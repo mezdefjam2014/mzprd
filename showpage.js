@@ -153,11 +153,12 @@ function tap(){
  for(let i=0;i<2;i++)spawnHeart(true);setHearts(P.hearts);milestones();
 }
 async function flush(){
- const s=P.cur;if(!s||s.status==='archived'||!P.pending)return;const n=Math.min(P.pending,30);P.pending-=n;
+ const s=P.cur;if(!realShow(s)||s.status==='archived'||!P.pending)return;const n=Math.min(P.pending,30);P.pending-=n;
  const r=await api({action:'heart',show:s.id,browser:window.mzBid(),n});if(r&&r.hearts!=null){P.sentLast=r.hearts}
 }
+const realShow=s=>!!(s&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(s.id||'')));
 async function poll(){
- const s=P.cur;if(!s)return;const r=await api({action:'hearts',show:s.id});if(!r||r.hearts==null)return;
+ const s=P.cur;if(!realShow(s)||document.hidden)return;const r=await api({action:'hearts',show:s.id});if(!r||r.hearts==null)return;
  const mine=P.pending;const total=r.hearts+mine,delta=total-P.hearts;
  if(delta>0){P.hearts=total;P.stage.setHearts(P.hearts);for(let i=0;i<Math.min(24,delta);i++)setTimeout(()=>spawnHeart(false),Math.random()*3000);setHearts(P.hearts);milestones()}
  else if(!P.playing&&r.hearts>P.hearts){P.hearts=r.hearts;setHearts(P.hearts);milestones()}

@@ -80,7 +80,7 @@ function noiseBuf(ctx){if(_noise&&_noise.sampleRate===ctx.sampleRate)return _noi
 /* real crowd recordings (CC0, bigsoundbank.com): cheers, applause and the closing roar. Loaded once, shared by live play and video render */
 let _sfx=null,_sfxP=null;
 function loadSfx(){if(_sfxP)return _sfxP;const dc=new OfflineAudioContext(2,1,48000),base=u=>new URL(u,document.baseURI).href,
- ld=u=>fetch(base('sfx/'+u+'.mp3?v=1')).then(r=>r.arrayBuffer()).then(b=>dc.decodeAudioData(b)).catch(()=>null);
+ ld=u=>fetch(base('sfx/'+u+'.mp3?v=2')).then(r=>r.arrayBuffer()).then(b=>dc.decodeAudioData(b)).catch(()=>null);
  _sfxP=Promise.all(['crowd-cheer1','crowd-cheer2','crowd-roar','crowd-applause'].map(ld)).then(([c1,c2,roar,app])=>{_sfx={cheers:[c1,c2].filter(Boolean),roar,app};return _sfx});return _sfxP}
 function schedule(ctx,dest,script,bufs,from,until,o){
  o=o||{};const t0=o.t0||0,srcs=[],C=T=>t0+(T-from);

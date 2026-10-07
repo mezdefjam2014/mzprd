@@ -33,9 +33,9 @@ button{cursor:pointer}
 .hero{position:relative;width:100%;aspect-ratio:1672/468;overflow:hidden;background:#000}
 .stage{position:absolute;inset:0;transform:scale(1.03);will-change:transform}
 .stage img{position:absolute;inset:0;width:100%;height:100%;display:block}
-.hand{position:absolute;background-image:url(hero.jpg);background-repeat:no-repeat;pointer-events:none;will-change:transform;
+.hand{position:absolute;background-image:url(hero.webp);background-repeat:no-repeat;pointer-events:none;will-change:transform;
  -webkit-mask-image:radial-gradient(ellipse at 50% 50%,#000 62%,transparent 78%);mask-image:radial-gradient(ellipse at 50% 50%,#000 62%,transparent 78%)}
-.spk{position:absolute;background-image:url(hero.jpg);background-repeat:no-repeat;pointer-events:none;will-change:transform,filter;border-radius:50%;
+.spk{position:absolute;background-image:url(hero.webp);background-repeat:no-repeat;pointer-events:none;will-change:transform,filter;border-radius:50%;
  -webkit-mask-image:radial-gradient(circle,#000 80%,transparent 94%);mask-image:radial-gradient(circle,#000 80%,transparent 94%)}
 .pfx{position:absolute;pointer-events:none;opacity:0;mix-blend-mode:screen;background:radial-gradient(ellipse,rgba(255,235,210,.9),rgba(255,60,50,.55) 45%,transparent 72%)}
 .lamp{position:absolute;left:12%;top:12%;width:20%;height:48%;background:radial-gradient(ellipse,rgba(255,40,40,.55),transparent 65%);opacity:.14;mix-blend-mode:screen;pointer-events:none}
@@ -245,7 +245,7 @@ footer.f a:hover{color:#fff}
 .x{position:absolute;top:10px;right:12px;width:36px;height:36px;background:transparent;border:1.5px solid #4a4a50;color:#fff;font:600 18px/1 Montserrat;display:grid;place-items:center;padding:0}
 .x:hover{border-color:var(--red);background:var(--red)}
 .box{position:relative}
-.head{position:absolute;background-image:url(hero.jpg);background-repeat:no-repeat;pointer-events:none;will-change:transform;transform-origin:55% 100%;
+.head{position:absolute;background-image:url(hero.webp);background-repeat:no-repeat;pointer-events:none;will-change:transform;transform-origin:55% 100%;
  -webkit-mask-image:radial-gradient(ellipse at 52% 42%,#000 60%,transparent 84%);mask-image:radial-gradient(ellipse at 52% 42%,#000 60%,transparent 84%)}
 .head canvas{display:none}
 .chain{position:absolute;pointer-events:none;mix-blend-mode:screen;-webkit-mask-image:url(chain.png);mask-image:url(chain.png);-webkit-mask-size:100% 100%;mask-size:100% 100%;
@@ -291,7 +291,7 @@ footer.f a:hover{color:#fff}
 .nt{margin-top:12px;font-size:12px;color:var(--gold);min-height:16px}
 #toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);background:#111;border:1px solid var(--red);color:#fff;font:600 11px Montserrat;letter-spacing:.2em;padding:12px 18px;opacity:0;pointer-events:none;transition:.25s;z-index:90}
 #toast.on{opacity:1;transform:translate(-50%,0)}
-#enter{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;background:linear-gradient(rgba(6,5,7,.78),rgba(6,5,7,.92)),url(hero.jpg) center/cover}
+#enter{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;background:linear-gradient(rgba(6,5,7,.78),rgba(6,5,7,.92)),url(hero.webp) center/cover}
 #enter.off{display:none}
 #enter h1{font:400 clamp(30px,8vw,76px) 'Press Start 2P';color:#fff;text-shadow:0 0 30px rgba(224,36,47,.7),4px 4px 0 var(--red)}
 #enter p{font:600 11px Montserrat;letter-spacing:.5em;color:#7a7a82}
@@ -394,7 +394,7 @@ footer.f a:hover{color:#fff}
 <body>
 <noscript><p style="padding:24px;color:#ccc;font:16px/1.6 sans-serif">MZPRD sells beats and sample packs. Please turn on JavaScript to listen to previews and buy.</p></noscript>
 <div class="hero" id="hero">
- <div class="stage" id="stage"><img src="hero.jpg" alt="MZPRD producing beats on an MPC in a dark studio with speakers, a lamp and a laptop" fetchpriority="high" decoding="async">
+ <div class="stage" id="stage"><img src="hero.webp" alt="MZPRD producing beats on an MPC in a dark studio with speakers, a lamp and a laptop" fetchpriority="high" decoding="async">
   <div class="pfx" id="pfxL"></div><div class="pfx" id="pfxR"></div>
   <div class="hand" id="handL"></div><div class="hand" id="handR"></div>
   <div class="spk" id="spkL"></div><div class="spk" id="spkR"></div><div class="head" id="head"><canvas id="eyes"></canvas></div><div class="chain" id="chain"></div><canvas class="vin" id="vin"></canvas><canvas class="lcd" id="vlab"></canvas><canvas class="lap" id="lap"></canvas><canvas class="padfx" id="padfx"></canvas><canvas class="hpfx" id="hpfx"></canvas><canvas class="lcd" id="lcd"></canvas><canvas class="mpc" id="mpc"></canvas><canvas class="fx" id="fx"></canvas></div>
@@ -835,7 +835,7 @@ $('#search').onclick=()=>toast('SEARCH COMING SOON');
 const CAMF={beats:null,kits:[.108,.705,1.8],show:[.287,.15,1.8],about:[.897,.43,1.8]};
 let camT='beats';const cam={fx:.5,fy:.5,z:1};
 function hideSeo(){const e=document.getElementById('seo');if(e)e.style.display='none'}
-async function openShow(){try{if(!window.MZShow)await loadScript('show.js?v=12');if(!window.showPageOpen)await loadScript('showpage.js?v=10');await window.showPageOpen(document.getElementById('shRoot'))}catch(e){toast('SHOW FAILED TO LOAD')}}
+async function openShow(){try{if(!window.MZShow)await loadScript('show.js?v=13');if(!window.showPageOpen)await loadScript('showpage.js?v=11');await window.showPageOpen(document.getElementById('shRoot'))}catch(e){toast('SHOW FAILED TO LOAD')}}
 function showView(v){
  camT=v==='beat'?(pageKind==='p'?'kits':'beats'):v;
  {const dl=$('#deals');if(dl)dl.style.display=(v==='about'||v==='show')?'none':''}
@@ -1212,7 +1212,7 @@ function setupPromo(){
  const g=$('#girl'),img=$('#girlImg');clearTimeout(girlTimer);g.classList.remove('in');
  if(!promo.promo_enabled||girlGone||location.hash==='#nopromo')return;
  $('#girlMsg').textContent=promo.promo_text||'ALL BEATS';$('#girlPrice').textContent=money(Number(promo.promo_price)).replace(/\.00$/,'');
- const src=promo.promo_image_path?pub(promo.promo_image_path):'girl.png';
+ const src=promo.promo_image_path?pub(promo.promo_image_path):'girl.webp';
  img.hidden=true;img.onload=()=>{img.hidden=false};img.onerror=()=>{img.hidden=true};img.src=src;
  const cycle=()=>{if(girlGone||!promo.promo_enabled)return;g.classList.add('in');girlTimer=setTimeout(()=>{g.classList.remove('in');girlTimer=setTimeout(cycle,45000)},11000)};
  girlTimer=setTimeout(cycle,4000);
@@ -1225,7 +1225,7 @@ function thanksMoment(){
  say(rp(['Pleasure doing business.',"It's yours. Go make something crazy.",'Respect. Enjoy.']),4800);nod=Math.max(nod,2.2);
  const g=$('#girl'),img=$('#girlImg'),sp=document.querySelector('.sign span');clearTimeout(girlTimer);
  $('#girlMsg').textContent='THANK YOU';$('#girlPrice').textContent='YOURS!';if(sp)sp.textContent='ENJOY THE FILES';$('#girlShop').style.display='none';
- if(!img.getAttribute('src')){img.onload=()=>{img.hidden=false};img.onerror=()=>{img.hidden=true};img.src=promo.promo_image_path?pub(promo.promo_image_path):'girl.png'}
+ if(!img.getAttribute('src')){img.onload=()=>{img.hidden=false};img.onerror=()=>{img.hidden=true};img.src=promo.promo_image_path?pub(promo.promo_image_path):'girl.webp'}
  g.classList.add('in');
  girlTimer=setTimeout(()=>{g.classList.remove('in');setTimeout(()=>{if(sp)sp.textContent='LIMITED TIME';$('#girlShop').style.display='';setupPromo()},900)},6800);
 }
@@ -1412,7 +1412,7 @@ async function boRender(){
  document.getElementById('bo2b').style.display='none';document.getElementById('bo2c').style.display='none';
  if(window.emailClose)emailClose();if(window.showMakerClose)showMakerClose();
  if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=4');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
- if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=12');if(!window.showMakerOpen)await loadScript('showmaker.js?v=10');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
+ if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=13');if(!window.showMakerOpen)await loadScript('showmaker.js?v=10');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
  if(vid){try{await loadStudio();await studioOpen()}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
  if(window.studioClose)studioClose();
  document.getElementById('bo2b').style.display=tab==='promo'?'':'none';
