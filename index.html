@@ -310,7 +310,7 @@ footer.f a:hover{color:#fff}
 .bi .acts .del{border-color:var(--red);color:var(--red)}
 .bi .acts .del:hover{background:var(--red);color:#fff}
 .bi .draft{color:var(--gold)}
-#bmsg{font:600 12px Montserrat;color:var(--gold);margin-top:12px;min-height:16px;letter-spacing:.08em}
+#bmsg,#bmsg2{font:600 12px Montserrat;color:var(--gold);margin-top:12px;min-height:16px;letter-spacing:.08em}
 @media(max-width:1000px){
  .row{grid-template-columns:56px minmax(0,1fr) 38px 112px;gap:10px}
  .no,.wv,.st,.ic,.dl{display:none}
@@ -436,11 +436,15 @@ footer.f a:hover{color:#fff}
 </div></div>
 
 <div id="bo">
- <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="bundles">BUNDLES</button><button data-t="promo">PROMO</button><button data-t="sales">SALES</button><button data-t="video">VIDEO STUDIO</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
+ <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="promo">PROMO</button><button data-t="sales">SALES</button><button data-t="video">VIDEO STUDIO</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
  <div id="studio"></div>
  <div class="bo2">
   <form class="bf" id="bf"></form>
   <div><div class="bl" id="bl"></div></div>
+ </div>
+ <div class="bo2" id="bo2b" style="display:none;margin-top:26px">
+  <form class="bf" id="bf2"></form>
+  <div><div class="bl" id="bl2"></div></div>
  </div>
 </div>
 
@@ -1286,13 +1290,13 @@ async function checkAdmin(){
  if(session){const r=await sb.rpc('is_admin');isAdmin=r.data===true}
  LINK.textContent=isAdmin?'BACK OFFICE':'LOGIN';
 }
-const ADM=['beats','packs','bundles','promo','sales','video'],adminRel=()=>location.pathname.slice(BASEPATH.length).match(/^admin\/(?:([a-z]+)\/)?$/);
+const ADM=['beats','packs','promo','sales','video'],adminRel=()=>location.pathname.slice(BASEPATH.length).match(/^admin\/(?:([a-z]+)\/)?$/);
 function syncBoTabs(){document.querySelectorAll('.bh [data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t===tab))}
 function goAdmin(t){if(!ADM.includes(t))t='beats';tab=t;editing=null;if(!adminRel()||adminRel()[1]!==t)history.pushState(null,'',BASEPATH+'admin/'+t+'/');syncBoTabs();openBO()}
 function leaveAdmin(){$('#bo').classList.remove('on');if(window.studioClose)studioClose();if(adminRel())history.pushState(null,'',BASEPATH);route()}
 function showLogin(){$('#lMsg').textContent='';$('#login').classList.add('on');setTimeout(()=>$('#lEmail').focus(),50)}
 async function enterAdmin(t){
- if(t==='dash'||t==='orders')t='sales';if(!ADM.includes(t))t='beats';tab=t;editing=null;
+ if(t==='dash'||t==='orders')t='sales';if(t==='bundles')t='promo';if(!ADM.includes(t))t='beats';tab=t;editing=null;
  await checkAdmin();if(isAdmin){syncBoTabs();openBO()}else showLogin();
 }
 LINK.onclick=()=>isAdmin?goAdmin(tab):showLogin();
@@ -1316,14 +1320,15 @@ const FIELDS={
  beats:{table:'beats',title:'BEAT',files:[['cover_path','COVER IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (tagged MP3/WAV, public)','audio/*','public-media','previews'],['audio_path','FULL FILE (private, for buyers, any size)','audio/*,.zip','private-files','beats']]},
  packs:{table:'packs',title:'SAMPLE PACK',files:[['cover_path','PACK IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (optional, public)','audio/*','public-media','previews'],['file_path','PACK FILE (.zip, private, any size)','.zip,application/zip,audio/*','private-files','packs']]}
 };
-function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=2';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=4';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
 async function boRender(){
  const vid=tab==='video';document.querySelector('#bo .bo2').style.display=vid?'none':'';
+ document.getElementById('bo2b').style.display='none';
  if(vid){try{await loadStudio();await studioOpen()}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
  if(window.studioClose)studioClose();
- if(tab==='promo')return promoRender();
+ document.getElementById('bo2b').style.display=tab==='promo'?'':'none';
+ if(tab==='promo'){await promoRender();return bundlesRender()}
  if(tab==='sales')return salesRender();
- if(tab==='bundles')return bundlesRender();
  const F=FIELDS[tab],e=editing||{};
  const files=F.files.map(([k,l,acc])=>`<label>${l}</label><input type="file" data-k="${k}" accept="${acc}">${e[k]?`<div class="cur">Current: ${esc(e[k].split('/').pop())} (choose a new file to replace)</div><label class="chk" style="margin-top:6px"><input type="checkbox" data-rm="${k}"> REMOVE THIS FILE</label>`:''}`).join('');
  const slugBit=`<label>PAGE URL NAME (auto from title if empty)</label><input type="text" id="f_slug" value="${esc(e.slug??'')}" placeholder="${tab==='beats'?'big-beat':'big-citi-vinyl'}">`;
@@ -1363,7 +1368,7 @@ async function bundlesRender(){
   sb.from('bundles').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false})]);
  const e=editing||{name:'',kind:'any_beats',qty:3,price:25,item_keys:[],active:true,sort_order:0};
  const opts=[...(bl.data||[]).map(x=>['b:'+x.id,'BEAT: '+x.title]),...(pk.data||[]).map(x=>['p:'+x.id,'PACK: '+x.title])];
- $('#bf').innerHTML='<h3>'+(editing?'EDIT':'ADD')+' BUNDLE</h3>'+
+ $('#bf2').innerHTML='<h3>'+(editing?'EDIT':'ADD')+' BUNDLE</h3>'+
   '<label>NAME (shown to shoppers)</label><input type="text" id="g_name" value="'+esc(e.name)+'" placeholder="3 Beat Pack" required>'+
   '<label>TYPE</label><select id="g_kind"><option value="any_beats"'+(e.kind==='any_beats'?' selected':'')+'>ANY N BEATS FOR ONE PRICE</option><option value="any_packs"'+(e.kind==='any_packs'?' selected':'')+'>ANY N PACKS FOR ONE PRICE</option><option value="fixed"'+(e.kind==='fixed'?' selected':'')+'>SPECIFIC ITEMS TOGETHER (e.g. a pack + a beat)</option></select>'+
   '<div id="g_qtyw"><label>HOW MANY ITEMS</label><input type="number" id="g_qty" min="2" value="'+esc(e.qty||3)+'"></div>'+
@@ -1371,10 +1376,10 @@ async function bundlesRender(){
   '<label>BUNDLE PRICE (USD, for the whole set)</label><input type="number" step="0.01" min="0" id="g_price" value="'+esc(e.price)+'">'+
   '<label>SORT ORDER (0 = first)</label><input type="number" id="g_sort" value="'+esc(e.sort_order||0)+'">'+
   '<label class="chk"><input type="checkbox" id="g_act"'+(e.active?' checked':'')+'> ACTIVE (applies at checkout and shows on the site)</label>'+
-  '<button class="go" type="submit" id="g_save">'+(editing?'SAVE CHANGES':'ADD BUNDLE')+'</button>'+(editing?'<button class="bo-btn" type="button" id="g_cancel" style="width:100%;margin-top:10px">CANCEL EDIT</button>':'')+'<div id="bmsg"></div>';
+  '<button class="go" type="submit" id="g_save">'+(editing?'SAVE CHANGES':'ADD BUNDLE')+'</button>'+(editing?'<button class="bo-btn" type="button" id="g_cancel" style="width:100%;margin-top:10px">CANCEL EDIT</button>':'')+'<div id="bmsg2"></div>';
  const sw=()=>{const f=$('#g_kind').value==='fixed';$('#g_qtyw').style.display=f?'none':'block';$('#g_itemsw').style.display=f?'block':'none'};sw();$('#g_kind').onchange=sw;
- $('#bf').onsubmit=bundleSave;if(editing)$('#g_cancel').onclick=()=>{editing=null;bundlesRender()};
- const L=$('#bl');L.innerHTML=(bn.data&&bn.data.length)?'':'<div class="bi"><span>No bundles yet. The shopper gets the best deal automatically when their cart qualifies.</span></div>';
+ $('#bf2').onsubmit=bundleSave;if(editing)$('#g_cancel').onclick=()=>{editing=null;bundlesRender()};
+ const L=$('#bl2');L.innerHTML=(bn.data&&bn.data.length)?'':'<div class="bi"><span>No bundles yet. The shopper gets the best deal automatically when their cart qualifies.</span></div>';
  (bn.data||[]).forEach(r=>{
   const d=document.createElement('div');d.className='bi';
   const what=r.kind==='fixed'?(r.item_keys||[]).length+' specific items':'any '+r.qty+(r.kind==='any_packs'?' packs':' beats');
@@ -1384,7 +1389,7 @@ async function bundlesRender(){
   L.appendChild(d)});
 }
 async function bundleSave(ev){
- ev.preventDefault();const msg=$('#bmsg'),btn=$('#g_save');btn.disabled=true;
+ ev.preventDefault();const msg=$('#bmsg2'),btn=$('#g_save');btn.disabled=true;
  const kind=$('#g_kind').value,price=parseFloat($('#g_price').value),qty=parseInt($('#g_qty').value);
  const keys=[...document.querySelectorAll('.chks input:checked')].map(x=>x.value);
  const row={name:$('#g_name').value.trim(),kind:kind,qty:kind==='fixed'?null:qty,price:price,item_keys:kind==='fixed'?keys:[],active:$('#g_act').checked,sort_order:parseInt($('#g_sort').value)||0};

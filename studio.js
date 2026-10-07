@@ -10,7 +10,8 @@ const S={items:[],kind:'beats',item:null,cover:null,bd:null,fmt:'16:9',layout:'f
  end:true,vis:'waveform',visColor:'#e8b94a',visH:80,sync:true,glow:false,font:'Impact',size:100,color:'#e8b94a',stroke:3,maxLen:'',
  buf:null,src:'preview',srcLabel:'',
  tx:{intro:{on:true,text:'NEW BEAT',start:0},tag:{on:true,text:'PROD. BY MEZTHEPROD',start:0},title:{on:true,text:'',start:1},info:{on:true,text:'',start:2}}};
-let A=null,run=null,noise=null,scrub=0,mounted=false;
+let A=null,run=null,noise=null,scrub=0,mounted=false,OFF=null,lastBass=0;
+const R={busy:false};
 const $s=s=>document.querySelector('#studio '+s);
 const e2=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dims=()=>S.fmt==='16:9'?[1920,1080]:[1080,1920];
@@ -53,7 +54,11 @@ function css(){
 #studio .trow input[type=text],#studio .trow input[type=number]{padding:7px}
 #studio .msg{font:500 12px Montserrat;color:#a9a9ae;margin-top:8px;min-height:16px}
 #studio .bar{height:6px;background:#1b1b20;margin-top:8px}#studio .bar b{display:block;height:100%;width:0;background:var(--red)}
-#studio .yt textarea{min-height:60px}`;
+#studio .yt textarea{min-height:60px}
+#studio canvas#sWave{width:100%;height:56px;max-height:none;min-width:0;cursor:pointer;touch-action:none;background:#050506}
+#studio.busy .pn:not(.yt) input,#studio.busy .pn:not(.yt) select,#studio.busy .pn:not(.yt) textarea,#studio.busy .pn:not(.yt) button,#studio.busy .pn:not(.yt) .it{pointer-events:none;opacity:.5}
+#studio .cnt{font:500 10px Montserrat;color:#6c6c73;letter-spacing:.1em;margin-top:4px}
+#studio .two2{display:grid;grid-template-columns:1fr 1fr;gap:8px}`;
  document.head.appendChild(st);
 }
 
@@ -76,14 +81,19 @@ function html(){
   <div class="pn">
    <div class="seg"><button data-f="16:9" class="on">16:9 YOUTUBE</button><button data-f="9:16">9:16 SHORTS</button></div>
    <div class="cvw"><canvas id="sCv"></canvas></div>
-   <div class="row" style="margin-top:10px"><button class="btn" id="sPlay">PLAY PREVIEW</button><input type="range" id="sScrub" min="0" max="100" value="0" step="0.1"><span id="sTime" style="flex:none;font:600 11px Montserrat;color:#c9c9ce;min-width:84px;text-align:right">0:00 / 0:00</span></div>
+   <div class="row" style="margin-top:10px"><button class="btn" id="sPlay">PLAY PREVIEW</button><canvas id="sWave"></canvas><span id="sTime" style="flex:none;font:600 11px Montserrat;color:#c9c9ce;min-width:84px;text-align:right">0:00 / 0:00</span></div>
    <h4>TEXT (shows from the second you set)</h4>
    <div id="sTx"></div>
   </div>
   <div class="pn yt" style="margin-top:18px"><h4>YOUTUBE TEXT (copy and paste)</h4>
-   <label>TITLE</label><input type="text" id="yT"><button class="btn" data-c="yT" style="margin-top:6px">COPY TITLE</button>
-   <label>DESCRIPTION</label><textarea id="yD"></textarea><button class="btn" data-c="yD" style="margin-top:6px">COPY DESCRIPTION</button>
-   <label>TAGS</label><textarea id="yG"></textarea><button class="btn" data-c="yG" style="margin-top:6px">COPY TAGS</button>
+   <div class="two2"><div><label>SOUNDS LIKE (artist, optional)</label><input type="text" id="yA" placeholder="e.g. a mid-size artist"></div><div><label>MOOD</label><input type="text" id="yM" placeholder="Dark, Hard, Sad..."></div></div>
+   <button class="btn" id="yAll" style="margin-top:10px">NEW VARIATION (TITLE + DESCRIPTION + TAGS)</button>
+   <label>TITLE <span id="yTi" style="color:#6c6c73"></span></label><input type="text" id="yT"><div class="cnt" id="yTc"></div>
+   <div class="two2" style="margin-top:6px"><button class="btn" data-c="yT">COPY TITLE</button><button class="btn" data-n="t">NEXT TITLE</button></div>
+   <label>DESCRIPTION <span id="yDi" style="color:#6c6c73"></span></label><textarea id="yD"></textarea><div class="cnt" id="yDc"></div>
+   <div class="two2" style="margin-top:6px"><button class="btn" data-c="yD">COPY DESCRIPTION</button><button class="btn" data-n="d">NEXT DESCRIPTION</button></div>
+   <label>TAGS <span id="yGi" style="color:#6c6c73"></span></label><textarea id="yG"></textarea><div class="cnt" id="yGc"></div>
+   <div class="two2" style="margin-top:6px"><button class="btn" data-c="yG">COPY TAGS</button><button class="btn" data-n="g">NEXT TAGS</button></div>
   </div>
  </div>
  <div>
@@ -125,12 +135,22 @@ function makeBackdrop(W,H){
  const[a,b,w,h]=coverRect(S.cover.naturalWidth,S.cover.naturalHeight,-60,-60,W+120,H+120);
  x.filter='blur(36px) brightness(.55)';x.drawImage(S.cover,a,b,w,h);return c;
 }
+function fft(re,im){const n=re.length;for(let i=1,j=0;i<n;i++){let b=n>>1;for(;j&b;b>>=1)j^=b;j^=b;if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
+ for(let len=2;len<=n;len<<=1){const a=-2*Math.PI/len,wr=Math.cos(a),wi=Math.sin(a);for(let i=0;i<n;i+=len){let cr=1,ci=0;for(let k=0;k<len/2;k++){const u=i+k,v=i+k+len/2,xr=re[v]*cr-im[v]*ci,xi=re[v]*ci+im[v]*cr;re[v]=re[u]-xr;im[v]=im[u]-xi;re[u]+=xr;im[u]+=xi;const nr=cr*wr-ci*wi;ci=cr*wi+ci*wr;cr=nr}}}}
+function offData(t){
+ const buf=S.buf,sr=buf.sampleRate,c0=buf.getChannelData(0),c1=buf.numberOfChannels>1?buf.getChannelData(1):c0,N=2048,c=Math.floor(t*sr),re=new Float64Array(N),im=new Float64Array(N),td=new Uint8Array(1024),fd=new Uint8Array(512);
+ for(let i=0;i<N;i++){const j=c+i-N,v=(j>=0&&j<c0.length)?(c0[j]+c1[j])/2:0;re[i]=v*(.5-.5*Math.cos(2*Math.PI*i/(N-1)));if(i>=N-1024)td[i-(N-1024)]=Math.max(0,Math.min(255,Math.round(128+v*128)))}
+ fft(re,im);const pv=OFF.prev;
+ for(let i=0;i<512;i++){const m=Math.sqrt(re[i]*re[i]+im[i]*im[i])/N*2;pv[i]=pv[i]*.7+m*.3;fd[i]=Math.max(0,Math.min(255,Math.round((20*Math.log10(Math.max(pv[i],1e-9))+100)/70*255)))}
+ let s=0;for(let i=0;i<8;i++)s+=fd[i];lastBass=s/8/255;return{td,fd,bass:lastBass};
+}
 function audioData(t){
+ if(OFF)return offData(t);
  const out={td:new Uint8Array(1024),fd:new Uint8Array(512),bass:0};
  if(A&&A.playing){A.an.getByteTimeDomainData(out.td);A.an.getByteFrequencyData(out.fd)}
  else{for(let i=0;i<1024;i++)out.td[i]=128+Math.sin(i/26+t*3)*34*Math.sin(i/190+t)+Math.sin(i/7+t*5)*8;
   for(let i=0;i<512;i++)out.fd[i]=Math.max(8,(1-i/512)*190*(.55+.45*Math.sin(i/9+t*4)));}
- let s=0;for(let i=0;i<8;i++)s+=out.fd[i];out.bass=s/8/255;return out;
+ let s=0;for(let i=0;i<8;i++)s+=out.fd[i];out.bass=s/8/255;lastBass=out.bass;return out;
 }
 function fitText(c,txt,maxW,px,font){c.font=`${px}px ${font}`;const w=c.measureText(txt).width;return w>maxW?px*maxW/w:px}
 function drawText(c,key,t,W,H,y,px,align,x){
@@ -276,11 +296,12 @@ function startPlay(toSpeakers,from){
  a.src=s;a.t0=a.ctx.currentTime-off;a.playing=true;return s;
 }
 function stopPlay(){if(A&&A.src){try{A.src.onended=null;A.src.stop()}catch(e){}A.src=null}if(A)A.playing=false;if(run&&run.raf){cancelAnimationFrame(run.raf)}run=null;setPlayBtn()}
+function playFrom(f){const s=startPlay(true,f*len());if(!s)return;run={done:()=>{stopPlay();scrub=0;redraw()}};s.onended=()=>{};setPlayBtn();loop(false)}
 function setPlayBtn(){const b=$s('#sPlay');if(b)b.textContent=(A&&A.playing&&!(run&&run.rec))?'STOP PREVIEW':'PLAY PREVIEW'}
 function loop(rec){
  const cv=$s('#sCv');if(!cv)return;const a=A,dur=len();
  const tick=()=>{if(!run)return;const t=a.ctx.currentTime-a.t0;
-  frame(cv,Math.min(t,dur),dur);setTime(t,dur);
+  frame(cv,Math.min(t,dur),dur);setTime(t,dur);drawWave(Math.min(1,t/dur),lastBass);
   if(rec)$s('#sProg').style.width=Math.min(100,t/dur*100)+'%';
   if(t>=dur){run.done&&run.done();return}
   run.raf=requestAnimationFrame(tick)};
@@ -288,12 +309,77 @@ function loop(rec){
 }
 function setTime(t,d){const el=$s('#sTime');if(el)el.textContent=fmt(t)+' / '+fmt(d)}
 function redraw(){const cv=$s('#sCv');if(!cv)return;const[w,h]=dims();if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;S.bd=null}
- if(A&&A.playing)return;const d=len(),t=scrub*d;frame(cv,t,d);setTime(t,d)}
+ if(A&&A.playing)return;const d=len(),t=scrub*d;frame(cv,t,d);setTime(t,d);drawWave(scrub,0)}
+function peaks(){
+ const d=len(),key=(S.buf?S.buf.length:0)+':'+d;if(S.pk&&S.pk.key===key)return S.pk;
+ const n=360,out=new Float32Array(n);
+ if(S.buf){const ch=S.buf.getChannelData(0),sr=S.buf.sampleRate,tot=Math.min(ch.length,Math.floor(d*sr)),step=Math.max(1,Math.floor(tot/n)),sk=Math.max(1,(step/64)|0);
+  let mx=1e-6;for(let i=0;i<n;i++){let m=0;const a=i*step,e=Math.min(ch.length,a+step);for(let j=a;j<e;j+=sk){const v=Math.abs(ch[j]);if(v>m)m=v}out[i]=m;if(m>mx)mx=m}
+  for(let i=0;i<n;i++)out[i]=Math.max(.04,out[i]/mx)}else out.fill(.06);
+ out.key=key;S.pk=out;return out;
+}
+function drawWave(frac,bass){
+ const c=$s('#sWave');if(!c)return;const dpr=devicePixelRatio||1,W=Math.round(c.clientWidth*dpr),H=Math.round(c.clientHeight*dpr);if(!W||!H)return;
+ if(c.width!==W||c.height!==H){c.width=W;c.height=H}
+ const x=c.getContext('2d'),p=peaks(),n=p.length,bw=W/n,mid=H/2,ph=frac*n;x.clearRect(0,0,W,H);
+ for(let i=0;i<n;i++){const near=Math.max(0,1-Math.abs(i-ph)/8),h=Math.max(2*dpr,p[i]*H*.88*(1+near*(bass||0)*.8));x.fillStyle=i<ph?'#e0242f':'#3a3a42';x.fillRect(i*bw+bw*.14,mid-h/2,bw*.72,h)}
+ x.fillStyle='#fff';x.fillRect(Math.max(0,Math.round(frac*W)-dpr),0,2*dpr,H);
+}
 function msg(m){const el=$s('#sMsg');if(el)el.textContent=m}
 function setAudM(m){const el=$s('#sAudM');if(el)el.textContent=m}
 
 /* ---------- render ---------- */
+const mcx=new MessageChannel(),ysq=[];mcx.port1.onmessage=()=>{const f=ysq.shift();if(f)f()};
+const yieldNow=()=>new Promise(r=>{ysq.push(r);mcx.port2.postMessage(0)});
+function badge(p){const b=document.querySelector('.bh [data-t=video]');if(b)b.textContent=p==null?'VIDEO STUDIO':'VIDEO STUDIO '+p+'%'}
+const beforeUnload=e=>{if(R.busy){e.preventDefault();e.returnValue=''}};
+function loadMuxer(){return window.Mp4Muxer?Promise.resolve():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mp4-muxer.js',document.baseURI).href;sc.onload=ok;sc.onerror=()=>no(new Error('muxer'));document.head.appendChild(sc)})}
 async function render(){
+ if(R.busy)return;if(!S.buf){msg('Add audio first (preview or your own file).');return}
+ stopPlay();
+ if(window.VideoEncoder&&window.AudioEncoder&&window.VideoFrame&&window.AudioData&&window.OfflineAudioContext){
+  try{await renderFast();return}catch(e){console.warn('fast render failed',e);OFF=null;R.busy=false;badge();$s('#sRender').disabled=false;document.getElementById('studio').classList.remove('busy');msg('Fast render is not available here ('+((e&&e.message)||e)+'). Using real-time render.')}
+ }
+ return renderRT();
+}
+async function renderFast(){
+ await loadMuxer();
+ const[w,h]=dims(),fps=30,dur=len(),N=Math.ceil(dur*fps),btn=$s('#sRender'),dl=$s('#sDl'),root=document.getElementById('studio');
+ const pickV=async()=>{for(const c of [{codec:'avc1.640028',mux:'avc'},{codec:'avc1.4d0028',mux:'avc'},{codec:'avc1.42E028',mux:'avc'},{codec:'vp09.00.40.08',mux:'vp9'}]){const cfg={codec:c.codec,width:w,height:h,bitrate:8e6,framerate:fps};try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return{...c,cfg}}catch(e){}}return null};
+ const pickA=async()=>{for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){try{const r=await AudioEncoder.isConfigSupported({codec:c.codec,sampleRate:48000,numberOfChannels:2,bitrate:192000});if(r&&r.supported)return c}catch(e){}}return null};
+ const vc=await pickV(),ac=await pickA();if(!vc||!ac)throw new Error('no codec');
+ R.busy=true;root.classList.add('busy');btn.disabled=true;dl.style.display='none';badge(0);addEventListener('beforeunload',beforeUnload);
+ $s('#sProg').style.width='0';msg('Preparing...');
+ await document.fonts.load('40px '+(FONTS[S.font]||'Impact')).catch(()=>{});await document.fonts.load("12px 'Press Start 2P'").catch(()=>{});
+ if(!heroImg){heroImg=new Image();heroImg.src=new URL('hero.jpg',document.baseURI).href}try{await heroImg.decode()}catch(e){}
+ const oc=new OfflineAudioContext(2,Math.ceil(dur*48000),48000),src=oc.createBufferSource();src.buffer=S.buf;src.connect(oc.destination);src.start(0);const rb=await oc.startRendering();
+ const target=new Mp4Muxer.ArrayBufferTarget(),muxer=new Mp4Muxer.Muxer({target,video:{codec:vc.mux,width:w,height:h},audio:{codec:ac.mux,numberOfChannels:2,sampleRate:48000},fastStart:'in-memory'});
+ let err=null;
+ const venc=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>{err=e}});venc.configure(vc.cfg);
+ const aenc=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>{err=e}});aenc.configure({codec:ac.codec,sampleRate:48000,numberOfChannels:2,bitrate:192000});
+ const t0=performance.now();
+ try{
+  const L=rb.getChannelData(0),Rr=rb.getChannelData(1),CH=4800;
+  for(let o=0,k=0;o<L.length;o+=CH,k++){const n=Math.min(CH,L.length-o),buf=new Float32Array(n*2);buf.set(L.subarray(o,o+n),0);buf.set(Rr.subarray(o,o+n),n);
+   const ad=new AudioData({format:'f32-planar',sampleRate:48000,numberOfFrames:n,numberOfChannels:2,timestamp:Math.round(o/48000*1e6),data:buf});aenc.encode(ad);ad.close();if(k%25===0)await yieldNow()}
+  const cv=document.createElement('canvas');cv.width=w;cv.height=h;S.bd=null;OFF={prev:new Float32Array(512)};
+  for(let i=0;i<N;i++){
+   if(err)throw err;
+   frame(cv,Math.min(i/fps,dur),dur);
+   const vf=new VideoFrame(cv,{timestamp:Math.round(i*1e6/fps),duration:Math.round(1e6/fps)});venc.encode(vf,{keyFrame:i%90===0});vf.close();
+   while(venc.encodeQueueSize>8){await Promise.race([new Promise(r=>venc.addEventListener('dequeue',r,{once:true})),new Promise(r=>setTimeout(r,40))]);if(err)throw err}
+   if(i%4===0){const p=Math.round(i/N*100);$s('#sProg').style.width=p+'%';badge(p);msg('Rendering '+p+'% ... you can switch tabs, it keeps going.');await yieldNow()}
+  }
+  OFF=null;await venc.flush();await aenc.flush();if(err)throw err;muxer.finalize();
+ }finally{OFF=null;try{venc.close()}catch(e){}try{aenc.close()}catch(e){}removeEventListener('beforeunload',beforeUnload)}
+ const blob=new Blob([target.buffer],{type:'video/mp4'}),url=URL.createObjectURL(blob);
+ dl.href=url;dl.download=((S.item&&S.item.slug)||'video')+'-'+(S.fmt==='16:9'?'16x9':'9x16')+'.mp4';dl.style.display='block';
+ R.busy=false;root.classList.remove('busy');btn.disabled=false;badge();$s('#sProg').style.width='100%';
+ msg('Done in '+Math.round((performance.now()-t0)/1000)+'s. '+(blob.size/1048576).toFixed(1)+' MB MP4. Click DOWNLOAD VIDEO.');
+ try{toast('VIDEO READY: '+dl.download)}catch(e){}
+ redraw();
+}
+async function renderRT(){
  if(!S.buf){msg('Add audio first (preview or your own file).');return}
  if(!window.MediaRecorder){msg('This browser cannot record video. Use Chrome or Edge.');return}
  stopPlay();const cv=$s('#sCv'),btn=$s('#sRender'),dl=$s('#sDl');dl.style.display='none';
@@ -324,7 +410,7 @@ function setItem(it){
  S.item=it;S.cover=null;S.bd=null;S.buf=null;
  const isB=S.kind==='beats',info=[];if(it.bpm)info.push(it.bpm+' BPM');if(it.musical_key)info.push(it.musical_key);
  S.tx.title.text=it.title||'';S.tx.info.text=info.length?info.join('  |  '):(isB?'':'SAMPLE PACK');S.tx.intro.text=isB?'NEW BEAT':'NEW SAMPLE PACK';
- buildTx();ytText();loadCover(it.cover_path?pub(it.cover_path):'');
+ buildTx();ytText(true);loadCover(it.cover_path?pub(it.cover_path):'');
  if(S.src==='preview')loadPreview();else{S.buf=null;redraw()}
  document.querySelectorAll('#studio .it').forEach(e=>e.classList.toggle('on',e.dataset.id===String(it.id)));
 }
@@ -336,16 +422,71 @@ function loadCover(url){
 function buildTx(){
  const L={intro:'INTRO',tag:'PRODUCER TAG',title:'TITLE',info:'INFO'};
  $s('#sTx').innerHTML=Object.keys(L).map(k=>{const o=S.tx[k];return `<div class="trow"><input type="checkbox" data-k="${k}" data-f="on"${o.on?' checked':''}><span>${L[k]}</span><input type="text" data-k="${k}" data-f="text" value="${e2(o.text)}"><input type="number" data-k="${k}" data-f="start" min="0" step="0.5" value="${o.start}"></div>`}).join('');
- $s('#sTx').oninput=e=>{const t=e.target,k=t.dataset.k;if(!k)return;const f=t.dataset.f;S.tx[k][f]=f==='on'?t.checked:f==='start'?(parseFloat(t.value)||0):t.value;if(f==='text')ytText();redraw()};
+ $s('#sTx').oninput=e=>{const t=e.target,k=t.dataset.k;if(!k)return;const f=t.dataset.f;S.tx[k][f]=f==='on'?t.checked:f==='start'?(parseFloat(t.value)||0):t.value;if(f==='text'&&k==='title')ytText();redraw()};
 }
-function ytText(){
- const it=S.item;if(!it||!$s('#yT'))return;const isB=S.kind==='beats',info=[it.bpm&&it.bpm+' BPM',it.musical_key].filter(Boolean).join(' ');
- const url=SITE+'/'+(isB?'beat':'pack')+'/'+(it.slug||'')+'/';
- const tags=(it.tags||'').split(/[\/,]/).map(s=>s.trim()).filter(Boolean);
- $s('#yT').value=(isB?'[FREE] ':'')+(it.title||'')+(isB?' | Hard Type Beat':' | Sample Pack')+(info?' | '+info:'')+' | Prod. MZPRD';
- $s('#yD').value=(isB?'Buy this beat and download it instantly: ':'Get this sample pack: ')+url+'\n\n'+(it.title||'')+(info?' - '+info:'')+'\nProduced by MZPRD (Meztheprod)\n\nMore beats and sample packs: '+SITE+'\n\n#'+(isB?'typebeat #rapbeat':'samplepack #producer')+' #mzprd';
- $s('#yG').value=[...tags,it.title,'MZPRD','Meztheprod',isB?'type beat':'sample pack',isB?'rap beat':'vinyl samples',isB?'hip hop instrumental':'producer loops'].filter(Boolean).join(', ');
+const YEAR=new Date().getFullYear(),yi={t:0,d:0,g:0};
+function ytCtx(){
+ const it=S.item,isB=S.kind==='beats',tags=(it.tags||'').split(/[\/,]/).map(x=>x.trim()).filter(Boolean),
+  art=(($s('#yA')||{}).value||'').trim(),mood=(($s('#yM')||{}).value||'').trim()||tags[1]||'Hard',genre=tags[0]||'Hip Hop',
+  bpm=it.bpm?it.bpm+' BPM':'',key=it.musical_key||'',info=[bpm,key].filter(Boolean).join(' '),
+  A=art?art+' Type Beat':mood+' '+genre+' Type Beat';
+ return{it,isB,tags,art,mood,genre,bpm,key,info,A,T:it.title||'',url:SITE+'/'+(isB?'beat':'pack')+'/'+(it.slug||'')+'/',Y:YEAR,gtag:genre.toLowerCase().replace(/[^a-z0-9]/g,'')};
 }
+function cut(str,n){str=str.replace(/\s+/g,' ').replace(/\s+\|\s+\|/g,' |').replace(/\(\s*\)/g,'').trim();if(str.length<=n)return str;const c=str.slice(0,n),i=c.lastIndexOf(' ');return(i>n*.6?c.slice(0,i):c).replace(/[|\-,(\s]+$/,'')}
+const TITLES_B=[
+ x=>'[FREE] '+x.T+' | Hard Type Beat'+(x.info?' | '+x.info:'')+' | Prod. MZPRD',
+ x=>'[FREE] '+x.A+' '+x.Y+' - "'+x.T+'" | '+x.genre+' Instrumental',
+ x=>'"'+x.T+'" - '+x.mood+' '+x.A+(x.bpm?' ('+x.bpm+')':'')+' | Prod. MZPRD',
+ x=>x.A+' '+x.Y+' "'+x.T+'" (Prod. MZPRD)',
+ x=>x.mood+' '+x.genre+' Beat "'+x.T+'" | '+x.A+(x.info?' | '+x.info:''),
+ x=>'FREE '+x.A+' - "'+x.T+'" | Rap Instrumental '+x.Y,
+ x=>'"'+x.T+'" | '+x.A+' | '+x.genre+' Beat '+x.Y+' ('+(x.info||'Prod. MZPRD')+')',
+ x=>x.T+' | '+x.mood+' '+x.genre+' Instrumental '+x.Y+' | '+x.A
+];
+const TITLES_P=[
+ x=>x.T+' | Sample Pack'+(x.info?' | '+x.info:'')+' | Prod. MZPRD',
+ x=>'"'+x.T+'" Sample Pack - Vinyl Samples & Producer Loops '+x.Y,
+ x=>'[PREVIEW] '+x.T+' | '+x.genre+' Sample Pack | Prod. MZPRD',
+ x=>x.mood+' Vinyl Sample Pack "'+x.T+'" (Loops + Chops) '+x.Y,
+ x=>x.T+' - Producer Sample Pack | Chops, Loops & Textures',
+ x=>'Sample Pack "'+x.T+'" | '+x.genre+' Vinyl Samples for Producers '+x.Y
+];
+const DESCS_B=[
+ x=>'Buy this beat and download it instantly: '+x.url+'\n\n'+x.T+(x.info?' - '+x.info:'')+'\nProduced by MZPRD (Meztheprod)\n\nMore beats and sample packs: '+SITE+'\n\n#typebeat #rapbeat #mzprd',
+ x=>x.A+' '+x.Y+' - "'+x.T+'"\n\nBuy this beat and download it instantly: '+x.url+'\n\n'+(x.info?'BPM / Key: '+x.info+'\n':'')+'Mood: '+x.mood+'\n\nSubscribe for new beats every week and turn on the bell.\n\nProduced by MZPRD (Meztheprod)\n'+SITE+'\n\n#typebeat #'+x.gtag+'beat #mzprd',
+ x=>'"'+x.T+'" - '+x.mood+' '+x.genre+' instrumental\n\nBuy / download: '+x.url+'\n\nDETAILS\nBeat: '+x.T+(x.bpm?'\nBPM: '+x.bpm.replace(' BPM',''):'')+(x.key?'\nKey: '+x.key:'')+'\nMood: '+x.mood+'\nProd. by MZPRD\n\nAll beats: '+SITE+'\n\n#typebeat #instrumental #mzprd',
+ x=>'Rappers and singers: hear it, then record over it. '+x.A+' '+x.Y+' "'+x.T+'".\n\nGet the beat: '+x.url+'\n\nWant to try it first? Open the site, play the preview and use the recording booth over the beat.\nSend me your finished song, I check every message.\n\nProd. by MZPRD (Meztheprod)\n'+SITE+'\n\n#typebeat #rapbeat #mzprd',
+ x=>x.T+' is a '+x.mood.toLowerCase()+' '+x.genre.toLowerCase()+' instrumental'+(x.info?' ('+x.info+')':'')+' made for rappers, singers and content creators looking for '+x.A.toLowerCase()+' '+x.Y+'.\n\nBuy it and download it instantly: '+x.url+'\n\nMore '+x.genre.toLowerCase()+' beats, instrumentals and sample packs by MZPRD (Meztheprod): '+SITE+'\n\n#'+x.gtag+'beat #typebeat #mzprd'
+];
+const DESCS_P=[
+ x=>'Get this sample pack: '+x.url+'\n\n'+x.T+(x.info?' - '+x.info:'')+'\nProduced by MZPRD (Meztheprod)\n\nMore beats and sample packs: '+SITE+'\n\n#samplepack #producer #mzprd',
+ x=>x.T+' - '+x.mood+' sample pack for producers\n\nGet it and download instantly: '+x.url+'\n\nVinyl samples, loops and chops ready to flip into your next beat.\nSubscribe for new packs and beats every week.\n\nProd. by MZPRD (Meztheprod)\n'+SITE+'\n\n#samplepack #vinylsamples #mzprd',
+ x=>'Sample pack preview: "'+x.T+'"\n\nDETAILS\nPack: '+x.T+'\nStyle: '+x.mood+' '+x.genre+'\nFormat: loops and samples, download straight after payment\n\nBuy it here: '+x.url+'\nAll packs: '+SITE+'\n\n#samplepack #producerloops #mzprd'
+];
+const TAGS_B=[
+ x=>[...x.tags,x.T,'MZPRD','Meztheprod','type beat','rap beat','hip hop instrumental'],
+ x=>[x.A,'type beat',x.genre+' type beat',x.mood+' type beat','free type beat','rap instrumental','instrumental',x.T,'prod mzprd',x.Y+' type beat'],
+ x=>['buy beats','beats for sale','rap beats for sale','hip hop beats for sale',x.genre+' beats for sale','rap instrumental',x.T,'MZPRD','Meztheprod'],
+ x=>[x.genre+' beat',x.genre+' instrumental',x.mood+' beat',x.genre+' beat '+x.Y,'trap beat','boom bap beat','rap beat','dark beat','hard beat',x.T,'MZPRD'],
+ x=>[x.art?x.art+' type beat '+x.Y:x.mood+' type beat '+x.Y,x.A+' free',x.mood+' '+x.genre+' beat','beat for rappers','instrumental for rap','rap beat with hook',x.T,'MZPRD']
+];
+const TAGS_P=[
+ x=>[x.T,'MZPRD','Meztheprod','sample pack','vinyl samples','producer loops'],
+ x=>['sample pack','vinyl samples','producer loops','sample pack for producers','loops and chops','beat making','free samples preview',x.T,'MZPRD'],
+ x=>[x.genre+' samples',x.mood+' samples','vinyl sample pack','sample pack '+x.Y,'producer sounds','sample flip','how to flip samples',x.T,'MZPRD']
+];
+function fitTags(a){const seen=new Set(),out=[];let len=0;for(const t of a.map(x=>String(x||'').trim()).filter(Boolean)){const k=t.toLowerCase();if(seen.has(k))continue;if(len+t.length+(out.length?2:0)>500)break;seen.add(k);out.push(t);len+=t.length+(out.length>1?2:0)}return out.join(', ')}
+function ytText(reset){
+ const it=S.item;if(!it||!$s('#yT'))return;if(reset===true){yi.t=yi.d=yi.g=0}
+ const x=ytCtx(),T=x.isB?TITLES_B:TITLES_P,D=x.isB?DESCS_B:DESCS_P,G=x.isB?TAGS_B:TAGS_P;
+ yi.t%=T.length;yi.d%=D.length;yi.g%=G.length;
+ $s('#yT').value=cut(T[yi.t](x),100);$s('#yD').value=D[yi.d](x).slice(0,5000);$s('#yG').value=fitTags(G[yi.g](x));
+ $s('#yTi').textContent='('+(yi.t+1)+'/'+T.length+')';$s('#yDi').textContent='('+(yi.d+1)+'/'+D.length+')';$s('#yGi').textContent='('+(yi.g+1)+'/'+G.length+')';
+ ytCount();
+}
+function ytCount(){const t=$s('#yT').value.length,d=$s('#yD').value.length,g=$s('#yG').value.length;
+ $s('#yTc').textContent=t+' / 100 characters'+(t>100?' (too long)':'');$s('#yDc').textContent=d+' / 5000 characters';$s('#yGc').textContent=g+' / 500 characters'+(g>500?' (too long)':'')}
+function ytNext(k){yi[k]++;ytText()}
 function renderList(){
  const l=$s('#sl'),rows=S.items.filter(i=>i._k===S.kind);
  l.innerHTML=rows.length?rows.map(r=>`<div class="it" data-id="${e2(r.id)}">${r.cover_path?`<img src="${e2(pub(r.cover_path))}" alt="">`:'<i></i>'}<div><b>${e2(r.title)}</b><span>${[r.bpm&&r.bpm+' BPM',r.musical_key,r.preview_path?'':'NO PREVIEW'].filter(Boolean).join(' / ')||'&nbsp;'}</span></div></div>`).join(''):'<div class="msg" style="padding:12px">Nothing here yet.</div>';
@@ -372,14 +513,22 @@ function wire(){
  q('#sCov').onchange=e=>{const f=e.target.files[0];if(f)loadCover(URL.createObjectURL(f))};
  document.querySelectorAll('#studio [name=sSrc]').forEach(r=>r.onchange=()=>{S.src=r.value;stopPlay();if(S.src==='preview')loadPreview();else{S.buf=null;setAudM('Choose your audio file below.');if(q('#sAud').files[0])loadFile(q('#sAud').files[0]);else redraw()}});
  q('#sAud').onchange=e=>{const f=e.target.files[0];if(f){document.querySelector('#studio [name=sSrc][value=file]').checked=true;S.src='file';loadFile(f)}};
- q('#sScrub').oninput=()=>{scrub=q('#sScrub').value/100;if(A&&A.playing&&!(run&&run.rec))stopPlay();redraw()};
+ const wv=q('#sWave');let drag=false,was=false;
+ const seek=e=>{const r=wv.getBoundingClientRect();scrub=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));redraw();drawWave(scrub,0)};
+ wv.onpointerdown=e=>{if(run&&run.rec)return;drag=true;was=!!(A&&A.playing);if(was)stopPlay();wv.setPointerCapture(e.pointerId);seek(e)};
+ wv.onpointermove=e=>{if(drag)seek(e)};
+ wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
+ q('#yAll').onclick=()=>{yi.t++;yi.d++;yi.g++;ytText()};
+ document.querySelectorAll('#studio [data-n]').forEach(b=>b.onclick=()=>ytNext(b.dataset.n));
+ ['#yA','#yM'].forEach(id=>q(id).oninput=()=>ytText());
+ ['#yT','#yD','#yG'].forEach(id=>q(id).oninput=ytCount);
  q('#sPlay').onclick=()=>{
   if(run&&run.rec)return;
   if(A&&A.playing){stopPlay();redraw();return}
   if(!S.buf){msg('Add audio first.');return}
-  const from=scrub*len();const s=startPlay(true,from);if(!s)return;run={done:()=>{stopPlay();scrub=0;q('#sScrub').value=0;redraw()}};s.onended=()=>{};setPlayBtn();loop(false)};
+  playFrom(scrub)};
  q('#sRender').onclick=render;
- document.querySelectorAll('#studio [data-c]').forEach(b=>b.onclick=async()=>{const el=q('#'+b.dataset.c);el.select();try{await navigator.clipboard.writeText(el.value);window.toast('COPIED')}catch(e){document.execCommand('copy');window.toast('COPIED')}});
+ document.querySelectorAll('#studio [data-c]').forEach(b=>b.onclick=async()=>{const el=q('#'+b.dataset.c);el.select();try{await navigator.clipboard.writeText(el.value);toast('COPIED')}catch(e){document.execCommand('copy');toast('COPIED')}});
 }
 window.studioOpen=async function(){
  css();const root=document.getElementById('studio');root.classList.add('on');
@@ -387,5 +536,5 @@ window.studioOpen=async function(){
   try{await loadItems()}catch(e){root.querySelector('#sl').innerHTML='<div class="msg" style="padding:12px">Could not load items.</div>';return}
   renderList();const first=S.items.find(i=>i._k===S.kind);if(first)setItem(first)}
 };
-window.studioClose=function(){stopPlay();const r=document.getElementById('studio');if(r)r.classList.remove('on')};
+window.studioClose=function(){if(!(run&&run.rec))stopPlay();const r=document.getElementById('studio');if(r)r.classList.remove('on')};
 })();
