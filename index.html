@@ -1094,13 +1094,13 @@ function frame(){
  const pr=playing&&au.duration?au.currentTime/au.duration:0;
  if(playing)$('#pg b').style.width=pr*100+'%';
  if(curPack>=0){const cd=document.querySelectorAll('#packs .card')[curPack],pb=cd&&cd.querySelector('.cprog b');if(pb)pb.style.width=pr*100+'%'}
- wvs.forEach((w,i)=>{const p=i===cur?pr:0;if(w.p!==p||!w.d){w.p=p;w.d=1;drawWv(w,p)}});
- if(pwv&&pwv.cv.isConnected&&pageIdx>=0){const p=(pwv.k==='p'?pwv.i===curPack:pwv.i===cur)?pr:0;if(pwv.p!==p||!pwv.d){pwv.p=p;pwv.d=1;drawWv(pwv,p)}}
+ wvs.forEach((w,i)=>{const p=i===cur?pr:0;if(w.p!==p||!w.d){if(drawWv(w,p)!==false){w.p=p;w.d=1}}});
+ if(pwv&&pwv.cv.isConnected&&pageIdx>=0){const p=(pwv.k==='p'?pwv.i===curPack:pwv.i===cur)?pr:0;if(pwv.p!==p||!pwv.d){if(drawWv(pwv,p)!==false){pwv.p=p;pwv.d=1}}}
  if((fxN&1)===0)drawLap(pr,t);
  requestAnimationFrame(frame);
 }
 function drawWv(w,p){
- const c=w.cv,dpr=devicePixelRatio||1,W=c.clientWidth;if(!W)return;
+ const c=w.cv,dpr=devicePixelRatio||1,W=c.clientWidth;if(!W)return false;
  const H=c.clientHeight||42;if(c.width!==Math.round(W*dpr)||c.height!==Math.round(H*dpr)){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr)}
  const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
  const n=w.bars.length,s=W/n;
