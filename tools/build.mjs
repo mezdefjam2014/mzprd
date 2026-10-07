@@ -164,7 +164,7 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity
 
 fs.mkdirSync(DIST, { recursive: true })
 for (const e of fs.readdirSync(DIST)) fs.rmSync(path.join(DIST, e), { recursive: true, force: true })
-for (const f of ['hero.jpg', 'girl.png', 'chain.png', 'studio.js', 'thumbs.js', 'mp4-muxer.js', 'CNAME']) {
+for (const f of ['hero.jpg', 'girl.png', 'chain.png', 'studio.js', 'email.js', 'mix.js', 'thumbs.js', 'mp4-muxer.js', 'CNAME']) {
   if (fs.existsSync(path.join(ROOT, f))) fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f))
 }
 const urls = []
@@ -230,7 +230,7 @@ for (const c of [...beatCats, ...packCats]) {
 }
 
 /* ----- back office pages (not indexed) ----- */
-for (const t of ['', 'beats', 'packs', 'bundles', 'promo', 'sales', 'video']) {
+for (const t of ['', 'beats', 'packs', 'bundles', 'promo', 'sales', 'video', 'email']) {
   const rel = t ? 'admin/' + t : 'admin'
   write(rel, render({
     path: rel + '/', title: 'Back office | MZPRD', desc: 'Back office.', h1: 'Back office', noindex: true,
