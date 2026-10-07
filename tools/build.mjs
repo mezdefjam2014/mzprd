@@ -91,6 +91,7 @@ function headHtml(s) {
   const lds = [BRAND_JSON, SITE_JSON, ...(s.ld || [])]
   return [
     `<base href="${BASE}">`,
+    s.page && s.page.kind !== 'home' || s.noindex ? '<style>#enter{display:none!important}</style>' : '',
     `<title>${esc(s.title)}</title>`,
     `<meta name="description" content="${esc(s.desc)}">`,
     `<meta name="robots" content="${s.noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'}">`,

@@ -16,6 +16,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"MZPRD","description":"Beats and sample packs by MZPRD."}</script>
 <!--/SEO:HEAD-->
+<script>try{if(localStorage.getItem('mzprd_seen')==='1')document.documentElement.classList.add('seen')}catch(e){}</script>
+<style>html.seen #enter{display:none!important}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://www.paypal.com">
 <link rel="dns-prefetch" href="https://www.sandbox.paypal.com">
@@ -816,7 +818,16 @@ addEventListener('hashchange',()=>{if(location.hash==='#demo')return;hideSeo();r
 $('#pp').onclick=()=>curPack>=0?playPack(curPack):(cur<0?play(0):play(cur));$('#next').onclick=()=>go(1);$('#prev').onclick=()=>go(-1);
 $('#vol').oninput=e=>{au.volume=+e.target.value};au.volume=.8;
 $('#pg').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration};
-$('#go').onclick=()=>{initAudio();ac.resume();$('#enter').classList.add('off');setTimeout(()=>{loadPaypal().catch(()=>{});callCheckout({action:'ping'}).catch(()=>{})},1200)};
+function enterSite(){
+ $('#enter').classList.add('off');try{localStorage.setItem('mzprd_seen','1')}catch(e){}
+ setTimeout(()=>{loadPaypal().catch(()=>{});callCheckout({action:'ping'}).catch(()=>{})},1200);
+}
+/* the intro is for a first visit to the home page only; click anywhere to skip it */
+$('#go').onclick=()=>{initAudio();ac.resume();enterSite()};
+$('#enter').onclick=e=>{if(e.target.id!=='go'){try{initAudio();ac.resume()}catch(x){}enterSite()}};
+{let seen=false;try{seen=localStorage.getItem('mzprd_seen')==='1'}catch(e){}
+ const P0=window.__PAGE,deep=!!(P0&&P0.kind!=='home');
+ if(seen||deep||location.hash.indexOf('#/')===0){$('#enter').classList.add('off');setTimeout(()=>{loadPaypal().catch(()=>{});callCheckout({action:'ping'}).catch(()=>{})},1200)}}
 addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body){e.preventDefault();$('#pp').click()}});
 
 async function loadAll(){
