@@ -4,7 +4,7 @@
    Shared by the SHOW page, the back office Show Maker preview, and the video renderer. */
 (function(){
 'use strict';
-const W=1280,H=720;
+const W=1092,H=790;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t;
 function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const fmt=s=>{s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
@@ -132,6 +132,8 @@ function schedule(ctx,dest,script,bufs,from,until,o){
 }
 
 /* ---------- the stage (animated on top of the stage artwork) ---------- */
+const PHONES=[[180,594,30],[99,600,38],[45,595,24],[1031,598,16],[1080,596,12],[603,605,24],[975,606,27],[435,611,21],[969,603,8],[155,608,9],[203,606,8],[391,613,20],[172,610,6],[982,609,8],[951,615,9],[238,620,12],[288,619,13],[697,621,17],[1034,625,10],[523,630,13],[152,629,8],[202,630,8],[769,628,15],[485,644,20],[669,638,8],[617,642,7],[655,639,7],[666,646,7],[662,660,5],[421,667,15],[31,668,16]];
+const FIX=[[298,78],[378,78],[438,84],[535,86],[653,86],[712,78],[796,78],[1028,112],[52,306]];
 const VARIANT={city:'',neon:'hue-rotate(38deg) saturate(1.25)',ice:'hue-rotate(150deg) saturate(1.1) brightness(1.06)',ember:'hue-rotate(-32deg) saturate(1.3) sepia(.18)'};
 function makeStage(canvas,seed){
  const c=canvas.getContext('2d');canvas.width=W;canvas.height=H;
@@ -139,40 +141,12 @@ function makeStage(canvas,seed){
  const st={t:0,cam:{z:1,x:0,y:0},energy:.1,cheer:0,nod:0,bounce:0,flash:0,shake:0,hands:[0,0],pads:new Float32Array(12),hearts:0,
   hue:230,fireworks:[],confetti:[],lastHit:-1,hitIdx:0,lastCutBar:-1,lastDrop:-1,fogP:[],endT:-1,lastStartTrack:-2};
  /* a fresh random front-row crowd every time */
- for(let i=0;i<20;i++){const back=i<7;st.fogP.push({back,x:R()*(W+400)-200,y:back?405+R()*55:478+R()*52,s:back?1+R()*.6:1.1+R()*.8,vx:(R()<.5?-1:1)*(5+R()*12),a:back?.4+R()*.2:.5+R()*.25,k:(R()*4)|0,ph:R()*6.28})}
- const L={},C={},seedP=R()*6.28;st.colUp=new Float32Array(200);
- /* ---- the show scene: your empty stage plate + the separate pieces from the layer sheet ---- */
- const PS=W/1672,SCR={x:438,y:136,w:433,h:287},BODY={x:482,y:179,s:1.2},TBL={x:404,y:429,s:1.2},SPK={x:52,b:612,s:.95},MON={x:994,b:612,s:.95},CRW={x:-19,y:485,s:.871};
- const FIX=[[80,90,320],[345,85,285],[450,95,30],[568,95,212],[1070,95,212],[1192,95,30],[1338,85,285],[1600,90,205]].map(([x,y,h])=>[x*PS,y*PS,h]);
- const LAS=[[330*PS,662*PS,-1],[1370*PS,662*PS,1]];
- function layersFor(theme){
-  if(!S.plate)return null;if(L[theme])return L[theme];
-  const f=VARIANT[theme]||'',mk=im=>{const o=document.createElement('canvas');o.width=im.naturalWidth;o.height=im.naturalHeight;const g=o.getContext('2d');g.filter=f;g.drawImage(im,0,0);return o},P=S.plate;
-  return L[theme]={atlas:mk(P.atlas),stage:mk(P.stage),lights:mk(P.lights)};
- }
- const pc=(g,A,k,x,y,sc)=>{const r=S.plate.meta.r[k];g.drawImage(A,r[0],r[1],r[2],r[3],x,y,r[2]*sc,r[3]*sc)};
- const sz=k=>S.plate.meta.r[k];
- function stageBase(g,Ly,cy,glow){g.drawImage(Ly.stage,0,0,W,H);const m=S.plate.meta,r=m.r.crown;if(!r)return;const x=m.crown[0]*PS,y=m.crown[1]*PS+(cy||0);g.drawImage(Ly.atlas,r[0],r[1],r[2],r[3],x,y,r[2]*PS,r[3]*PS);
-  if(glow>.02){g.save();g.globalCompositeOperation='lighter';g.globalAlpha=Math.min(.6,glow);g.drawImage(Ly.atlas,r[0],r[1],r[2],r[3],x,y,r[2]*PS,r[3]*PS);g.restore()}}
- function speakers(g,A,pump){
-  pump=pump||0;{const r=sz('speakers'),sc=SPK.s*(1+pump*.05);pc(g,A,'speakers',SPK.x+r[2]*(SPK.s-sc)/2,SPK.b-r[3]*sc,sc)}
-  {const r=sz('monitors'),sc=MON.s*(1+pump*.05);pc(g,A,'monitors',MON.x+r[2]*(MON.s-sc)/2,MON.b-r[3]*sc,sc)}
- }
- /* MPC pads (4 x 3 visible) in the producer piece's own pixels */
-  function producer(g,A,po){
-  po=po||{bounce:0,nod:0,hands:[0,0],pads:null,hue:230,t:0};
-  pc(g,A,'table',TBL.x,TBL.y,TBL.s);
-  const bs=BODY.s,dy=po.bounce*2.4;
-  pc(g,A,'torso',BODY.x,BODY.y+dy,bs);
-  {const px=BODY.x+150*bs,py=BODY.y+dy+86*bs,r=sz('head');g.save();g.translate(px,py+po.nod*2.2);g.rotate(po.nod*.06+Math.sin(po.t*1.3)*.012);g.drawImage(A,r[0],r[1],r[2],r[3],-150*bs,-86*bs,r[2]*bs,r[3]*bs);g.restore()}
-  pc(g,A,'mpc',BODY.x,BODY.y,bs);
-  if(po.pads){const pd=S.plate.meta.pads;g.save();pd.forEach(([px,py],p)=>{const a=po.pads[p%12];if(a<.04)return;const r=sz('pad'+p),x=BODY.x+px*bs,y=BODY.y+py*bs;g.globalAlpha=Math.min(1,a*1.15);g.drawImage(A,r[0],r[1],r[2],r[3],x,y,r[2]*bs,r[3]*bs);g.globalCompositeOperation='lighter';g.globalAlpha=Math.min(.7,a*.6);g.drawImage(A,r[0],r[1],r[2],r[3],x-1,y-1,r[2]*bs+2,r[3]*bs+2);g.globalCompositeOperation='source-over'});g.restore()}
-  pc(g,A,'hl',BODY.x,BODY.y+dy*.6+po.hands[0]*3.2,bs);pc(g,A,'hr',BODY.x,BODY.y+dy*.6+po.hands[1]*3.2,bs);
- }
- function crowdStatic(g,A){const r=sz('crowd');g.drawImage(A,r[0],r[1],r[2],r[3],CRW.x,CRW.y,r[2]*CRW.s,r[3]*CRW.s)}
- function compFor(theme){
-  if(C[theme])return C[theme];const Ly=layersFor(theme);if(!Ly)return null;const o=document.createElement('canvas');o.width=W;o.height=H;const g=o.getContext('2d');
-  stageBase(g,Ly);speakers(g,Ly.atlas);producer(g,Ly.atlas);crowdStatic(g,Ly.atlas);return C[theme]=o;
+ const front=[];for(let i=0;i<13;i++)front.push({x:(i+.5)*W/13+(R()-.5)*60,s:1.9+R()*1.1,ph:R()*6.28,sp:.8+R()*.6,look:Math.floor(R()*4),arm:R(),y:H-6+R()*28});
+ const phones=PHONES.map(p=>({x:p[0],y:p[1],r:Math.max(6,p[2]*.6),ph:R()*6.28,sp:3+R()*5,on:R()<.85}));
+ for(let i=0;i<22;i++)st.fogP.push({x:R()*W,y:420+R()*190,r:90+R()*150,vx:(R()-.5)*14,a:.05+R()*.07});
+ function plateFor(theme){
+  if(!S.plate)return null;if(plates[theme])return plates[theme];
+  const o=document.createElement('canvas');o.width=W;o.height=H;const g=o.getContext('2d');g.filter=VARIANT[theme]||'';g.drawImage(S.plate,0,0,W,H);return plates[theme]=o;
  }
  function crownPath(g,cx,cy,sz){const p=[[-1,.45],[-.92,-.35],[-.4,.15],[0,-.7],[.4,.15],[.92,-.35],[1,.45]];g.beginPath();p.forEach(([x,y],i)=>i?g.lineTo(cx+x*sz,cy+y*sz):g.moveTo(cx+x*sz,cy+y*sz));g.closePath()}
  const vig=document.createElement('canvas');vig.width=W;vig.height=H;{const g=vig.getContext('2d'),gr=g.createRadialGradient(W/2,H/2,H*.42,W/2,H/2,H*.98);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,0,0,.6)');g.fillStyle=gr;g.fillRect(0,0,W,H)}
@@ -181,10 +155,10 @@ function makeStage(canvas,seed){
  const burst=(x,y,hue,n)=>{for(let i=0;i<n;i++){const a=R()*6.283,sp=60+R()*170;st.fireworks.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,l:1,h:hue+(R()-.5)*30})}};
  const flags=()=>{const m=S.script.milestones||[],f={};m.forEach(k=>{if(st.hearts>=k.at)f[k.fx]=true});return f};
  /* camera framings (artwork coordinates, offsets from the centre) */
- const FR={wide:{z:1,x:0,y:0},dj:{z:1.9,x:0,y:-46},left:{z:1.5,x:-300,y:30},right:{z:1.5,x:300,y:30},crowd:{z:1.35,x:0,y:170},screen:{z:1.6,x:15,y:-80}};
+ const FR={wide:{z:1,x:0,y:0},dj:{z:1.7,x:30,y:60},left:{z:1.4,x:-190,y:-70},right:{z:1.4,x:200,y:-70},crowd:{z:1.3,x:0,y:190},screen:{z:1.45,x:25,y:-140}};
  const SEQ={dynamic:['wide','dj','left','crowd','right','screen','dj','wide'],slow:['wide','dj','screen','wide'],static:['wide']};
- function pickCam(t,seg,bpm,cutsOv){
-  const beatLen=60/Math.max(60,bpm||92),bar=Math.floor(t/(beatLen*4)),mode=cutsOv||S.script.fx.cuts||'dynamic';
+ function pickCam(t,seg,bpm){
+  const beatLen=60/Math.max(60,bpm||92),bar=Math.floor(t/(beatLen*4)),mode=S.script.fx.cuts||'dynamic';
   const per=mode==='slow'?8:(seg.preset==='drop'||seg.preset==='finale')&&mode==='dynamic'?2:4;
   if(mode==='static')return{k:'wide',drift:true};
   if(seg.preset==='breakdown')return{k:'dj',drift:true};
@@ -196,9 +170,6 @@ function makeStage(canvas,seed){
   ctl=ctl||{};dt=clamp(dt||.016,.001,.1);st.t=T;const sc=S.script,fx=sc.fx,q=segAt(sc,Math.max(0,T)),P=PRESETS[q.seg.preset]||PRESETS.drop;
   const mode=ctl.mode||'live',tr=trackAt(sc,T),trk=tr>=0?sc.tracks[tr]:null,bpm=(trk&&trk.bpm)||92,beatLen=60/bpm;
   const fg=flags(),bass=au.bass||0,loud=au.loud||0;
-  {const look0=(trk&&trk.look&&VARIANT[trk.look]!==undefined)?trk.look:(st.look||S.theme);
-   if(st.look==null){st.look=look0;st.prevLook=look0;st.lookT=1}else if(look0!==st.look){st.prevLook=st.look;st.look=look0;st.lookT=0}
-   st.lookT=Math.min(1,st.lookT+dt/1.4)}
   /* hits: the producer taps on the real drum hits, the crowd pulses */
   const H2=S.hits;let i0=st.hitIdx;if(i0>=H2.length||(i0>0&&H2[i0-1].t>T+.05)){let lo=0,hi=H2.length;while(lo<hi){const m=(lo+hi)>>1;if(H2[m].t<T-.2)lo=m+1;else hi=m}i0=lo}
   while(i0<H2.length&&H2[i0].t<T-.2)i0++;
@@ -220,68 +191,57 @@ function makeStage(canvas,seed){
   if(mode==='end'){st.endT=st.endT<0?0:st.endT+dt}else st.endT=-1;
   /* palette + intensity */
   const hh=lerp(P.hue[0],P.hue[1],(Math.sin(T*.35)+1)/2);st.hue+=(hh-st.hue)*.05;const hue=st.hue;
-  const int=clamp(P.int*(fx.intensity==null?.85:fx.intensity)*((trk&&trk.int)||1)*(fg.lights?1.25:1)*(mode==='wait'?.5:1)*(.34+loud*1.35),0,1.35);
+  const int=clamp(P.int*(fx.intensity==null?.85:fx.intensity)*(fg.lights?1.25:1)*(mode==='wait'?.5:1)*(.34+loud*1.35),0,1.35);
   /* camera */
-  const cp=pickCam(Math.max(0,T),q.seg,bpm,trk&&trk.cuts);let tz=FR[cp.k].z,tx=FR[cp.k].x,ty=FR[cp.k].y;
+  const cp=pickCam(Math.max(0,T),q.seg,bpm);let tz=FR[cp.k].z,tx=FR[cp.k].x,ty=FR[cp.k].y;
   if(cp.push){tz=1+q.p*.16;tx=0;ty=q.p*20}
   if(cp.drift){tx+=Math.sin(T*.3)*14;ty+=Math.cos(T*.23)*7}
   if(fg.special&&mode==='live'&&st.bounce>.5)tz*=1.03;
   const kk=1-Math.exp(-dt*((cp.bar!=null&&cp.bar!==st.lastCutBar)?9:2.6));st.lastCutBar=cp.bar;
   st.cam.z=lerp(st.cam.z,tz,kk);st.cam.x=lerp(st.cam.x,tx,kk);st.cam.y=lerp(st.cam.y,ty,kk);
-  const lim=Math.max(0,W/2*(1-1/st.cam.z)),limy=Math.max(0,H/2*(1-1/st.cam.z)),Ly=layersFor(st.look),A=Ly&&Ly.atlas,MT=S.plate&&S.plate.meta;
+  const lim=Math.max(0,W/2*(1-1/st.cam.z)),limy=Math.max(0,H/2*(1-1/st.cam.z)),pl=plateFor(S.theme);
   c.save();c.fillStyle='#04030a';c.fillRect(0,0,W,H);
   const sh=st.shake*5;c.translate(W/2+(Math.random()-.5)*sh,H/2+(Math.random()-.5)*sh);c.scale(st.cam.z,st.cam.z);c.translate(-W/2-clamp(st.cam.x,-lim,lim),-H/2-clamp(st.cam.y,-limy,limy));
-  const pump=fx.speakers!==false?clamp(bass*.5+st.bounce*.7+st.cheer*.2,0,1):0;
-  /* 1. the stage plate (cross-fades between per-beat looks) */
-  const crY=mode==='live'?Math.sin(T*1.15)*5-st.bounce*4:Math.sin(T*.8)*3,crG=mode==='live'?bass*.25+st.bounce*.3:0;
-  if(Ly){const pv=st.lookT<1&&st.prevLook!==st.look?layersFor(st.prevLook):null;if(pv){stageBase(c,pv,crY,crG);c.globalAlpha=st.lookT;stageBase(c,Ly,crY,crG);c.globalAlpha=1}else stageBase(c,Ly,crY,crG)}
-  else{c.fillStyle='#0b0716';c.fillRect(0,0,W,H)}
-  /* 2. the venue dims in quiet moments; the plate's own lights come back up with the music */
-  const dim=clamp(.6-int*.5,0,.58);if(dim>.02){c.fillStyle=`rgba(5,3,14,${dim})`;c.fillRect(0,0,W,H)}
-  if(Ly){c.save();c.globalCompositeOperation='lighter';c.globalAlpha=clamp(int*.42+bass*.22+st.flash*.3,0,.85);c.drawImage(Ly.lights,0,0,W,H);c.restore()}
-  /* 3. LED screen: crown pulse, spectrum, countdown / thanks text */
-  {const sx=SCR.x,sy=SCR.y,sw=SCR.w,sh2=SCR.h;c.save();c.beginPath();c.rect(sx,sy,sw,sh2);c.clip();
-   if(mode==='wait'||mode==='end'){c.fillStyle='rgba(6,5,20,.86)';c.fillRect(sx,sy,sw,sh2);c.textAlign='center';c.fillStyle='#fff';c.font='14px "Press Start 2P",monospace';
-    c.fillText(mode==='end'?'SEE YOU NEXT WEEK':(ctl.head||'SHOW STARTS IN'),sx+sw/2,sy+sh2*.3);if(mode==='wait'){c.font='30px "Press Start 2P",monospace';c.fillStyle='#ffd34a';c.shadowColor='#ffb020';c.shadowBlur=14;c.fillText(ctl.text||'--:--',sx+sw/2,sy+sh2*.48);c.shadowBlur=0}}
-   else{c.globalCompositeOperation='lighter';const gr=c.createRadialGradient(sx+sw/2,sy+sh2*.42,10,sx+sw/2,sy+sh2*.42,sw*.55);gr.addColorStop(0,`hsla(${hue+10},90%,68%,${.1+bass*.3+st.bounce*.2})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(sx,sy,sw,sh2);
-    if(fg.special&&mode==='live'){c.fillStyle=`hsla(${(T*90)%360},100%,60%,.14)`;c.fillRect(sx,sy,sw,sh2)}
-    const bn=40,bw2=sw/bn;for(let b2=0;b2<bn;b2++){const v=au.fd?au.fd[Math.floor(Math.pow(b2/bn,1.6)*260)]/255:bass*(.4+.6*Math.sin(b2+T*5)**2);c.fillStyle=`hsla(${hue+b2*4},100%,${55+v*18}%,${.25+v*.5})`;c.fillRect(sx+b2*bw2+1,sy+sh2-4-v*46,bw2-2,v*46+3)}}
+  if(pl)c.drawImage(pl,0,0);
+  else{const g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#14102a');g.addColorStop(1,'#050409');c.fillStyle=g;c.fillRect(0,0,W,H)}
+  /* the venue dims in quiet moments and comes up with the music */
+  const dim=clamp(.62-int*.55,0,.6);if(dim>.02){c.fillStyle=`rgba(4,3,14,${dim})`;c.fillRect(0,0,W,590);c.fillStyle=`rgba(4,3,14,${dim*.5})`;c.fillRect(0,590,W,H-590)}
+  /* LED screen: crown glow, spectrum, countdown / thanks text */
+  {const sx=392,sy=138,sw=360,sh2=256;c.save();c.beginPath();c.rect(sx,sy,sw,sh2);c.clip();
+   if(mode==='wait'||mode==='end'){c.fillStyle='rgba(6,5,20,.88)';c.fillRect(sx,sy,sw,sh2);c.textAlign='center';c.fillStyle='#fff';c.font='15px "Press Start 2P",monospace';
+    c.fillText(mode==='end'?'SEE YOU NEXT WEEK':(ctl.head||'SHOW STARTS IN'),sx+sw/2,sy+110);if(mode==='wait'){c.font='34px "Press Start 2P",monospace';c.fillStyle='#ffd34a';c.shadowColor='#ffb020';c.shadowBlur=14;c.fillText(ctl.text||'--:--',sx+sw/2,sy+170);c.shadowBlur=0}}
+   else{c.globalCompositeOperation='lighter';const gr=c.createRadialGradient(sx+sw/2,sy+120,10,sx+sw/2,sy+120,190);gr.addColorStop(0,`hsla(${hue+10},90%,70%,${.25+bass*.4+st.bounce*.25})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(sx,sy,sw,sh2);
+    if(fg.special&&mode==='live'){c.fillStyle=`hsla(${(T*90)%360},100%,60%,.16)`;c.fillRect(sx,sy,sw,sh2)}
+    const bn=36,bw2=sw/bn;for(let b2=0;b2<bn;b2++){const v=au.fd?au.fd[Math.floor(Math.pow(b2/bn,1.6)*260)]/255:bass*(.4+.6*Math.sin(b2+T*5)**2);c.fillStyle=`hsla(${hue+b2*4},100%,${55+v*18}%,${.35+v*.5})`;c.fillRect(sx+b2*bw2+1,sy+sh2-4-v*58,bw2-2,v*58+3)}}
    c.restore()}
-  /* 4. fixture flares + soft moving beams (more of them on drops) */
+  /* moving beams from the rig, brighter with the music */
   if(int>.05&&fx.lights!==false){c.save();c.globalCompositeOperation='lighter';
-   FIX.forEach(([x0,y0,h0],i)=>{const hue2=h0+(hue-230)*.2,on=fg.lights||i%3!==2;
-    const fl=c.createRadialGradient(x0,y0,0,x0,y0,34+bass*16);fl.addColorStop(0,`hsla(${hue2},100%,86%,${clamp(.25*int+st.bounce*.35,0,.85)})`);fl.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=fl;c.fillRect(x0-50,y0-50,100,100);
-    if(!on)return;const sw2=Math.sin(T*(.45+i*.06)+i*1.9)*(.22+(q.seg.preset==='drop'?.16:0))+(x0<W/2?-.2:.2),ang=Math.PI/2+sw2,len=H*.8,x1=x0+Math.cos(ang)*len,y1=y0+Math.sin(ang)*len,half=10+int*8+bass*8,px=-Math.sin(ang),py=Math.cos(ang);
-    const gr=c.createLinearGradient(x0,y0,x1,y1);gr.addColorStop(0,`hsla(${hue2},100%,72%,${.1*int+bass*.06})`);gr.addColorStop(.7,`hsla(${hue2},100%,60%,${.03*int})`);gr.addColorStop(1,`hsla(${hue2},100%,50%,0)`);
-    c.fillStyle=gr;c.beginPath();c.moveTo(x0-3,y0);c.lineTo(x0+3,y0);c.lineTo(x1+px*half,y1+py*half);c.lineTo(x1-px*half,y1-py*half);c.closePath();c.fill()});
+   FIX.forEach(([x0,y0],i)=>{if(!fg.lights&&i%3===2)return;const sw2=Math.sin(T*(.45+i*.06)+i*1.9)*(.3+(q.seg.preset==='drop'?.18:0))+(i%2?.14:-.14),ang=Math.PI/2+sw2+(i===8?-.9:i===7?.35:0),len=H*.95,x1=x0+Math.cos(ang)*len,y1=y0+Math.sin(ang)*len,half=16+int*13+bass*14,hue2=hue+(i%2?P.hue[1]-P.hue[0]:0)*.5+i*6,px=-Math.sin(ang),py=Math.cos(ang);
+    const gr=c.createLinearGradient(x0,y0,x1,y1);gr.addColorStop(0,`hsla(${hue2},100%,72%,${.2*int+bass*.12})`);gr.addColorStop(1,`hsla(${hue2},100%,50%,0)`);
+    c.fillStyle=gr;c.beginPath();c.moveTo(x0-4,y0);c.lineTo(x0+4,y0);c.lineTo(x1+px*half,y1+py*half);c.lineTo(x1-px*half,y1-py*half);c.closePath();c.fill();
+    const g2=c.createRadialGradient(x0,y0,0,x0,y0,26);g2.addColorStop(0,`hsla(${hue2},100%,82%,${.7*int})`);g2.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g2;c.fillRect(x0-26,y0-26,52,52)});
    c.restore()}
-  /* 5. lasers from the two emitters on the stage floor: unlocked by hearts, strongest on drops */
+  /* lasers: unlocked by hearts, strongest on drops */
   const laserA=P.laser*clamp((st.energy-.22)*2.6,0,1);
-  if(fx.lasers!==false&&fg.lasers&&mode==='live'&&laserA>.05){c.save();c.globalCompositeOperation='lighter';LAS.forEach(([ox,oy,sd],k2)=>{for(let i=0;i<6;i++){const a=-Math.PI/2+sd*(.25+i*.15)+Math.sin(T*.9+i+k2)*.14,hue3=[320,200,280][i%3];c.strokeStyle=`hsla(${hue3},100%,62%,${.55*laserA})`;c.lineWidth=1.6;c.beginPath();c.moveTo(ox,oy);c.lineTo(ox+Math.cos(a)*1100,oy+Math.sin(a)*1100);c.stroke();c.strokeStyle=`hsla(${hue3},100%,60%,${.1*laserA})`;c.lineWidth=7;c.stroke()}});c.restore()}
-  /* smoke sprites: a back bank behind the producer and a front bank between the stage and the crowd */
-  const smoke=back=>{if(fx.fog===false||!A)return;c.save();c.globalCompositeOperation='screen';st.fogP.forEach(f=>{if(f.back!==back)return;if(back===true||back===false){}
-    const r=MT.r['smoke'+f.k],w2=r[2]*f.s*1.3,h2=r[3]*f.s;f.x+=f.vx*dt;if(f.x<-w2-200)f.x=W+200;if(f.x>W+200)f.x=-w2-200;
-    c.globalAlpha=clamp(f.a*P.fog*(.5+int*.55+bass*.2)*(.85+.15*Math.sin(T*.7+f.ph)),0,.9);c.drawImage(A,r[0],r[1],r[2],r[3],f.x,f.y-h2/2+Math.sin(T*.4+f.ph)*4,w2,h2)});c.restore()};
-  smoke(true);
-  /* contact shadows so the gear sits on the floor */
-  {const sh0=(x,y,rx,ry,a)=>{c.save();c.translate(x,y);c.scale(1,ry/rx);const g=c.createRadialGradient(0,0,0,0,0,rx);g.addColorStop(0,`rgba(0,0,0,${a})`);g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(-rx,-rx,rx*2,rx*2);c.restore()};
-   sh0(TBL.x+236,TBL.y+150,280,26,.7);sh0(SPK.x+150,SPK.b+2,190,20,.6);sh0(MON.x+115,MON.b+2,150,18,.6)}
-  /* 6. speakers pump on the kick, glow on the hit */
-  if(A){speakers(c,A,pump);
-   if(st.bounce>.1&&fx.speakers!==false){c.save();c.globalCompositeOperation='lighter';[[SPK.x+150,SPK.b-140,150],[MON.x+115,MON.b-95,110]].forEach(([gx,gy,gr0])=>{const gr=c.createRadialGradient(gx,gy,0,gx,gy,gr0);gr.addColorStop(0,`hsla(${hue},100%,66%,${Math.min(.22,st.bounce*.16)})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(gx-gr0,gy-gr0,gr0*2,gr0*2)});c.restore()}}
-  /* 7. the producer: body bounces, head nods, each hand presses on its own hits, pads flash */
-  if(A)producer(c,A,{bounce:st.bounce,nod:st.nod,hands:st.hands,pads:st.pads,hue,t:T});
-  smoke(false);
-  /* low haze band over the stage floor, lit by the rig */
-  {const g=c.createLinearGradient(0,440,0,640);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.5,`hsla(${hue+20},70%,60%,${.06+int*.07+bass*.04})`);g.addColorStop(1,'rgba(0,0,0,0)');c.save();c.globalCompositeOperation='screen';c.fillStyle=g;c.fillRect(0,440,W,200);c.restore()}
-  /* 8. the crowd: one smooth mesh warp so people sway and wave without tearing; energy follows the music */
+  if(fx.lasers!==false&&fg.lasers&&mode==='live'&&laserA>.05){c.save();c.globalCompositeOperation='lighter';for(let i=0;i<12;i++){const a=-Math.PI/2+(i-5.5)*.17+Math.sin(T*.9+i)*.3,hue3=i%3===0?0:i%3===1?125:190,ox=W/2+(i-5.5)*34;c.strokeStyle=`hsla(${hue3},100%,60%,${.55*laserA})`;c.lineWidth=1.6;c.beginPath();c.moveTo(ox,540);c.lineTo(ox+Math.cos(a)*900,540+Math.sin(a)*900);c.stroke();c.strokeStyle=`hsla(${hue3},100%,60%,${.12*laserA})`;c.lineWidth=7;c.stroke()}c.restore()}
+  /* smoke drifting along the stage */
+  if(fx.fog!==false){c.save();c.globalCompositeOperation='lighter';st.fogP.forEach(f=>{f.x+=f.vx*dt;if(f.x<-f.r)f.x=W+f.r;if(f.x>W+f.r)f.x=-f.r;const a=f.a*P.fog*(.35+int*.7),gr=c.createRadialGradient(f.x,f.y,0,f.x,f.y,f.r);gr.addColorStop(0,`hsla(${hue+f.x*.04},80%,62%,${a})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(f.x-f.r,f.y-f.r,f.r*2,f.r*2)});c.restore()}
+  /* the producer: body bounce, head nod, hands tapping the pads, pad lights (all on the beat) */
+  if(pl){
+   c.drawImage(pl,478,386,198,96,478,386-st.bounce*2.2,198,96);
+   c.drawImage(pl,546,324,96,70,546,324+st.nod*2.6,96,70);
+   c.drawImage(pl,524,458,64,36,524,458+st.hands[0]*3,64,36);c.drawImage(pl,596,458,64,36,596,458+st.hands[1]*3,64,36);
+   c.save();c.globalCompositeOperation='lighter';for(let p=0;p<12;p++){const a=st.pads[p];if(a<.04)continue;const [hx,hy]=PADS[p],gr=c.createRadialGradient(hx,hy,0,hx,hy,26);gr.addColorStop(0,`hsla(${(p*47+hue)%360},100%,70%,${a})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(hx-26,hy-26,52,52)}c.restore()}
+  /* crowd bobs up and down in a wave that follows the energy */
   const E=st.energy;
-  if(A){const cw=MT.r.crowd,sc=CRW.s,bp=(T/beatLen)%1,hop=playing?E*Math.pow(Math.max(0,Math.sin(Math.PI*bp)),2)*3.2:0,jy=hop+(st.bounce*1.6+st.cheer*3)*(.4+E);
-   c.drawImage(A,cw[0],cw[1],cw[2],cw[3],CRW.x,CRW.y-jy,cw[2]*sc,cw[3]*sc);
-   MT.arms.forEach(([ax,ay,pvx,pvy],i)=>{const r=MT.r['arm'+i],ang=Math.sin(T*(1.5+(i%5)*.33)+i*1.7+seedP)*(.04+E*.15)+st.cheer*.08*(i%2?1:-1)+hop*.012*(i%3-1),lift=hop*.6+st.cheer*2*E;
-    c.save();c.translate(CRW.x+pvx*sc,CRW.y+pvy*sc-jy-lift);c.rotate(ang);c.drawImage(A,r[0],r[1],r[2],r[3],(ax-pvx)*sc,(ay-pvy)*sc,r[2]*sc,r[3]*sc);c.restore()});
-  /* phone screens twinkle (softer once the crowd calms) */
-   if(fx.flash!==false&&MT.phones){c.save();c.globalCompositeOperation='lighter';MT.phones.forEach((p,i)=>{const px=CRW.x+p[0]*sc,py=CRW.y+p[1]*sc-jy,r=Math.max(8,p[2]*sc*1.5),a=(.12+.28*(.5+.5*Math.sin(T*(3+(i%5)*1.3)+i*2.1)))*(.5+(1-E)*.5+(q.seg.preset==='breakdown'?.5:0)),gr=c.createRadialGradient(px,py,0,px,py,r);gr.addColorStop(0,`rgba(190,225,255,${a})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(px-r,py-r,r*2,r*2)});c.restore()}}
+  if(pl){const cy0=578,bump=(st.bounce*3+st.cheer*7)*(.4+E);for(let x=0;x<W;x+=14){const ph=x*.017+T*(2+E*2.2),up=Math.max(0,Math.sin(ph))*(E*6+1)+bump*(.5+.5*Math.sin(x*.05+T*3));c.drawImage(pl,x,cy0,14,H-cy0,x,cy0-up,14,H-cy0)}}
+  /* phone lights twinkle in the crowd (fewer, softer once the crowd calms) */
+  if(fx.flash!==false){c.save();c.globalCompositeOperation='lighter';phones.forEach(p=>{if(!p.on)return;const a=(.22+.28*(.5+.5*Math.sin(T*p.sp+p.ph)))*(.5+(1-E)*.5+(q.seg.preset==='breakdown'?.5:0)),gr=c.createRadialGradient(p.x,p.y-Math.max(0,Math.sin(T*(2+E*2.2)+p.x*.017))*(E*6+1),0,p.x,p.y,p.r*2.2);gr.addColorStop(0,`rgba(190,225,255,${a})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(p.x-p.r*2.2,p.y-p.r*2.2-8,p.r*4.4,p.r*4.4+8)});c.restore()}
+  /* a fresh random front row of fans every time, hands up when the crowd is hyped */
+  front.forEach(p=>{const s=p.s*7,x=p.x+Math.sin(T*1.1*p.sp+p.ph)*E*5,bob=Math.sin(T*3.2*p.sp+p.ph)*(1+E*3.5)+st.cheer*6*E,y=p.y-bob;
+   c.fillStyle='#050309';c.fillRect(x-s*1.1,y-s*1.5,s*2.2,s*3);c.beginPath();c.arc(x,y-s*1.9,s*.78,0,6.3);c.fill();
+   if(p.look===1)c.fillRect(x-s*.9,y-s*2.8,s*1.8,s*.5);else if(p.look===2)c.fillRect(x+s*.4,y-s*2.5,s*.7,s*1.2);
+   if(p.arm<clamp(E*1.2+st.cheer*.6,0,1)){const w1=Math.sin(T*5*p.sp+p.ph)*s*.5,h2=s*(2.4+E*1.4+st.cheer*1.2);c.strokeStyle='#050309';c.lineWidth=s*.45;c.beginPath();c.moveTo(x-s*.9,y-s);c.lineTo(x-s*1.3+w1,y-s-h2);c.moveTo(x+s*.9,y-s);c.lineTo(x+s*1.3-w1,y-s-h2*.9);c.stroke()}});
   /* strobe flash on drops */
   if(st.flash>.02&&fx.flash!==false){c.fillStyle=`rgba(255,255,255,${Math.min(.5,st.flash*.45)})`;c.fillRect(0,0,W,H)}
   /* fireworks and confetti (unlocked by hearts, plus the finale) */
@@ -299,19 +259,15 @@ function makeStage(canvas,seed){
   if(mode==='end'&&st.endT>=0){const e=st.endT,x=lerp(-W*1.2,0,1-Math.pow(1-clamp(e/1.1,0,1),3)),yb=H*.43;c.save();c.translate(x,0);c.fillStyle='rgba(8,6,16,.9)';c.fillRect(0,yb-48,W,96);c.fillStyle='#ffd34a';c.fillRect(0,yb-48,W,4);c.fillRect(0,yb+44,W,4);
    c.font='46px "Press Start 2P",monospace';c.textAlign='center';c.textBaseline='middle';c.fillStyle='#000';c.fillText('THANKS FOR WATCHING!',W/2+4,yb+4);const gr2=c.createLinearGradient(0,yb-26,0,yb+26);gr2.addColorStop(0,'#fff6c8');gr2.addColorStop(.5,'#ffd34a');gr2.addColorStop(1,'#d99a12');c.fillStyle=gr2;c.shadowColor='#ffb020';c.shadowBlur=18;c.fillText('THANKS FOR WATCHING!',W/2,yb);c.restore()}
  };
- st.setScript=(s,hits)=>{S.script=s;S.hits=hits||[];S.theme=VARIANT[s.theme]!==undefined?s.theme:'city';st.look=null;st.hitIdx=0;st.lastHit=-1;st.lastStartTrack=-2};
- st.setTheme=t=>{S.theme=VARIANT[t]!==undefined?t:'city';st.look=null};st.setHits=h=>{S.hits=h;st.hitIdx=0;st.lastHit=-1};st.setPlate=i=>{S.plate=i;for(const k in L)delete L[k];for(const k in C)delete C[k]};
+ st.setScript=(s,hits)=>{S.script=s;S.hits=hits||[];S.theme=VARIANT[s.theme]!==undefined?s.theme:'city';st.hitIdx=0;st.lastHit=-1;st.lastStartTrack=-2};
+ st.setTheme=t=>{S.theme=VARIANT[t]!==undefined?t:'city'};st.setHits=h=>{S.hits=h;st.hitIdx=0;st.lastHit=-1};st.setPlate=i=>{S.plate=i;for(const k in plates)delete plates[k]};
  st.setHearts=n=>{st.hearts=n};st.reset=()=>{st.hitIdx=0;st.lastHit=-1;st.fireworks=[];st.confetti=[];st.endT=-1;st.lastStartTrack=-2;st.lastDrop=-1};
- st.canvas=canvas;st.burst=burst;st.script=()=>S.script;st.themeThumb=name=>compFor(name);
+ st.canvas=canvas;st.burst=burst;st.script=()=>S.script;st.themeThumb=name=>plateFor(name);
  return st;
 }
 
 /* ---------- helpers for loading ---------- */
-async function loadPlate(){
- const base=u=>new URL(u,document.baseURI).href,V='?v=7',ld=u=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=base(u+V)});
- const [atlas,stage,lights,meta]=await Promise.all([ld('show-atlas.webp'),ld('show-stage.webp'),ld('show-lights.webp'),fetch(base('show-atlas.json'+V)).then(r=>r.json()).catch(()=>null)]);
- return(atlas&&stage&&lights&&meta)?{atlas,stage,lights,meta}:null;
-}
+function loadPlate(){return new Promise(r=>{const i=new Image();i.src=new URL('show-stage.webp?v=2',document.baseURI).href;i.onload=()=>r(i);i.onerror=()=>r(null)})}
 async function loadFonts(){await Promise.all(['28px Anton','13px "Press Start 2P"'].map(f=>document.fonts.load(f).catch(()=>{})))}
 async function loadTracks(script,ctx){
  const bufs=[],data=[];await loadSfx();
