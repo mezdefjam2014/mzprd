@@ -7,14 +7,15 @@ const PRESETS={clean:{grain:false,vig:true},grunge:{grain:true,vig:true},film:{g
 const FONTS={'Impact':'Impact, Haettenschweiler, sans-serif','Montserrat':'Montserrat, sans-serif','Press Start':"'Press Start 2P', monospace",'Serif':'Georgia, serif','Brush':"'Brush Script MT', cursive"};
 const VIS=['waveform','bars','circle','none'],ANIM=['zoom','pan','none'];
 const S={items:[],kind:'beats',item:null,cover:null,bd:null,fmt:'16:9',layout:'fit',preset:'clean',anim:'zoom',grain:false,vig:true,
- vis:'waveform',visColor:'#e8b94a',visH:80,sync:true,glow:false,font:'Impact',size:100,color:'#e8b94a',stroke:3,maxLen:'',
+ end:true,vis:'waveform',visColor:'#e8b94a',visH:80,sync:true,glow:false,font:'Impact',size:100,color:'#e8b94a',stroke:3,maxLen:'',
  buf:null,src:'preview',srcLabel:'',
  tx:{intro:{on:true,text:'NEW BEAT',start:0},tag:{on:true,text:'PROD. BY MEZTHEPROD',start:0},title:{on:true,text:'',start:1},info:{on:true,text:'',start:2}}};
 let A=null,run=null,noise=null,scrub=0,mounted=false;
 const $s=s=>document.querySelector('#studio '+s);
 const e2=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dims=()=>S.fmt==='16:9'?[1920,1080]:[1080,1920];
-const len=()=>{const d=S.buf?S.buf.duration:30,m=parseFloat(S.maxLen);return m>0?Math.min(d,m):d};
+const SHORT_DEF=60,SHORT_MAX=120;
+const len=()=>{const d=S.buf?S.buf.duration:30,m=parseFloat(S.maxLen),p=S.fmt==='9:16';return Math.max(1,Math.min(d,m>0?m:(p?SHORT_DEF:Infinity),p?SHORT_MAX:Infinity))};
 
 function css(){
  if(document.getElementById('studioCss'))return;
@@ -68,7 +69,7 @@ function html(){
    <label class="chk"><input type="radio" name="sSrc" value="preview" checked> USE PREVIEW (with tags)</label>
    <label class="chk"><input type="radio" name="sSrc" value="file"> USE MY FULL BEAT FILE</label>
    <input type="file" id="sAud" accept="audio/*"><div class="msg" id="sAudM"></div>
-   <label>MAX LENGTH IN SECONDS (empty = whole audio)</label><input type="number" id="sMax" min="5" step="1" placeholder="auto">
+   <label id="sMaxL">MAX LENGTH IN SECONDS (empty = whole audio)</label><input type="number" id="sMax" min="5" step="1" placeholder="auto">
   </div>
  </div>
  <div>
@@ -102,6 +103,8 @@ function html(){
    <div class="row"><div><label>COLOR</label><input type="color" id="sVc" value="#e8b94a" style="width:100%;height:36px;background:none;border:1px solid #34343a"></div><div><label>HEIGHT</label><input type="range" id="sVh" min="20" max="200" value="80"></div></div>
    <label class="chk"><input type="checkbox" id="sSync" checked> COVER PULSES TO THE BEAT</label>
    <label class="chk"><input type="checkbox" id="sGlow"> GLOW EFFECT</label>
+   <h4>END CARD</h4>
+   <label class="chk"><input type="checkbox" id="sEnd" checked> 8-BIT SUBSCRIBE CARD AT THE END</label>
   </div>
   <button class="go" id="sRender">RENDER VIDEO</button>
   <div class="bar"><b id="sProg"></b></div><div class="msg" id="sMsg">Keep this tab open and visible while it renders. A 3 minute beat takes about 3 minutes.</div>
@@ -195,6 +198,43 @@ function frame(cv,t,dur){
   drawText(c,'tag',t,W,H,H*.045,W*.032,'right',W*.96);
  }
  if(S.preset==='film'){c.fillStyle='#000';const b=H*(land?.085:.05);c.fillRect(0,0,W,b);c.fillRect(0,H-b,W,b)}
+ const ecd=Math.min(6,dur*.5);if(S.end&&dur&&t>dur-ecd)endCard(c,W,H,t-(dur-ecd),ecd);
+}
+let ec=null,heroImg=null;
+function endCard(c,W,H,tt,ecd){
+ if(!heroImg){heroImg=new Image();heroImg.src=new URL('hero.jpg',document.baseURI).href}
+ if(!heroImg.complete||!heroImg.naturalWidth)return;
+ const land=W>H,lw=land?480:270,lh=land?270:480;
+ if(!ec||ec.width!==lw||ec.height!==lh){ec=document.createElement('canvas');ec.width=lw;ec.height=lh}
+ const x=ec.getContext('2d');x.imageSmoothingEnabled=false;x.globalCompositeOperation='source-over';x.globalAlpha=1;
+ const bpm=(S.item&&+S.item.bpm)||92,beat=60/bpm,ph=(tt/beat)%1,k=Math.floor(tt/beat),hit=ph<.22?1:0;
+ x.fillStyle='#07040c';x.fillRect(0,0,lw,lh);
+ for(let i=0;i<46;i++){const sx=(i*73)%lw,sy=(i*41)%lh;if(((i+k)%5)===0)continue;x.fillStyle=i%3?'#3a2a55':'#e8b94a';x.fillRect(sx,sy,1,1)}
+ const cw=land?280:270,kk=cw/740,ch=Math.round(468*kk),cx=land?14:0,cy=land?Math.round(lh/2-ch/2)+6:44,SX=470,sub=(sx,sy,sw,sh,dx,dy)=>x.drawImage(heroImg,sx,sy,sw,sh,cx+(sx-SX)*kk+dx,cy+sy*kk+dy,sw*kk,sh*kk);
+ x.drawImage(heroImg,SX,0,740,468,cx,cy+hit,cw,ch);
+ sub(690,0,330,250,(k%2?1:-1)*hit,hit*2);
+ sub(700,320,200,120,0,k%2?hit*2:0);sub(1010,300,130,130,0,k%2?0:hit*2);
+ x.globalCompositeOperation='lighter';
+ for(let j=0;j<3;j++){const cell=(k*7+j*5)%8,col=cell%4,row=cell>>2;x.fillStyle='rgba(255,190,110,'+(.8*(1-ph))+')';
+  x.fillRect(Math.round(cx+(745+col*60-SX)*kk),Math.round(cy+(382+row*26)*kk),Math.max(2,Math.round(52*kk)),Math.max(1,Math.round(20*kk)))}
+ x.globalCompositeOperation='source-over';
+ for(let i=0;i<16;i++){const h=3+Math.round((hit*5+3)*(.5+.5*Math.sin(tt*6+i*1.3))+(i%4===k%4?4:0));x.fillStyle=i%2?'#e0242f':'#e8b94a';x.fillRect(lw/2-48+i*6,lh-4-h,4,h)}
+ const px=land?385:135,y0=land?60:226,bw=land?160:210,bh=land?30:38,fs=land?11:13,by=y0+(land?50:60),gold='#e8b94a',red='#e0242f';
+ const txt=(s,y,size,col,sh)=>{x.font=size+"px 'Press Start 2P'";x.textAlign='center';x.textBaseline='middle';if(sh){x.fillStyle=sh;x.fillText(s,px+1,y+1)}x.fillStyle=col;x.fillText(s,px,y)};
+ txt('MZPRD',y0,land?14:18,k%2?'#fff':gold,'#7a1218');
+ const cl=tt>2.2&&tt<2.45;
+ x.fillStyle='#000';x.fillRect(px-bw/2-2,by-bh/2-2,bw+4,bh+4);x.fillStyle=cl?'#a5141c':red;x.fillRect(px-bw/2,by-bh/2,bw,bh);x.fillStyle='rgba(255,255,255,.25)';x.fillRect(px-bw/2,by-bh/2,bw,2);
+ x.fillStyle='#fff';const ax=px-bw/2+10,ay=by;for(let i=0;i<5;i++)x.fillRect(ax+i,ay-5+i,1,10-2*i);
+ x.font=fs+"px 'Press Start 2P'";x.textAlign='left';x.fillStyle='#fff';x.fillText('SUBSCRIBE',px-bw/2+22,by+1);
+ txt('NEW BEATS WEEKLY',y0+(land?100:122),land?7:8,'#d9d9dc');
+ const bx=px-(land?44:50),bY=y0+(land?128:158)+(hit?-1:0);
+ x.fillStyle=gold;x.fillRect(bx,bY-4,5,2);x.fillRect(bx-1,bY-2,7,4);x.fillRect(bx-2,bY+2,9,2);x.fillRect(bx+1,bY+4,3,1);
+ x.font=(land?7:8)+"px 'Press Start 2P'";x.textAlign='left';x.fillStyle='#d9d9dc';x.fillText('HIT THE BELL',bx+12,bY+1);
+ const m=Math.min(1,tt/1.6),mx=px+bw/2+34-(bw/2+20)*m,my=by+bh+40-(bh+40)*m+Math.sin(tt*5)*(m<1?2:0);
+ x.fillStyle='#000';for(let i=0;i<8;i++)x.fillRect(Math.round(mx),Math.round(my)+i,1+Math.min(i,5),1);
+ x.fillStyle='#fff';for(let i=0;i<6;i++)x.fillRect(Math.round(mx)+1,Math.round(my)+1+i,Math.max(0,Math.min(i,4)),1);
+ for(let y=0;y<lh;y+=2){x.fillStyle='rgba(0,0,0,.18)';x.fillRect(0,y,lw,1)}
+ c.save();c.globalAlpha=Math.min(1,tt/.4);c.imageSmoothingEnabled=false;c.drawImage(ec,0,0,W,H);c.restore();
 }
 function effects(c,W,H,t){
  const pr=S.preset;
@@ -258,7 +298,7 @@ async function render(){
  if(!window.MediaRecorder){msg('This browser cannot record video. Use Chrome or Edge.');return}
  stopPlay();const cv=$s('#sCv'),btn=$s('#sRender'),dl=$s('#sDl');dl.style.display='none';
  const[w,h]=dims();cv.width=w;cv.height=h;S.bd=null;
- await document.fonts.load('40px '+(FONTS[S.font]||'Impact')).catch(()=>{});
+ await document.fonts.load('40px '+(FONTS[S.font]||'Impact')).catch(()=>{});await document.fonts.load("12px 'Press Start 2P'").catch(()=>{});
  const a=audioCtx();await a.ctx.resume();
  const types=['video/mp4;codecs=avc1.640028,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
  const mime=types.find(t=>MediaRecorder.isTypeSupported(t))||'';
@@ -311,7 +351,9 @@ function renderList(){
  l.innerHTML=rows.length?rows.map(r=>`<div class="it" data-id="${e2(r.id)}">${r.cover_path?`<img src="${e2(pub(r.cover_path))}" alt="">`:'<i></i>'}<div><b>${e2(r.title)}</b><span>${[r.bpm&&r.bpm+' BPM',r.musical_key,r.preview_path?'':'NO PREVIEW'].filter(Boolean).join(' / ')||'&nbsp;'}</span></div></div>`).join(''):'<div class="msg" style="padding:12px">Nothing here yet.</div>';
  l.querySelectorAll('.it').forEach(e=>e.onclick=()=>{stopPlay();setItem(rows.find(r=>String(r.id)===e.dataset.id))});
 }
-function syncUi(){const m=len();$s('#sMax').placeholder=S.buf?'auto ('+Math.round(S.buf.duration)+'s)':'auto'}
+function syncUi(){const p=S.fmt==='9:16',mx=$s('#sMax');if(!mx)return;
+ mx.max=p?SHORT_MAX:'';mx.placeholder=p?SHORT_DEF+' (max '+SHORT_MAX+')':(S.buf?'auto ('+Math.round(S.buf.duration)+'s)':'auto');
+ $s('#sMaxL').textContent=p?'LENGTH IN SECONDS (SHORTS: 60 DEFAULT, 120 MAX)':'MAX LENGTH IN SECONDS (empty = whole audio)'}
 async function loadItems(){
  const [b,p]=await Promise.all([sb.from('beats').select('*').order('created_at',{ascending:false}),sb.from('packs').select('*').order('created_at',{ascending:false})]);
  S.items=[...(b.data||[]).map(x=>({...x,_k:'beats'})),...(p.data||[]).map(x=>({...x,_k:'packs'}))];
@@ -319,13 +361,13 @@ async function loadItems(){
 function wire(){
  const q=s=>$s(s);
  document.querySelectorAll('#studio .seg [data-k]').forEach(b=>b.onclick=()=>{S.kind=b.dataset.k;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderList()});
- document.querySelectorAll('#studio [data-f]').forEach(b=>{if(b.tagName==='BUTTON')b.onclick=()=>{S.fmt=b.dataset.f;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));S.bd=null;stopPlay();redraw()}});
+ document.querySelectorAll('#studio [data-f]').forEach(b=>{if(b.tagName==='BUTTON')b.onclick=()=>{S.fmt=b.dataset.f;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));S.bd=null;stopPlay();syncUi();redraw()}});
  q('#sPre').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.preset=b.dataset.p;const d=PRESETS[S.preset];S.grain=d.grain;S.vig=d.vig;q('#sGrain').checked=d.grain;q('#sVig').checked=d.vig;
   q('#sPre').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));redraw()};
  const bind=(id,key,fn)=>{const el=q(id);el.oninput=el.onchange=()=>{S[key]=fn?fn(el):el.value;if(key==='layout')S.bd=null;redraw()}};
  bind('#sLay','layout');bind('#sAnim','anim');bind('#sGrain','grain',e=>e.checked);bind('#sVig','vig',e=>e.checked);
  bind('#sFont','font');bind('#sCol','color');bind('#sStr','stroke',e=>+e.value);bind('#sSize','size',e=>+e.value);
- bind('#sVis','vis');bind('#sVc','visColor');bind('#sVh','visH',e=>+e.value);bind('#sSync','sync',e=>e.checked);bind('#sGlow','glow',e=>e.checked);
+ bind('#sVis','vis');bind('#sVc','visColor');bind('#sVh','visH',e=>+e.value);bind('#sSync','sync',e=>e.checked);bind('#sGlow','glow',e=>e.checked);bind('#sEnd','end',e=>e.checked);
  q('#sMax').oninput=()=>{S.maxLen=q('#sMax').value;redraw()};
  q('#sCov').onchange=e=>{const f=e.target.files[0];if(f)loadCover(URL.createObjectURL(f))};
  document.querySelectorAll('#studio [name=sSrc]').forEach(r=>r.onchange=()=>{S.src=r.value;stopPlay();if(S.src==='preview')loadPreview();else{S.buf=null;setAudM('Choose your audio file below.');if(q('#sAud').files[0])loadFile(q('#sAud').files[0]);else redraw()}});

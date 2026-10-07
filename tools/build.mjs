@@ -229,6 +229,15 @@ for (const c of [...beatCats, ...packCats]) {
   addUrl('about/')
 }
 
+/* ----- back office pages (not indexed) ----- */
+for (const t of ['', 'beats', 'packs', 'bundles', 'promo', 'sales', 'video']) {
+  const rel = t ? 'admin/' + t : 'admin'
+  write(rel, render({
+    path: rel + '/', title: 'Back office | MZPRD', desc: 'Back office.', h1: 'Back office', noindex: true,
+    page: { kind: 'admin', tab: t || 'beats' }, content: '',
+  }))
+}
+
 /* ----- merch ----- */
 {
   const content = '<p>Hoodies, tees and crown gear are dropping soon.</p>'
@@ -303,6 +312,6 @@ ${related.length ? `<h3>More sample packs</h3>${li(related, 'pack')}` : ''}${cat
 fs.writeFileSync(path.join(DIST, 'sitemap.xml'),
   '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   urls.map((u) => `  <url><loc>${esc(u.loc)}</loc><lastmod>${u.lastmod}</lastmod></url>`).join('\n') + '\n</urlset>\n')
-fs.writeFileSync(path.join(DIST, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`)
+fs.writeFileSync(path.join(DIST, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /admin/\n\nSitemap: ${SITE}/sitemap.xml\n`)
 
 console.log(`Built ${urls.length} pages: ${beats.length} beats, ${packs.length} packs, ${beatCats.length + packCats.length} topic pages -> ${DIST}`)
