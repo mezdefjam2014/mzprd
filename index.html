@@ -324,6 +324,7 @@ footer.f a:hover{color:#fff}
 <script>
 const SB_URL='https://qapmtiuptmgcajoaontj.supabase.co',SB_KEY='sb_publishable_jyfu7YHp2wK_WEv3nWeEzg_ogP00kD3';
 const sb=window.supabase.createClient(SB_URL,SB_KEY);
+const HOME_TITLE='MZPRD | Buy Beats and Sample Packs Online';
 const $=s=>document.querySelector(s);
 $('#enterT').innerHTML=[...'MZPRD'].map((c,i)=>'<span style="animation-delay:'+(1.5+i*.14)+'s">'+c+'</span>').join('');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -538,7 +539,7 @@ function showView(v){
 }
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
  if(location.hash.indexOf('#/beat/')===0||location.hash.indexOf('#/pack/')===0)history.pushState(null,'',location.pathname+location.search);
- pageIdx=-1;document.title='MZPRD | Beats';showView(b.dataset.v);
+ pageIdx=-1;document.title=HOME_TITLE;showView(b.dataset.v);
 });
 const slugify=t=>String(t||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 const bslug=B=>B.slug||slugify(B.title)||String(B.id);
@@ -549,7 +550,7 @@ function route(){
  const mp=location.hash.match(/^#\/pack\/(.+)$/);
  if(mp){const sl=decodeURIComponent(mp[1]);showPackPage(packs.findIndex(b=>bslug(b)===sl));return}
  if($('#v-beat').classList.contains('on')){const wasPack=pageKind==='p';pageIdx=-1;showView(wasPack?'kits':'beats')}
- document.title='MZPRD | Beats';
+ document.title=HOME_TITLE;
 }
 function closeBeatPage(){history.pushState(null,'',location.pathname+location.search);route();scrollTo(0,0)}
 function showBeatPage(i){
