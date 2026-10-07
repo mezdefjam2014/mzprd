@@ -82,7 +82,8 @@ img.th{image-rendering:auto}
 .card .cprog{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.15)}
 .card .cprog b{display:block;height:100%;width:0;background:var(--red);box-shadow:0 0 8px var(--red)}
 .card .nop{position:absolute;left:8px;bottom:8px;font:600 9px Montserrat;letter-spacing:.25em;color:#888;background:rgba(0,0,0,.6);padding:4px 7px}
-.card .ti{font-size:12px}
+.card .ti{font-size:12px;cursor:pointer}
+.card .ti:hover{color:var(--red)}
 .card .ds{font:500 14px/1.5 Montserrat;color:#9a9aa2;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:63px}
 .card .pr{font:700 15px Montserrat;color:#fff;letter-spacing:.1em}
 .row .th,.row .ti{cursor:pointer}.row .ti:hover{color:var(--red)}
@@ -350,7 +351,7 @@ function go(d){if(curPack>=0){goPack(d);return}if(!beats.length)return;play(cur<
 au.onplay=()=>{playing=true;ui()};au.onpause=()=>{playing=false;hits=[];ui()};
 au.onended=()=>{if(curPack>=0){playing=false;hits=[];ui()}else go(1)};
 function ui(){
- const bpEl=document.querySelector('.bp');if(bpEl)bpEl.classList.toggle('play',pageIdx>=0&&pageIdx===cur&&playing);
+ const bpEl=document.querySelector('.bp');if(bpEl)bpEl.classList.toggle('play',pageIdx>=0&&((pageKind==='b'&&pageIdx===cur)||(pageKind==='p'&&pageIdx===curPack))&&playing);
  document.querySelectorAll('.row').forEach((e,i)=>e.classList.toggle('play',i===cur&&playing));
  $('#pp').textContent=playing?'||':'>';
  document.querySelectorAll('#packs .card').forEach((e,i)=>{e.classList.toggle('play',i===curPack&&playing);if(i!==curPack){const b=e.querySelector('.cprog b');if(b)b.style.width='0'}});
@@ -417,6 +418,7 @@ function renderPacks(){
   c.innerHTML=`<div class="cv">${thumb(P,i+2,'')}${P.preview_path?'<button class="pl" aria-label="Play preview of '+esc(P.title)+'"><i></i></button><div class="cprog"><b></b></div>':'<span class="nop">NO PREVIEW</span>'}</div><div class="ti">${esc(P.title)}</div><div class="ds">${esc(P.description||'')}</div><div class="pr">${money(P.price)}</div><button class="cart">ADD TO CART</button>${P.free_download&&P.preview_path?'<button class="cart fd" style="margin-top:-2px">FREE DOWNLOAD</button>':''}`;
   c.querySelector('.cart').onclick=e=>toggleCart('p:'+P.id,e.currentTarget);
   if(P.preview_path){c.querySelector('.cv').onclick=()=>playPack(i)}
+  c.querySelector('.ti').onclick=()=>{location.hash='#/pack/'+encodeURIComponent(bslug(P))}
   const fd=c.querySelector('.fd');if(fd)fd.onclick=()=>freeDownload(P);g.appendChild(c)});
  paintArt(el);syncCart();
 }
@@ -443,7 +445,7 @@ function syncCart(){
  [...document.querySelectorAll('#packs .card > .cart:not(.fd)')].forEach((b,i)=>{const k='p:'+packs[i]?.id,on=cart.has(k);b.classList.toggle('in',on);b.textContent=on?'IN CART':'ADD TO CART'});
  $('#badge').textContent=cart.size;
  if(cart.size&&typeof mountPaypal==='function'&&!ppRendered&&!ppMounting)mountPaypal();
- const pb=$('#bCart');if(pb&&pageIdx>=0&&beats[pageIdx]){const on=cart.has('b:'+beats[pageIdx].id);pb.classList.toggle('in',on);pb.textContent=on?'IN CART':'ADD TO CART'}
+ const pb=$('#bCart');const pit=pageKind==='p'?packs[pageIdx]:beats[pageIdx];if(pb&&pageIdx>=0&&pit){const on=cart.has(pageKind+':'+pit.id);pb.classList.toggle('in',on);pb.textContent=on?'IN CART':'ADD TO CART'}
 }
 function renderCart(){
  const its=[...cart].map(k=>[k,lookup(k)]).filter(x=>x[1]);
@@ -522,21 +524,23 @@ function showView(v){
  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
 }
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
- if(location.hash.indexOf('#/beat/')===0)history.pushState(null,'',location.pathname+location.search);
+ if(location.hash.indexOf('#/beat/')===0||location.hash.indexOf('#/pack/')===0)history.pushState(null,'',location.pathname+location.search);
  pageIdx=-1;document.title='MZPRD | Beats';showView(b.dataset.v);
 });
 const slugify=t=>String(t||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 const bslug=B=>B.slug||slugify(B.title)||String(B.id);
-let pageIdx=-1,pwv=null;
+let pageIdx=-1,pageKind='b',pwv=null;
 function route(){
  const m=location.hash.match(/^#\/beat\/(.+)$/);
  if(m){const sl=decodeURIComponent(m[1]);showBeatPage(beats.findIndex(b=>bslug(b)===sl));return}
- if($('#v-beat').classList.contains('on')){pageIdx=-1;showView('beats')}
+ const mp=location.hash.match(/^#\/pack\/(.+)$/);
+ if(mp){const sl=decodeURIComponent(mp[1]);showPackPage(packs.findIndex(b=>bslug(b)===sl));return}
+ if($('#v-beat').classList.contains('on')){const wasPack=pageKind==='p';pageIdx=-1;showView(wasPack?'kits':'beats')}
  document.title='MZPRD | Beats';
 }
 function closeBeatPage(){history.pushState(null,'',location.pathname+location.search);route();scrollTo(0,0)}
 function showBeatPage(i){
- const box=$('#bpage');pageIdx=i;pwv=null;
+ const box=$('#bpage');pageIdx=i;pageKind='b';pwv=null;
  if(i<0||!beats[i]){box.innerHTML='<button class="back" id="bBack">&larr; ALL BEATS</button><div class="empty"><b>NOT FOUND</b>THIS BEAT IS NOT AVAILABLE</div>';$('#bBack').onclick=()=>{history.pushState(null,'',location.pathname+location.search);route()};showView('beat');return}
  const B=beats[i],tg=(B.tags||'').split('/').map(x=>x.trim()).filter(Boolean),old=promo.promo_enabled&&eff(B)!==Number(B.price);
  const others=beats.map((b,k)=>[b,k]).filter(x=>x[1]!==i).slice(0,4);
@@ -551,6 +555,24 @@ function showBeatPage(i){
  const bars=wvs[i]?wvs[i].bars:[...Array(110)].map(()=>.5);pwv={cv:$('#bwv'),bars:bars,p:-1,d:0,i:i};
  const cv=$('#bwv');cv.onclick=e=>{if(cur!==i){play(i);return}const r=cv.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration};
  document.title=B.title+' | MZPRD';
+ syncCart();showView('beat');
+}
+function showPackPage(i){
+ const box=$('#bpage');pageIdx=i;pageKind='p';pwv=null;
+ if(i<0||!packs[i]){box.innerHTML='<button class="back" id="bBack">&larr; ALL KITS</button><div class="empty"><b>NOT FOUND</b>THIS PACK IS NOT AVAILABLE</div>';$('#bBack').onclick=closeBeatPage;showView('beat');return}
+ const P=packs[i],others=packs.map((p,k)=>[p,k]).filter(x=>x[1]!==i).slice(0,4);
+ box.innerHTML='<button class="x" id="bX" aria-label="Close pack page">&times;</button><button class="back" id="bBack">&larr; ALL KITS</button><div class="bp'+(curPack===i&&playing?' play':'')+'"><div class="cov">'+thumb(P,i+2,'')+'</div><div><h1>'+esc(P.title)+'</h1><div class="tgs"><span>SAMPLE PACK</span></div><div class="prc">'+money(P.price)+'</div>'+(P.preview_path?'<canvas class="bwv" id="bwv"></canvas>':'')+(P.description?'<div class="d">'+esc(P.description)+'</div>':'')+'<div class="acts2">'+(P.preview_path?'<button class="pl" id="bPlay" aria-label="Play preview"><i></i></button>':'')+'<button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(P.free_download&&P.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE PACKS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1]+2,'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
+ paintArt(box);
+ $('#bBack').onclick=$('#bX').onclick=closeBeatPage;
+ const pl=$('#bPlay');if(pl)pl.onclick=()=>playPack(i);
+ $('#bCart').onclick=e=>toggleCart('p:'+P.id,e.currentTarget);
+ $('#bShare').onclick=()=>{try{navigator.clipboard.writeText(location.origin+location.pathname+'#/pack/'+encodeURIComponent(bslug(P)))}catch(e){}toast('LINK COPIED')};
+ const f=$('#bFree');if(f)f.onclick=()=>freeDownload(P);
+ box.querySelectorAll('.mr a').forEach(a=>a.onclick=()=>{location.hash='#/pack/'+encodeURIComponent(a.dataset.s);scrollTo(0,0)});
+ const cv=$('#bwv');
+ if(cv){seed=hashSeed(P.id);const bars=[...Array(110)].map((_,k)=>(.25+.75*rr())*(.65+.35*Math.sin(k/9+i)));pwv={cv:cv,bars:bars,p:-1,d:0,i:i,k:'p'};
+  cv.onclick=e=>{if(curPack!==i){playPack(i);return}const r=cv.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration}}
+ document.title=P.title+' | MZPRD';
  syncCart();showView('beat');
 }
 addEventListener('hashchange',()=>{if(location.hash==='#demo')return;route()});
@@ -802,7 +824,7 @@ function frame(){
  if(playing)$('#pg b').style.width=pr*100+'%';
  if(curPack>=0){const cd=document.querySelectorAll('#packs .card')[curPack],pb=cd&&cd.querySelector('.cprog b');if(pb)pb.style.width=pr*100+'%'}
  wvs.forEach((w,i)=>{const p=i===cur?pr:0;if(w.p!==p||!w.d){w.p=p;w.d=1;drawWv(w,p)}});
- if(pwv&&pwv.cv.isConnected&&pageIdx>=0){const p=pwv.i===cur?pr:0;if(pwv.p!==p||!pwv.d){pwv.p=p;pwv.d=1;drawWv(pwv,p)}}
+ if(pwv&&pwv.cv.isConnected&&pageIdx>=0){const p=(pwv.k==='p'?pwv.i===curPack:pwv.i===cur)?pr:0;if(pwv.p!==p||!pwv.d){pwv.p=p;pwv.d=1;drawWv(pwv,p)}}
  if((fxN&1)===0)drawLap(pr,t);
  requestAnimationFrame(frame);
 }
@@ -865,7 +887,8 @@ async function boRender(){
  if(tab==='orders')return ordersRender();
  const F=FIELDS[tab],e=editing||{};
  const files=F.files.map(([k,l,acc])=>`<label>${l}</label><input type="file" data-k="${k}" accept="${acc}">${e[k]?`<div class="cur">Current: ${esc(e[k].split('/').pop())} (choose a new file to replace)</div><label class="chk" style="margin-top:6px"><input type="checkbox" data-rm="${k}"> REMOVE THIS FILE</label>`:''}`).join('');
- const beatBits=tab==='beats'?`<label>TAGS (Boom Bap / Sample / Gritty)</label><input type="text" id="f_tags" value="${esc(e.tags??'')}"><label>PAGE URL NAME (auto from title if empty)</label><input type="text" id="f_slug" value="${esc(e.slug??'')}" placeholder="big-beat">`:'';
+ const slugBit=`<label>PAGE URL NAME (auto from title if empty)</label><input type="text" id="f_slug" value="${esc(e.slug??'')}" placeholder="${tab==='beats'?'big-beat':'big-citi-vinyl'}">`;
+ const beatBits=tab==='beats'?`<label>TAGS (Boom Bap / Sample / Gritty)</label><input type="text" id="f_tags" value="${esc(e.tags??'')}">`+slugBit:slugBit;
  $('#bf').innerHTML=`<h3>${editing?'EDIT':'ADD'} ${F.title}</h3>
   <label>TITLE</label><input type="text" id="f_title" value="${esc(e.title??'')}" required>
   <label>DESCRIPTION</label><textarea id="f_desc">${esc(e.description??'')}</textarea>
@@ -887,8 +910,8 @@ async function boRender(){
  rows.forEach(r=>{
   const d=document.createElement('div');d.className='bi';
   const u=pub(r.cover_path);
-  d.innerHTML=`${u?`<img src="${esc(u)}" alt="">`:'<div class="nc"></div>'}<div><b>${esc(r.title)}</b><span>${money(r.price)}${r.published?'':' <i class="draft">/ HIDDEN</i>'}${r.free_download?' / FREE DL':''}</span></div><div class="acts">${tab==='beats'&&r.slug?'<button class="vw">PAGE</button>':''}<button class="ed">EDIT</button><button class="del">DELETE</button></div>`;
-  const vw=d.querySelector('.vw');if(vw)vw.onclick=()=>{$('#bo').classList.remove('on');location.hash='#/beat/'+encodeURIComponent(r.slug);scrollTo(0,0)};
+  d.innerHTML=`${u?`<img src="${esc(u)}" alt="">`:'<div class="nc"></div>'}<div><b>${esc(r.title)}</b><span>${money(r.price)}${r.published?'':' <i class="draft">/ HIDDEN</i>'}${r.free_download?' / FREE DL':''}</span></div><div class="acts">${r.slug?'<button class="vw">PAGE</button>':''}<button class="ed">EDIT</button><button class="del">DELETE</button></div>`;
+  const vw=d.querySelector('.vw');if(vw)vw.onclick=()=>{$('#bo').classList.remove('on');location.hash=(tab==='packs'?'#/pack/':'#/beat/')+encodeURIComponent(r.slug);scrollTo(0,0)};
   d.querySelector('.ed').onclick=()=>{editing=r;boRender();scrollTo(0,0)};
   d.querySelector('.del').onclick=()=>boDelete(r);
   bl.appendChild(d);
@@ -962,7 +985,8 @@ async function boSave(ev){
  ev.preventDefault();const F=FIELDS[tab],msg=$('#bmsg'),btn=$('#f_save');btn.disabled=true;
  const row={title:$('#f_title').value.trim(),description:$('#f_desc').value.trim()||null,price:parseFloat($('#f_price').value)||0,published:$('#f_pub').checked,free_download:$('#f_free').checked,sort_order:parseInt($('#f_sort').value)||0};
  if(!row.title){msg.textContent='Title is required.';btn.disabled=false;return}
- if(tab==='beats'){row.tags=$('#f_tags').value.trim()||null;row.slug=slugify($('#f_slug').value||row.title)||null}
+ if(tab==='beats')row.tags=$('#f_tags').value.trim()||null;
+ row.slug=slugify($('#f_slug').value||row.title)||null;
  const oldFiles=[],newUploaded=[];
  try{
   for(const [k,l,acc,bucket,folder] of F.files){
@@ -981,7 +1005,7 @@ async function boSave(ev){
   msg.textContent='Saved.';editing=null;await loadAll();boRender();toast('SAVED TO SUPABASE');
  }catch(err){
   for(const [b,p] of newUploaded)await rmObj(b,p);
-  msg.textContent='Error: '+(/beats_slug_key|duplicate key/.test(err.message||'')?'That page URL name is already used by another beat. Change it and save again.':(err.message||err));btn.disabled=false;
+  msg.textContent='Error: '+(/beats_slug_key|packs_slug_key|duplicate key/.test(err.message||'')?'That page URL name is already used by another beat. Change it and save again.':(err.message||err));btn.disabled=false;
  }
 }
 async function boDelete(r){
