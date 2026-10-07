@@ -430,7 +430,7 @@ function setItem(it){
  S.item=it;S.cover=null;S.bd=null;S.buf=null;
  const isB=S.kind==='beats',info=[];if(it.bpm)info.push(it.bpm+' BPM');if(it.musical_key)info.push(it.musical_key);
  S.tx.title.text=it.title||'';S.tx.info.text=info.length?info.join('  |  '):(isB?'':'SAMPLE PACK');S.tx.intro.text=isB?'NEW BEAT':'NEW SAMPLE PACK';
- buildTx();ytText(true);loadCover(it.cover_path?pub(it.cover_path):'');
+ buildTx();ytText(true);loadCover(it.cover_path?pub(it.cover_path):(S.kind==='beats'?stockCover(it.title,1024):''));
  if(S.src==='preview')loadPreview();else{S.buf=null;redraw()}
  document.querySelectorAll('#studio .it').forEach(e=>e.classList.toggle('on',e.dataset.id===String(it.id)));
 }
@@ -576,7 +576,7 @@ function thDl(i,f){
 async function thAll(){for(let i=0;i<window.MZThumbs.count;i++){await thDl(i,'16:9');await new Promise(r=>setTimeout(r,350));await thDl(i,'9:16');await new Promise(r=>setTimeout(r,350))}}
 function renderList(){
  const l=$s('#sl'),rows=S.items.filter(i=>i._k===S.kind);
- l.innerHTML=rows.length?rows.map(r=>`<div class="it" data-id="${e2(r.id)}">${r.cover_path?`<img src="${e2(pub(r.cover_path))}" alt="">`:'<i></i>'}<div><b>${e2(r.title)}</b><span>${[r.bpm&&r.bpm+' BPM',r.musical_key,r.preview_path?'':'NO PREVIEW'].filter(Boolean).join(' / ')||'&nbsp;'}</span></div></div>`).join(''):'<div class="msg" style="padding:12px">Nothing here yet.</div>';
+ l.innerHTML=rows.length?rows.map(r=>`<div class="it" data-id="${e2(r.id)}">${r.cover_path?`<img src="${e2(pub(r.cover_path))}" alt="">`:(r._k==='beats'?`<img src="${e2(stockCover(r.title,96))}" alt="">`:'<i></i>')}<div><b>${e2(r.title)}</b><span>${[r.bpm&&r.bpm+' BPM',r.musical_key,r.preview_path?'':'NO PREVIEW'].filter(Boolean).join(' / ')||'&nbsp;'}</span></div></div>`).join(''):'<div class="msg" style="padding:12px">Nothing here yet.</div>';
  l.querySelectorAll('.it').forEach(e=>e.onclick=()=>{stopPlay();setItem(rows.find(r=>String(r.id)===e.dataset.id))});
 }
 function syncUi(){const p=S.fmt==='9:16',mx=$s('#sMax');if(!mx)return;
@@ -605,7 +605,7 @@ function wire(){
  wv.onpointerdown=e=>{if(run&&run.rec)return;drag=true;was=!!(A&&A.playing);if(was)stopPlay();wv.setPointerCapture(e.pointerId);seek(e)};
  wv.onpointermove=e=>{if(drag)seek(e)};
  wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
- q('#thOpen').onclick=thOpen;q("#mixBtn").onclick=async()=>{try{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=2',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
+ q('#thOpen').onclick=thOpen;q("#mixBtn").onclick=async()=>{try{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=3',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
  q('#thGo').onclick=()=>thMake(false);q('#thMore').onclick=()=>thMake(true);q('#thAll').onclick=thAll;
  document.querySelectorAll('#studio [data-th]').forEach(b=>b.onclick=()=>{TH.pf=b.dataset.th;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(window.MZThumbs&&q('#thGrid').children.length)thMake(false)});
  q('#yAll').onclick=()=>{yi.t++;yi.d++;yi.g++;ytText()};

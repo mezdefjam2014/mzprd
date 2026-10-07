@@ -35,9 +35,15 @@ function css(){
 #showmk .ctl{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}#showmk .ctl input[type=range]{flex:1;min-width:140px;accent-color:var(--red)}
 #showmk .time{font:600 12px Montserrat;color:#c9c9ce;min-width:92px;text-align:right}
 #showmk .seg{height:10px;display:flex;margin:6px 0 0;border:1px solid #2a2a2e}#showmk .seg i{display:block;height:100%}
-#showmk .th{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-#showmk .th button{background:#050506;border:2px solid #34343a;padding:3px;cursor:pointer;color:#fff;font:600 9px Montserrat;letter-spacing:.1em}
-#showmk .th button.on{border-color:var(--red)}#showmk .th canvas{width:100%;height:auto;display:block;margin-bottom:3px}
+#showmk .th{display:flex;flex-wrap:wrap;gap:8px}
+#showmk .th button{flex:1 1 calc(50% - 8px);min-width:130px;background:#050506;border:2px solid #34343a;padding:4px;cursor:pointer;color:#fff;font:700 10px Montserrat;letter-spacing:.14em}
+#showmk .th button.on{border-color:var(--red)}#showmk .th canvas{width:100%;height:auto;aspect-ratio:160/116;display:block;margin-bottom:4px}
+#showmk .sec{border:1px solid #2a2a2e;margin:10px 0;background:#08080a}
+#showmk .sec summary{cursor:pointer;padding:12px;font:700 11px Montserrat;letter-spacing:.22em;color:var(--gold);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#showmk .sec summary::-webkit-details-marker{display:none}
+#showmk .sec summary:after{content:'+';font-size:16px;color:#8e8e94}#showmk .sec[open] summary:after{content:'\\2212'}
+#showmk .sec .in{padding:0 12px 12px}
+#showmk .sec summary small{font:500 10px Montserrat;letter-spacing:.06em;color:#8e8e94;flex:1;text-align:right;margin-right:8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 #showmk .trk,#showmk .sgr,#showmk .msr{display:grid;gap:6px;align-items:center;padding:6px;border:1px solid #1d1d21;margin-bottom:6px}
 #showmk .trk{grid-template-columns:1fr 62px 62px 28px}#showmk .sgr{grid-template-columns:118px 1fr 58px 58px 28px}#showmk .msr{grid-template-columns:70px 1fr 90px}
 #showmk .x{background:transparent;border:1px solid #4a4a50;color:#fff;font:700 13px Montserrat;cursor:pointer;padding:4px}
@@ -63,22 +69,26 @@ function html(){return`<div class="mg"><div>
 <div><div class="pn" style="max-height:none">
  <div class="row" style="grid-template-columns:1fr auto"><h3>SHOW MAKER</h3><button class="btn" id="smSave">SAVE DRAFT</button></div>
  <label>SHOW TITLE</label><input type="text" id="smTitle" placeholder="Friday Night Session">
- <h4>1. SETLIST (YOUR BEATS)</h4><div id="smTracks"></div>
- <div class="two"><button class="btn" id="smAddT">+ ADD A BEAT</button><button class="btn" id="smSpread">SPREAD EVENLY</button></div>
- <h4>2. STAGE THEME</h4><div class="th" id="smTh"></div>
- <h4>3. SHOW LENGTH AND TIMELINE</h4>
- <div class="two"><div><label>LENGTH (MINUTES, 5 TO 20)</label><input type="number" id="smLen" min="5" max="20" step="1" value="5"></div><div><label>&nbsp;</label><button class="btn" id="smSurprise" style="width:100%">SURPRISE ME</button></div></div>
- <div id="smSegs" style="margin-top:8px"></div><button class="btn" id="smAddS" style="width:100%">+ ADD A SECTION</button>
- <h4>4. STAGE AND EFFECTS</h4>
- <div class="two"><label class="chk"><input type="checkbox" id="fxL"> STAGE LIGHTS</label><label class="chk"><input type="checkbox" id="fxF"> FOG / SMOKE</label><label class="chk"><input type="checkbox" id="fxZ"> LASERS (MILESTONE)</label><label class="chk"><input type="checkbox" id="fxP"> CROWD PHONES</label><label class="chk"><input type="checkbox" id="fxW"> FIREWORKS (MILESTONE)</label><label class="chk"><input type="checkbox" id="fxS"> CROWD SOUND</label></div>
- <div class="two"><div><label>INTENSITY</label><input type="range" id="fxI" min="30" max="130" step="5" style="width:100%;accent-color:var(--red)"></div><div><label>CAMERA CUTS</label><select id="fxC"><option value="dynamic">Dynamic</option><option value="slow">Slow</option><option value="static">Static</option></select></div></div>
- <label>CROWD ENERGY</label><select id="fxE"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select>
- <h4>5. HEART MILESTONES</h4><div id="smMs"></div>
- <h4>6. SCHEDULE</h4><div class="two"><div><label>DATE</label><input type="date" id="smDate"></div><div><label>TIME</label><input type="time" id="smClock"></div></div>
- <div class="msg" id="smMsg">Drafts are hidden from visitors. Only a published show appears on the SHOW page.</div>
- <button class="btn big" id="smPub" style="margin-top:8px">PUBLISH SHOW</button>
- <button class="btn big" id="smRender" style="margin-top:8px;background:transparent;border-color:#4a4a50">RENDER TO VIDEO FILE</button>
- <div class="bar"><b id="smProg"></b></div><div class="msg" id="smRMsg"></div>
+ <label class="chk" style="margin:12px 0 2px"><input type="checkbox" id="smAuto" checked> AUTO-BUILD THE SHOW FROM MY BEATS</label>
+ <div class="msg" id="smAutoNote" style="margin:0 0 4px"></div>
+ <details class="sec" open><summary>1. BEATS <small id="smS1"></small></summary><div class="in"><div id="smTracks"></div>
+  <div class="two"><button class="btn" id="smAddT">+ ADD A BEAT</button><button class="btn" id="smSpread">SHUFFLE THE SHOW</button></div></div></details>
+ <details class="sec" open><summary>2. STAGE LOOK <small id="smS2"></small></summary><div class="in"><div class="th" id="smTh"></div>
+  <label class="chk" style="margin-top:10px"><input type="checkbox" id="smVary" checked> GIVE EACH BEAT ITS OWN STAGE LOOK</label></div></details>
+ <details class="sec"><summary>3. TIMELINE <small id="smS3"></small></summary><div class="in">
+  <div class="two"><div><label>LENGTH (MINUTES, 5 TO 20)</label><input type="number" id="smLen" min="5" max="20" step="1" value="5"></div><div><label>&nbsp;</label><button class="btn" id="smSurprise" style="width:100%">SURPRISE ME</button></div></div>
+  <div id="smSegs" style="margin-top:8px"></div><button class="btn" id="smAddS" style="width:100%">+ ADD A SECTION</button></div></details>
+ <details class="sec"><summary>4. STAGE AND EFFECTS <small>lights, smoke, lasers, crowd</small></summary><div class="in">
+  <div class="two"><label class="chk"><input type="checkbox" id="fxL"> STAGE LIGHTS</label><label class="chk"><input type="checkbox" id="fxF"> FOG / SMOKE</label><label class="chk"><input type="checkbox" id="fxZ"> LASERS (MILESTONE)</label><label class="chk"><input type="checkbox" id="fxP"> CROWD PHONES</label><label class="chk"><input type="checkbox" id="fxW"> FIREWORKS (MILESTONE)</label><label class="chk"><input type="checkbox" id="fxS"> CROWD SOUND</label></div>
+  <div class="two"><div><label>INTENSITY</label><input type="range" id="fxI" min="30" max="130" step="5" style="width:100%;accent-color:var(--red)"></div><div><label>CAMERA CUTS</label><select id="fxC"><option value="dynamic">Dynamic</option><option value="slow">Slow</option><option value="static">Static</option></select></div></div>
+  <label>CROWD ENERGY</label><select id="fxE"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div></details>
+ <details class="sec"><summary>5. HEART MILESTONES <small>effects the crowd unlocks</small></summary><div class="in"><div id="smMs"></div></div></details>
+ <details class="sec" open><summary>6. SCHEDULE AND PUBLISH <small id="smS6"></small></summary><div class="in">
+  <div class="two"><div><label>DATE</label><input type="date" id="smDate"></div><div><label>TIME</label><input type="time" id="smClock"></div></div>
+  <div class="msg" id="smMsg">Drafts are hidden from visitors. Only a published show appears on the SHOW page.</div>
+  <button class="btn big" id="smPub" style="margin-top:8px">PUBLISH SHOW</button>
+  <button class="btn big" id="smRender" style="margin-top:8px;background:transparent;border-color:#4a4a50">RENDER TO VIDEO FILE</button>
+  <div class="bar"><b id="smProg"></b></div><div class="msg" id="smRMsg"></div></div></details>
 </div></div></div>`}
 /* ---------- helpers ---------- */
 const beatById=id=>E.beats.find(b=>String(b.id)===String(id));
@@ -95,19 +105,45 @@ function refreshHits(){const sc=E.script,bufs=sc.tracks.map(t=>E.cache[t.id]&&E.
 function syncTracks(){const sc=E.script;sc.tracks.forEach(t=>{const b=beatById(t.id);if(b){t.title=b.title;t.bpm=b.bpm||t.bpm||0;t.key=b.musical_key||t.key||'';t.audio=b.preview_path||'';t.cover=b.cover_path||''}})}
 function segBar(){const sc=E.script;$q('#smSeg').innerHTML=sc.segments.map(s=>`<i style="width:${(s.end-s.start)/sc.len*100}%;background:${SEGCOL[s.preset]||'#555'}" title="${esc(s.name)}"></i>`).join('')}
 /* ---------- panels ---------- */
+const LOOKS=['city','neon','ice','ember'];
+function applyLooks(){const sc=E.script,base=Math.max(0,LOOKS.indexOf(sc.theme));sc.tracks.forEach((t,i)=>{if(sc.vary===false)delete t.look;else t.look=LOOKS[(base+i)%LOOKS.length]})}
+function autoBuild(){
+ const sc=E.script,n=sc.tracks.length;if(!n)return;
+ if(sc.seed==null)sc.seed=Math.floor(Math.random()*997);
+ const len=clamp(n*150,300,1200);sc.len=len;
+ const slot=len/n;sc.tracks.forEach((t,i)=>{t.start=Math.round(i*slot);t.end=Math.round((i+1)*slot-(i<n-1?3:0));t.cuts=['dynamic','slow','dynamic','dynamic'][(i+sc.seed)%4];t.int=[1,.92,1.08,1][(i+sc.seed)%4]});
+ applyLooks();
+ const TPL=[[['intro',.12],['build',.2],['drop',.4],['breakdown',.13],['drop',.15]],[['build',.25],['drop',.35],['breakdown',.2],['drop',.2]],[['intro',.15],['drop',.35],['breakdown',.15],['build',.15],['drop',.2]]],segs=[];
+ sc.tracks.forEach((t,i)=>{const a=t.start,b=i<n-1?sc.tracks[i+1].start:len,tpl=TPL[(i+sc.seed)%3].map(x=>x.slice());
+  if(i===0&&tpl[0][0]!=='intro')tpl.unshift(['intro',.1]);if(i===n-1)tpl[tpl.length-1][0]='finale';
+  const tot=tpl.reduce((q,x)=>q+x[1],0);let pos=a;tpl.forEach((x,k)=>{const end=k===tpl.length-1?b:Math.round(pos+(b-a)*x[1]/tot);segs.push({name:M.PRESETS[x[0]].n,preset:x[0],start:pos,end});pos=end})});
+ const m=[];segs.forEach(g=>{const l=m[m.length-1];if(l&&l.preset===g.preset)l.end=g.end;else m.push(g)});
+ m[0].start=0;m[m.length-1].end=len;sc.segments=m;sc.auto=true;
+}
+function rebuild(){const sc=E.script;if(sc.auto!==false)autoBuild();else{spread();applyLooks()}fillStruct()}
+function fillStruct(){const sc=E.script;$q('#smLen').value=sc.len/60;$q('#smScrub').max=sc.len;rTracks();rSegs();segBar();refreshHits();syncAutoUi();setT();seek(E.T)}
+function manual(){const sc=E.script;if(sc.auto!==false){sc.auto=false;syncAutoUi()}}
+function syncAutoUi(){
+ const sc=E.script,auto=sc.auto!==false,looks=new Set(sc.tracks.map(t=>t.look).filter(Boolean)),nl=Math.max(1,looks.size);
+ $q('#smAuto').checked=auto;$q('#smVary').checked=sc.vary!==false;$q('#smLen').disabled=auto;
+ $q('#smAutoNote').textContent=auto?sc.tracks.length+' beat'+(sc.tracks.length===1?'':'s')+' = a '+mmss(sc.len)+' show with '+nl+' stage look'+(nl>1?'s':'')+' and '+sc.segments.length+' sections. Add a beat and the show grows and changes.':'Auto-build is off: you control every time and section by hand.';
+ $q('#smS1').textContent=sc.tracks.length+' beat'+(sc.tracks.length===1?'':'s');$q('#smS2').textContent=M.THEMES[sc.theme]||'';$q('#smS3').textContent=mmss(sc.len)+' / '+sc.segments.length+' sections';
+ const w=E.when?new Date(E.when):null;$q('#smS6').textContent=w?w.toLocaleDateString([], {month:'short',day:'numeric'})+' '+w.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}):'not scheduled';
+}
 function rTracks(){
  const sc=E.script,el=$q('#smTracks');
  el.innerHTML=sc.tracks.map((t,i)=>`<div class="trk" data-i="${i}"><select data-f="id">${E.beats.map(b=>`<option value="${esc(b.id)}"${String(b.id)===String(t.id)?' selected':''}>${esc(b.title)}</option>`).join('')}</select><input type="text" data-f="start" value="${mmss(t.start)}"><input type="text" data-f="end" value="${mmss(t.end)}"><button class="x" data-f="rm">&times;</button></div>`).join('')||'<div class="msg">Add at least one beat. Each beat fades out, the crowd settles, then the next beat brings it back.</div>';
  el.querySelectorAll('.trk').forEach(r=>{const i=+r.dataset.i;r.querySelectorAll('[data-f]').forEach(f=>{f.onchange=async()=>{const t=sc.tracks[i];const k=f.dataset.f;
-  if(k==='rm'){sc.tracks.splice(i,1)}else if(k==='id'){t.id=f.value;syncTracks();await prep()}else t[k]=clamp(parseT(f.value),0,sc.len);
-  if(t&&t.end<=t.start+1)t.end=Math.min(sc.len,t.start+10);refreshHits();rTracks();seek(E.T)};f.onclick=f.dataset.f==='rm'?f.onchange:null})});
+  if(k==='rm'){sc.tracks.splice(i,1);rebuild()}
+  else if(k==='id'){t.id=f.value;syncTracks();await prep();rebuild()}
+  else{t[k]=clamp(parseT(f.value),0,sc.len);if(t.end<=t.start+1)t.end=Math.min(sc.len,t.start+10);manual();refreshHits();rTracks();seek(E.T)}};f.onclick=f.dataset.f==='rm'?f.onchange:null})});
 }
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function spread(){const sc=E.script,n=sc.tracks.length;if(!n)return;const slot=sc.len/n;sc.tracks.forEach((t,i)=>{t.start=Math.round(i*slot);t.end=Math.round((i+1)*slot-(i<n-1?3:0))});rTracks();refreshHits()}
 function rTheme(){
  const el=$q('#smTh');el.innerHTML=Object.keys(M.THEMES).map(k=>`<button data-k="${k}" class="${k===E.script.theme?'on':''}"><canvas width="160" height="116"></canvas>${M.THEMES[k]}</button>`).join('');
  el.querySelectorAll('button').forEach(b=>{const cv=b.querySelector('canvas');if(E.stage){const t=E.stage.themeThumb(b.dataset.k);if(t)cv.getContext('2d').drawImage(t,0,0,160,116)}
-  b.onclick=()=>{E.script.theme=b.dataset.k;E.stage.setTheme(b.dataset.k);rTheme()}});
+  b.onclick=()=>{E.script.theme=b.dataset.k;applyLooks();E.stage.setTheme(b.dataset.k);rTheme();syncAutoUi()}});
 }
 function rSegs(){
  const sc=E.script,el=$q('#smSegs');
@@ -116,11 +152,11 @@ function rSegs(){
   if(k==='rm'){if(sc.segments.length>1){sc.segments.splice(i,1);sc.segments[0].start=0;for(let j=1;j<sc.segments.length;j++)sc.segments[j].start=sc.segments[j-1].end;sc.segments[sc.segments.length-1].end=sc.len}}
   else if(k==='preset'){s.preset=f.value;s.name=M.PRESETS[f.value].n}
   else if(k==='end'){s.end=clamp(parseT(f.value),s.start+5,sc.len);if(sc.segments[i+1])sc.segments[i+1].start=s.end;for(let j=i+1;j<sc.segments.length;j++){if(sc.segments[j].end<=sc.segments[j].start+4)sc.segments[j].end=Math.min(sc.len,sc.segments[j].start+5);if(sc.segments[j+1])sc.segments[j+1].start=sc.segments[j].end}sc.segments[sc.segments.length-1].end=sc.len}
-  rSegs();segBar();seek(E.T)}})});
+  manual();rSegs();segBar();seek(E.T)}})});
 }
-function addSeg(){const sc=E.script,l=sc.segments[sc.segments.length-1],half=Math.max(l.start+10,Math.round((l.start+l.end)/2));if(l.end-l.start<20)return;sc.segments.push({name:'DROP',preset:'drop',start:half,end:l.end});l.end=half;rSegs();segBar()}
+function addSeg(){const sc=E.script,l=sc.segments[sc.segments.length-1],half=Math.max(l.start+10,Math.round((l.start+l.end)/2));if(l.end-l.start<20)return;manual();sc.segments.push({name:'DROP',preset:'drop',start:half,end:l.end});l.end=half;rSegs();segBar()}
 function setLen(min){
- const sc=E.script,old=sc.len,mn=window.__showMin||5,len=Math.max(10,Math.round(clamp(min,mn,20)*60)),k=len/old;sc.len=len;
+ manual();const sc=E.script,old=sc.len,mn=window.__showMin||5,len=Math.max(10,Math.round(clamp(min,mn,20)*60)),k=len/old;sc.len=len;
  sc.segments.forEach(s=>{s.start=Math.round(s.start*k);s.end=Math.round(s.end*k)});sc.segments[0].start=0;for(let i=1;i<sc.segments.length;i++)sc.segments[i].start=sc.segments[i-1].end;sc.segments[sc.segments.length-1].end=len;
  sc.tracks.forEach(t=>{t.start=Math.round(t.start*k);t.end=Math.min(len,Math.round(t.end*k))});
  $q('#smScrub').max=len;rSegs();rTracks();segBar();refreshHits();setT()
@@ -136,7 +172,7 @@ function rMs(){
 function setWhen(){const d=E.when?new Date(E.when):null;$q('#smDate').value=d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:'';$q('#smClock').value=d?`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:'20:00'}
 function readWhen(){const d=$q('#smDate').value,t=$q('#smClock').value||'20:00';return d?new Date(d+'T'+t).toISOString():''}
 function msg(t){$q('#smMsg').textContent=t}
-function fillAll(){$q('#smTitle').value=E.title;$q('#smLen').value=E.script.len/60;$q('#smScrub').max=E.script.len;rTracks();rTheme();rSegs();rFx();rMs();setWhen();segBar();setT()}
+function fillAll(){syncAutoUi();$q('#smTitle').value=E.title;$q('#smLen').value=E.script.len/60;$q('#smScrub').max=E.script.len;rTracks();rTheme();rSegs();rFx();rMs();setWhen();segBar();setT();syncAutoUi()}
 /* ---------- preview playback ---------- */
 function setT(){const el=$q('#smTime');if(el)el.textContent=mmss(E.T)+' / '+mmss(E.script.len);const sc=$q('#smScrub');if(sc&&document.activeElement!==sc)sc.value=E.T}
 async function seek(T){E.T=clamp(T,0,E.script.len);const was=E.playing;stopA();if(was)await play();else{E.stage.reset();setT()}}
@@ -189,13 +225,9 @@ function load(s){
 }
 /* ---------- surprise me ---------- */
 function surprise(){
- const sc=E.script,ths=Object.keys(M.THEMES),R=Math.random;sc.theme=ths[Math.floor(R()*ths.length)];E.stage.setTheme(sc.theme);
- const mins=[5,5,8,10,12,15][Math.floor(R()*6)],len=mins*60;sc.len=len;
- const names=['intro','build','drop','breakdown','drop','build','drop','finale'],n=mins<=5?5:mins<=10?7:8,pat=n===5?['intro','build','drop','breakdown','finale']:n===7?['intro','build','drop','breakdown','build','drop','finale']:names;
- const cuts=[0];for(let i=1;i<pat.length;i++)cuts.push(Math.round(len*(i/pat.length)+(R()-.5)*len*.03));cuts.push(len);
- sc.segments=pat.map((p,i)=>({name:M.PRESETS[p].n,preset:p,start:cuts[i],end:cuts[i+1]}));
- sc.fx.cuts=['dynamic','dynamic','slow'][Math.floor(R()*3)];sc.fx.crowd=['medium','high','high'][Math.floor(R()*3)];sc.fx.intensity=.7+R()*.4;
- if(sc.tracks.length)spread();$q('#smLen').value=mins;$q('#smScrub').max=len;rTheme();rSegs();rFx();segBar();rTracks();refreshHits();seek(0);msg('Surprise! A fresh look and timeline. Tweak anything, then save or publish.')
+ const sc=E.script,R=Math.random,ths=Object.keys(M.THEMES);sc.theme=ths[Math.floor(R()*ths.length)];E.stage.setTheme(sc.theme);
+ sc.seed=Math.floor(R()*997);sc.fx.crowd=['medium','high','high'][Math.floor(R()*3)];sc.fx.intensity=.7+R()*.4;sc.auto=true;
+ rFx();rTheme();rebuild();seek(0);msg('Surprise! A fresh look and a new arrangement. Tweak anything, then save or publish.')
 }
 /* ---------- video render ---------- */
 function loadMuxer(){return window.Mp4Muxer?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=new URL('mp4-muxer.js',document.baseURI).href;s.onload=ok;s.onerror=()=>no(new Error('muxer'));document.head.appendChild(s)})}
@@ -266,8 +298,10 @@ function wire(){
  $q('#smScrub').oninput=e=>{E.T=+e.target.value;if(E.playing)stopA();E.stage.reset();setT()};$q('#smScrub').onchange=e=>{seek(+e.target.value)};
  root.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{E.testHearts=+b.dataset.h;$q('#smHeart').value=E.testHearts});
  $q('#smHeart').oninput=e=>{E.testHearts=Math.max(0,+e.target.value||0)};
- $q('#smAddT').onclick=async()=>{const sc=E.script;if(sc.tracks.length>=8||!E.beats.length)return;const b=E.beats[Math.min(sc.tracks.length,E.beats.length-1)];sc.tracks.push({id:b.id,title:b.title,bpm:b.bpm||0,key:b.musical_key||'',audio:b.preview_path,cover:b.cover_path,start:0,end:30});spread();syncTracks();rTracks();await prep()};
- $q('#smSpread').onclick=spread;$q('#smAddS').onclick=addSeg;$q('#smSurprise').onclick=surprise;
+ $q('#smAddT').onclick=async()=>{const sc=E.script;if(sc.tracks.length>=8||!E.beats.length)return;const b=E.beats[Math.min(sc.tracks.length,E.beats.length-1)];sc.tracks.push({id:b.id,title:b.title,bpm:b.bpm||0,key:b.musical_key||'',audio:b.preview_path,cover:b.cover_path,start:0,end:30});syncTracks();await prep();rebuild()};
+ $q('#smSpread').onclick=()=>{E.script.seed=Math.floor(Math.random()*997);rebuild();msg('Shuffled: a new arrangement of looks, cameras and drops.')};
+ $q('#smAuto').onchange=e=>{E.script.auto=e.target.checked;if(e.target.checked)rebuild();else syncAutoUi()};
+ $q('#smVary').onchange=e=>{E.script.vary=e.target.checked;applyLooks();syncAutoUi();refreshHits()};$q('#smAddS').onclick=addSeg;$q('#smSurprise').onclick=surprise;
  $q('#smLen').onchange=e=>{setLen(+e.target.value||5);e.target.value=E.script.len/60};
  $q('#smSave').onclick=async()=>{msg('Saving...');if(await save(E.status==='published'?'published':'draft'))msg('Saved as '+E.status+'.')};
  $q('#smPub').onclick=async()=>{if(!(await askConfirm('PUBLISH THIS SHOW?','Visitors will see it on the SHOW page and it goes live at the scheduled time. You can unpublish it later.')))return;msg('Publishing...');if(await save('published'))msg('Published! It is now on the SHOW page.')};
@@ -279,7 +313,7 @@ window.showMakerOpen=async function(){
  if(!mounted){root.innerHTML=html();mounted=true;wire();await M.loadFonts();E.plate=await M.loadPlate();E.stage=M.makeStage($q('#smCv'));E.stage.setPlate(E.plate);
   const {data:bt}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,cover_path').order('created_at',{ascending:false});E.beats=(bt||[]).filter(b=>b.preview_path);
   if(!E.script.tracks.length&&E.beats.length){const b=E.beats[0];E.script.tracks=[{id:b.id,title:b.title,bpm:b.bpm||0,key:b.musical_key||'',audio:b.preview_path,cover:b.cover_path,start:0,end:E.script.len}]}
-  E.stage.setScript(E.script,[]);fillAll();await loadShows();await rRend();prep();
+  E.stage.setScript(E.script,[]);if(E.script.auto!==false)autoBuild();fillAll();await loadShows();await rRend();prep();
   cancelAnimationFrame(E.raf);E.raf=requestAnimationFrame(frame)}
  else{cancelAnimationFrame(E.raf);E.raf=requestAnimationFrame(frame)}
 };

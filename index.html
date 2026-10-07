@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://www.paypal.com">
 <link rel="dns-prefetch" href="https://www.sandbox.paypal.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@800&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 :root{--red:#e0242f;--gold:#e8b94a;--ink:#060507;--line:#1d1d21;--lvl:0}
 *{box-sizing:border-box;margin:0}
@@ -570,8 +570,34 @@ function art(c,i){
  x.fillStyle=p[2];let bx=0;while(bx<W){const w=3+rr()*4|0,h=6+rr()*12|0;x.fillRect(bx,W-h,w,h);bx+=w}
  x.fillStyle=p[3];for(let k=0;k<22;k++)x.fillRect(rr()*W|0,18+rr()*13|0,1,1);
 }
+/* stock beat cover: black square, giant stacked white type that fills the width. Made on the fly from the beat name, so it uses no storage. */
+const STOCK_LINES=['PROD BY MZPRD','BEAT FOR YOUR','NEXT PROJECT'],_stk={};
+function stockBalance(w,n){
+ let best=null,sc=1e9;const len=a=>a.join(' ').length;
+ if(n===2){for(let i=1;i<w.length;i++){const a=[w.slice(0,i),w.slice(i)],s=Math.abs(len(a[0])-len(a[1]));if(s<sc){sc=s;best=a}}}
+ else{for(let i=1;i<w.length-1;i++)for(let j=i+1;j<w.length;j++){const a=[w.slice(0,i),w.slice(i,j),w.slice(j)],s=Math.max(len(a[0]),len(a[1]),len(a[2]));if(s<sc){sc=s;best=a}}}
+ return (best||[w]).map(a=>a.join(' '));
+}
+function stockCover(title,size){
+ size=size||512;const t=String(title||'BEAT').toUpperCase().replace(/\s+/g,' ').trim()||'BEAT',ready=document.fonts&&document.fonts.check('800 100px Inter')?'i':'f',key=ready+size+'|'+t;
+ if(_stk[key])return _stk[key];
+ const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d'),k=size/1024,TW=930*k,F=px=>'800 '+px+'px Inter,"Helvetica Neue",Helvetica,Arial,sans-serif',words=t.split(' ');
+ x.fillStyle='#000';x.fillRect(0,0,size,size);x.textAlign='center';x.textBaseline='alphabetic';
+ const tl=words.length<=3?words:stockBalance(words,3);
+ const L=[...tl.map(s=>({s,max:430*k})),...STOCK_LINES.map(s=>({s,max:200*k}))];
+ L.forEach(l=>{x.font=F(100);if('letterSpacing' in x)x.letterSpacing='-2px';const w=x.measureText(l.s).width||1;l.fs=Math.min(l.max,100*TW/w);l.cap=l.fs*.73});
+ let gap=17*k,tot=L.reduce((q,l)=>q+l.cap,0)+gap*(L.length-1);const f=tot>size*.92?size*.92/tot:1;if(f<1){L.forEach(l=>{l.fs*=f;l.cap*=f});gap*=f;tot*=f}
+ let y=(size-tot)/2;
+ L.forEach((l,i)=>{x.font=F(l.fs);if('letterSpacing' in x)x.letterSpacing=(-.02*l.fs)+'px';x.fillStyle='#fafafa';
+  if(i===L.length-1){x.shadowColor='rgba(255,255,255,.85)';x.shadowBlur=30*k}else x.shadowBlur=0;
+  x.fillText(l.s,size/2,y+l.cap);x.shadowBlur=0;y+=l.cap+gap});
+ return _stk[key]=c.toDataURL('image/jpeg',.9);
+}
+const isBeatRow=x=>x&&('audio_path' in x||x._k==='beats'||x.bpm!==undefined&&!('file_path' in x));
+const coverUrl=(x,px)=>x&&x.cover_path?pub(x.cover_path):(isBeatRow(x)?stockCover(x.title,px||512):'');
+try{document.fonts.load('800 100px Inter').then(()=>{if(typeof beats!=='undefined'&&beats.length){renderBeats();if(typeof ui==='function')ui()}}).catch(()=>{})}catch(e){}
 function thumb(item,i,cls){
- const u=pub(item.cover_path);
+ const u=coverUrl(item,512);
  if(u)return`<img class="${cls}" src="${esc(u)}" alt="" loading="lazy">`;
  return`<canvas class="${cls}" width="32" height="32" data-art="${i}"></canvas>`;
 }
@@ -794,7 +820,7 @@ $('#search').onclick=()=>toast('SEARCH COMING SOON');
 const CAMF={beats:null,kits:[.108,.705,1.8],show:[.287,.15,1.8],about:[.897,.43,1.8]};
 let camT='beats';const cam={fx:.5,fy:.5,z:1};
 function hideSeo(){const e=document.getElementById('seo');if(e)e.style.display='none'}
-async function openShow(){try{if(!window.MZShow)await loadScript('show.js?v=3');if(!window.showPageOpen)await loadScript('showpage.js?v=4');await window.showPageOpen(document.getElementById('shRoot'))}catch(e){toast('SHOW FAILED TO LOAD')}}
+async function openShow(){try{if(!window.MZShow)await loadScript('show.js?v=7');if(!window.showPageOpen)await loadScript('showpage.js?v=7');await window.showPageOpen(document.getElementById('shRoot'))}catch(e){toast('SHOW FAILED TO LOAD')}}
 function showView(v){
  camT=v==='beat'?(pageKind==='p'?'kits':'beats'):v;
  {const dl=$('#deals');if(dl)dl.style.display=(v==='about'||v==='show')?'none':''}
@@ -914,7 +940,7 @@ function vinSize(){['vin','vlab'].forEach(id=>{const c=$('#'+id),d=Math.min(devi
 /* the beat you are playing sits on the turntable: its cover is the record label */
 let labelImg=null,labelSrc='';
 function labelUpdate(){
- const it=curPack>=0?packs[curPack]:(cur>=0?beats[cur]:null),url=it&&it.cover_path?pub(it.cover_path):'';
+ const it=curPack>=0?packs[curPack]:(cur>=0?beats[cur]:null),url=it?coverUrl(it,256):'';
  if(url!==labelSrc){labelSrc=url;labelImg=null;if(url){const im=new Image();im.onload=()=>{if(labelSrc===url)labelImg=im};im.src=url}}
 }
 function drawLabel(){
@@ -1360,18 +1386,18 @@ document.querySelectorAll('.bh [data-t]').forEach(b=>b.onclick=()=>goAdmin(b.dat
 function openBO(){$('#bo').classList.add('on');boRender()}
 
 const FIELDS={
- beats:{table:'beats',title:'BEAT',files:[['cover_path','COVER IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (tagged MP3/WAV, public)','audio/*','public-media','previews'],['audio_path','FULL FILE (private, for buyers, any size)','audio/*,.zip','private-files','beats']]},
+ beats:{table:'beats',title:'BEAT',files:[['cover_path','COVER IMAGE (optional: leave it empty to use the stock cover, which takes no storage)','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (tagged MP3/WAV, public)','audio/*','public-media','previews'],['audio_path','FULL FILE (private, for buyers, any size)','audio/*,.zip','private-files','beats']]},
  packs:{table:'packs',title:'SAMPLE PACK',files:[['cover_path','PACK IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (optional, public)','audio/*','public-media','previews'],['file_path','PACK FILE (.zip, private, any size)','.zip,application/zip,audio/*','private-files','packs']]}
 };
 function loadScript(f){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+f;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
-function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=16';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=17';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
 async function boRender(){
  {const pb=document.getElementById('pbkBar');if(pb)pb.style.display=tab==='packs'?'block':'none'}
  const vid=tab==='video';document.querySelector('#bo .bo2').style.display=vid?'none':'';
  document.getElementById('bo2b').style.display='none';document.getElementById('bo2c').style.display='none';
  if(window.emailClose)emailClose();if(window.showMakerClose)showMakerClose();
  if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=2');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
- if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=3');if(!window.showMakerOpen)await loadScript('showmaker.js?v=4');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
+ if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=7');if(!window.showMakerOpen)await loadScript('showmaker.js?v=6');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
  if(vid){try{await loadStudio();await studioOpen()}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
  if(window.studioClose)studioClose();
  document.getElementById('bo2b').style.display=tab==='promo'?'':'none';
@@ -1383,6 +1409,7 @@ async function boRender(){
  const beatBits=tab==='beats'?`<label>TAGS: GENRES PEOPLE SEARCH (hip hop / rap / r&amp;b / boom bap / trap)</label><input type="text" id="f_tags" value="${esc(e.tags??'')}">`+slugBit:slugBit;
  $('#bf').innerHTML=`<h3>${editing?'EDIT':'ADD'} ${F.title}</h3>
   <label>TITLE</label><input type="text" id="f_title" value="${esc(e.title??'')}" required>
+  ${tab==='beats'?'<div class="cur" style="margin:10px 0 4px">STOCK COVER (used when you do not upload a cover, nothing is stored):</div><img id="f_stk" alt="stock cover" style="width:190px;height:190px;display:block;border:1px solid #2a2a2e">':''}
   <label>DESCRIPTION (2 to 3 sentences using words people search, like dark hip hop beat)</label><textarea id="f_desc">${esc(e.description??'')}</textarea>
   ${beatBits}
   <label>PRICE (USD)</label><input type="number" step="0.01" min="0" id="f_price" value="${esc(e.price??(tab==='beats'?29.99:19.99))}">
@@ -1394,6 +1421,7 @@ async function boRender(){
   ${editing?'<button class="bo-btn" type="button" id="f_cancel" style="width:100%;margin-top:10px">CANCEL EDIT</button>':''}
   <div id="bmsg"></div>`;
  $('#bf').onsubmit=boSave;
+ if(tab==='beats'&&$('#f_stk')){const up=()=>{$('#f_stk').src=stockCover($('#f_title').value||'BEAT NAME',420)};$('#f_title').addEventListener('input',up);up();document.fonts&&document.fonts.load('800 100px Inter').then(up).catch(()=>{})}
  if(editing)$('#f_cancel').onclick=()=>{editing=null;boRender()};
  const {data:rows,error}=await sb.from(F.table).select('*').order('created_at',{ascending:false});
  const bl=$('#bl');
@@ -1401,7 +1429,7 @@ async function boRender(){
  bl.innerHTML=rows.length?'':'<div class="bi"><span>Nothing here yet. Add your first one on the left.</span></div>';
  rows.forEach(r=>{
   const d=document.createElement('div');d.className='bi';
-  const u=pub(r.cover_path);
+  const u=coverUrl(r,160);
   d.innerHTML=`${u?`<img src="${esc(u)}" alt="">`:'<div class="nc"></div>'}<div><b>${esc(r.title)}</b><span>${money(r.price)}${r.published?'':' <i class="draft">/ HIDDEN</i>'}${r.free_download?' / FREE DL':''}</span></div><div class="acts">${r.slug?'<button class="vw">PAGE</button>':''}<button class="ed">EDIT</button><button class="del">DELETE</button></div>`;
   const vw=d.querySelector('.vw');if(vw)vw.onclick=()=>{$('#bo').classList.remove('on');goItem(tab==='packs'?'pack':'beat',r.slug);scrollTo(0,0)};
   d.querySelector('.ed').onclick=()=>{editing=r;boRender();scrollTo(0,0)};

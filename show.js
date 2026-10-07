@@ -125,6 +125,7 @@ function schedule(ctx,dest,script,bufs,from,until,o){
 
 /* ---------- the stage (animated on top of the stage artwork) ---------- */
 const PHONES=[[180,594,30],[99,600,38],[45,595,24],[1031,598,16],[1080,596,12],[603,605,24],[975,606,27],[435,611,21],[969,603,8],[155,608,9],[203,606,8],[391,613,20],[172,610,6],[982,609,8],[951,615,9],[238,620,12],[288,619,13],[697,621,17],[1034,625,10],[523,630,13],[152,629,8],[202,630,8],[769,628,15],[485,644,20],[669,638,8],[617,642,7],[655,639,7],[666,646,7],[662,660,5],[421,667,15],[31,668,16]];
+const WOOF=[[314,440,40],[265,430,30],[175,440,26],[168,515,38],[263,515,36],[410,432,24],[735,420,26],[828,430,40],[885,430,30]];
 const FIX=[[298,78],[378,78],[438,84],[535,86],[653,86],[712,78],[796,78],[1028,112],[52,306]];
 const VARIANT={city:'',neon:'hue-rotate(38deg) saturate(1.25)',ice:'hue-rotate(150deg) saturate(1.1) brightness(1.06)',ember:'hue-rotate(-32deg) saturate(1.3) sepia(.18)'};
 function makeStage(canvas,seed){
@@ -133,12 +134,17 @@ function makeStage(canvas,seed){
  const st={t:0,cam:{z:1,x:0,y:0},energy:.1,cheer:0,nod:0,bounce:0,flash:0,shake:0,hands:[0,0],pads:new Float32Array(12),hearts:0,
   hue:230,fireworks:[],confetti:[],lastHit:-1,hitIdx:0,lastCutBar:-1,lastDrop:-1,fogP:[],endT:-1,lastStartTrack:-2};
  /* a fresh random front-row crowd every time */
- const front=[];for(let i=0;i<13;i++)front.push({x:(i+.5)*W/13+(R()-.5)*60,s:1.9+R()*1.1,ph:R()*6.28,sp:.8+R()*.6,look:Math.floor(R()*4),arm:R(),y:H-6+R()*28});
  const phones=PHONES.map(p=>({x:p[0],y:p[1],r:Math.max(6,p[2]*.6),ph:R()*6.28,sp:3+R()*5,on:R()<.85}));
  for(let i=0;i<22;i++)st.fogP.push({x:R()*W,y:420+R()*190,r:90+R()*150,vx:(R()-.5)*14,a:.05+R()*.07});
- function plateFor(theme){
-  if(!S.plate)return null;if(plates[theme])return plates[theme];
-  const o=document.createElement('canvas');o.width=W;o.height=H;const g=o.getContext('2d');g.filter=VARIANT[theme]||'';g.drawImage(S.plate,0,0,W,H);return plates[theme]=o;
+ const L={},C={},seedP=R()*6.28;let medTop=0;st.colUp=new Float32Array(Math.ceil(W/14));
+ function layersFor(theme){
+  if(!S.plate)return null;if(L[theme])return L[theme];
+  const f=VARIANT[theme]||'',mk=img=>{const o=document.createElement('canvas');o.width=img.naturalWidth;o.height=img.naturalHeight;const g=o.getContext('2d');g.filter=f;g.drawImage(img,0,0);return o},P=S.plate;
+  return L[theme]={bg:mk(P.bg),crowd:mk(P.crowd),torso:mk(P.torso),head:mk(P.head),hl:mk(P.hl),hr:mk(P.hr)};
+ }
+ function compFor(theme){
+  if(C[theme])return C[theme];const l=layersFor(theme);if(!l)return null;const m=S.plate.meta,o=document.createElement('canvas');o.width=W;o.height=H;const g=o.getContext('2d');
+  g.drawImage(l.bg,0,0);g.drawImage(l.torso,m.torso[0],m.torso[1]);g.drawImage(l.hl,m.handL[0],m.handL[1]);g.drawImage(l.hr,m.handR[0],m.handR[1]);g.drawImage(l.head,m.head[0],m.head[1]);g.drawImage(l.crowd,m.crowd[0],m.crowd[1]);return C[theme]=o;
  }
  function crownPath(g,cx,cy,sz){const p=[[-1,.45],[-.92,-.35],[-.4,.15],[0,-.7],[.4,.15],[.92,-.35],[1,.45]];g.beginPath();p.forEach(([x,y],i)=>i?g.lineTo(cx+x*sz,cy+y*sz):g.moveTo(cx+x*sz,cy+y*sz));g.closePath()}
  const vig=document.createElement('canvas');vig.width=W;vig.height=H;{const g=vig.getContext('2d'),gr=g.createRadialGradient(W/2,H/2,H*.42,W/2,H/2,H*.98);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,0,0,.6)');g.fillStyle=gr;g.fillRect(0,0,W,H)}
@@ -149,8 +155,8 @@ function makeStage(canvas,seed){
  /* camera framings (artwork coordinates, offsets from the centre) */
  const FR={wide:{z:1,x:0,y:0},dj:{z:1.7,x:30,y:60},left:{z:1.4,x:-190,y:-70},right:{z:1.4,x:200,y:-70},crowd:{z:1.3,x:0,y:190},screen:{z:1.45,x:25,y:-140}};
  const SEQ={dynamic:['wide','dj','left','crowd','right','screen','dj','wide'],slow:['wide','dj','screen','wide'],static:['wide']};
- function pickCam(t,seg,bpm){
-  const beatLen=60/Math.max(60,bpm||92),bar=Math.floor(t/(beatLen*4)),mode=S.script.fx.cuts||'dynamic';
+ function pickCam(t,seg,bpm,cutsOv){
+  const beatLen=60/Math.max(60,bpm||92),bar=Math.floor(t/(beatLen*4)),mode=cutsOv||S.script.fx.cuts||'dynamic';
   const per=mode==='slow'?8:(seg.preset==='drop'||seg.preset==='finale')&&mode==='dynamic'?2:4;
   if(mode==='static')return{k:'wide',drift:true};
   if(seg.preset==='breakdown')return{k:'dj',drift:true};
@@ -162,6 +168,9 @@ function makeStage(canvas,seed){
   ctl=ctl||{};dt=clamp(dt||.016,.001,.1);st.t=T;const sc=S.script,fx=sc.fx,q=segAt(sc,Math.max(0,T)),P=PRESETS[q.seg.preset]||PRESETS.drop;
   const mode=ctl.mode||'live',tr=trackAt(sc,T),trk=tr>=0?sc.tracks[tr]:null,bpm=(trk&&trk.bpm)||92,beatLen=60/bpm;
   const fg=flags(),bass=au.bass||0,loud=au.loud||0;
+  {const look0=(trk&&trk.look&&VARIANT[trk.look]!==undefined)?trk.look:(st.look||S.theme);
+   if(st.look==null){st.look=look0;st.prevLook=look0;st.lookT=1}else if(look0!==st.look){st.prevLook=st.look;st.look=look0;st.lookT=0}
+   st.lookT=Math.min(1,st.lookT+dt/1.4)}
   /* hits: the producer taps on the real drum hits, the crowd pulses */
   const H2=S.hits;let i0=st.hitIdx;if(i0>=H2.length||(i0>0&&H2[i0-1].t>T+.05)){let lo=0,hi=H2.length;while(lo<hi){const m=(lo+hi)>>1;if(H2[m].t<T-.2)lo=m+1;else hi=m}i0=lo}
   while(i0<H2.length&&H2[i0].t<T-.2)i0++;
@@ -183,20 +192,24 @@ function makeStage(canvas,seed){
   if(mode==='end'){st.endT=st.endT<0?0:st.endT+dt}else st.endT=-1;
   /* palette + intensity */
   const hh=lerp(P.hue[0],P.hue[1],(Math.sin(T*.35)+1)/2);st.hue+=(hh-st.hue)*.05;const hue=st.hue;
-  const int=clamp(P.int*(fx.intensity==null?.85:fx.intensity)*(fg.lights?1.25:1)*(mode==='wait'?.5:1)*(.34+loud*1.35),0,1.35);
+  const int=clamp(P.int*(fx.intensity==null?.85:fx.intensity)*((trk&&trk.int)||1)*(fg.lights?1.25:1)*(mode==='wait'?.5:1)*(.34+loud*1.35),0,1.35);
   /* camera */
-  const cp=pickCam(Math.max(0,T),q.seg,bpm);let tz=FR[cp.k].z,tx=FR[cp.k].x,ty=FR[cp.k].y;
+  const cp=pickCam(Math.max(0,T),q.seg,bpm,trk&&trk.cuts);let tz=FR[cp.k].z,tx=FR[cp.k].x,ty=FR[cp.k].y;
   if(cp.push){tz=1+q.p*.16;tx=0;ty=q.p*20}
   if(cp.drift){tx+=Math.sin(T*.3)*14;ty+=Math.cos(T*.23)*7}
   if(fg.special&&mode==='live'&&st.bounce>.5)tz*=1.03;
   const kk=1-Math.exp(-dt*((cp.bar!=null&&cp.bar!==st.lastCutBar)?9:2.6));st.lastCutBar=cp.bar;
   st.cam.z=lerp(st.cam.z,tz,kk);st.cam.x=lerp(st.cam.x,tx,kk);st.cam.y=lerp(st.cam.y,ty,kk);
-  const lim=Math.max(0,W/2*(1-1/st.cam.z)),limy=Math.max(0,H/2*(1-1/st.cam.z)),pl=plateFor(S.theme);
+  const lim=Math.max(0,W/2*(1-1/st.cam.z)),limy=Math.max(0,H/2*(1-1/st.cam.z)),lay=layersFor(st.look);
   c.save();c.fillStyle='#04030a';c.fillRect(0,0,W,H);
   const sh=st.shake*5;c.translate(W/2+(Math.random()-.5)*sh,H/2+(Math.random()-.5)*sh);c.scale(st.cam.z,st.cam.z);c.translate(-W/2-clamp(st.cam.x,-lim,lim),-H/2-clamp(st.cam.y,-limy,limy));
-  if(pl)c.drawImage(pl,0,0);
+  if(lay){const pv=st.lookT<1&&st.prevLook!==st.look?layersFor(st.prevLook):null;if(pv){c.drawImage(pv.bg,0,0);c.globalAlpha=st.lookT;c.drawImage(lay.bg,0,0);c.globalAlpha=1}else c.drawImage(lay.bg,0,0)}
   else{const g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#14102a');g.addColorStop(1,'#050409');c.fillStyle=g;c.fillRect(0,0,W,H)}
   /* the venue dims in quiet moments and comes up with the music */
+  /* the speakers pump with the beat: each woofer cone pushes out on the bass and kicks, with a light flash on the hit */
+  if(lay&&fx.speakers!==false){const pump=bass*.12+st.bounce*.15+st.cheer*.04;
+   if(pump>.004)WOOF.forEach(([wx,wy,wr])=>{c.save();c.beginPath();c.arc(wx,wy,wr,0,6.3);c.clip();c.translate(wx,wy);const sc2=1+pump;c.scale(sc2,sc2);c.translate(-wx,-wy);c.drawImage(lay.bg,0,0);c.restore();
+    if(st.bounce>.12){c.save();c.globalCompositeOperation='lighter';const gr=c.createRadialGradient(wx,wy,wr*.2,wx,wy,wr*1.3);gr.addColorStop(0,`hsla(${hue},100%,72%,${Math.min(.5,st.bounce*.28)})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(wx-wr*1.4,wy-wr*1.4,wr*2.8,wr*2.8);c.restore()}})}
   const dim=clamp(.62-int*.55,0,.6);if(dim>.02){c.fillStyle=`rgba(4,3,14,${dim})`;c.fillRect(0,0,W,590);c.fillStyle=`rgba(4,3,14,${dim*.5})`;c.fillRect(0,590,W,H-590)}
   /* LED screen: crown glow, spectrum, countdown / thanks text */
   {const sx=392,sy=138,sw=360,sh2=256;c.save();c.beginPath();c.rect(sx,sy,sw,sh2);c.clip();
@@ -218,22 +231,23 @@ function makeStage(canvas,seed){
   if(fx.lasers!==false&&fg.lasers&&mode==='live'&&laserA>.05){c.save();c.globalCompositeOperation='lighter';for(let i=0;i<12;i++){const a=-Math.PI/2+(i-5.5)*.17+Math.sin(T*.9+i)*.3,hue3=i%3===0?0:i%3===1?125:190,ox=W/2+(i-5.5)*34;c.strokeStyle=`hsla(${hue3},100%,60%,${.55*laserA})`;c.lineWidth=1.6;c.beginPath();c.moveTo(ox,540);c.lineTo(ox+Math.cos(a)*900,540+Math.sin(a)*900);c.stroke();c.strokeStyle=`hsla(${hue3},100%,60%,${.12*laserA})`;c.lineWidth=7;c.stroke()}c.restore()}
   /* smoke drifting along the stage */
   if(fx.fog!==false){c.save();c.globalCompositeOperation='lighter';st.fogP.forEach(f=>{f.x+=f.vx*dt;if(f.x<-f.r)f.x=W+f.r;if(f.x>W+f.r)f.x=-f.r;const a=f.a*P.fog*(.35+int*.7),gr=c.createRadialGradient(f.x,f.y,0,f.x,f.y,f.r);gr.addColorStop(0,`hsla(${hue+f.x*.04},80%,62%,${a})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(f.x-f.r,f.y-f.r,f.r*2,f.r*2)});c.restore()}
-  /* the producer: body bounce, head nod, hands tapping the pads, pad lights (all on the beat) */
-  if(pl){
-   c.drawImage(pl,478,386,198,96,478,386-st.bounce*2.2,198,96);
-   c.drawImage(pl,546,324,96,70,546,324+st.nod*2.6,96,70);
-   c.drawImage(pl,524,458,64,36,524,458+st.hands[0]*3,64,36);c.drawImage(pl,596,458,64,36,596,458+st.hands[1]*3,64,36);
+  /* the producer is cut out in layers: the torso, head and each hand move on the beat, pad lights flash */
+  if(lay&&S.plate.meta){const mt=S.plate.meta;
+   c.save();c.translate(0,472);c.scale(1,1+st.bounce*.014);c.translate(0,-472);c.drawImage(lay.torso,mt.torso[0],mt.torso[1]);c.restore();
+   c.drawImage(lay.hl,mt.handL[0],mt.handL[1]+st.hands[0]*3);c.drawImage(lay.hr,mt.handR[0],mt.handR[1]+st.hands[1]*3);
+   c.drawImage(lay.head,mt.head[0],mt.head[1]+st.nod*2.6);
    c.save();c.globalCompositeOperation='lighter';for(let p=0;p<12;p++){const a=st.pads[p];if(a<.04)continue;const [hx,hy]=PADS[p],gr=c.createRadialGradient(hx,hy,0,hx,hy,26);gr.addColorStop(0,`hsla(${(p*47+hue)%360},100%,70%,${a})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(hx-26,hy-26,52,52)}c.restore()}
-  /* crowd bobs up and down in a wave that follows the energy */
+  /* the crowd is its own cut-out layer: the whole crowd bobs, raised hands wave extra, all following the energy */
   const E=st.energy;
-  if(pl){const cy0=578,bump=(st.bounce*3+st.cheer*7)*(.4+E);for(let x=0;x<W;x+=14){const ph=x*.017+T*(2+E*2.2),up=Math.max(0,Math.sin(ph))*(E*6+1)+bump*(.5+.5*Math.sin(x*.05+T*3));c.drawImage(pl,x,cy0,14,H-cy0,x,cy0-up,14,H-cy0)}}
+  if(lay&&S.plate.meta){const mt=S.plate.meta,cm=mt.crowd,tops=mt.tops;
+   if(!medTop){const a=tops.filter(v=>v<H).sort((x,y)=>x-y);medTop=a[Math.floor(a.length*.55)]||600}
+   const bump=(st.bounce*3+st.cheer*7)*(.4+E);
+   for(let i=0;i<tops.length;i++){const sx=i*14,cw=Math.min(14,cm[2]-sx),r=clamp((medTop-tops[i])/60,0,1),ph=sx*.017+T*(2+E*2.2)+seedP,
+    up=Math.max(0,Math.sin(ph))*(E*5+1)+bump*(.5+.5*Math.sin(sx*.05+T*3))+r*(E*6+st.cheer*7)*(.5+.5*Math.sin(T*(3+r*2)+i*1.7+seedP)),
+    dx=r*Math.sin(T*3.4+i*2.1+seedP)*(1.4+E*2.6);
+    st.colUp[i]=up;c.drawImage(lay.crowd,sx,0,cw,cm[3],sx+dx,cm[1]-up,cw,cm[3])}}
   /* phone lights twinkle in the crowd (fewer, softer once the crowd calms) */
-  if(fx.flash!==false){c.save();c.globalCompositeOperation='lighter';phones.forEach(p=>{if(!p.on)return;const a=(.22+.28*(.5+.5*Math.sin(T*p.sp+p.ph)))*(.5+(1-E)*.5+(q.seg.preset==='breakdown'?.5:0)),gr=c.createRadialGradient(p.x,p.y-Math.max(0,Math.sin(T*(2+E*2.2)+p.x*.017))*(E*6+1),0,p.x,p.y,p.r*2.2);gr.addColorStop(0,`rgba(190,225,255,${a})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(p.x-p.r*2.2,p.y-p.r*2.2-8,p.r*4.4,p.r*4.4+8)});c.restore()}
-  /* a fresh random front row of fans every time, hands up when the crowd is hyped */
-  front.forEach(p=>{const s=p.s*7,x=p.x+Math.sin(T*1.1*p.sp+p.ph)*E*5,bob=Math.sin(T*3.2*p.sp+p.ph)*(1+E*3.5)+st.cheer*6*E,y=p.y-bob;
-   c.fillStyle='#050309';c.fillRect(x-s*1.1,y-s*1.5,s*2.2,s*3);c.beginPath();c.arc(x,y-s*1.9,s*.78,0,6.3);c.fill();
-   if(p.look===1)c.fillRect(x-s*.9,y-s*2.8,s*1.8,s*.5);else if(p.look===2)c.fillRect(x+s*.4,y-s*2.5,s*.7,s*1.2);
-   if(p.arm<clamp(E*1.2+st.cheer*.6,0,1)){const w1=Math.sin(T*5*p.sp+p.ph)*s*.5,h2=s*(2.4+E*1.4+st.cheer*1.2);c.strokeStyle='#050309';c.lineWidth=s*.45;c.beginPath();c.moveTo(x-s*.9,y-s);c.lineTo(x-s*1.3+w1,y-s-h2);c.moveTo(x+s*.9,y-s);c.lineTo(x+s*1.3-w1,y-s-h2*.9);c.stroke()}});
+  if(fx.flash!==false){c.save();c.globalCompositeOperation='lighter';phones.forEach(p=>{if(!p.on)return;const up=st.colUp[Math.min(st.colUp.length-1,Math.floor(p.x/14))]||0;const a=(.22+.28*(.5+.5*Math.sin(T*p.sp+p.ph)))*(.5+(1-E)*.5+(q.seg.preset==='breakdown'?.5:0)),gr=c.createRadialGradient(p.x,p.y-up,0,p.x,p.y-up,p.r*2.2);gr.addColorStop(0,`rgba(190,225,255,${a})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(p.x-p.r*2.2,p.y-up-p.r*2.2,p.r*4.4,p.r*4.4)});c.restore()}
   /* strobe flash on drops */
   if(st.flash>.02&&fx.flash!==false){c.fillStyle=`rgba(255,255,255,${Math.min(.5,st.flash*.45)})`;c.fillRect(0,0,W,H)}
   /* fireworks and confetti (unlocked by hearts, plus the finale) */
@@ -251,15 +265,19 @@ function makeStage(canvas,seed){
   if(mode==='end'&&st.endT>=0){const e=st.endT,x=lerp(-W*1.2,0,1-Math.pow(1-clamp(e/1.1,0,1),3)),yb=H*.43;c.save();c.translate(x,0);c.fillStyle='rgba(8,6,16,.9)';c.fillRect(0,yb-48,W,96);c.fillStyle='#ffd34a';c.fillRect(0,yb-48,W,4);c.fillRect(0,yb+44,W,4);
    c.font='46px "Press Start 2P",monospace';c.textAlign='center';c.textBaseline='middle';c.fillStyle='#000';c.fillText('THANKS FOR WATCHING!',W/2+4,yb+4);const gr2=c.createLinearGradient(0,yb-26,0,yb+26);gr2.addColorStop(0,'#fff6c8');gr2.addColorStop(.5,'#ffd34a');gr2.addColorStop(1,'#d99a12');c.fillStyle=gr2;c.shadowColor='#ffb020';c.shadowBlur=18;c.fillText('THANKS FOR WATCHING!',W/2,yb);c.restore()}
  };
- st.setScript=(s,hits)=>{S.script=s;S.hits=hits||[];S.theme=VARIANT[s.theme]!==undefined?s.theme:'city';st.hitIdx=0;st.lastHit=-1;st.lastStartTrack=-2};
- st.setTheme=t=>{S.theme=VARIANT[t]!==undefined?t:'city'};st.setHits=h=>{S.hits=h;st.hitIdx=0;st.lastHit=-1};st.setPlate=i=>{S.plate=i;for(const k in plates)delete plates[k]};
+ st.setScript=(s,hits)=>{S.script=s;S.hits=hits||[];S.theme=VARIANT[s.theme]!==undefined?s.theme:'city';st.look=null;st.hitIdx=0;st.lastHit=-1;st.lastStartTrack=-2};
+ st.setTheme=t=>{S.theme=VARIANT[t]!==undefined?t:'city';st.look=null};st.setHits=h=>{S.hits=h;st.hitIdx=0;st.lastHit=-1};st.setPlate=i=>{S.plate=i;for(const k in L)delete L[k];for(const k in C)delete C[k];medTop=0};
  st.setHearts=n=>{st.hearts=n};st.reset=()=>{st.hitIdx=0;st.lastHit=-1;st.fireworks=[];st.confetti=[];st.endT=-1;st.lastStartTrack=-2;st.lastDrop=-1};
- st.canvas=canvas;st.burst=burst;st.script=()=>S.script;st.themeThumb=name=>plateFor(name);
+ st.canvas=canvas;st.burst=burst;st.script=()=>S.script;st.themeThumb=name=>compFor(name);
  return st;
 }
 
 /* ---------- helpers for loading ---------- */
-function loadPlate(){return new Promise(r=>{const i=new Image();i.src=new URL('show-stage.webp?v=2',document.baseURI).href;i.onload=()=>r(i);i.onerror=()=>r(null)})}
+async function loadPlate(){
+ const base=u=>new URL(u,document.baseURI).href,ld=u=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=base(u)}),V='?v=3';
+ const [bg,crowd,torso,head,hl,hr,meta]=await Promise.all([ld('show-bg.webp'+V),ld('show-crowd.webp'+V),ld('show-dj-torso.webp'+V),ld('show-dj-head.webp'+V),ld('show-dj-hl.webp'+V),ld('show-dj-hr.webp'+V),fetch(base('show-layers.json'+V)).then(r=>r.json()).catch(()=>null)]);
+ return(bg&&crowd&&torso&&head&&hl&&hr&&meta)?{bg,crowd,torso,head,hl,hr,meta}:null;
+}
 async function loadFonts(){await Promise.all(['28px Anton','13px "Press Start 2P"'].map(f=>document.fonts.load(f).catch(()=>{})))}
 async function loadTracks(script,ctx){
  const bufs=[],data=[];

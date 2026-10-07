@@ -18,6 +18,8 @@ function css(){
 .shbox canvas.hv{pointer-events:none;image-rendering:auto}
 .shnp{position:absolute;left:12px;top:12px;display:flex;gap:10px;align-items:center;background:rgba(8,6,16,.78);border:1px solid #2a2542;padding:8px 12px 8px 8px;backdrop-filter:blur(3px);max-width:46%}
 .shnp img{width:46px;height:46px;object-fit:cover;background:#15121f}
+.shnp .shcart{display:block;margin-top:7px;background:var(--red);border:0;color:#fff;font:700 10px Montserrat;letter-spacing:.14em;padding:7px 10px;cursor:pointer}
+.shnp .shcart.in{background:#1a1730;color:#6fd08c;border:1px solid #2f6a46}
 .shnp small{display:block;font:600 9px Montserrat;letter-spacing:.28em;color:#8e8aa8}
 .shnp b{display:block;font:700 15px Montserrat;letter-spacing:.1em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
 .shnp span{font:500 11px Montserrat;color:#a9a5c0;letter-spacing:.08em}
@@ -69,6 +71,7 @@ function build(){
  <form class="shsub" id="shSub"><label>GET A REMINDER BEFORE THE NEXT SHOW (ONLY SHOW AND NEW DROP NEWS, NO SPAM)</label><input type="email" id="shEm" placeholder="your@email.com" autocomplete="email" required><input class="hp" type="text" id="shHp" tabindex="-1" autocomplete="off"><button type="submit">REMIND ME</button><div class="sm" id="shSm"></div></form></div>`;
  P.cv=P.root.querySelector('#shCv');P.hv=P.root.querySelector('#shHv');P.hx=P.hv.getContext('2d');
  P.root.querySelector('#shTap').onclick=tap;
+ P.root.querySelector('#shNp').onclick=e=>{const b=e.target.closest('.shcart');if(!b)return;toggleCart('b:'+b.dataset.id,b);P.lastNp=null};
  P.root.querySelector('#shMute').onclick=()=>{P.muted=!P.muted;if(P.master)P.master.gain.value=P.muted?0:1;P.root.querySelector('#shMute').textContent='SOUND: '+(P.muted?'OFF':'ON')};
  P.root.querySelectorAll('.shtabs button').forEach(b=>b.onclick=()=>{P.tab=b.dataset.t;P.root.querySelectorAll('.shtabs button').forEach(x=>x.classList.toggle('on',x===b));renderList()});
  P.root.querySelector('#shSub').onsubmit=async e=>{e.preventDefault();const sm=P.root.querySelector('#shSm');sm.textContent='Saving...';const r=await api({action:'subscribe',email:P.root.querySelector('#shEm').value,website:P.root.querySelector('#shHp').value,source:'show'});sm.textContent=r.ok?'You are on the list. See you at the next show!':(r.error||'Something went wrong.');if(r.ok)P.root.querySelector('#shEm').value=''};
@@ -115,7 +118,7 @@ async function start(live){
  try{
   if(!P.actx)P.actx=new (window.AudioContext||window.webkitAudioContext)();await P.actx.resume();
   await M.loadFonts();if(!P.hero){P.hero=await M.loadPlate();P.stage.setPlate(P.hero)}
-  const script=s.script;script.tracks.forEach(t=>{if(t.audio&&!/^https?:/.test(t.audio))t.audio=pub(t.audio);if(t.cover&&!/^https?:/.test(t.cover))t.cover=pub(t.cover)});
+  const script=s.script;script.tracks.forEach(t=>{if(t.audio&&!/^https?:/.test(t.audio))t.audio=pub(t.audio);if(t.cover&&!/^https?:/.test(t.cover))t.cover=pub(t.cover);if(!t.cover)t.cover=stockCover(t.title,96)});
   const L=await M.loadTracks(script,P.actx);P.data=L;
   P.hits=M.hitTimeline(script,L.data);P.stage.setScript(script,P.hits);P.stage.setHearts(P.hearts);P.stage.reset();
   const from=live?clampT((now()-new Date(s.schedule_at).getTime())/1000,script.len):0;
@@ -192,7 +195,7 @@ function frame(ts){
  if(mode==='end'&&Math.random()<dt*10)spawnHeart(false);
  drawHearts(dt);
  if(P.playing&&s){const k=s.script.tracks[M.trackAt(s.script,T)],np=P.root.querySelector('#shNp');
-  if(P.lastNp!==(k?k.title:'')+Math.floor(T)){P.lastNp=(k?k.title:'')+Math.floor(T);np.innerHTML=k?`${k.cover?`<img src="${esc(k.cover)}" alt="">`:''}<div><small>NOW PLAYING</small><b>${esc(k.title)}</b><span>${[k.bpm&&k.bpm+' BPM',k.key].filter(Boolean).join('  ')}${k.bpm||k.key?'   ':''}${M.fmt(T)} / ${M.fmt(s.script.len)}</span></div>`:`<div><small>${esc(s.title).toUpperCase()}</small><span>${M.fmt(T)} / ${M.fmt(s.script.len)}</span></div>`}}
+  if(P.lastNp!==(k?k.title:'')+Math.floor(T)){P.lastNp=(k?k.title:'')+Math.floor(T);const bt=k&&(typeof beats!=='undefined'?beats:[]).find(b=>String(b.id)===String(k.id)),inC=bt&&cart.has('b:'+bt.id);np.innerHTML=k?`${k.cover?`<img src="${esc(k.cover)}" alt="">`:''}<div><small>NOW PLAYING</small><b>${esc(k.title)}</b><span>${[k.bpm&&k.bpm+' BPM',k.key].filter(Boolean).join('  ')}${k.bpm||k.key?'   ':''}${M.fmt(T)} / ${M.fmt(s.script.len)}</span>${bt?`<button class="shcart${inC?' in':''}" data-id="${esc(bt.id)}">${inC?'IN CART':'ADD TO CART  '+money(eff(bt))}</button>`:''}</div>`:`<div><small>${esc(s.title).toUpperCase()}</small><span>${M.fmt(T)} / ${M.fmt(s.script.len)}</span></div>`}}
  if(ts-P.pollT>4000){P.pollT=ts;poll()}if(ts-P.flushT>1500){P.flushT=ts;flush()}
 }
 function audio(){
