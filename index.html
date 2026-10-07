@@ -294,6 +294,7 @@ footer.f a:hover{color:#fff}
  </div>
 </div>
 
+<div class="modal" id="cfm" style="z-index:95"><div class="box"><h3 id="cfmT">CONFIRM</h3><div id="cfmM" style="font:500 14px/1.7 Montserrat;color:#d9d9dc"></div><div style="display:flex;gap:10px;margin-top:20px"><button class="go" id="cfmNo" style="background:#2a2a2e;margin:0">CANCEL</button><button class="go" id="cfmYes" style="margin:0">DELETE</button></div></div></div>
 <div id="toast"></div>
 <div class="grain"></div>
 <div id="enter"><svg class="crown" viewBox="0 0 120 84" aria-hidden="true"><path class="cp" d="M10 66 L17 20 L42 46 L60 10 L78 46 L103 20 L110 66 Z M14 76 H106"/></svg><h1 id="enterT">MZPRD</h1><button id="go">ENTER</button><p>SOUND ON</p></div>
@@ -919,10 +920,17 @@ function putWithProgress(url,file,onp){return new Promise((res,rej)=>{const x=ne
  x.onload=()=>(x.status>=200&&x.status<300)?res():rej(new Error('Upload failed ('+x.status+').'));
  x.onerror=()=>rej(new Error('Upload failed. Check your connection.'));x.send(file)})}
 async function rmObj(bucket,path){
- if(!path)return;
- if(String(path).indexOf('r2:')===0){try{await adminCall({action:'r2-delete',key:String(path).slice(3)})}catch(e){}}
- else{await sb.storage.from(bucket).remove([path])}
+ if(!path)return true;
+ try{
+  if(String(path).indexOf('r2:')===0){const r=await adminCall({action:'r2-delete',key:String(path).slice(3)});return r.ok!==false}
+  const r=await sb.storage.from(bucket).remove([path]);return !r.error;
+ }catch(e){return false}
 }
+function askConfirm(title,msg,yes){return new Promise(res=>{
+ $('#cfmT').textContent=title;$('#cfmM').textContent=msg;$('#cfmYes').textContent=yes||'DELETE';const m=$('#cfm');m.classList.add('on');
+ const done=v=>{m.classList.remove('on');$('#cfmYes').onclick=null;$('#cfmNo').onclick=null;m.onclick=null;res(v)};
+ $('#cfmYes').onclick=()=>done(true);$('#cfmNo').onclick=()=>done(false);m.onclick=e=>{if(e.target===m)done(false)};
+})}
 async function upload(file,bucket,folder,onp){
  const ext=(file.name.match(/\.[A-Za-z0-9]+$/)||[''])[0].toLowerCase();
  if(bucket==='private-files'){const r=await adminCall({action:'r2-upload-url',folder:folder,ext:ext});await putWithProgress(r.url,file,onp);return 'r2:'+r.key}
@@ -957,12 +965,15 @@ async function boSave(ev){
  }
 }
 async function boDelete(r){
- if(!confirm('Delete "'+r.title+'" and its files from Supabase? This cannot be undone.'))return;
- const F=FIELDS[tab];
- for(const [k,,,bucket] of F.files){if(r[k])await rmObj(bucket,r[k])}
+ const ok=await askConfirm('DELETE "'+String(r.title).toUpperCase()+'"?','This permanently deletes it and all of its files from Supabase and Cloudflare. This cannot be undone.');
+ if(!ok)return;
+ const F=FIELDS[tab];toast('DELETING...');
+ let failed=0;
+ for(const f of F.files){const k=f[0],bucket=f[3];if(r[k]){if(!(await rmObj(bucket,r[k])))failed++}}
  const {error}=await sb.from(F.table).delete().eq('id',r.id);
  if(error){toast('DELETE FAILED: '+error.message);return}
- toast('DELETED');editing=null;await loadAll();boRender();
+ toast(failed?'DELETED (but '+failed+' file(s) could not be removed - check storage)':'DELETED EVERYWHERE');
+ editing=null;await loadAll();boRender();
 }
 
 sb.auth.onAuthStateChange(()=>{});
