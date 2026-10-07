@@ -164,7 +164,7 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity
 
 fs.mkdirSync(DIST, { recursive: true })
 for (const e of fs.readdirSync(DIST)) fs.rmSync(path.join(DIST, e), { recursive: true, force: true })
-for (const f of ['hero.jpg', 'girl.png', 'chain.png', 'studio.js', 'slots.js', 'email.js', 'mix.js', 'thumbs.js', 'mp4-muxer.js', 'CNAME']) {
+for (const f of ['hero.jpg', 'girl.png', 'chain.png', 'studio.js', 'slots.js', 'show-stage.webp', 'show.js', 'showpage.js', 'showmaker.js', 'email.js', 'mix.js', 'thumbs.js', 'mp4-muxer.js', 'CNAME']) {
   if (fs.existsSync(path.join(ROOT, f))) fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f))
 }
 const urls = []
@@ -230,7 +230,7 @@ for (const c of [...beatCats, ...packCats]) {
 }
 
 /* ----- back office pages (not indexed) ----- */
-for (const t of ['', 'beats', 'packs', 'bundles', 'promo', 'sales', 'video', 'email']) {
+for (const t of ['', 'beats', 'packs', 'bundles', 'promo', 'sales', 'video', 'email', 'show']) {
   const rel = t ? 'admin/' + t : 'admin'
   write(rel, render({
     path: rel + '/', title: 'Back office | MZPRD', desc: 'Back office.', h1: 'Back office', noindex: true,
@@ -238,16 +238,16 @@ for (const t of ['', 'beats', 'packs', 'bundles', 'promo', 'sales', 'video', 'em
   }))
 }
 
-/* ----- merch ----- */
+/* ----- weekly show ----- */
 {
-  const content = '<p>Hoodies, tees and crown gear are dropping soon.</p>'
-  write('merch', render({
-    path: 'merch/', title: 'Merch | MZPRD (Meztheprod)',
-    desc: 'MZPRD merch: hoodies, tees and crown gear, dropping soon.',
-    h1: 'MZPRD Merch', page: { kind: 'view', v: 'merch', title: 'Merch | MZPRD (Meztheprod)' }, content,
-    ld: [crumbsLd([['Home', ''], ['Merch', 'merch/']])],
+  const content = '<p>A new 5 minute pixel show every week: the MZPRD producer performs the newest beats live on a pixel stage while the crowd sends hearts. Watch live, or replay past shows.</p>'
+  write('show', render({
+    path: 'show/', title: 'Weekly Pixel Show | MZPRD (Meztheprod)',
+    desc: 'A new 5 minute pixel-art beat show every week from MZPRD (Meztheprod). Watch live, send hearts, or replay past shows.',
+    h1: 'MZPRD Weekly Pixel Show', page: { kind: 'view', v: 'show', title: 'Weekly Pixel Show | MZPRD (Meztheprod)' }, content,
+    ld: [crumbsLd([['Home', ''], ['Show', 'show/']])],
   }))
-  addUrl('merch/')
+  addUrl('show/')
 }
 
 /* ----- one page per beat ----- */
