@@ -473,6 +473,7 @@ function drawMpc(t){
  y.setTransform(1,0,0,1,0,0);y.clearRect(0,0,l.width,l.height);
  y.setTransform(w*MP.ux/MP.W,w*MP.uy/MP.W,w*MP.vx/MP.H,w*MP.vy/MP.H,(MP.ox-MP.x)*w,(MP.oy-MP.y)*w);
  const W=MP.W,H=MP.H;
+ y.translate(W,H);y.scale(-1,-1);/* rotate 180 degrees so the screen faces the producer */
  const bg=y.createLinearGradient(0,0,0,H);bg.addColorStop(0,`rgb(${10+lit*30|0},${70+lit*60|0},${140+lit*60|0})`);bg.addColorStop(1,`rgb(5,${35+lit*30|0},${90+lit*40|0})`);
  y.fillStyle=bg;y.fillRect(0,0,W,H);
  y.fillStyle='rgba(255,255,255,.07)';for(let r=3;r<H;r+=3)y.fillRect(0,r,W,.8);
