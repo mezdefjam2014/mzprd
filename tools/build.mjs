@@ -39,7 +39,7 @@ const tagsOf = (b) => String(b.tags || '').split(/[\/,]/).map((t) => t.trim()).f
 const hay = (x) => (String(x.tags || '') + ' ' + x.title + ' ' + String(x.description || '')).toLowerCase()
 const stockH = (t) => { const s = String(t || 'BEAT').toUpperCase().replace(/\s+/g, ' ').trim() || 'BEAT'; let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return h.toString(36) }
 for (const b of beats) if (!b.cover_path) { const u = PUB + 'stock/' + b.id + '-' + stockH(b.title) + '.jpg'; try { if ((await fetch(u, { method: 'HEAD' })).ok) b._stock = u } catch {} }
-const cover = (x) => (x.cover_path ? PUB + x.cover_path : x._stock || SITE + '/hero.jpg')
+const cover = (x) => (x.cover_path ? PUB + x.cover_path : x._stock || SITE + '/og.jpg')
 const genreOf = (b) => tagsOf(b)[0] || 'Rap and Hip Hop'
 const today = new Date().toISOString().slice(0, 10)
 
@@ -104,11 +104,12 @@ function headHtml(s) {
     `<meta property="og:title" content="${esc(s.title)}">`,
     `<meta property="og:description" content="${esc(s.desc)}">`,
     `<meta property="og:url" content="${url}">`,
-    `<meta property="og:image" content="${esc(s.image || SITE + '/hero.jpg')}">`,
+    `<meta property="og:image" content="${esc(s.image || SITE + '/og.jpg')}">`,
+    s.image ? '' : '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="MZPRD: rap, hip hop and R&amp;B beats and sample packs by Meztheprod">',
     '<meta name="twitter:card" content="summary_large_image">',
     `<meta name="twitter:title" content="${esc(s.title)}">`,
     `<meta name="twitter:description" content="${esc(s.desc)}">`,
-    `<meta name="twitter:image" content="${esc(s.image || SITE + '/hero.jpg')}">`,
+    `<meta name="twitter:image" content="${esc(s.image || SITE + '/og.jpg')}">`,
     ...lds.map((o) => `<script type="application/ld+json">${json(o)}</script>`),
   ].filter(Boolean).join('\n')
 }
@@ -166,7 +167,7 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity
 
 fs.mkdirSync(DIST, { recursive: true })
 for (const e of fs.readdirSync(DIST)) fs.rmSync(path.join(DIST, e), { recursive: true, force: true })
-for (const f of ['hero.jpg', 'hero.webp', 'girl.png', 'girl.webp', 'chain.png', 'studio.js', 'slots.js', 'show-stage.webp', 'packbuilder.js', 'show.js', 'showpage.js', 'showmaker.js', 'email.js', 'mix.js', 'thumbs.js', 'mp4-muxer.js', 'CNAME']) {
+for (const f of ['hero.jpg', 'hero.webp', 'og.jpg', 'favicon.ico', 'favicon-32.png', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'site.webmanifest', 'girl.png', 'girl.webp', 'chain.png', 'studio.js', 'slots.js', 'show-stage.webp', 'packbuilder.js', 'show.js', 'showpage.js', 'showmaker.js', 'email.js', 'mix.js', 'thumbs.js', 'mp4-muxer.js', 'CNAME']) {
   if (fs.existsSync(path.join(ROOT, f))) fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f))
 }
 if (fs.existsSync(path.join(ROOT, 'sfx'))) fs.cpSync(path.join(ROOT, 'sfx'), path.join(DIST, 'sfx'), { recursive: true })
