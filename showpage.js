@@ -99,7 +99,7 @@ async function load(){
 function applyCurrent(){
  const s=P.cur;stop(false);
  if(!s){P.stage.setScript(M.defaultScript(300),[]);P.hearts=0;P.shown=0;setHearts(0);gate();P.root.querySelector('#shNp').style.display='none';P.root.querySelector('#shMute').style.display='none';return}
- P.stage.setScript(s.script,[]);P.stage.setHearts(Number(s.hearts));P.hearts=Number(s.hearts);P.shown=P.hearts;setHearts(P.hearts,true);milestones();gate();
+ P.stage.setScript(s.script,[]);const sd=(P.seedFor===s.id?P.seed:0);P.stage.setHearts(Number(s.hearts)+sd);P.hearts=Number(s.hearts)+sd;P.shown=P.hearts;setHearts(P.hearts,true);milestones();gate();
 }
 /* ---------- gate overlay (countdown / enter / replay) ---------- */
 function gate(){
@@ -120,6 +120,7 @@ async function start(live){
   await M.loadFonts();if(!P.hero){P.hero=await M.loadPlate();P.stage.setPlate(P.hero)}
   const script=s.script;script.tracks.forEach(t=>{if(t.audio&&!/^https?:/.test(t.audio))t.audio=pub(t.audio);const lb=(typeof beats!=='undefined'&&beats||[]).find(b=>String(b.id)===String(t.id));if(lb){t.title=lb.title;t.cover=coverUrl(lb,96);return}if(t.cover&&!/^https?:/.test(t.cover))t.cover=pub(t.cover);if(!t.cover)t.cover=stockCover(t.title,96)});
   const L=await M.loadTracks(script,P.actx);P.data=L;
+  if(live&&P.seedFor!==s.id){P.seedFor=s.id;P.seed=70+Math.floor(Math.random()*431);P.hearts+=P.seed;P.shown=P.hearts;setHearts(P.hearts,true);milestones()}
   P.hits=M.hitTimeline(script,L.data);P.stage.setScript(script,P.hits);P.stage.setHearts(P.hearts);P.stage.reset();
   const from=live?clampT((now()-new Date(s.schedule_at).getTime())/1000,script.len):0;
   if(live&&from>=script.len-2){P.loading=false;gate();return}
@@ -159,7 +160,7 @@ async function flush(){
 const realShow=s=>!!(s&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(s.id||'')));
 async function poll(){
  const s=P.cur;if(!realShow(s)||document.hidden)return;const r=await api({action:'hearts',show:s.id});if(!r||r.hearts==null)return;
- const mine=P.pending;const total=r.hearts+mine,delta=total-P.hearts;
+ const mine=P.pending;const total=r.hearts+mine+(P.seedFor===s.id?P.seed:0),delta=total-P.hearts;
  if(delta>0){P.hearts=total;P.stage.setHearts(P.hearts);for(let i=0;i<Math.min(24,delta);i++)setTimeout(()=>spawnHeart(false),Math.random()*3000);setHearts(P.hearts);milestones()}
  else if(!P.playing&&r.hearts>P.hearts){P.hearts=r.hearts;setHearts(P.hearts);milestones()}
 }

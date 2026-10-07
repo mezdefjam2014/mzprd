@@ -838,7 +838,7 @@ $('#search').onclick=()=>toast('SEARCH COMING SOON');
 const CAMF={beats:null,kits:[.108,.705,1.8],show:[.287,.15,1.8],about:[.897,.43,1.8]};
 let camT='beats';const cam={fx:.5,fy:.5,z:1};
 function hideSeo(){const e=document.getElementById('seo');if(e)e.style.display='none'}
-async function openShow(){try{if(!window.MZShow)await loadScript('show.js?v=13');if(!window.showPageOpen)await loadScript('showpage.js?v=11');await window.showPageOpen(document.getElementById('shRoot'))}catch(e){toast('SHOW FAILED TO LOAD')}}
+async function openShow(){try{if(!window.MZShow)await loadScript('show.js?v=13');if(!window.showPageOpen)await loadScript('showpage.js?v=12');await window.showPageOpen(document.getElementById('shRoot'))}catch(e){toast('SHOW FAILED TO LOAD')}}
 function showView(v){
  camT=v==='beat'?(pageKind==='p'?'kits':'beats'):v;
  {const pl=document.querySelector('.plc');if(pl)pl.style.display=v==='beats'?'':'none'}
