@@ -61,6 +61,30 @@ button{cursor:pointer}
 .bthbtns .go{flex:1;margin:0;min-width:120px}
 #recBtn{background:transparent;border:1.5px solid var(--red);color:var(--red);font:700 10px Montserrat;letter-spacing:.2em;padding:0 12px;height:40px;display:none}
 #recBtn:hover{background:var(--red);color:#fff}
+.deals{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px;position:relative;z-index:1}
+.deals:empty{display:none}
+.deals span{border:1px solid var(--gold);color:var(--gold);font:700 10px Montserrat;letter-spacing:.2em;padding:8px 11px;background:rgba(232,185,74,.07);text-transform:uppercase}
+.cvlk{position:absolute;top:8px;right:8px;width:38px;height:38px;border-radius:50%;background:rgba(8,8,10,.72);border:1.5px solid #777;color:#fff;display:grid;place-items:center;padding:0;z-index:2}
+.cvlk svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8}
+.cvlk.on{color:var(--red);border-color:var(--red)}.cvlk.on svg{fill:var(--red)}
+.cvlk:hover{border-color:#fff}
+#favBtn .badge{background:var(--red)}
+#favList .ci button{margin-left:8px;border:1px solid #4a4a50;padding:6px 8px;color:#fff}
+#favList .ci button:hover{border-color:var(--red)}
+.bf select{width:100%;background:#050506;border:1.5px solid #34343a;color:#fff;padding:11px;font:500 14px Montserrat}
+.chks{max-height:210px;overflow:auto;border:1px solid #2a2a2e;padding:6px 10px;background:#050506}
+.chks div{display:flex;gap:10px;align-items:center;padding:7px 0;font:500 13px Montserrat;color:#d9d9dc;border-bottom:1px solid #16161a}
+.chks input{width:18px;height:18px;accent-color:var(--red);flex:none}
+.kp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.kp div{background:#050506;border:1px solid #2a2a2e;padding:12px}
+.kp b{display:block;font:700 20px Montserrat;color:#fff;margin-bottom:4px}
+.kp span{font:600 9px Montserrat;letter-spacing:.25em;color:#6c6c73}
+.kp .g b{color:var(--gold)}
+.dtab{width:100%;border-collapse:collapse;margin-top:6px}
+.dtab td,.dtab th{padding:9px 6px;border-bottom:1px solid #1d1d21;font:500 12px Montserrat;color:#d9d9dc;text-align:left}
+.dtab th{font:600 9px Montserrat;letter-spacing:.25em;color:#6c6c73}
+.dcard{background:#0c0c0f;border:1px solid #26262b;padding:14px;margin-bottom:14px}
+.dcard h4{font:700 11px Montserrat;letter-spacing:.3em;color:var(--gold);margin-bottom:10px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .grain{position:fixed;inset:0;pointer-events:none;z-index:30;opacity:.07;background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
 header{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:clamp(14px,2.8vw,40px) 8.1%}
@@ -345,6 +369,7 @@ footer.f a:hover{color:#fff}
   <div class="tools">
    <button id="dlPill" class="pill" style="display:none" aria-label="Your downloads"></button>
    <button id="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></button>
+   <button id="favBtn" aria-label="Saved beats and packs"><svg viewBox="0 0 24 24"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 5.800-8 11-8 11z"/></svg><span class="badge" id="favN" style="display:none">0</span></button>
    <button id="cartBtn" aria-label="Cart"><svg viewBox="0 0 24 24"><path d="M2 3h3l2.5 12h11L21 7H6"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span class="badge" id="badge">0</span></button>
   </div>
  </header>
@@ -352,6 +377,7 @@ footer.f a:hover{color:#fff}
 
 <div class="case">
  <i class="rv a"></i><i class="rv b"></i><i class="rv c"></i><i class="rv d"></i>
+ <div class="deals" id="deals"></div>
  <div class="view on" id="v-beats"><div id="list"></div></div>
  <div class="view" id="v-kits"><div id="packs"></div></div>
  <div class="view" id="v-beat"><div id="bpage"></div></div>
@@ -384,7 +410,7 @@ footer.f a:hover{color:#fff}
 </div></div>
 
 <div id="bo">
- <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="promo">PROMO</button><button data-t="orders">ORDERS</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
+ <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="bundles">BUNDLES</button><button data-t="promo">PROMO</button><button data-t="orders">ORDERS</button><button data-t="dash">DASHBOARD</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
  <div class="bo2">
   <form class="bf" id="bf"></form>
   <div><div class="bl" id="bl"></div></div>
@@ -410,6 +436,7 @@ footer.f a:hover{color:#fff}
  </div>
  <div class="bthnote">YOUR TAKE STAYS IN THIS PAGE ONLY. IT CANNOT BE SAVED OR DOWNLOADED. BUY THE BEAT TO GET THE FILES.</div>
 </div></div>
+<div class="modal" id="fav"><div class="box"><button class="x" id="favX" aria-label="Close">&times;</button><h3>SAVED</h3><div id="favList"></div></div></div>
 <div class="modal" id="cfm" style="z-index:95"><div class="box"><h3 id="cfmT">CONFIRM</h3><div id="cfmM" style="font:500 14px/1.7 Montserrat;color:#d9d9dc"></div><div style="display:flex;gap:10px;margin-top:20px"><button class="go" id="cfmNo" style="background:#2a2a2e;margin:0">CANCEL</button><button class="go" id="cfmYes" style="margin:0">DELETE</button></div></div></div>
 <div id="toast"></div>
 <div class="grain"></div>
@@ -430,7 +457,7 @@ const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearT
 const DEMO=[
  {id:'d1',title:'Demo Loop One',musical_key:'D#m',bpm:92,tags:'Boom Bap / Demo',price:29.99,preview_path:'demo.wav'},
  {id:'d2',title:'Demo Loop Two',musical_key:'Fm',bpm:92,tags:'Trap / Demo',price:29.99,preview_path:'demo.wav'}];
-let promo={promo_enabled:false,promo_price:10,promo_text:'ALL BEATS',promo_image_path:null},beats=[],packs=[],cur=-1,playing=false,cart=new Set(),liked=new Set(),level=0,ac,an,data,hits=[];
+let promo={promo_enabled:false,promo_price:10,promo_text:'ALL BEATS',promo_image_path:null},beats=[],packs=[],cur=-1,playing=false,cart=new Set(),liked=new Set(),bundles=[],level=0,ac,an,data,hits=[];
 const au=$('#au');
 
 /* audio */
@@ -446,7 +473,7 @@ function playPack(i){
  if(!P.preview_path){toast('NO PREVIEW UPLOADED YET');return}
  initAudio();ac.resume();
  if(i===curPack&&au.src){au.paused?au.play():au.pause();return}
- curPack=i;cur=-1;au.src=pub(P.preview_path);au.play().catch(()=>toast('COULD NOT PLAY'));ui();
+ curPack=i;cur=-1;au.src=pub(P.preview_path);au.play().catch(()=>toast('COULD NOT PLAY'));ui();track('pack_play',P.id);
 }
 function goPack(d){const ok=packs.map((p,k)=>p.preview_path?k:-1).filter(k=>k>=0);if(!ok.length)return;let pos=ok.indexOf(curPack);pos=pos<0?0:(pos+d+ok.length)%ok.length;playPack(ok[pos])}
 function play(i){
@@ -454,7 +481,7 @@ function play(i){
  if(!B.preview_path){toast('NO PREVIEW UPLOADED YET');return}
  initAudio();ac.resume();
  if(i===cur&&au.src){au.paused?au.play():au.pause();return}
- curPack=-1;cur=i;au.src=pub(B.preview_path);au.play().catch(()=>toast('COULD NOT PLAY'));ui();
+ curPack=-1;cur=i;au.src=pub(B.preview_path);au.play().catch(()=>toast('COULD NOT PLAY'));ui();track('play',B.id);
 }
 function go(d){if(curPack>=0){goPack(d);return}if(!beats.length)return;play(cur<0?0:(cur+d+beats.length)%beats.length)}
 au.onplay=()=>{playing=true;ui()};au.onpause=()=>{playing=false;hits=[];ui()};
@@ -511,7 +538,7 @@ function renderBeats(){
   d.querySelector('.pl').onclick=()=>play(i);
   d.firstElementChild.onclick=d.querySelector('.ti').onclick=()=>{location.hash='#/beat/'+encodeURIComponent(bslug(B))};
   cv.onclick=e=>{if(cur!==i){play(i);return}const r=cv.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration};
-  d.querySelector('.lk').onclick=e=>{const k='b'+B.id;liked.has(k)?liked.delete(k):liked.add(k);e.currentTarget.classList.toggle('on',liked.has(k))};
+  d.querySelector('.lk').onclick=()=>toggleLike('b:'+B.id);
   d.querySelector('.sh').onclick=()=>{try{navigator.clipboard.writeText(location.href.split('#')[0]+'#'+encodeURIComponent(B.title))}catch(e){}toast('LINK COPIED')};
   const dlb=d.querySelector('.dl');if(dlb)dlb.onclick=()=>freeDownload(B);
   d.querySelector('.cart').onclick=e=>toggleCart('b:'+B.id,e.currentTarget);
@@ -525,10 +552,11 @@ function renderPacks(){
  el.innerHTML='<div class="crate"><div class="grid"></div><div class="cfront">SAMPLE PACK CRATE</div></div>';const g=el.querySelector('.grid');
  packs.forEach((P,i)=>{
   const c=document.createElement('div');c.className='card';
-  c.innerHTML=`<div class="cv">${thumb(P,i+2,'')}${P.preview_path?'<button class="pl" aria-label="Play preview of '+esc(P.title)+'"><i></i></button><div class="cprog"><b></b></div>':'<span class="nop">NO PREVIEW</span>'}</div><div class="ti">${esc(P.title)}</div><div class="ds">${esc(P.description||'')}</div><div class="pr">${money(P.price)}</div><button class="cart">ADD TO CART</button>${P.free_download&&P.preview_path?'<button class="cart fd" style="margin-top:-2px">FREE DOWNLOAD</button>':''}`;
+  c.innerHTML=`<div class="cv">${thumb(P,i+2,'')}${P.preview_path?'<button class="pl" aria-label="Play preview of '+esc(P.title)+'"><i></i></button><div class="cprog"><b></b></div>':'<span class="nop">NO PREVIEW</span>'}<button class="cvlk" aria-label="Save">${I.heart}</button></div><div class="ti">${esc(P.title)}</div><div class="ds">${esc(P.description||'')}</div><div class="pr">${money(P.price)}</div><button class="cart">ADD TO CART</button>${P.free_download&&P.preview_path?'<button class="cart fd" style="margin-top:-2px">FREE DOWNLOAD</button>':''}`;
   c.querySelector('.cart').onclick=e=>toggleCart('p:'+P.id,e.currentTarget);
   if(P.preview_path){c.querySelector('.cv').onclick=()=>playPack(i)}
   c.querySelector('.ti').onclick=()=>{location.hash='#/pack/'+encodeURIComponent(bslug(P))}
+  c.querySelector('.cvlk').onclick=e=>{e.stopPropagation();toggleLike('p:'+P.id)}
   const fd=c.querySelector('.fd');if(fd)fd.onclick=()=>freeDownload(P);g.appendChild(c)});
  paintArt(el);syncCart();
 }
@@ -557,12 +585,46 @@ function syncCart(){
  [...document.querySelectorAll('#packs .card > .cart:not(.fd)')].forEach((b,i)=>{const k='p:'+packs[i]?.id,on=cart.has(k);b.classList.toggle('in',on);b.textContent=on?'IN CART':'ADD TO CART'});
  $('#badge').textContent=cart.size;
  if(cart.size&&typeof mountPaypal==='function'&&!ppRendered&&!ppMounting)mountPaypal();
+ if(typeof syncLikes==='function')syncLikes();
  const pb=$('#bCart');const pit=pageKind==='p'?packs[pageIdx]:beats[pageIdx];if(pb&&pageIdx>=0&&pit){const on=cart.has(pageKind+':'+pit.id);pb.classList.toggle('in',on);pb.textContent=on?'IN CART':'ADD TO CART'}
 }
+function cartLines(){return [...cart].map(k=>{const x=lookup(k);return x?{t:k[0],id:k.slice(2),title:x.title,price:k[0]==='b'?eff(x):Number(x.price),k:k}:null}).filter(Boolean)}
+/* same math as the server, so the cart total always matches what PayPal charges */
+function bundleCalc(lines){
+ let rest=lines.map(l=>Object.assign({},l)),savings=0;const names=[];const key=l=>l.t+':'+l.id;
+ for(const b of bundles.filter(x=>x.kind==='fixed')){
+  const keys=b.item_keys||[];if(!keys.length)continue;
+  const hit=keys.map(k=>rest.find(l=>key(l)===k));
+  if(hit.every(Boolean)){const sum=hit.reduce((t,l)=>t+l.price,0);if(Number(b.price)<sum){savings+=sum-Number(b.price);names.push(b.name);rest=rest.filter(l=>!hit.includes(l))}}
+ }
+ for(const b of bundles.filter(x=>x.kind!=='fixed').sort((x,y)=>y.qty-x.qty)){
+  const t=b.kind==='any_packs'?'p':'b',n=Number(b.qty)||0;if(n<2)continue;
+  let pool=rest.filter(l=>l.t===t).sort((x,y)=>y.price-x.price);
+  while(pool.length>=n){const grp=pool.slice(0,n),sum=grp.reduce((q,l)=>q+l.price,0);if(Number(b.price)>=sum)break;savings+=sum-Number(b.price);names.push(b.name);rest=rest.filter(l=>!grp.includes(l));pool=pool.slice(n)}
+ }
+ return {savings:Math.round(savings*100)/100,names:names};
+}
+function bundleHint(lines){
+ for(const b of bundles.filter(x=>x.kind!=='fixed')){
+  const t=b.kind==='any_packs'?'p':'b',n=Number(b.qty)||0;if(n<2)continue;
+  const mine=lines.filter(l=>l.t===t),c=mine.length;if(!c)continue;const rem=c%n;if(!rem)continue;
+  const need=n-rem,avg=mine.reduce((q,l)=>q+l.price,0)/c;
+  if(need<=2&&Number(b.price)<n*avg)return 'ADD '+need+' MORE '+(t==='b'?'BEAT':'PACK')+(need>1?'S':'')+' TO UNLOCK: '+String(b.name).toUpperCase();
+ }
+ return '';
+}
+function renderDeals(){
+ const el=$('#deals');if(!el)return;
+ el.innerHTML=bundles.map(b=>{const m=money(b.price).replace(/\.00$/,'');const txt=b.kind==='any_beats'?'ANY '+b.qty+' BEATS FOR '+m:b.kind==='any_packs'?'ANY '+b.qty+' PACKS FOR '+m:String(b.name)+': '+m;return '<span>'+esc(txt)+'</span>'}).join('');
+}
 function renderCart(){
- const its=[...cart].map(k=>[k,lookup(k)]).filter(x=>x[1]);
- $('#items').innerHTML=its.length?its.map(([k,x])=>`<div class="ci"><span>${esc(x.title).toUpperCase()}</span><span>${money(k[0]==='b'?eff(x):x.price)}<button data-k="${k}">REMOVE</button></span></div>`).join(''):'<div class="ci"><span>EMPTY</span></div>';
- $('#total').textContent=money(its.reduce((s,[k,x])=>s+(k[0]==='b'?eff(x):Number(x.price)),0));$('#nt').textContent='';
+ const its=cartLines();
+ let html=its.length?its.map(x=>'<div class="ci"><span>'+esc(x.title).toUpperCase()+'</span><span>'+money(x.price)+'<button data-k="'+x.k+'">REMOVE</button></span></div>').join(''):'<div class="ci"><span>EMPTY</span></div>';
+ const bd=bundleCalc(its),gross=its.reduce((q,x)=>q+x.price,0);
+ if(bd.savings>0)html+='<div class="ci" style="color:var(--gold)"><span>BUNDLE: '+esc(bd.names.join(', ')).toUpperCase()+'</span><span>-'+money(bd.savings)+'</span></div>';
+ const hint=bundleHint(its);if(hint)html+='<div class="ci" style="color:var(--gold);border:0;font-size:10px"><span>'+esc(hint)+'</span></div>';
+ $('#items').innerHTML=html;
+ $('#total').textContent=money(gross-bd.savings);$('#nt').textContent='';
  document.querySelectorAll('#items button').forEach(b=>b.onclick=()=>{cart.delete(b.dataset.k);syncCart();renderCart();$('#ppbox').style.display=cart.size?'block':'none';prefetchOrder()});
 }
 const PP_ID='BAAk_pgKpR08tx_Fv0QmKgsVga24tfZI0Rqfxq2v4J27q6GWAcTfVadt2vtvjAanJGlYQ8o_9SjbI_vhkc',FN=SB_URL+'/functions/v1/checkout';
@@ -626,6 +688,31 @@ async function dlGet(b){
 }
 $('#dlPill').onclick=()=>{const o=dlLoad();if(o)showDone(o,false)};
 {const o=dlLoad();if(o)dlStart(o)}
+const LK='mzprd_likes';
+function likedLoad(){try{return new Set(JSON.parse(localStorage.getItem(LK)||'[]'))}catch(e){return new Set()}}
+function likedSave(){try{localStorage.setItem(LK,JSON.stringify([...liked]))}catch(e){}}
+liked=likedLoad();
+function toggleLike(k){const had=liked.has(k);had?liked.delete(k):liked.add(k);likedSave();syncLikes();toast(had?'REMOVED FROM SAVED':'SAVED')}
+function syncLikes(){
+ document.querySelectorAll('#list .lk').forEach((b,i)=>b.classList.toggle('on',!!beats[i]&&liked.has('b:'+beats[i].id)));
+ document.querySelectorAll('#packs .card').forEach((c,i)=>{const b=c.querySelector('.cvlk');if(b)b.classList.toggle('on',!!packs[i]&&liked.has('p:'+packs[i].id))});
+ const bl=$('#bLike');if(bl&&pageIdx>=0){const it=pageKind==='p'?packs[pageIdx]:beats[pageIdx];if(it){const on=liked.has(pageKind+':'+it.id);bl.classList.toggle('in',on);bl.textContent=on?'SAVED':'SAVE'}}
+ const n=[...liked].filter(k=>lookup(k)).length,fb=$('#favN');if(fb){fb.textContent=n;fb.style.display=n?'':'none'}
+}
+function openFav(){
+ const items=[...liked].map(k=>({k:k,x:lookup(k)})).filter(o=>o.x);
+ const L=$('#favList');
+ L.innerHTML=items.length?items.map(o=>'<div class="ci"><span>'+esc(o.x.title).toUpperCase()+'</span><span>'+money(o.k[0]==='b'?eff(o.x):o.x.price)+'<button data-p="'+o.k+'">PLAY</button><button data-c="'+o.k+'">'+(cart.has(o.k)?'IN CART':'ADD')+'</button><button data-r="'+o.k+'" aria-label="Remove">&times;</button></span></div>').join(''):'<div class="ci"><span style="line-height:1.7">NOTHING SAVED YET. TAP THE HEART ON ANY BEAT OR PACK TO KEEP IT HERE.</span></div>';
+ L.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const k=b.dataset.p;$('#fav').classList.remove('on');if(k[0]==='b')play(beats.findIndex(x=>'b:'+x.id===k));else playPack(packs.findIndex(x=>'p:'+x.id===k))});
+ L.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{toggleCart(b.dataset.c,b);b.textContent=cart.has(b.dataset.c)?'IN CART':'ADD'});
+ L.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{liked.delete(b.dataset.r);likedSave();syncLikes();openFav()});
+ $('#fav').classList.add('on');
+}
+$('#favBtn').onclick=openFav;$('#favX').onclick=()=>$('#fav').classList.remove('on');
+$('#fav').onclick=e=>{if(e.target.id==='fav')e.target.classList.remove('on')};
+/* log plays so the dashboard can show what people listen to (one count per beat per visit, never your own) */
+const played=new Set();
+function track(kind,id){if(typeof isAdmin!=='undefined'&&isAdmin)return;if(!/^[0-9a-f-]{36}$/i.test(String(id))||played.has(kind+id))return;played.add(kind+id);try{sb.from('events').insert({kind:kind,item_id:id}).then(()=>{},()=>{})}catch(e){}}
 $('#cartBtn').onclick=()=>{showCartMain();renderCart();$('#modal').classList.add('on');mountPaypal();prefetchOrder()};
 $('#cx').onclick=()=>closeCartModal();$('#lx').onclick=()=>$('#login').classList.remove('on');
 addEventListener('keydown',e=>{if(e.key==='Escape'){const open=$('#modal').classList.contains('on')||$('#login').classList.contains('on');closeCartModal();$('#login').classList.remove('on');if(!open&&pageIdx>=0)closeBeatPage()}});
@@ -635,6 +722,7 @@ const CAMF={beats:null,kits:[.108,.705,1.8],merch:[.287,.15,1.8],about:[.897,.43
 let camT='beats';const cam={fx:.5,fy:.5,z:1};
 function showView(v){
  camT=v==='beat'?(pageKind==='p'?'kits':'beats'):v;
+ {const dl=$('#deals');if(dl)dl.style.display=(v==='about'||v==='merch')?'none':''}
  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.v===(v==='beat'?'beats':v)));
  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
 }
@@ -659,11 +747,12 @@ function showBeatPage(i){
  if(i<0||!beats[i]){box.innerHTML='<button class="back" id="bBack">&larr; ALL BEATS</button><div class="empty"><b>NOT FOUND</b>THIS BEAT IS NOT AVAILABLE</div>';$('#bBack').onclick=()=>{history.pushState(null,'',location.pathname+location.search);route()};showView('beat');return}
  const B=beats[i],tg=(B.tags||'').split('/').map(x=>x.trim()).filter(Boolean),old=promo.promo_enabled&&eff(B)!==Number(B.price);
  const others=beats.map((b,k)=>[b,k]).filter(x=>x[1]!==i).slice(0,4);
- box.innerHTML='<button class="x" id="bX" aria-label="Close beat page">&times;</button><button class="back" id="bBack">&larr; ALL BEATS</button><div class="bp'+(cur===i&&playing?' play':'')+'"><div class="cov">'+thumb(B,i,'')+'</div><div><h1>'+esc(B.title)+'</h1><div class="tgs">'+tg.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div><div class="prc">'+money(eff(B))+(old?'<s>'+money(B.price)+'</s>':'')+'</div><canvas class="bwv" id="bwv"></canvas>'+(B.description?'<div class="d">'+esc(B.description)+'</div>':'')+'<div class="acts2"><button class="pl" id="bPlay" aria-label="Play"><i></i></button><button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(B.preview_path?'<button class="cart" id="bRec" style="border-color:#4a4a50;color:#fff">RECORD OVER IT</button>':'')+(B.free_download&&B.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE BEATS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1],'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
+ box.innerHTML='<button class="x" id="bX" aria-label="Close beat page">&times;</button><button class="back" id="bBack">&larr; ALL BEATS</button><div class="bp'+(cur===i&&playing?' play':'')+'"><div class="cov">'+thumb(B,i,'')+'</div><div><h1>'+esc(B.title)+'</h1><div class="tgs">'+tg.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div><div class="prc">'+money(eff(B))+(old?'<s>'+money(B.price)+'</s>':'')+'</div><canvas class="bwv" id="bwv"></canvas>'+(B.description?'<div class="d">'+esc(B.description)+'</div>':'')+'<div class="acts2"><button class="pl" id="bPlay" aria-label="Play"><i></i></button><button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bLike" style="border-color:#4a4a50;color:#fff">SAVE</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(B.preview_path?'<button class="cart" id="bRec" style="border-color:#4a4a50;color:#fff">RECORD OVER IT</button>':'')+(B.free_download&&B.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE BEATS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1],'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
  paintArt(box);
  $('#bBack').onclick=$('#bX').onclick=closeBeatPage;
  $('#bPlay').onclick=()=>play(i);
  $('#bCart').onclick=e=>toggleCart('b:'+B.id,e.currentTarget);
+ $('#bLike').onclick=()=>{const it=pageKind==='p'?packs[pageIdx]:beats[pageIdx];if(it)toggleLike(pageKind+':'+it.id)};
  $('#bShare').onclick=()=>{try{navigator.clipboard.writeText(location.origin+location.pathname+'#/beat/'+encodeURIComponent(bslug(B)))}catch(e){}toast('LINK COPIED')};
  const f=$('#bFree');if(f)f.onclick=()=>freeDownload(B);
  const rb=$('#bRec');if(rb)rb.onclick=()=>openBooth(i);
@@ -677,11 +766,12 @@ function showPackPage(i){
  const box=$('#bpage');pageIdx=i;pageKind='p';pwv=null;
  if(i<0||!packs[i]){box.innerHTML='<button class="back" id="bBack">&larr; ALL KITS</button><div class="empty"><b>NOT FOUND</b>THIS PACK IS NOT AVAILABLE</div>';$('#bBack').onclick=closeBeatPage;showView('beat');return}
  const P=packs[i],others=packs.map((p,k)=>[p,k]).filter(x=>x[1]!==i).slice(0,4);
- box.innerHTML='<button class="x" id="bX" aria-label="Close pack page">&times;</button><button class="back" id="bBack">&larr; ALL KITS</button><div class="bp'+(curPack===i&&playing?' play':'')+'"><div class="cov">'+thumb(P,i+2,'')+'</div><div><h1>'+esc(P.title)+'</h1><div class="tgs"><span>SAMPLE PACK</span></div><div class="prc">'+money(P.price)+'</div>'+(P.preview_path?'<canvas class="bwv" id="bwv"></canvas>':'')+(P.description?'<div class="d">'+esc(P.description)+'</div>':'')+'<div class="acts2">'+(P.preview_path?'<button class="pl" id="bPlay" aria-label="Play preview"><i></i></button>':'')+'<button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(P.free_download&&P.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE PACKS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1]+2,'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
+ box.innerHTML='<button class="x" id="bX" aria-label="Close pack page">&times;</button><button class="back" id="bBack">&larr; ALL KITS</button><div class="bp'+(curPack===i&&playing?' play':'')+'"><div class="cov">'+thumb(P,i+2,'')+'</div><div><h1>'+esc(P.title)+'</h1><div class="tgs"><span>SAMPLE PACK</span></div><div class="prc">'+money(P.price)+'</div>'+(P.preview_path?'<canvas class="bwv" id="bwv"></canvas>':'')+(P.description?'<div class="d">'+esc(P.description)+'</div>':'')+'<div class="acts2">'+(P.preview_path?'<button class="pl" id="bPlay" aria-label="Play preview"><i></i></button>':'')+'<button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bLike" style="border-color:#4a4a50;color:#fff">SAVE</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(P.free_download&&P.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE PACKS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1]+2,'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
  paintArt(box);
  $('#bBack').onclick=$('#bX').onclick=closeBeatPage;
  const pl=$('#bPlay');if(pl)pl.onclick=()=>playPack(i);
  $('#bCart').onclick=e=>toggleCart('p:'+P.id,e.currentTarget);
+ $('#bLike').onclick=()=>{const it=pageKind==='p'?packs[pageIdx]:beats[pageIdx];if(it)toggleLike(pageKind+':'+it.id)};
  $('#bShare').onclick=()=>{try{navigator.clipboard.writeText(location.origin+location.pathname+'#/pack/'+encodeURIComponent(bslug(P)))}catch(e){}toast('LINK COPIED')};
  const f=$('#bFree');if(f)f.onclick=()=>freeDownload(P);
  box.querySelectorAll('.mr a').forEach(a=>a.onclick=()=>{location.hash='#/pack/'+encodeURIComponent(a.dataset.s);scrollTo(0,0)});
@@ -702,13 +792,14 @@ async function loadAll(){
  if(location.hash==='#demo'){beats=DEMO;packs=[]}
  else{
   const st=await sb.from('site_settings').select('*').eq('id',1).maybeSingle();if(st.data)promo=st.data;
+  const bq=await sb.from('bundles').select('*').eq('active',true).order('sort_order',{ascending:true});bundles=bq.data||[];
   const [b,p]=await Promise.all([
    sb.from('beats').select('*').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
    sb.from('packs').select('*').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false})]);
   if(b.error||p.error)toast('COULD NOT LOAD STORE');
   beats=b.data||[];packs=p.data||[];
  }
- cur=-1;curPack=-1;renderBeats();renderPacks();setupPromo();route();
+ cur=-1;curPack=-1;renderBeats();renderPacks();renderDeals();syncLikes();setupPromo();route();
 }
 
 /* hero animation: hands tap on detected kick / snare */
@@ -1167,6 +1258,8 @@ const FIELDS={
 async function boRender(){
  if(tab==='promo')return promoRender();
  if(tab==='orders')return ordersRender();
+ if(tab==='bundles')return bundlesRender();
+ if(tab==='dash')return dashRender();
  const F=FIELDS[tab],e=editing||{};
  const files=F.files.map(([k,l,acc])=>`<label>${l}</label><input type="file" data-k="${k}" accept="${acc}">${e[k]?`<div class="cur">Current: ${esc(e[k].split('/').pop())} (choose a new file to replace)</div><label class="chk" style="margin-top:6px"><input type="checkbox" data-rm="${k}"> REMOVE THIS FILE</label>`:''}`).join('');
  const slugBit=`<label>PAGE URL NAME (auto from title if empty)</label><input type="text" id="f_slug" value="${esc(e.slug??'')}" placeholder="${tab==='beats'?'big-beat':'big-citi-vinyl'}">`;
@@ -1199,6 +1292,85 @@ async function boRender(){
   bl.appendChild(d);
  });
 }
+async function bundlesRender(){
+ const [bl,pk,bn]=await Promise.all([
+  sb.from('beats').select('id,title').order('created_at',{ascending:false}),
+  sb.from('packs').select('id,title').order('created_at',{ascending:false}),
+  sb.from('bundles').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false})]);
+ const e=editing||{name:'',kind:'any_beats',qty:3,price:25,item_keys:[],active:true,sort_order:0};
+ const opts=[...(bl.data||[]).map(x=>['b:'+x.id,'BEAT: '+x.title]),...(pk.data||[]).map(x=>['p:'+x.id,'PACK: '+x.title])];
+ $('#bf').innerHTML='<h3>'+(editing?'EDIT':'ADD')+' BUNDLE</h3>'+
+  '<label>NAME (shown to shoppers)</label><input type="text" id="g_name" value="'+esc(e.name)+'" placeholder="3 Beat Pack" required>'+
+  '<label>TYPE</label><select id="g_kind"><option value="any_beats"'+(e.kind==='any_beats'?' selected':'')+'>ANY N BEATS FOR ONE PRICE</option><option value="any_packs"'+(e.kind==='any_packs'?' selected':'')+'>ANY N PACKS FOR ONE PRICE</option><option value="fixed"'+(e.kind==='fixed'?' selected':'')+'>SPECIFIC ITEMS TOGETHER (e.g. a pack + a beat)</option></select>'+
+  '<div id="g_qtyw"><label>HOW MANY ITEMS</label><input type="number" id="g_qty" min="2" value="'+esc(e.qty||3)+'"></div>'+
+  '<div id="g_itemsw"><label>PICK THE ITEMS (need at least 2)</label><div class="chks">'+(opts.length?opts.map(o=>'<div><input type="checkbox" value="'+esc(o[0])+'"'+((e.item_keys||[]).includes(o[0])?' checked':'')+'><span>'+esc(o[1])+'</span></div>').join(''):'<div>Add beats or packs first.</div>')+'</div></div>'+
+  '<label>BUNDLE PRICE (USD, for the whole set)</label><input type="number" step="0.01" min="0" id="g_price" value="'+esc(e.price)+'">'+
+  '<label>SORT ORDER (0 = first)</label><input type="number" id="g_sort" value="'+esc(e.sort_order||0)+'">'+
+  '<label class="chk"><input type="checkbox" id="g_act"'+(e.active?' checked':'')+'> ACTIVE (applies at checkout and shows on the site)</label>'+
+  '<button class="go" type="submit" id="g_save">'+(editing?'SAVE CHANGES':'ADD BUNDLE')+'</button>'+(editing?'<button class="bo-btn" type="button" id="g_cancel" style="width:100%;margin-top:10px">CANCEL EDIT</button>':'')+'<div id="bmsg"></div>';
+ const sw=()=>{const f=$('#g_kind').value==='fixed';$('#g_qtyw').style.display=f?'none':'block';$('#g_itemsw').style.display=f?'block':'none'};sw();$('#g_kind').onchange=sw;
+ $('#bf').onsubmit=bundleSave;if(editing)$('#g_cancel').onclick=()=>{editing=null;bundlesRender()};
+ const L=$('#bl');L.innerHTML=(bn.data&&bn.data.length)?'':'<div class="bi"><span>No bundles yet. The shopper gets the best deal automatically when their cart qualifies.</span></div>';
+ (bn.data||[]).forEach(r=>{
+  const d=document.createElement('div');d.className='bi';
+  const what=r.kind==='fixed'?(r.item_keys||[]).length+' specific items':'any '+r.qty+(r.kind==='any_packs'?' packs':' beats');
+  d.innerHTML='<div class="nc"></div><div><b>'+esc(r.name)+'</b><span>'+money(r.price)+' / '+esc(what)+(r.active?'':' <i class="draft">/ OFF</i>')+'</span></div><div class="acts"><button class="ed">EDIT</button><button class="del">DELETE</button></div>';
+  d.querySelector('.ed').onclick=()=>{editing=r;bundlesRender();scrollTo(0,0)};
+  d.querySelector('.del').onclick=async()=>{if(!(await askConfirm('DELETE "'+String(r.name).toUpperCase()+'"?','This removes the bundle deal. Your beats and packs are not touched.')))return;const x=await sb.from('bundles').delete().eq('id',r.id);if(x.error){toast('DELETE FAILED: '+x.error.message);return}toast('BUNDLE DELETED');editing=null;await loadAll();bundlesRender()};
+  L.appendChild(d)});
+}
+async function bundleSave(ev){
+ ev.preventDefault();const msg=$('#bmsg'),btn=$('#g_save');btn.disabled=true;
+ const kind=$('#g_kind').value,price=parseFloat($('#g_price').value),qty=parseInt($('#g_qty').value);
+ const keys=[...document.querySelectorAll('.chks input:checked')].map(x=>x.value);
+ const row={name:$('#g_name').value.trim(),kind:kind,qty:kind==='fixed'?null:qty,price:price,item_keys:kind==='fixed'?keys:[],active:$('#g_act').checked,sort_order:parseInt($('#g_sort').value)||0};
+ const fail=t=>{msg.textContent=t;btn.disabled=false};
+ if(!row.name)return fail('Give the bundle a name.');
+ if(!(price>=0))return fail('Enter a price.');
+ if(kind!=='fixed'&&!(qty>=2))return fail('How many items must be at least 2.');
+ if(kind==='fixed'&&keys.length<2)return fail('Pick at least 2 items for a specific-items bundle.');
+ msg.textContent='Saving...';
+ const q=editing?sb.from('bundles').update(row).eq('id',editing.id):sb.from('bundles').insert(row);
+ const {error}=await q;if(error)return fail('Error: '+error.message);
+ editing=null;await loadAll();toast('BUNDLE SAVED');bundlesRender();
+}
+
+async function dashRender(){
+ const day=864e5,now=Date.now(),start=new Date();start.setHours(0,0,0,0);
+ $('#bf').innerHTML='<h3>SALES DASHBOARD</h3><div class="cur">Paid orders and listens. Your own plays are not counted.</div><div class="kp" id="kp"><div><b>...</b><span>LOADING</span></div></div>';
+ $('#bl').innerHTML='';
+ const since=new Date(now-30*day).toISOString();
+ const [o,e,bt,pk]=await Promise.all([
+  sb.from('orders').select('total,discount,items,paid_at,payer_email,bundle_note').eq('status','paid').order('paid_at',{ascending:false}).limit(2000),
+  sb.from('events').select('kind,item_id,created_at').gte('created_at',since).limit(20000),
+  sb.from('beats').select('id,title'),sb.from('packs').select('id,title')]);
+ if(o.error){$('#kp').innerHTML='<div><b>!</b><span>'+esc(o.error.message)+'</span></div>';return}
+ const orders=(o.data||[]).filter(x=>x.paid_at),titles={};
+ (bt.data||[]).forEach(x=>titles[x.id]=x.title);(pk.data||[]).forEach(x=>titles[x.id]=x.title);
+ const sumSince=t=>orders.filter(x=>new Date(x.paid_at).getTime()>=t).reduce((q,x)=>q+Number(x.total),0);
+ const all=orders.reduce((q,x)=>q+Number(x.total),0),d30=sumSince(now-30*day),d7=sumSince(now-7*day),today=sumSince(start.getTime());
+ const o30=orders.filter(x=>new Date(x.paid_at).getTime()>=now-30*day),aov=o30.length?d30/o30.length:0;
+ const saved=orders.reduce((q,x)=>q+Number(x.discount||0),0),buyers=new Set(orders.map(x=>(x.payer_email||'').toLowerCase()).filter(Boolean));
+ const plays=(e.data||[]),p7=plays.filter(x=>new Date(x.created_at).getTime()>=now-7*day).length;
+ $('#kp').innerHTML=[['g',money(today),'TODAY'],['g',money(d7),'LAST 7 DAYS'],['g',money(d30),'LAST 30 DAYS'],['g',money(all),'ALL TIME'],['',String(o30.length),'ORDERS (30 DAYS)'],['',money(aov),'AVG ORDER (30 DAYS)'],['',String(buyers.size),'UNIQUE BUYERS'],['',String(plays.length)+' ('+p7+' this week)','LISTENS (30 DAYS)'],['',money(saved),'GIVEN IN BUNDLES']].map(k=>'<div class="'+k[0]+'"><b>'+esc(k[1])+'</b><span>'+k[2]+'</span></div>').join('');
+ /* revenue per day, last 30 days */
+ const days=[...Array(30)].map((_,i)=>{const t=new Date(start.getTime()-(29-i)*day);return {t:t,v:0}});
+ orders.forEach(x=>{const t=new Date(x.paid_at);t.setHours(0,0,0,0);const i=Math.round((t.getTime()-days[0].t.getTime())/day);if(i>=0&&i<30)days[i].v+=Number(x.total)});
+ const L=$('#bl');
+ L.innerHTML='<div class="dcard"><h4>REVENUE, LAST 30 DAYS</h4><canvas id="dch" style="width:100%;height:170px;display:block"></canvas><div style="display:flex;justify-content:space-between;font:500 10px Montserrat;letter-spacing:.15em;color:#6c6c73;margin-top:6px"><span>'+days[0].t.toLocaleDateString()+'</span><span>TODAY</span></div></div><div class="dcard"><h4>BEST SELLERS</h4><div id="dsell"></div></div><div class="dcard"><h4>MOST PLAYED (30 DAYS)</h4><div id="dplay"></div></div><div class="dcard"><h4>RECENT ORDERS</h4><div id="drec"></div></div>';
+ const cv=$('#dch'),dpr=devicePixelRatio||1,W=cv.clientWidth,H=170;cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+ const mx=Math.max(1,...days.map(d=>d.v)),bw=W/30;
+ x.strokeStyle='#1d1d21';for(let i=1;i<4;i++){x.beginPath();x.moveTo(0,H*i/4);x.lineTo(W,H*i/4);x.stroke()}
+ days.forEach((d,i)=>{const h=d.v/mx*(H-24);x.fillStyle=d.v?'#e0242f':'#2a2a2e';x.fillRect(i*bw+2,H-h-(d.v?0:2),Math.max(2,bw-4),d.v?h:2)});
+ x.fillStyle='#8e8e94';x.font='600 10px Montserrat';x.fillText('PEAK '+money(mx),6,12);
+ const tbl=(rows,cols)=>rows.length?'<table class="dtab"><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr>'+rows.map(r=>'<tr>'+r.map(v=>'<td>'+v+'</td>').join('')+'</tr>').join('')+'</table>':'<div class="cur">Nothing yet.</div>';
+ const sell={};orders.forEach(od=>(od.items||[]).forEach(it=>{const k=it.title;sell[k]=sell[k]||{n:0,r:0};sell[k].n++;sell[k].r+=Number(it.price)}));
+ $('#dsell').innerHTML=tbl(Object.entries(sell).sort((a,b)=>b[1].r-a[1].r).slice(0,8).map(([k,v])=>[esc(k),v.n,money(v.r)]),['ITEM','SOLD','REVENUE']);
+ const pc={};plays.forEach(pl=>{pc[pl.item_id]=(pc[pl.item_id]||0)+1});
+ $('#dplay').innerHTML=tbl(Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([id,n])=>[esc(titles[id]||'(deleted)'),n]),['ITEM','LISTENS']);
+ $('#drec').innerHTML=tbl(orders.slice(0,8).map(od=>[new Date(od.paid_at).toLocaleDateString(),esc((od.items||[]).map(i=>i.title).join(', ')),money(od.total)+(Number(od.discount)>0?' <span style="color:var(--gold)">(bundle)</span>':'')]),['DATE','ITEMS','TOTAL']);
+}
+
 async function ordersRender(){
  const {data,error}=await sb.from('orders').select('*').order('created_at',{ascending:false}).limit(100);
  if(error){$('#bf').innerHTML='<h3>ORDERS</h3>';$('#bl').innerHTML='<div class="bi"><span>'+esc(error.message)+'</span></div>';return}
@@ -1206,7 +1378,7 @@ async function ordersRender(){
  $('#bf').innerHTML='<h3>ORDERS</h3><label>PAID ORDERS</label><div class="prc" style="font:700 22px Montserrat;color:#fff">'+paid.length+'</div><label>TOTAL SALES</label><div style="font:700 22px Montserrat;color:#e8b94a">'+money(sum)+'</div><div class="cur" style="margin-top:14px">Money goes straight to your PayPal. Orders marked REVIEW had a payment amount mismatch and need a look.</div>';
  $('#bl').innerHTML=(data&&data.length)?'':'<div class="bi"><span>No orders yet.</span></div>';
  (data||[]).forEach(o=>{const d=document.createElement('div');d.className='bi';
-  d.innerHTML='<div class="nc"></div><div><b>'+esc((o.items||[]).map(i=>i.title).join(', '))+'</b><span>'+money(o.total)+' / '+esc(o.status.toUpperCase())+' / '+esc(o.payer_email||'-')+' / '+new Date(o.created_at).toLocaleString()+'</span></div><div></div>';$('#bl').appendChild(d)});
+  d.innerHTML='<div class="nc"></div><div><b>'+esc((o.items||[]).map(i=>i.title).join(', '))+'</b><span>'+money(o.total)+(Number(o.discount)>0?' (BUNDLE -'+money(o.discount)+')':'')+' / '+esc(o.status.toUpperCase())+' / '+esc(o.payer_email||'-')+' / '+new Date(o.created_at).toLocaleString()+'</span></div><div></div>';$('#bl').appendChild(d)});
 }
 async function promoRender(){
  const {data:st}=await sb.from('site_settings').select('*').eq('id',1).maybeSingle();const e=st||promo;
