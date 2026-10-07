@@ -564,7 +564,7 @@ function renderBeats(){
   const cv=d.querySelector('.wv');seed=hashSeed(B.id);
   const bars=[...Array(110)].map((_,k)=>(.25+.75*rr())*(.65+.35*Math.sin(k/9+i)));wvs.push({cv,bars,p:-1,d:0});
   d.querySelector('.pl').onclick=()=>play(i);
-  d.firstElementChild.onclick=d.querySelector('.ti').onclick=e=>{if(e)e.preventDefault();location.hash='#/beat/'+encodeURIComponent(bslug(B))};
+  d.firstElementChild.onclick=d.querySelector('.ti').onclick=e=>{if(e)e.preventDefault();goItem('beat',bslug(B))};
   cv.onclick=e=>{if(cur!==i){play(i);return}const r=cv.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration};
   d.querySelector('.lk').onclick=()=>toggleLike('b:'+B.id);
   d.querySelector('.sh').onclick=()=>{try{navigator.clipboard.writeText(location.href.split('#')[0]+'#'+encodeURIComponent(B.title))}catch(e){}toast('LINK COPIED')};
@@ -583,7 +583,7 @@ function renderPacks(){
   c.innerHTML=`<div class="cv">${thumb(P,i+2,'')}${P.preview_path?'<button class="pl" aria-label="Play preview of '+esc(P.title)+'"><i></i></button><div class="cprog"><b></b></div>':'<span class="nop">NO PREVIEW</span>'}<button class="cvlk" aria-label="Save">${I.heart}</button></div><div class="ti"><a class="tl" href="pack/${esc(bslug(P))}/">${esc(P.title)}</a></div><div class="ds">${esc(P.description||'')}</div><div class="pr">${money(P.price)}</div><button class="cart">ADD TO CART</button>${P.free_download&&P.preview_path?'<button class="cart fd" style="margin-top:-2px">FREE DOWNLOAD</button>':''}`;
   c.querySelector('.cart').onclick=e=>toggleCart('p:'+P.id,e.currentTarget);
   if(P.preview_path){c.querySelector('.cv').onclick=()=>playPack(i)}
-  c.querySelector('.ti').onclick=e=>{if(e)e.preventDefault();location.hash='#/pack/'+encodeURIComponent(bslug(P))}
+  c.querySelector('.ti').onclick=e=>{if(e)e.preventDefault();goItem('pack',bslug(P))}
   c.querySelector('.cvlk').onclick=e=>{e.stopPropagation();toggleLike('p:'+P.id)}
   const fd=c.querySelector('.fd');if(fd)fd.onclick=()=>freeDownload(P);g.appendChild(c)});
  paintArt(el);syncCart();
@@ -763,7 +763,8 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
  if(location.hash||location.pathname!==u)history.pushState(null,'',u);
  showView(v);scrollTo(0,0);
 });
-addEventListener('popstate',()=>{if(!location.hash)route()});
+function goItem(k,sl){history.pushState(null,'',BASEPATH+k+'/'+encodeURIComponent(sl)+'/');hideSeo();route()}
+addEventListener('popstate',()=>{if(location.hash!=='#demo'){hideSeo();route()}});
 const slugify=t=>String(t||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 const bslug=B=>B.slug||slugify(B.title)||String(B.id);
 let pageIdx=-1,pageKind='b',pwv=null;
@@ -772,10 +773,9 @@ function route(){
   if(P.kind==='beat'){showBeatPage(beats.findIndex(b=>bslug(b)===P.slug));return}
   if(P.kind==='pack'){showPackPage(packs.findIndex(b=>bslug(b)===P.slug));return}
   if(P.kind==='view'){showView(P.v);if(P.title)document.title=P.title;return}}}
- const m=location.hash.match(/^#\/beat\/(.+)$/);
- if(m){const sl=decodeURIComponent(m[1]);showBeatPage(beats.findIndex(b=>bslug(b)===sl));return}
- const mp=location.hash.match(/^#\/pack\/(.+)$/);
- if(mp){const sl=decodeURIComponent(mp[1]);showPackPage(packs.findIndex(b=>bslug(b)===sl));return}
+ {const lh=location.hash.match(/^#\/(beat|pack)\/(.+)$/);if(lh)history.replaceState(null,'',BASEPATH+lh[1]+'/'+lh[2]+'/')}
+ const m=location.pathname.slice(BASEPATH.length).match(/^(beat|pack)\/([^/]+)\/?$/);
+ if(m){const sl=decodeURIComponent(m[2]);if(m[1]==='beat')showBeatPage(beats.findIndex(b=>bslug(b)===sl));else showPackPage(packs.findIndex(b=>bslug(b)===sl));return}
  {const pv=pathView();if(pv){pageIdx=-1;hideSeo();showView(pv);document.title=VTITLE[pv];return}}
  if($('#v-beat').classList.contains('on')){const wasPack=pageKind==='p';pageIdx=-1;showView(wasPack?'kits':'beats')}
  else if(!location.hash&&location.pathname===BASEPATH&&!document.querySelector('#v-beats.on'))showView('beats');
@@ -796,7 +796,7 @@ function showBeatPage(i){
  $('#bShare').onclick=()=>{try{navigator.clipboard.writeText(BASEURL+'beat/'+encodeURIComponent(bslug(B))+'/')}catch(e){}toast('LINK COPIED')};
  const f=$('#bFree');if(f)f.onclick=()=>freeDownload(B);
  const rb=$('#bRec');if(rb)rb.onclick=()=>openBooth(i);
- box.querySelectorAll('.mr a').forEach(a=>a.onclick=()=>{location.hash='#/beat/'+encodeURIComponent(a.dataset.s);scrollTo(0,0)});
+ box.querySelectorAll('.mr a').forEach(a=>a.onclick=()=>{goItem('beat',a.dataset.s);scrollTo(0,0)});
  const bars=wvs[i]?wvs[i].bars:[...Array(110)].map(()=>.5);pwv={cv:$('#bwv'),bars:bars,p:-1,d:0,i:i};
  const cv=$('#bwv');cv.onclick=e=>{if(cur!==i){play(i);return}const r=cv.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration};
  document.title=(window.__PAGE&&window.__PAGE.kind==='beat'&&window.__PAGE.slug===bslug(B))?SEO_TITLE:B.title+' | MZPRD';
@@ -814,7 +814,7 @@ function showPackPage(i){
  $('#bLike').onclick=()=>{const it=pageKind==='p'?packs[pageIdx]:beats[pageIdx];if(it)toggleLike(pageKind+':'+it.id)};
  $('#bShare').onclick=()=>{try{navigator.clipboard.writeText(BASEURL+'pack/'+encodeURIComponent(bslug(P))+'/')}catch(e){}toast('LINK COPIED')};
  const f=$('#bFree');if(f)f.onclick=()=>freeDownload(P);
- box.querySelectorAll('.mr a').forEach(a=>a.onclick=()=>{location.hash='#/pack/'+encodeURIComponent(a.dataset.s);scrollTo(0,0)});
+ box.querySelectorAll('.mr a').forEach(a=>a.onclick=()=>{goItem('pack',a.dataset.s);scrollTo(0,0)});
  const cv=$('#bwv');
  if(cv){seed=hashSeed(P.id);const bars=[...Array(110)].map((_,k)=>(.25+.75*rr())*(.65+.35*Math.sin(k/9+i)));pwv={cv:cv,bars:bars,p:-1,d:0,i:i,k:'p'};
   cv.onclick=e=>{if(curPack!==i){playPack(i);return}const r=cv.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration}}
@@ -1335,7 +1335,7 @@ async function boRender(){
   const d=document.createElement('div');d.className='bi';
   const u=pub(r.cover_path);
   d.innerHTML=`${u?`<img src="${esc(u)}" alt="">`:'<div class="nc"></div>'}<div><b>${esc(r.title)}</b><span>${money(r.price)}${r.published?'':' <i class="draft">/ HIDDEN</i>'}${r.free_download?' / FREE DL':''}</span></div><div class="acts">${r.slug?'<button class="vw">PAGE</button>':''}<button class="ed">EDIT</button><button class="del">DELETE</button></div>`;
-  const vw=d.querySelector('.vw');if(vw)vw.onclick=()=>{$('#bo').classList.remove('on');location.hash=(tab==='packs'?'#/pack/':'#/beat/')+encodeURIComponent(r.slug);scrollTo(0,0)};
+  const vw=d.querySelector('.vw');if(vw)vw.onclick=()=>{$('#bo').classList.remove('on');goItem(tab==='packs'?'pack':'beat',r.slug);scrollTo(0,0)};
   d.querySelector('.ed').onclick=()=>{editing=r;boRender();scrollTo(0,0)};
   d.querySelector('.del').onclick=()=>boDelete(r);
   bl.appendChild(d);
