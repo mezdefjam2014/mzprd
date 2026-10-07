@@ -99,8 +99,8 @@ function character(c,x,y,w,P,flip,rim){
  c.save();c.globalCompositeOperation='overlay';c.globalAlpha=.55;draw();c.restore();
  return h;
 }
-const info=X=>[X.bpm?X.bpm+' BPM':'',X.key||''].filter(Boolean).join('   •   ');
-const tagWord=X=>X.kind==='packs'?'SAMPLE PACK':'TYPE BEAT';
+const info=X=>X.infoText!=null?X.infoText:[X.bpm?X.bpm+' BPM':'',X.key||''].filter(Boolean).join('   •   ');
+const tagWord=X=>X.tagText||(X.kind==='packs'?'SAMPLE PACK':'TYPE BEAT');
 const HOOKS={beats:['FREE','NEW','HARD','FIRE','DARK'],packs:['NEW','VINYL','LOOPS','FREE','DARK']};
 function frameBox(c,x,y,s,u,P){
  c.save();c.shadowColor='rgba(0,0,0,.85)';c.shadowBlur=50*u;c.shadowOffsetY=18*u;c.fillStyle='#000';c.fillRect(x,y,s,s);c.restore();

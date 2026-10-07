@@ -1322,7 +1322,7 @@ const FIELDS={
  packs:{table:'packs',title:'SAMPLE PACK',files:[['cover_path','PACK IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (optional, public)','audio/*','public-media','previews'],['file_path','PACK FILE (.zip, private, any size)','.zip,application/zip,audio/*','private-files','packs']]}
 };
 function loadScript(f){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+f;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
-function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=13';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=16';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
 async function boRender(){
  const vid=tab==='video';document.querySelector('#bo .bo2').style.display=vid?'none':'';
  document.getElementById('bo2b').style.display='none';

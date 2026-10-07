@@ -65,9 +65,9 @@ function css(){
 #studio .thc .two2 button{padding:7px 2px;font-size:9px;letter-spacing:.08em}
 #thLb{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;cursor:zoom-out}
 #thLb canvas{max-width:92vw;max-height:92vh;box-shadow:0 0 60px #000}
-#thOpen{display:block;width:100%;margin-top:14px;background:#14141a;border:1.5px solid rgba(224,36,47,.7);color:#fff;font:700 12px Montserrat;letter-spacing:.3em;padding:14px;animation:thGlow 3.2s ease-in-out infinite}
+#mixBtn,#thOpen{display:block;width:100%;margin-top:14px;background:#14141a;border:1.5px solid rgba(224,36,47,.7);color:#fff;font:700 12px Montserrat;letter-spacing:.3em;padding:14px;animation:thGlow 3.2s ease-in-out infinite}
 @keyframes thGlow{0%,100%{box-shadow:0 0 0 rgba(224,36,47,0)}50%{box-shadow:0 0 14px rgba(224,36,47,.28)}}
-#thOpen:hover{border-color:#e0242f;background:#1b1b22}
+#mixBtn:hover,#thOpen:hover{border-color:#e0242f;background:#1b1b22}
 #thModal{display:none;position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.82);align-items:center;justify-content:center;padding:18px}
 #thModal.on{display:flex}
 #thModal .thbox{position:relative;width:min(980px,100%);max-height:92vh;overflow:auto;background:#0c0c0f;border:1.5px solid var(--red);box-shadow:0 0 50px rgba(224,36,47,.35);padding:20px}
@@ -137,6 +137,7 @@ function html(){
   <button class="go" id="sRender">RENDER VIDEO</button>
   <div class="bar"><b id="sProg"></b></div><div class="msg" id="sMsg">Keep this tab open and visible while it renders. A 3 minute beat takes about 3 minutes.</div>
   <a id="sDl" class="btn" style="display:none;text-align:center;margin-top:8px;text-decoration:none">DOWNLOAD VIDEO</a>
+  <button id="mixBtn" type="button">&#9835; MIX VIDEO (10-15 MIN)</button>
   <button id="thOpen" type="button">&#9733; THUMBNAILS</button>
  </div></div>`;
 }
@@ -543,7 +544,7 @@ const TH={seed:0,pf:'16:9'},THMODAL=`<div id="thModal" aria-hidden="true"><div c
  <div id="thGrid"></div><div class="msg" id="thMsg">Made from the cover, title and BPM. 3 have the producer, 2 do not. Every card downloads in 16:9 (1280x720) and 9:16 (1080x1920).</div>
  <button class="btn" id="thAll" style="display:none;margin-top:8px">DOWNLOAD ALL (10 FILES)</button>
 </div></div>`;
-function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=5',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
+function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=6',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
 function thCtx(){const it=S.item||{};return{title:it.title||'',w:window.MZThumbs.words(S.tx.title.text||it.title),cover:S.cover,bpm:it.bpm,key:it.musical_key,kind:S.kind,seed:TH.seed}}
 const thSize=f=>f==='16:9'?[1280,720]:[1080,1920];
 function thOpen(){const m=$s('#thModal');m.classList.add('on');m.setAttribute('aria-hidden','false');document.addEventListener('keydown',thKey);if(!$s('#thGrid').children.length)thMake(false)}
@@ -604,7 +605,7 @@ function wire(){
  wv.onpointerdown=e=>{if(run&&run.rec)return;drag=true;was=!!(A&&A.playing);if(was)stopPlay();wv.setPointerCapture(e.pointerId);seek(e)};
  wv.onpointermove=e=>{if(drag)seek(e)};
  wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
- q('#thOpen').onclick=thOpen;q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
+ q('#thOpen').onclick=thOpen;q("#mixBtn").onclick=async()=>{try{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=2',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
  q('#thGo').onclick=()=>thMake(false);q('#thMore').onclick=()=>thMake(true);q('#thAll').onclick=thAll;
  document.querySelectorAll('#studio [data-th]').forEach(b=>b.onclick=()=>{TH.pf=b.dataset.th;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(window.MZThumbs&&q('#thGrid').children.length)thMake(false)});
  q('#yAll').onclick=()=>{yi.t++;yi.d++;yi.g++;ytText()};
@@ -625,5 +626,6 @@ window.studioOpen=async function(){
   try{await loadItems()}catch(e){root.querySelector('#sl').innerHTML='<div class="msg" style="padding:12px">Could not load items.</div>';return}
   renderList();const first=S.items.find(i=>i._k===S.kind);if(first)setItem(first)}
 };
-window.studioClose=function(){thShut();if(!(run&&run.rec))stopPlay();const r=document.getElementById('studio');if(r)r.classList.remove('on')};
+window.MZEndCard=function(c,W,H,tt,ecd){return endCard(c,W,H,tt,ecd)};
+window.studioClose=function(){thShut();if(window.mixClose)mixClose();if(!(run&&run.rec))stopPlay();const r=document.getElementById('studio');if(r)r.classList.remove('on')};
 })();
