@@ -739,6 +739,7 @@ $('#modal').onclick=e=>{if(e.target.id==='modal')closeCartModal()};
 $('#search').onclick=()=>toast('SEARCH COMING SOON');
 const CAMF={beats:null,kits:[.108,.705,1.8],merch:[.287,.15,1.8],about:[.897,.43,1.8]};
 let camT='beats';const cam={fx:.5,fy:.5,z:1};
+function hideSeo(){const e=document.getElementById('seo');if(e)e.style.display='none'}
 function showView(v){
  camT=v==='beat'?(pageKind==='p'?'kits':'beats'):v;
  {const dl=$('#deals');if(dl)dl.style.display=(v==='about'||v==='merch')?'none':''}
@@ -747,7 +748,7 @@ function showView(v){
 }
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
  if(location.hash.indexOf('#/beat/')===0||location.hash.indexOf('#/pack/')===0)history.pushState(null,'',BASEPATH);
- pageIdx=-1;document.title=HOME_TITLE;showView(b.dataset.v);
+ hideSeo();pageIdx=-1;document.title=HOME_TITLE;showView(b.dataset.v);
 });
 const slugify=t=>String(t||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 const bslug=B=>B.slug||slugify(B.title)||String(B.id);
@@ -764,7 +765,7 @@ function route(){
  if($('#v-beat').classList.contains('on')){const wasPack=pageKind==='p';pageIdx=-1;showView(wasPack?'kits':'beats')}
  document.title=HOME_TITLE;
 }
-function closeBeatPage(){history.pushState(null,'',BASEPATH);route();scrollTo(0,0)}
+function closeBeatPage(){hideSeo();history.pushState(null,'',BASEPATH);route();scrollTo(0,0)}
 function showBeatPage(i){
  const box=$('#bpage');pageIdx=i;pageKind='b';pwv=null;
  if(i<0||!beats[i]){box.innerHTML='<button class="back" id="bBack">&larr; ALL BEATS</button><div class="empty"><b>NOT FOUND</b>THIS BEAT IS NOT AVAILABLE</div>';$('#bBack').onclick=()=>{history.pushState(null,'',BASEPATH);route()};showView('beat');return}
@@ -804,7 +805,7 @@ function showPackPage(i){
  document.title=(window.__PAGE&&window.__PAGE.kind==='pack'&&window.__PAGE.slug===bslug(P))?SEO_TITLE:P.title+' | MZPRD';
  syncCart();showView('beat');
 }
-addEventListener('hashchange',()=>{if(location.hash==='#demo')return;route()});
+addEventListener('hashchange',()=>{if(location.hash==='#demo')return;hideSeo();route()});
 $('#pp').onclick=()=>curPack>=0?playPack(curPack):(cur<0?play(0):play(cur));$('#next').onclick=()=>go(1);$('#prev').onclick=()=>go(-1);
 $('#vol').oninput=e=>{au.volume=+e.target.value};au.volume=.8;
 $('#pg').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration};
