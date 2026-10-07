@@ -502,6 +502,8 @@ function playPack(i){
  initAudio();ac.resume();
  if(i===curPack&&au.src){au.paused?au.play():au.pause();return}
  curPack=i;cur=-1;au.src=pub(P.preview_path);au.play().catch(()=>toast('COULD NOT PLAY'));ui();track('pack_play',P.id);
+ const g=document.querySelector('#packs .grid'),cd=g&&g.children[i];
+ if(cd){const a=g.getBoundingClientRect(),b=cd.getBoundingClientRect();g.scrollTo({left:g.scrollLeft+(b.left+b.width/2)-(a.left+a.width/2),behavior:'smooth'})}
 }
 function goPack(d){const ok=packs.map((p,k)=>p.preview_path?k:-1).filter(k=>k>=0);if(!ok.length)return;let pos=ok.indexOf(curPack);pos=pos<0?0:(pos+d+ok.length)%ok.length;playPack(ok[pos])}
 function play(i){
