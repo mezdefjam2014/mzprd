@@ -65,6 +65,17 @@ function css(){
 #studio .thc .two2 button{padding:7px 2px;font-size:9px;letter-spacing:.08em}
 #thLb{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;cursor:zoom-out}
 #thLb canvas{max-width:92vw;max-height:92vh;box-shadow:0 0 60px #000}
+#thOpen{display:block;width:100%;margin-top:14px;background:linear-gradient(90deg,#e0242f,#ff7a1a);border:0;color:#fff;font:700 13px Montserrat;letter-spacing:.3em;padding:15px;animation:thGlow 1.8s ease-in-out infinite}
+@keyframes thGlow{0%,100%{box-shadow:0 0 8px rgba(224,36,47,.55),0 0 22px rgba(255,122,26,.25)}50%{box-shadow:0 0 18px rgba(255,122,26,.95),0 0 46px rgba(224,36,47,.7)}}
+#thOpen:hover{filter:brightness(1.15)}
+#thModal{display:none;position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.82);align-items:center;justify-content:center;padding:18px}
+#thModal.on{display:flex}
+#thModal .thbox{position:relative;width:min(980px,100%);max-height:92vh;overflow:auto;background:#0c0c0f;border:1.5px solid var(--red);box-shadow:0 0 50px rgba(224,36,47,.35);padding:20px}
+#thModal .thx{position:absolute;top:8px;right:10px;width:40px;height:40px;background:transparent;border:1.5px solid #4a4a50;color:#fff;font:400 26px/1 Montserrat;padding:0}
+#thModal .thx:hover{border-color:var(--red);color:var(--red)}
+#thModal h4{font:700 12px Montserrat;letter-spacing:.3em;color:var(--gold);margin:0 0 12px}
+#thModal #thGrid{grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:700px){#thModal #thGrid{grid-template-columns:1fr 1fr}}
 #studio .two2{display:grid;grid-template-columns:1fr 1fr;gap:8px}`;
  document.head.appendChild(st);
 }
@@ -126,11 +137,7 @@ function html(){
   <button class="go" id="sRender">RENDER VIDEO</button>
   <div class="bar"><b id="sProg"></b></div><div class="msg" id="sMsg">Keep this tab open and visible while it renders. A 3 minute beat takes about 3 minutes.</div>
   <a id="sDl" class="btn" style="display:none;text-align:center;margin-top:8px;text-decoration:none">DOWNLOAD VIDEO</a>
-  <div class="pn yt thp" style="margin-top:18px"><h4>THUMBNAILS</h4>
-   <div class="two2"><button class="btn" id="thGo">MAKE 5 THUMBNAILS</button><button class="btn" id="thMore">NEW SET</button></div>
-   <div class="seg" style="margin-top:8px"><button data-th="16:9" class="on">PREVIEW 16:9</button><button data-th="9:16">PREVIEW 9:16</button></div>
-   <div id="thGrid"></div><div class="msg" id="thMsg">Made from the cover, title and BPM. 3 have the producer, 2 do not. Every card downloads in 16:9 (1280x720) and 9:16 (1080x1920).</div>
-   <button class="btn" id="thAll" style="display:none;margin-top:8px">DOWNLOAD ALL (10 FILES)</button></div>
+  <button class="go" id="thOpen" type="button">&#9733; THUMBNAILS</button>
  </div></div>`;
 }
 
@@ -528,16 +535,26 @@ function ytText(reset){
 function ytCount(){const t=$s('#yT').value.length,d=$s('#yD').value.length,g=$s('#yG').value.length;
  $s('#yTc').textContent=t+' / 100 characters'+(t>100?' (too long)':'');$s('#yDc').textContent=d+' / 5000 characters';$s('#yGc').textContent=g+' / 500 characters'+(g>500?' (too long)':'')}
 function ytNext(k){yi[k]++;ytText()}
-const TH={seed:0,pf:'16:9'};
+const TH={seed:0,pf:'16:9'},THMODAL=`<div id="thModal" aria-hidden="true"><div class="thbox" role="dialog" aria-label="Thumbnails">
+ <button class="thx" id="thClose" aria-label="Close">&times;</button>
+ <h4>THUMBNAILS</h4>
+ <div class="two2"><button class="btn" id="thGo">MAKE 5 THUMBNAILS</button><button class="btn" id="thMore">NEW SET</button></div>
+ <div class="seg" style="margin-top:8px"><button data-th="16:9" class="on">PREVIEW 16:9</button><button data-th="9:16">PREVIEW 9:16</button></div>
+ <div id="thGrid"></div><div class="msg" id="thMsg">Made from the cover, title and BPM. 3 have the producer, 2 do not. Every card downloads in 16:9 (1280x720) and 9:16 (1080x1920).</div>
+ <button class="btn" id="thAll" style="display:none;margin-top:8px">DOWNLOAD ALL (10 FILES)</button>
+</div></div>`;
 function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
 function thCtx(){const it=S.item||{};return{title:it.title||'',w:window.MZThumbs.words(S.tx.title.text||it.title),cover:S.cover,bpm:it.bpm,key:it.musical_key,kind:S.kind,seed:TH.seed}}
 const thSize=f=>f==='16:9'?[1280,720]:[1080,1920];
+function thOpen(){const m=$s('#thModal');m.classList.add('on');m.setAttribute('aria-hidden','false');document.addEventListener('keydown',thKey);if(!$s('#thGrid').children.length)thMake(false)}
+function thShut(){const m=$s('#thModal');if(m){m.classList.remove('on');m.setAttribute('aria-hidden','true')}document.removeEventListener('keydown',thKey)}
+function thKey(e){if(e.key!=='Escape')return;const lb=document.getElementById('thLb');if(lb){lb.remove();return}thShut()}
 async function thMake(bump){
  const m=$s('#thMsg');if(!S.item){m.textContent='Pick a beat or pack first.';return}
  m.textContent='Making thumbnails...';
  try{await thLoad()}catch(e){m.textContent='Could not load the thumbnail maker.';return}
  if(bump)TH.seed+=7;
- const g=$s('#thGrid'),X=thCtx(),pv=TH.pf==='16:9'?[480,270]:[270,480];g.innerHTML='';
+ const g=$s('#thGrid'),X=thCtx(),pv=TH.pf==='16:9'?[640,360]:[360,640];g.innerHTML='';
  for(let i=0;i<window.MZThumbs.count;i++){
   const card=document.createElement('div');card.className='thc';
   const cv=window.MZThumbs.make(i,pv[0],pv[1],X);cv.onclick=()=>thBig(i);
@@ -587,6 +604,7 @@ function wire(){
  wv.onpointerdown=e=>{if(run&&run.rec)return;drag=true;was=!!(A&&A.playing);if(was)stopPlay();wv.setPointerCapture(e.pointerId);seek(e)};
  wv.onpointermove=e=>{if(drag)seek(e)};
  wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
+ q('#thOpen').onclick=thOpen;q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
  q('#thGo').onclick=()=>thMake(false);q('#thMore').onclick=()=>thMake(true);q('#thAll').onclick=thAll;
  document.querySelectorAll('#studio [data-th]').forEach(b=>b.onclick=()=>{TH.pf=b.dataset.th;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(window.MZThumbs&&q('#thGrid').children.length)thMake(false)});
  q('#yAll').onclick=()=>{yi.t++;yi.d++;yi.g++;ytText()};
@@ -603,9 +621,9 @@ function wire(){
 }
 window.studioOpen=async function(){
  css();const root=document.getElementById('studio');root.classList.add('on');
- if(!mounted){root.innerHTML=html();mounted=true;wire();buildTx();redraw();root.querySelector('#sl').innerHTML='<div class="msg" style="padding:12px">Loading...</div>';
+ if(!mounted){root.innerHTML=html()+THMODAL;mounted=true;wire();buildTx();redraw();root.querySelector('#sl').innerHTML='<div class="msg" style="padding:12px">Loading...</div>';
   try{await loadItems()}catch(e){root.querySelector('#sl').innerHTML='<div class="msg" style="padding:12px">Could not load items.</div>';return}
   renderList();const first=S.items.find(i=>i._k===S.kind);if(first)setItem(first)}
 };
-window.studioClose=function(){if(!(run&&run.rec))stopPlay();const r=document.getElementById('studio');if(r)r.classList.remove('on')};
+window.studioClose=function(){thShut();if(!(run&&run.rec))stopPlay();const r=document.getElementById('studio');if(r)r.classList.remove('on')};
 })();
