@@ -42,13 +42,11 @@ button{cursor:pointer}
 .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),transparent 22%,transparent 80%,rgba(6,5,7,.9));pointer-events:none}
 .say{position:absolute;right:5%;bottom:16%;z-index:4;max-width:min(300px,62%);background:#fff;color:#0b0b0d;padding:10px 14px 11px;border:3px solid var(--red);box-shadow:4px 4px 0 #000;font:700 12px/1.4 Montserrat;letter-spacing:.05em;opacity:0;transform:translateY(10px) scale(.9);transition:opacity .25s,transform .25s cubic-bezier(.3,1.6,.6,1);pointer-events:none}
 .say.on{opacity:1;transform:none}
-.slotbtn{position:fixed;right:18px;bottom:18px;z-index:45;display:none;background:linear-gradient(#ff4b57,#d51f2c 55%,#a8141f);border:2px solid #0d0716;border-radius:14px;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 5px 0 #5e0d15,0 8px 24px rgba(0,0,0,.55);color:#fff;font:800 13px Montserrat,sans-serif;letter-spacing:.14em;padding:13px 18px;cursor:pointer;transition:bottom .3s,transform .12s;text-shadow:0 2px 0 rgba(0,0,0,.35)}
-.slotbtn:hover{filter:brightness(1.1);transform:translateY(-2px)}
-.slotbtn:active{transform:translateY(3px);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 1px 0 #5e0d15}
-.slotbtn:after{content:"";position:absolute;inset:-6px;border-radius:18px;border:2px solid rgba(255,211,74,.55);animation:slPing 2.4s ease-out infinite;pointer-events:none}
-@keyframes slPing{0%{opacity:.9;transform:scale(.96)}100%{opacity:0;transform:scale(1.12)}}
-body:has(#bar.on) .slotbtn{bottom:92px}
-@media(max-width:700px){.slotbtn{right:10px;bottom:10px;font-size:11px;padding:11px 14px}body:has(#bar.on) .slotbtn{bottom:84px}}
+.slotnav{display:none;color:#ffd34a!important;animation:slNav 2.6s ease-in-out infinite}
+.slotnav:hover{color:#fff!important}
+.slotnav[data-test="1"]:after{content:" (TEST)";color:#35e0ff}
+@keyframes slNav{0%,100%{text-shadow:0 0 0 rgba(255,211,74,0)}50%{text-shadow:0 0 12px rgba(255,211,74,.75)}}
+@media(max-width:700px){.slotnav .lg{display:none}}
 #cpnRow{display:none;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 2px}
 #cpnRow input{flex:1;min-width:120px;background:#050506;border:1.5px solid #34343a;color:#fff;padding:9px;font:600 12px Montserrat;letter-spacing:.12em;text-transform:uppercase}
 #cpnRow button{background:transparent;border:1.5px solid var(--gold);color:var(--gold);font:700 11px Montserrat;letter-spacing:.18em;padding:10px 14px}
@@ -393,7 +391,7 @@ footer.f a:hover{color:#fff}
   <div class="spk" id="spkL"></div><div class="spk" id="spkR"></div><div class="head" id="head"><canvas id="eyes"></canvas></div><div class="chain" id="chain"></div><canvas class="vin" id="vin"></canvas><canvas class="lcd" id="vlab"></canvas><canvas class="lap" id="lap"></canvas><canvas class="padfx" id="padfx"></canvas><canvas class="hpfx" id="hpfx"></canvas><canvas class="lcd" id="lcd"></canvas><canvas class="mpc" id="mpc"></canvas><canvas class="fx" id="fx"></canvas></div>
  <div class="lamp"></div>
  <div class="say" id="say"><b>MZPRD</b><span id="sayT"></span></div>
- <button class="slotbtn" id="slotBtn" type="button">🎰 PLAY SLOTS</button>
+
  <div id="girl"><img id="girlImg" alt="Promo" hidden><div class="sign"><b id="girlMsg">ALL BEATS</b><strong id="girlPrice">$10</strong><span>LIMITED TIME</span><button class="shop" id="girlShop">SHOP NOW</button></div><button class="bx" id="girlX" aria-label="Close promo">&times;</button></div>
  <h1 class="sr-only">MZPRD: beats and sample packs</h1>
  <header>
@@ -402,6 +400,7 @@ footer.f a:hover{color:#fff}
    <button data-v="kits">KITS</button>
    <button data-v="merch">MERCH</button>
    <button data-v="about">ABOUT</button>
+   <button id="slotBtn" class="slotnav" type="button"><span class="lg">&#127920; PLAY </span>SLOTS</button>
   </nav>
   <div class="tools">
    <button id="dlPill" class="pill" style="display:none" aria-label="Your downloads"></button>
@@ -790,7 +789,7 @@ function showView(v){
 }
 const VPATH={beats:'beats/',kits:'sample-packs/',merch:'merch/',about:'about/'},VTITLE={beats:'Rap, Hip Hop & R&B Beats and Instrumentals for Sale | MZPRD',kits:'Sample Packs, Vinyl Samples & Producer Loops | MZPRD',merch:'Merch | MZPRD',about:'About MZPRD (Meztheprod) | Beat Producer'};
 function pathView(){const p=location.pathname.slice(BASEPATH.length).replace(/\/?$/,'/');return Object.keys(VPATH).find(k=>VPATH[k]===p)||null}
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+document.querySelectorAll('nav button[data-v]').forEach(b=>b.onclick=()=>{
  const v=b.dataset.v,u=BASEPATH+VPATH[v];
  hideSeo();pageIdx=-1;document.title=VTITLE[v]||HOME_TITLE;
  if(location.hash||location.pathname!==u)history.pushState(null,'',u);
@@ -1611,7 +1610,7 @@ window.slotsBoot=async function(){
  let test=false;try{test=localStorage.getItem('mzprd_slot_test')==='1'&&isAdmin}catch(e){}
  try{let tok=SB_KEY;if(test){const {data:{session}}=await sb.auth.getSession();if(session)tok=session.access_token}
   const r=await fetch(SLOTFN,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+tok},body:JSON.stringify({action:'status',browser:mzBid(),test})});
-  const st=await r.json();slotsLive=!!(st&&st.enabled);btn.style.display=slotsLive?'block':'none';btn.textContent=test?'\uD83C\uDFB0 PLAY SLOTS (TEST)':'\uD83C\uDFB0 PLAY SLOTS';renderCart()}
+  const st=await r.json();slotsLive=!!(st&&st.enabled);btn.style.display=slotsLive?'inline-block':'none';btn.dataset.test=test?'1':'';renderCart()}
  catch(e){slotsLive=false;btn.style.display='none'}
 };
 $('#slotBtn').onclick=async()=>{try{if(!window.slotsOpen)await loadScript('slots.js?v=4');await window.slotsOpen()}catch(e){toast('SLOTS FAILED TO LOAD')}};
