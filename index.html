@@ -1630,7 +1630,7 @@ async function boSave(ev){
   msg.textContent='Saved.';editing=null;await loadAll();boRender();toast('SAVED TO SUPABASE');
  }catch(err){
   for(const [b,p] of newUploaded)await rmObj(b,p);
-  msg.textContent='Error: '+(/beats_slug_key|packs_slug_key|duplicate key/.test(err.message||'')?'That page URL name is already used by another beat. Change it and save again.':(err.message||err));btn.disabled=false;
+  msg.textContent='Error: '+(/beats_slug_key|packs_slug_key|duplicate key/.test(err.message||'')?'That page URL name is already used by another beat. Change it and save again.':(err.message||err));btn.disabled=false;toast('SAVE FAILED: '+String(err.message||err).slice(0,90).toUpperCase());console.error('Save failed',err);
  }
 }
 async function boDelete(r){
