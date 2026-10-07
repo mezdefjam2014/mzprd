@@ -42,6 +42,14 @@ button{cursor:pointer}
 .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),transparent 22%,transparent 80%,rgba(6,5,7,.9));pointer-events:none}
 .say{position:absolute;right:5%;bottom:16%;z-index:4;max-width:min(300px,62%);background:#fff;color:#0b0b0d;padding:10px 14px 11px;border:3px solid var(--red);box-shadow:4px 4px 0 #000;font:700 12px/1.4 Montserrat;letter-spacing:.05em;opacity:0;transform:translateY(10px) scale(.9);transition:opacity .25s,transform .25s cubic-bezier(.3,1.6,.6,1);pointer-events:none}
 .say.on{opacity:1;transform:none}
+.slotbtn{position:absolute;left:14px;bottom:14px;z-index:6;display:none;background:#e0242f;border:3px solid #000;box-shadow:0 0 0 2px #ffd34a,4px 4px 0 2px #000;color:#fff;font:400 10px 'Press Start 2P',monospace;letter-spacing:1px;padding:11px 14px;cursor:pointer;image-rendering:pixelated;animation:slBlink 1.6s steps(2,end) infinite}
+.slotbtn:hover{background:#ff3a46;transform:translate(-1px,-1px)}
+@keyframes slBlink{0%,60%{filter:none}61%,100%{filter:brightness(1.18)}}
+@media(max-width:700px){.slotbtn{left:8px;bottom:8px;font-size:8px;padding:9px 10px}}
+#cpnRow{display:none;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 2px}
+#cpnRow input{flex:1;min-width:120px;background:#050506;border:1.5px solid #34343a;color:#fff;padding:9px;font:600 12px Montserrat;letter-spacing:.12em;text-transform:uppercase}
+#cpnRow button{background:transparent;border:1.5px solid var(--gold);color:var(--gold);font:700 11px Montserrat;letter-spacing:.18em;padding:10px 14px}
+#cpnMsg{flex-basis:100%;font:500 11px Montserrat;color:#a9a9ae;min-height:14px}
 .say b{display:block;font:400 8px 'Press Start 2P';color:var(--red);margin-bottom:6px;letter-spacing:0}
 .crate{position:relative;padding:6px 0 0}
 .crate .grid{display:flex;gap:0;overflow-x:auto;overflow-y:visible;padding:34px 46px 26px;perspective:1100px;scroll-snap-type:x proximity;scrollbar-width:none}
@@ -382,6 +390,7 @@ footer.f a:hover{color:#fff}
   <div class="spk" id="spkL"></div><div class="spk" id="spkR"></div><div class="head" id="head"><canvas id="eyes"></canvas></div><div class="chain" id="chain"></div><canvas class="vin" id="vin"></canvas><canvas class="lcd" id="vlab"></canvas><canvas class="lap" id="lap"></canvas><canvas class="padfx" id="padfx"></canvas><canvas class="hpfx" id="hpfx"></canvas><canvas class="lcd" id="lcd"></canvas><canvas class="mpc" id="mpc"></canvas><canvas class="fx" id="fx"></canvas></div>
  <div class="lamp"></div>
  <div class="say" id="say"><b>MZPRD</b><span id="sayT"></span></div>
+ <button class="slotbtn" id="slotBtn" type="button">PLAY SLOTS</button>
  <div id="girl"><img id="girlImg" alt="Promo" hidden><div class="sign"><b id="girlMsg">ALL BEATS</b><strong id="girlPrice">$10</strong><span>LIMITED TIME</span><button class="shop" id="girlShop">SHOP NOW</button></div><button class="bx" id="girlX" aria-label="Close promo">&times;</button></div>
  <h1 class="sr-only">MZPRD: beats and sample packs</h1>
  <header>
@@ -423,7 +432,8 @@ footer.f a:hover{color:#fff}
 
 <div class="modal" id="modal"><div class="box">
  <button class="x" id="cx" aria-label="Close cart">&times;</button><div id="cartMain"><h3>YOUR CART</h3><div id="items"></div>
- <div class="tot"><span>TOTAL</span><span id="total">$0.00</span></div>
+<div id="cpnRow"><input id="cpnIn" maxlength="12" placeholder="COUPON CODE" autocomplete="off"><button id="cpnGo" type="button">APPLY</button><div id="cpnMsg"></div></div>
+<div class="tot"><span>TOTAL</span><span id="total">$0.00</span></div>
  <div id="ppbox"></div><div class="nt" id="nt"></div><div class="secure">SECURE CHECKOUT WITH PAYPAL / MZPRD</div></div>
  <div id="cartDone" style="display:none"></div>
 </div></div>
@@ -446,6 +456,10 @@ footer.f a:hover{color:#fff}
  <div class="bo2" id="bo2b" style="display:none;margin-top:26px">
   <form class="bf" id="bf2"></form>
   <div><div class="bl" id="bl2"></div></div>
+ </div>
+ <div class="bo2" id="bo2c" style="display:none;margin-top:26px">
+  <form class="bf" id="bf3" onsubmit="return false"></form>
+  <div><div class="bl" id="bl3"></div></div>
  </div>
 </div>
 
@@ -491,6 +505,7 @@ const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearT
 const DEMO=[
  {id:'d1',title:'Demo Loop One',musical_key:'D#m',bpm:92,tags:'Boom Bap / Demo',price:29.99,preview_path:'demo.wav'},
  {id:'d2',title:'Demo Loop Two',musical_key:'Fm',bpm:92,tags:'Trap / Demo',price:29.99,preview_path:'demo.wav'}];
+let coupon=null,slotsLive=false;try{coupon=JSON.parse(sessionStorage.getItem('mzprd_cpn')||'null')}catch(e){}
 let promo={promo_enabled:false,promo_price:10,promo_text:'ALL BEATS',promo_image_path:null},beats=[],packs=[],cur=-1,playing=false,cart=new Set(),liked=new Set(),bundles=[],level=0,ac,an,data,hits=[];
 const au=$('#au');
 
@@ -651,24 +666,33 @@ function renderDeals(){
  const el=$('#deals');if(!el)return;
  el.innerHTML=bundles.map(b=>{const m=money(b.price).replace(/\.00$/,'');const txt=b.kind==='any_beats'?'ANY '+b.qty+' BEATS FOR '+m:b.kind==='any_packs'?'ANY '+b.qty+' PACKS FOR '+m:String(b.name)+': '+m;return '<span>'+esc(txt)+'</span>'}).join('');
 }
+/* one coupon = a percent off the single most expensive beat in the cart (the server uses the same rule) */
+function couponDisc(lines,bd){
+ if(!coupon)return 0;const top=Math.max(0,...lines.filter(l=>l.t==='b').map(l=>l.price));
+ const d=Math.round(top*coupon.pct)/100;return Math.max(0,Math.min(d,lines.reduce((q,x)=>q+x.price,0)-bd.savings));
+}
 function renderCart(){
  const its=cartLines();
  let html=its.length?its.map(x=>'<div class="ci"><span>'+esc(x.title).toUpperCase()+'</span><span>'+money(x.price)+'<button data-k="'+x.k+'">REMOVE</button></span></div>').join(''):'<div class="ci"><span>EMPTY</span></div>';
  const bd=bundleCalc(its),gross=its.reduce((q,x)=>q+x.price,0);
  if(bd.savings>0)html+='<div class="ci" style="color:var(--gold)"><span>BUNDLE: '+esc(bd.names.join(', ')).toUpperCase()+'</span><span>-'+money(bd.savings)+'</span></div>';
  const hint=bundleHint(its);if(hint)html+='<div class="ci" style="color:var(--gold);border:0;font-size:10px"><span>'+esc(hint)+'</span></div>';
+ const cd=couponDisc(its,bd);
+ if(coupon)html+='<div class="ci" style="color:#6fd08c"><span>COUPON '+esc(coupon.code)+' ('+coupon.pct+'% OFF ONE BEAT)</span><span>'+(cd>0?'-'+money(cd):'ADD A BEAT')+'<button id="cpnRm">REMOVE</button></span></div>';
  $('#items').innerHTML=html;
- $('#total').textContent=money(gross-bd.savings);$('#nt').textContent='';
+ $('#total').textContent=money(gross-bd.savings-cd);$('#nt').textContent='';
+ {const rm=$('#cpnRm');if(rm)rm.onclick=()=>{coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}renderCart();prefetchOrder()}}
+ $('#cpnRow').style.display=(slotsLive&&!coupon&&its.length)?'flex':'none';
  document.querySelectorAll('#items button').forEach(b=>b.onclick=()=>{cart.delete(b.dataset.k);syncCart();renderCart();$('#ppbox').style.display=cart.size?'block':'none';prefetchOrder()});
 }
 const PP_ID='BAAk_pgKpR08tx_Fv0QmKgsVga24tfZI0Rqfxq2v4J27q6GWAcTfVadt2vtvjAanJGlYQ8o_9SjbI_vhkc',FN=SB_URL+'/functions/v1/checkout';
 let ppRendered=false,ppMounting=false,pre={sig:'',p:null,t:0};
-const cartSig=()=>[...cart].sort().join(',');
+const cartSig=()=>[...cart].sort().join(',')+(coupon?'|'+coupon.code:'');
 function prefetchOrder(){
  if(!cart.size)return;const sg=cartSig();
  if(pre.sig===sg&&pre.p&&Date.now()-pre.t<600000)return;
  pre.sig=sg;pre.t=Date.now();
- pre.p=callCheckout({action:'create',items:[...cart].map(k=>({t:k[0],id:k.slice(2)}))});pre.p.catch(()=>{pre.p=null});
+ pre.p=callCheckout({action:'create',items:[...cart].map(k=>({t:k[0],id:k.slice(2)})),coupon:coupon?coupon.code:undefined});pre.p.catch(()=>{pre.p=null});
 }
 async function callCheckout(body){
  const r=await fetch(FN,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify(body)});
@@ -686,8 +710,8 @@ async function mountPaypal(){
   style:{layout:'vertical',color:'gold',shape:'rect',label:'pay',height:46},
   createOrder:async()=>{try{$('#nt').textContent='';if(!cart.size)throw new Error('Your cart is empty.');
    if(pre.p&&pre.sig===cartSig()&&Date.now()-pre.t<600000){try{return (await pre.p).id}catch(e){}}
-   const r=await callCheckout({action:'create',items:[...cart].map(k=>({t:k[0],id:k.slice(2)}))});return r.id}catch(e){$('#nt').textContent=e.message;throw e}},
-  onApprove:async d=>{try{$('#nt').textContent='Confirming your payment...';const r=await callCheckout({action:'capture',orderId:d.orderID});const o={token:r.token,secret:r.secret,exp:Date.now()+r.seconds_left*1000,downloads:r.downloads};cart.clear();syncCart();dlStart(o);showDone(o,true);thanksPending=true;scrollTo({top:0,behavior:'smooth'})}catch(e){$('#nt').textContent=e.message}},
+   const r=await callCheckout({action:'create',items:[...cart].map(k=>({t:k[0],id:k.slice(2)})),coupon:coupon?coupon.code:undefined});return r.id}catch(e){$('#nt').textContent=e.message;throw e}},
+  onApprove:async d=>{try{$('#nt').textContent='Confirming your payment...';const r=await callCheckout({action:'capture',orderId:d.orderID});const o={token:r.token,secret:r.secret,exp:Date.now()+r.seconds_left*1000,downloads:r.downloads};cart.clear();coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}syncCart();dlStart(o);showDone(o,true);thanksPending=true;scrollTo({top:0,behavior:'smooth'})}catch(e){$('#nt').textContent=e.message}},
   onCancel:()=>{$('#nt').textContent='Payment cancelled. Your cart is still here.'},
   onError:()=>{if(!$('#nt').textContent)$('#nt').textContent='PayPal had a problem. Please try again.'}
  }).render('#ppbox');
@@ -1290,6 +1314,7 @@ async function checkAdmin(){
  isAdmin=false;
  if(session){const r=await sb.rpc('is_admin');isAdmin=r.data===true}
  LINK.textContent=isAdmin?'BACK OFFICE':'LOGIN';
+ if(window.slotsBoot)window.slotsBoot();
 }
 const ADM=['beats','packs','promo','sales','video','email'],adminRel=()=>location.pathname.slice(BASEPATH.length).match(/^admin\/(?:([a-z]+)\/)?$/);
 function syncBoTabs(){document.querySelectorAll('.bh [data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t===tab))}
@@ -1325,13 +1350,13 @@ function loadScript(f){return new Promise((ok,no)=>{const s=document.createEleme
 function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=16';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
 async function boRender(){
  const vid=tab==='video';document.querySelector('#bo .bo2').style.display=vid?'none':'';
- document.getElementById('bo2b').style.display='none';
+ document.getElementById('bo2b').style.display='none';document.getElementById('bo2c').style.display='none';
  if(window.emailClose)emailClose();
  if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=1');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
  if(vid){try{await loadStudio();await studioOpen()}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
  if(window.studioClose)studioClose();
  document.getElementById('bo2b').style.display=tab==='promo'?'':'none';
- if(tab==='promo'){await promoRender();return bundlesRender()}
+ if(tab==='promo'){document.getElementById('bo2c').style.display='';await promoRender();await bundlesRender();try{await loadScript('slots.js?v=2');await slotsAdmin($('#bf3'),$('#bl3'))}catch(e){$('#bf3').innerHTML='<h3>SLOTS</h3><div class="cur">Could not load the slots panel.</div>'}return}
  if(tab==='sales')return salesRender();
  const F=FIELDS[tab],e=editing||{};
  const files=F.files.map(([k,l,acc])=>`<label>${l}</label><input type="file" data-k="${k}" accept="${acc}">${e[k]?`<div class="cur">Current: ${esc(e[k].split('/').pop())} (choose a new file to replace)</div><label class="chk" style="margin-top:6px"><input type="checkbox" data-rm="${k}"> REMOVE THIS FILE</label>`:''}`).join('');
@@ -1558,6 +1583,35 @@ async function boDelete(r){
 }
 
 sb.auth.onAuthStateChange(()=>{});
+/* ---------- slots button + coupons ---------- */
+const SLOTFN=SB_URL+'/functions/v1/slots';
+function mzBid(){
+ let b='';try{b=localStorage.getItem('mzprd_bid')||''}catch(e){}
+ if(!/^[A-Za-z0-9-]{16,64}$/.test(b)){const m=document.cookie.match(/(?:^|; )mzprd_bid=([A-Za-z0-9-]{16,64})/);b=m?m[1]:''}
+ if(!/^[A-Za-z0-9-]{16,64}$/.test(b)){b=(window.crypto&&crypto.randomUUID?crypto.randomUUID():'');b=b.replace(/[^A-Za-z0-9-]/g,'');while(b.length<24)b+=Math.random().toString(36).slice(2);b=b.slice(0,40)}
+ try{localStorage.setItem('mzprd_bid',b)}catch(e){}try{document.cookie='mzprd_bid='+b+';max-age=63072000;path=/;SameSite=Lax'}catch(e){}
+ return b;
+}
+window.mzBid=mzBid;
+window.setCoupon=c=>{coupon={code:c.code,pct:c.pct};try{sessionStorage.setItem('mzprd_cpn',JSON.stringify(coupon))}catch(e){}};
+window.clearCoupon=()=>{coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}renderCart()};
+window.applyCoupon=async function(raw){
+ const code=String(raw||'').trim().toUpperCase(),m=$('#cpnMsg');if(!code)return false;if(m)m.textContent='Checking...';
+ try{const r=await fetch(SLOTFN,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},body:JSON.stringify({action:'check',code})});const j=await r.json();
+  if(!j.ok){coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}if(m)m.textContent=j.reason||'That code is not valid.';renderCart();return false}
+  coupon={code:j.code,pct:j.pct};try{sessionStorage.setItem('mzprd_cpn',JSON.stringify(coupon))}catch(e){}renderCart();prefetchOrder();return true}
+ catch(e){if(m)m.textContent='Could not check the code. Try again.';return false}
+};
+$('#cpnGo').onclick=()=>window.applyCoupon($('#cpnIn').value);$('#cpnIn').onkeydown=e=>{if(e.key==='Enter')window.applyCoupon($('#cpnIn').value)};
+window.slotsBoot=async function(){
+ const btn=$('#slotBtn');if(!btn)return;
+ let test=false;try{test=localStorage.getItem('mzprd_slot_test')==='1'&&isAdmin}catch(e){}
+ try{let tok=SB_KEY;if(test){const {data:{session}}=await sb.auth.getSession();if(session)tok=session.access_token}
+  const r=await fetch(SLOTFN,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+tok},body:JSON.stringify({action:'status',browser:mzBid(),test})});
+  const st=await r.json();slotsLive=!!(st&&st.enabled);btn.style.display=slotsLive?'block':'none';btn.textContent=test?'PLAY SLOTS (TEST)':'PLAY SLOTS';renderCart()}
+ catch(e){slotsLive=false;btn.style.display='none'}
+};
+$('#slotBtn').onclick=async()=>{try{if(!window.slotsOpen)await loadScript('slots.js?v=2');await window.slotsOpen()}catch(e){toast('SLOTS FAILED TO LOAD')}};
 checkAdmin();loadAll();frame();
 </script>
 </body>
