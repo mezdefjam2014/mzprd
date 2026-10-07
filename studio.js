@@ -58,6 +58,13 @@ function css(){
 #studio canvas#sWave{width:100%;height:56px;max-height:none;min-width:0;cursor:pointer;touch-action:none;background:#050506}
 #studio.busy .pn:not(.yt) input,#studio.busy .pn:not(.yt) select,#studio.busy .pn:not(.yt) textarea,#studio.busy .pn:not(.yt) button,#studio.busy .pn:not(.yt) .it{pointer-events:none;opacity:.5}
 #studio .cnt{font:500 10px Montserrat;color:#6c6c73;letter-spacing:.1em;margin-top:4px}
+#studio #thGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+#studio .thc{background:#050506;border:1px solid #2a2a2e;padding:5px}
+#studio .thc canvas{width:100%;height:auto;max-height:none;border:0;cursor:zoom-in}
+#studio .thc b{display:block;font:700 9px Montserrat;letter-spacing:.14em;color:#c9c9ce;margin:4px 0}
+#studio .thc .two2 button{padding:7px 2px;font-size:9px;letter-spacing:.08em}
+#thLb{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;cursor:zoom-out}
+#thLb canvas{max-width:92vw;max-height:92vh;box-shadow:0 0 60px #000}
 #studio .two2{display:grid;grid-template-columns:1fr 1fr;gap:8px}`;
  document.head.appendChild(st);
 }
@@ -90,7 +97,7 @@ function html(){
    <button class="btn" id="yAll" style="margin-top:10px">NEW VARIATION (TITLE + DESCRIPTION + TAGS)</button>
    <label>TITLE <span id="yTi" style="color:#6c6c73"></span></label><input type="text" id="yT"><div class="cnt" id="yTc"></div>
    <div class="two2" style="margin-top:6px"><button class="btn" data-c="yT">COPY TITLE</button><button class="btn" data-n="t">NEXT TITLE</button></div>
-   <label>DESCRIPTION <span id="yDi" style="color:#6c6c73"></span></label><textarea id="yD"></textarea><div class="cnt" id="yDc"></div>
+   <label>DESCRIPTION <span id="yDi" style="color:#6c6c73"></span></label><textarea id="yD"></textarea><div class="cnt" id="yDc"></div><div class="cnt" id="yLink"></div>
    <div class="two2" style="margin-top:6px"><button class="btn" data-c="yD">COPY DESCRIPTION</button><button class="btn" data-n="d">NEXT DESCRIPTION</button></div>
    <label>TAGS <span id="yGi" style="color:#6c6c73"></span></label><textarea id="yG"></textarea><div class="cnt" id="yGc"></div>
    <div class="two2" style="margin-top:6px"><button class="btn" data-c="yG">COPY TAGS</button><button class="btn" data-n="g">NEXT TAGS</button></div>
@@ -119,6 +126,11 @@ function html(){
   <button class="go" id="sRender">RENDER VIDEO</button>
   <div class="bar"><b id="sProg"></b></div><div class="msg" id="sMsg">Keep this tab open and visible while it renders. A 3 minute beat takes about 3 minutes.</div>
   <a id="sDl" class="btn" style="display:none;text-align:center;margin-top:8px;text-decoration:none">DOWNLOAD VIDEO</a>
+  <div class="pn yt thp" style="margin-top:18px"><h4>THUMBNAILS</h4>
+   <div class="two2"><button class="btn" id="thGo">MAKE 5 THUMBNAILS</button><button class="btn" id="thMore">NEW SET</button></div>
+   <div class="seg" style="margin-top:8px"><button data-th="16:9" class="on">PREVIEW 16:9</button><button data-th="9:16">PREVIEW 9:16</button></div>
+   <div id="thGrid"></div><div class="msg" id="thMsg">Made from the cover, title and BPM. 3 have the producer, 2 do not. Every card downloads in 16:9 (1280x720) and 9:16 (1080x1920).</div>
+   <button class="btn" id="thAll" style="display:none;margin-top:8px">DOWNLOAD ALL (10 FILES)</button></div>
  </div></div>`;
 }
 
@@ -430,7 +442,7 @@ function ytCtx(){
   art=(($s('#yA')||{}).value||'').trim(),mood=(($s('#yM')||{}).value||'').trim()||tags[1]||'Hard',genre=tags[0]||'Hip Hop',
   bpm=it.bpm?it.bpm+' BPM':'',key=it.musical_key||'',info=[bpm,key].filter(Boolean).join(' '),
   A=art?art+' Type Beat':mood+' '+genre+' Type Beat';
- return{it,isB,tags,art,mood,genre,bpm,key,info,A,T:it.title||'',url:SITE+'/'+(isB?'beat':'pack')+'/'+(it.slug||'')+'/',Y:YEAR,gtag:genre.toLowerCase().replace(/[^a-z0-9]/g,'')};
+ return{it,isB,tags,art,mood,genre,bpm,key,info,A,T:it.title||'',url:SITE+'/'+(isB?'beat':'pack')+'/'+(it.slug||String(it.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||it.id)+'/',Y:YEAR,gtag:genre.toLowerCase().replace(/[^a-z0-9]/g,'')};
 }
 function cut(str,n){str=str.replace(/\s+/g,' ').replace(/\s+\|\s+\|/g,' |').replace(/\(\s*\)/g,'').trim();if(str.length<=n)return str;const c=str.slice(0,n),i=c.lastIndexOf(' ');return(i>n*.6?c.slice(0,i):c).replace(/[|\-,(\s]+$/,'')}
 const TITLES_B=[
@@ -475,6 +487,35 @@ const TAGS_P=[
  x=>['sample pack','vinyl samples','producer loops','sample pack for producers','loops and chops','beat making','free samples preview',x.T,'MZPRD'],
  x=>[x.genre+' samples',x.mood+' samples','vinyl sample pack','sample pack '+x.Y,'producer sounds','sample flip','how to flip samples',x.T,'MZPRD']
 ];
+TITLES_B.push(
+ x=>'\uD83D\uDD25 '+x.A+' '+x.Y+' - "'+x.T+'" \uD83D\uDD25 | '+x.genre+' Beat',
+ x=>x.T+' ('+x.A+') '+x.Y+' | Prod. MZPRD',
+ x=>'[FREE] '+x.mood+' '+x.A+' - "'+x.T+'" | Free Rap Instrumental',
+ x=>'"'+x.T+'" '+x.genre+' Type Beat '+x.Y+' | '+x.mood+' Rap Instrumental ('+(x.bpm||'Prod. MZPRD')+')',
+ x=>x.A+' "'+x.T+'" | Buy It And Download Instantly | Prod. MZPRD',
+ x=>'['+(x.info||'NEW BEAT')+'] '+x.A+' '+x.Y+' - "'+x.T+'"');
+DESCS_B.push(
+ x=>x.A+' '+x.Y+' - "'+x.T+'"\n\nBuy it here: '+x.url+'\n\n0:00 '+x.T+(x.info?' ('+x.info+')':'')+'\n\nFollow for new beats every week.\nProd. by MZPRD (Meztheprod)\n'+SITE+'\n\n#typebeat #'+x.gtag+'beat #mzprd',
+ x=>'Looking for a '+x.mood.toLowerCase()+' '+x.genre.toLowerCase()+' beat? This one is ready.\n\n'+x.T+(x.info?' | '+x.info:'')+'\nGet it and download instantly: '+x.url+'\n\nHear more and buy from the full catalog: '+SITE+'\n\nProd. by MZPRD (Meztheprod)\n\n#typebeat #rapinstrumental #mzprd',
+ x=>x.url+'\n^ Buy / download "'+x.T+'" here\n\n'+x.A+' '+x.Y+(x.info?' | '+x.info:'')+' | '+x.mood+'\nProd. by MZPRD\n\n#typebeat #'+x.gtag+'beat #mzprd',
+ x=>'Use this beat for your next song. '+x.A+' '+x.Y+' "'+x.T+'".\n\nBuy it: '+x.url+'\n\nIf you record on it, send it to me and credit "Prod. MZPRD" so I can hear it.\nMore beats: '+SITE+'\n\n#typebeat #rapbeat #mzprd');
+TAGS_B.push(
+ x=>[x.mood+' '+x.genre+' beat',x.mood+' type beat',x.A,x.A+' '+x.Y,'rap instrumental '+x.Y,x.T,'MZPRD'],
+ x=>['instrumental','rap instrumental','hip hop instrumental','beat','rap beat','free beat','type beat '+x.Y,x.T,'MZPRD','Meztheprod'],
+ x=>['buy rap beats online','buy type beats','beats for artists','instrumentals for rappers',x.genre+' beats for sale','download beats',x.T,'MZPRD']);
+TITLES_P.push(
+ x=>'"'+x.T+'" | Vinyl Sample Pack For Producers ('+x.Y+')',
+ x=>x.mood+' Sample Pack - '+x.T+' | Loops, Chops & Vinyl Samples',
+ x=>'[SAMPLE PACK] '+x.T+' - '+x.genre+' Loops for Beatmakers '+x.Y,
+ x=>'Flip These Samples: "'+x.T+'" Sample Pack | Prod. MZPRD');
+DESCS_P.push(
+ x=>x.T+' - sample pack for beatmakers\n\nGet it: '+x.url+'\n\nUse the loops and chops in your next beat.\nProd. by MZPRD (Meztheprod)\n'+SITE+'\n\n#samplepack #beatmaker #mzprd',
+ x=>'Flip these samples. '+x.T+' ('+x.mood+' '+x.genre+')\n\nDownload it here: '+x.url+'\nAll packs and beats: '+SITE+'\n\n#samplepack #vinylsamples #producer',
+ x=>x.url+'\n^ Buy "'+x.T+'" here\n\n'+x.mood+' '+x.genre+' sample pack for producers.\nProd. by MZPRD\n\n#samplepack #producerloops #mzprd');
+TAGS_P.push(
+ x=>['sample pack for beatmakers','beat making samples','loops for producers','chops','vinyl chops',x.T,'MZPRD'],
+ x=>['free sample pack preview','vinyl sample pack','dusty samples','boom bap samples',x.genre+' sample pack',x.T,'MZPRD'],
+ x=>['buy sample packs','sample packs for sale','producer sounds','drum and sample pack',x.T,'MZPRD','Meztheprod']);
 function fitTags(a){const seen=new Set(),out=[];let len=0;for(const t of a.map(x=>String(x||'').trim()).filter(Boolean)){const k=t.toLowerCase();if(seen.has(k))continue;if(len+t.length+(out.length?2:0)>500)break;seen.add(k);out.push(t);len+=t.length+(out.length>1?2:0)}return out.join(', ')}
 function ytText(reset){
  const it=S.item;if(!it||!$s('#yT'))return;if(reset===true){yi.t=yi.d=yi.g=0}
@@ -482,11 +523,39 @@ function ytText(reset){
  yi.t%=T.length;yi.d%=D.length;yi.g%=G.length;
  $s('#yT').value=cut(T[yi.t](x),100);$s('#yD').value=D[yi.d](x).slice(0,5000);$s('#yG').value=fitTags(G[yi.g](x));
  $s('#yTi').textContent='('+(yi.t+1)+'/'+T.length+')';$s('#yDi').textContent='('+(yi.d+1)+'/'+D.length+')';$s('#yGi').textContent='('+(yi.g+1)+'/'+G.length+')';
- ytCount();
+ ytCount();const lk=$s('#yLink');if(lk)lk.innerHTML='Link used in the description: <a href="'+e2(x.url)+'" target="_blank" rel="noopener" style="color:#e8b94a">'+e2(x.url)+'</a>';
 }
 function ytCount(){const t=$s('#yT').value.length,d=$s('#yD').value.length,g=$s('#yG').value.length;
  $s('#yTc').textContent=t+' / 100 characters'+(t>100?' (too long)':'');$s('#yDc').textContent=d+' / 5000 characters';$s('#yGc').textContent=g+' / 500 characters'+(g>500?' (too long)':'')}
 function ytNext(k){yi[k]++;ytText()}
+const TH={seed:0,pf:'16:9'};
+function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
+function thCtx(){const it=S.item||{};return{title:it.title||'',w:window.MZThumbs.words(S.tx.title.text||it.title),cover:S.cover,bpm:it.bpm,key:it.musical_key,kind:S.kind,seed:TH.seed}}
+const thSize=f=>f==='16:9'?[1280,720]:[1080,1920];
+async function thMake(bump){
+ const m=$s('#thMsg');if(!S.item){m.textContent='Pick a beat or pack first.';return}
+ m.textContent='Making thumbnails...';
+ try{await thLoad()}catch(e){m.textContent='Could not load the thumbnail maker.';return}
+ if(bump)TH.seed+=7;
+ const g=$s('#thGrid'),X=thCtx(),pv=TH.pf==='16:9'?[480,270]:[270,480];g.innerHTML='';
+ for(let i=0;i<window.MZThumbs.count;i++){
+  const card=document.createElement('div');card.className='thc';
+  const cv=window.MZThumbs.make(i,pv[0],pv[1],X);cv.onclick=()=>thBig(i);
+  const lab=document.createElement('b');lab.textContent=(i+1)+'. '+window.MZThumbs.names[i]+(window.MZThumbs.withChar[i]?' (PRODUCER)':' (NO PRODUCER)');
+  const bt=document.createElement('div');bt.className='two2';bt.innerHTML='<button class="btn" data-d="16:9">16:9 JPG</button><button class="btn" data-d="9:16">9:16 JPG</button>';
+  bt.querySelectorAll('button').forEach(b=>b.onclick=()=>thDl(i,b.dataset.d));
+  card.append(cv,lab,bt);g.appendChild(card)}
+ $s('#thAll').style.display='block';m.textContent='Click a thumbnail to see it big. Tap NEW SET for 5 more looks.';
+}
+function thBig(i){
+ const [w,h]=thSize(TH.pf),cv=window.MZThumbs.make(i,w,h,thCtx()),lb=document.createElement('div');lb.id='thLb';lb.appendChild(cv);lb.onclick=()=>lb.remove();document.body.appendChild(lb);
+}
+function thDl(i,f){
+ return new Promise(res=>{try{const [w,h]=thSize(f),cv=window.MZThumbs.make(i,w,h,thCtx());
+  cv.toBlob(b=>{if(!b){$s('#thMsg').textContent='Could not export (the cover blocks it). Re-add the cover image from your computer.';return res()}
+   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=((S.item&&S.item.slug)||'thumb')+'-thumb'+(i+1)+'-'+(f==='16:9'?'16x9':'9x16')+'.jpg';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);res()},'image/jpeg',.92)}catch(e){$s('#thMsg').textContent='Could not export: '+e.message;res()}});
+}
+async function thAll(){for(let i=0;i<window.MZThumbs.count;i++){await thDl(i,'16:9');await new Promise(r=>setTimeout(r,350));await thDl(i,'9:16');await new Promise(r=>setTimeout(r,350))}}
 function renderList(){
  const l=$s('#sl'),rows=S.items.filter(i=>i._k===S.kind);
  l.innerHTML=rows.length?rows.map(r=>`<div class="it" data-id="${e2(r.id)}">${r.cover_path?`<img src="${e2(pub(r.cover_path))}" alt="">`:'<i></i>'}<div><b>${e2(r.title)}</b><span>${[r.bpm&&r.bpm+' BPM',r.musical_key,r.preview_path?'':'NO PREVIEW'].filter(Boolean).join(' / ')||'&nbsp;'}</span></div></div>`).join(''):'<div class="msg" style="padding:12px">Nothing here yet.</div>';
@@ -518,6 +587,8 @@ function wire(){
  wv.onpointerdown=e=>{if(run&&run.rec)return;drag=true;was=!!(A&&A.playing);if(was)stopPlay();wv.setPointerCapture(e.pointerId);seek(e)};
  wv.onpointermove=e=>{if(drag)seek(e)};
  wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
+ q('#thGo').onclick=()=>thMake(false);q('#thMore').onclick=()=>thMake(true);q('#thAll').onclick=thAll;
+ document.querySelectorAll('#studio [data-th]').forEach(b=>b.onclick=()=>{TH.pf=b.dataset.th;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(window.MZThumbs&&q('#thGrid').children.length)thMake(false)});
  q('#yAll').onclick=()=>{yi.t++;yi.d++;yi.g++;ytText()};
  document.querySelectorAll('#studio [data-n]').forEach(b=>b.onclick=()=>ytNext(b.dataset.n));
  ['#yA','#yM'].forEach(id=>q(id).oninput=()=>ytText());
