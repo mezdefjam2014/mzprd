@@ -164,7 +164,7 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity
 
 fs.mkdirSync(DIST, { recursive: true })
 for (const e of fs.readdirSync(DIST)) fs.rmSync(path.join(DIST, e), { recursive: true, force: true })
-for (const f of ['hero.jpg', 'girl.png', 'chain.png', 'studio.js', 'slots.js', 'show-stage.webp', 'show-bg.webp', 'show-crowd.webp', 'show-dj-torso.webp', 'show-dj-head.webp', 'show-dj-hl.webp', 'show-dj-hr.webp', 'show-layers.json', 'packbuilder.js', 'show.js', 'showpage.js', 'showmaker.js', 'email.js', 'mix.js', 'thumbs.js', 'mp4-muxer.js', 'CNAME']) {
+for (const f of ['hero.jpg', 'girl.png', 'chain.png', 'studio.js', 'slots.js', 'show-stage.webp', 'show-atlas.webp', 'show-atlas.json', 'show-bg.webp', 'show-crowd.webp', 'show-dj-torso.webp', 'show-dj-head.webp', 'show-dj-hl.webp', 'show-dj-hr.webp', 'show-layers.json', 'packbuilder.js', 'show.js', 'showpage.js', 'showmaker.js', 'email.js', 'mix.js', 'thumbs.js', 'mp4-muxer.js', 'CNAME']) {
   if (fs.existsSync(path.join(ROOT, f))) fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f))
 }
 const urls = []
