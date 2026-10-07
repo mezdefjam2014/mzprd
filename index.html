@@ -3,7 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MZPRD | Beats</title>
+<title>MZPRD | Buy Beats and Sample Packs Online</title>
+<meta name="description" content="MZPRD makes dark, hard-hitting beats and sample packs. Preview every beat, pay securely with PayPal and download instantly.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#060507">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MZPRD">
+<meta property="og:title" content="MZPRD | Buy Beats and Sample Packs Online">
+<meta property="og:description" content="Dark, hard-hitting beats and sample packs. Preview, pay securely with PayPal and download instantly.">
+<meta property="og:image" content="hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"MZPRD","description":"Beats and sample packs by MZPRD."}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://www.paypal.com">
 <link rel="dns-prefetch" href="https://www.sandbox.paypal.com">
@@ -25,6 +35,7 @@ button{cursor:pointer}
 .pfx{position:absolute;pointer-events:none;opacity:0;mix-blend-mode:screen;background:radial-gradient(ellipse,rgba(255,235,210,.9),rgba(255,60,50,.55) 45%,transparent 72%)}
 .lamp{position:absolute;left:12%;top:12%;width:20%;height:48%;background:radial-gradient(ellipse,rgba(255,40,40,.55),transparent 65%);opacity:.14;mix-blend-mode:screen;pointer-events:none}
 .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),transparent 22%,transparent 80%,rgba(6,5,7,.9));pointer-events:none}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .grain{position:fixed;inset:0;pointer-events:none;z-index:30;opacity:.07;background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
 header{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:clamp(14px,2.8vw,40px) 8.1%}
 nav{display:flex;gap:clamp(18px,3.4vw,50px)}
@@ -240,13 +251,15 @@ footer.f a:hover{color:#fff}
 </style>
 </head>
 <body>
+<noscript><p style="padding:24px;color:#ccc;font:16px/1.6 sans-serif">MZPRD sells beats and sample packs. Please turn on JavaScript to listen to previews and buy.</p></noscript>
 <div class="hero" id="hero">
- <div class="stage" id="stage"><img src="hero.jpg" alt="MZPRD producing beats on an MPC">
+ <div class="stage" id="stage"><img src="hero.jpg" alt="MZPRD producing beats on an MPC in a dark studio with speakers, a lamp and a laptop" fetchpriority="high" decoding="async">
   <div class="pfx" id="pfxL"></div><div class="pfx" id="pfxR"></div>
   <div class="hand" id="handL"></div><div class="hand" id="handR"></div>
   <div class="spk" id="spkL"></div><div class="spk" id="spkR"></div><div class="head" id="head"><canvas id="eyes"></canvas></div><div class="chain" id="chain"></div><canvas class="vin" id="vin"></canvas><canvas class="lap" id="lap"></canvas><canvas class="padfx" id="padfx"></canvas><canvas class="hpfx" id="hpfx"></canvas><canvas class="lcd" id="lcd"></canvas><canvas class="mpc" id="mpc"></canvas><canvas class="fx" id="fx"></canvas></div>
  <div class="lamp"></div>
  <div id="girl"><img id="girlImg" alt="Promo" hidden><div class="sign"><b id="girlMsg">ALL BEATS</b><strong id="girlPrice">$10</strong><span>LIMITED TIME</span><button class="shop" id="girlShop">SHOP NOW</button></div><button class="bx" id="girlX" aria-label="Close promo">&times;</button></div>
+ <h1 class="sr-only">MZPRD: beats and sample packs</h1>
  <header>
   <nav>
    <button class="on" data-v="beats">BEATS</button>
