@@ -111,11 +111,23 @@ function headHtml(s) {
 }
 
 let T = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')
+const aboutBox = () => `<h2>About MZPRD (Meztheprod)</h2>
+<p>MZPRD, short for Meztheprod, is a music producer making original beats and instrumentals for rap, hip hop and R&amp;B, plus sample packs, vinyl samples and producer loops for other producers.</p>
+<p>Every beat and sample pack has a preview you can play on the site, and you can record your own voice over a beat preview to see how it feels. When you find the one, pay securely with PayPal and download the full file straight away.</p>
+<h3>What you can get</h3>
+<ul><li><a href="beats/">Beats and instrumentals</a> for rap, hip hop and R&amp;B</li><li><a href="sample-packs/">Sample packs</a>, including vinyl samples and producer loops</li></ul>
+${catLinks()}
+<h3>How buying works</h3>
+<ol><li>Play the preview of any beat or sample pack.</li><li>Add the ones you want to your cart.</li><li>Pay securely with PayPal, using your PayPal account or a card.</li><li>Download your full files right away. They stay available for 15 minutes in the same browser, so save them to your device.</li></ol>
+<h3>Questions</h3>
+${FAQ.map((f) => `<details><summary>${esc(f[0])}</summary><p>${esc(f[1])}</p></details>`).join('')}`
+
 function render(s) {
   let h = T
+  h = h.replace(/<!--ABOUT:BOX-->[\s\S]*?<!--\/ABOUT:BOX-->/, () => aboutBox())
   h = h.replace(/<!--SEO:HEAD-->[\s\S]*?<!--\/SEO:HEAD-->/, () => headHtml(s))
   h = h.replace('<!--PAGEDATA-->', () => `<script>window.__PAGE=${json(s.page)}</script>`)
-  h = h.replace('<!--SEO:CONTENT-->', () => `<section class="seo" id="seo"><div class="in">${s.content}</div></section>`)
+  h = h.replace('<!--SEO:CONTENT-->', () => (s.content ? `<section class="seo" id="seo"><div class="in">${s.content}</div></section>` : ''))
   h = h.replace('<h1 class="sr-only">MZPRD: beats and sample packs</h1>', () => (s.detail ? `<p class="sr-only">MZPRD (Meztheprod)</p>` : `<h1 class="sr-only">${esc(s.h1)}</h1>`))
   if (s.detail) {
     h = h.replace('<div class="view on" id="v-beats">', '<div class="view" id="v-beats">')
@@ -159,16 +171,7 @@ const addUrl = (rel, lastmod) => urls.push({ loc: SITE + '/' + rel, lastmod: las
 
 /* ----- home ----- */
 {
-  const content = `<h2>MZPRD (Meztheprod): Rap, Hip Hop and R&amp;B Beats</h2>
-<p>MZPRD, short for Meztheprod, makes original beats and instrumentals for rappers, singers and artists. Every beat has a full preview, and when you find the one you can pay securely with PayPal and download the full file straight away.</p>
-<p><a href="beats/">Browse all beats and instrumentals</a>.</p>
-<h2>Sample Packs, Vinyl Samples and Producer Loops</h2>
-<p>Producers can also pick up sample packs built for beat making: vinyl samples, producer loops and more, with a playable preview on every pack. <a href="sample-packs/">See all sample packs</a>.</p>
-${catLinks()}
-<h2>How Buying Works</h2>
-<ol><li>Play the preview of any beat or sample pack.</li><li>Add the ones you want to your cart.</li><li>Pay securely with PayPal, using your PayPal account or a card.</li><li>Download your full files right away. They stay available for 15 minutes in the same browser, so save them to your device.</li></ol>
-<h2>Questions</h2>
-${FAQ.map((f) => `<details><summary>${esc(f[0])}</summary><p>${esc(f[1])}</p></details>`).join('')}`
+  const content = ''
   write('', render({
     path: '', title: 'MZPRD (Meztheprod) | Rap, Hip Hop & R&B Beats + Sample Packs',
     desc: 'MZPRD (Meztheprod) makes rap, hip hop and R&B beats and instrumentals, plus sample packs, vinyl samples and producer loops. Preview, pay with PayPal, download instantly.',
@@ -215,12 +218,7 @@ for (const c of [...beatCats, ...packCats]) {
 
 /* ----- about ----- */
 {
-  const content = `${crumbsHtml([['Home', ''], ['About', 'about']])}<h2>About MZPRD (Meztheprod)</h2>
-<p>MZPRD is short for Meztheprod: a music producer making original beats and instrumentals for rap, hip hop and R&amp;B, plus sample packs, vinyl samples and producer loops for other producers.</p>
-<p>Everything here is made to be heard first. Every beat and sample pack has a preview, and you can record your own voice over a beat preview to see how it feels before you buy.</p>
-<h3>What you can get</h3>
-<ul><li><a href="beats/">Beats and instrumentals</a> for rap, hip hop and R&amp;B</li><li><a href="sample-packs/">Sample packs</a>, including vinyl samples and producer loops</li></ul>
-${catLinks()}`
+  const content = ''
   write('about', render({
     path: 'about/', title: 'About MZPRD (Meztheprod) | Beat Producer',
     desc: 'Meet MZPRD, short for Meztheprod: a producer making rap, hip hop and R&B beats and instrumentals, plus sample packs, vinyl samples and producer loops.',
