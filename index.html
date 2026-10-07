@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MZPRD | Buy Beats and Sample Packs Online</title>
+<!--SEO:HEAD-->
+<title>MZPRD (Meztheprod) | Rap, Hip Hop & R&B Beats + Sample Packs</title>
 <meta name="description" content="MZPRD makes dark, hard-hitting beats and sample packs. Preview every beat, pay securely with PayPal and download instantly.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#060507">
@@ -14,6 +15,7 @@
 <meta property="og:image" content="hero.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"MZPRD","description":"Beats and sample packs by MZPRD."}</script>
+<!--/SEO:HEAD-->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://www.paypal.com">
 <link rel="dns-prefetch" href="https://www.sandbox.paypal.com">
@@ -85,6 +87,20 @@ button{cursor:pointer}
 .dtab th{font:600 9px Montserrat;letter-spacing:.25em;color:#6c6c73}
 .dcard{background:#0c0c0f;border:1px solid #26262b;padding:14px;margin-bottom:14px}
 .dcard h4{font:700 11px Montserrat;letter-spacing:.3em;color:var(--gold);margin-bottom:10px}
+.ti a.tl{color:inherit;text-decoration:none}
+.seo{max-width:920px;margin:34px auto 0;padding:0 18px;color:#b8b8be;font:500 15px/1.85 Montserrat}
+.seo h2{font:700 clamp(14px,1.9vw,20px)/1.45 Montserrat;letter-spacing:.14em;color:#fff;text-transform:uppercase;margin:26px 0 12px}
+.seo h2:first-child{margin-top:0}
+.seo h3{font:700 13px/1.5 Montserrat;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin:22px 0 8px}
+.seo p{margin:0 0 12px}
+.seo a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(232,185,74,.35)}
+.seo a:hover{color:#fff}
+.seo ul,.seo ol{margin:0 0 12px 20px}
+.seo li{margin:4px 0}
+.seo details{border-bottom:1px solid #1d1d21;padding:10px 0}
+.seo summary{cursor:pointer;color:#e6e6ea;font-weight:600}
+.seo .crumbs{font:600 10px Montserrat;letter-spacing:.22em;color:#6c6c73;margin-bottom:14px;text-transform:uppercase}
+.seo .crumbs a{color:#8e8e94;border:0}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .grain{position:fixed;inset:0;pointer-events:none;z-index:30;opacity:.07;background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
 header{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:clamp(14px,2.8vw,40px) 8.1%}
@@ -382,8 +398,9 @@ footer.f a:hover{color:#fff}
  <div class="view" id="v-kits"><div id="packs"></div></div>
  <div class="view" id="v-beat"><div id="bpage"></div></div>
  <div class="view" id="v-merch"><div class="empty"><b>MERCH</b>HOODIES, TEES AND CROWN GEAR<br>DROPPING SOON</div></div>
- <div class="view" id="v-about"><div class="about"><h2>MZPRD</h2><p>Dark, heavy, sample-driven beats for artists who want something that sounds like the city at 3 AM.</p><p>Placeholder bio: replace with your story, credits and how to reach you for custom work and exclusives.</p><p>Contact: your@email.com</p></div></div>
+ <div class="view" id="v-about"><div class="about"><h2>MZPRD (MEZTHEPROD)</h2><p>MZPRD is short for Meztheprod: a music producer making original beats and instrumentals for rap, hip hop and R&amp;B, plus sample packs, vinyl samples and producer loops for other producers.</p><p>Every beat has a preview you can play right here. When you find the one, pay securely with PayPal and download the full file straight away.</p><p><a href="about/" style="color:var(--gold)">Read more about MZPRD</a></p></div></div>
 </div>
+<!--SEO:CONTENT-->
 <footer class="f">MZPRD / ALL RIGHTS RESERVED<a id="loginLink">LOGIN</a></footer>
 
 <audio id="au" crossorigin="anonymous" preload="none"></audio>
@@ -442,11 +459,13 @@ footer.f a:hover{color:#fff}
 <div class="grain"></div>
 <div id="enter"><svg class="crown" viewBox="0 0 120 84" aria-hidden="true"><path class="cp" d="M10 66 L17 20 L42 46 L60 10 L78 46 L103 20 L110 66 Z M14 76 H106"/></svg><h1 id="enterT">MZPRD</h1><button id="go">ENTER</button><p>SOUND ON</p></div>
 
+<!--PAGEDATA-->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL='https://qapmtiuptmgcajoaontj.supabase.co',SB_KEY='sb_publishable_jyfu7YHp2wK_WEv3nWeEzg_ogP00kD3';
 const sb=window.supabase.createClient(SB_URL,SB_KEY);
-const HOME_TITLE='MZPRD | Buy Beats and Sample Packs Online';
+const BASEURL=new URL('.',document.baseURI).href,BASEPATH=new URL('.',document.baseURI).pathname;
+const HOME_TITLE='MZPRD (Meztheprod) | Rap, Hip Hop & R&B Beats + Sample Packs',SEO_TITLE=document.title;
 const $=s=>document.querySelector(s);
 $('#enterT').innerHTML=[...'MZPRD'].map((c,i)=>'<span style="animation-delay:'+(1.5+i*.14)+'s">'+c+'</span>').join('');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -526,7 +545,7 @@ function renderBeats(){
   const d=document.createElement('div');d.className='row';
   const tags=esc(B.tags||'').replace(/ ?\/ ?/g,'&nbsp;&nbsp;&nbsp;');
   d.innerHTML=`${thumb(B,i,'th')}<span class="no">${String(i+1).padStart(2,'0')}</span>
-  <div><div class="ti">${esc(B.title)}</div><div class="tg">${tags}</div><div class="ms">${money(eff(B))}</div></div>
+  <div><div class="ti"><a class="tl" href="beat/${esc(bslug(B))}/">${esc(B.title)}</a></div><div class="tg">${tags}</div><div class="ms">${money(eff(B))}</div></div>
   <button class="pl" aria-label="Play ${esc(B.title)}"><i></i></button>
   <canvas class="wv" height="42"></canvas>
   <div class="st tm">--:--<small>TIME</small></div><div class="st pc">${money(eff(B))}<small>${promo.promo_enabled&&eff(B)!==Number(B.price)?'<s>'+money(B.price)+'</s>':'PRICE'}</small></div>
@@ -536,7 +555,7 @@ function renderBeats(){
   const cv=d.querySelector('.wv');seed=hashSeed(B.id);
   const bars=[...Array(110)].map((_,k)=>(.25+.75*rr())*(.65+.35*Math.sin(k/9+i)));wvs.push({cv,bars,p:-1,d:0});
   d.querySelector('.pl').onclick=()=>play(i);
-  d.firstElementChild.onclick=d.querySelector('.ti').onclick=()=>{location.hash='#/beat/'+encodeURIComponent(bslug(B))};
+  d.firstElementChild.onclick=d.querySelector('.ti').onclick=e=>{if(e)e.preventDefault();location.hash='#/beat/'+encodeURIComponent(bslug(B))};
   cv.onclick=e=>{if(cur!==i){play(i);return}const r=cv.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration};
   d.querySelector('.lk').onclick=()=>toggleLike('b:'+B.id);
   d.querySelector('.sh').onclick=()=>{try{navigator.clipboard.writeText(location.href.split('#')[0]+'#'+encodeURIComponent(B.title))}catch(e){}toast('LINK COPIED')};
@@ -552,10 +571,10 @@ function renderPacks(){
  el.innerHTML='<div class="crate"><div class="grid"></div><div class="cfront">SAMPLE PACK CRATE</div></div>';const g=el.querySelector('.grid');
  packs.forEach((P,i)=>{
   const c=document.createElement('div');c.className='card';
-  c.innerHTML=`<div class="cv">${thumb(P,i+2,'')}${P.preview_path?'<button class="pl" aria-label="Play preview of '+esc(P.title)+'"><i></i></button><div class="cprog"><b></b></div>':'<span class="nop">NO PREVIEW</span>'}<button class="cvlk" aria-label="Save">${I.heart}</button></div><div class="ti">${esc(P.title)}</div><div class="ds">${esc(P.description||'')}</div><div class="pr">${money(P.price)}</div><button class="cart">ADD TO CART</button>${P.free_download&&P.preview_path?'<button class="cart fd" style="margin-top:-2px">FREE DOWNLOAD</button>':''}`;
+  c.innerHTML=`<div class="cv">${thumb(P,i+2,'')}${P.preview_path?'<button class="pl" aria-label="Play preview of '+esc(P.title)+'"><i></i></button><div class="cprog"><b></b></div>':'<span class="nop">NO PREVIEW</span>'}<button class="cvlk" aria-label="Save">${I.heart}</button></div><div class="ti"><a class="tl" href="pack/${esc(bslug(P))}/">${esc(P.title)}</a></div><div class="ds">${esc(P.description||'')}</div><div class="pr">${money(P.price)}</div><button class="cart">ADD TO CART</button>${P.free_download&&P.preview_path?'<button class="cart fd" style="margin-top:-2px">FREE DOWNLOAD</button>':''}`;
   c.querySelector('.cart').onclick=e=>toggleCart('p:'+P.id,e.currentTarget);
   if(P.preview_path){c.querySelector('.cv').onclick=()=>playPack(i)}
-  c.querySelector('.ti').onclick=()=>{location.hash='#/pack/'+encodeURIComponent(bslug(P))}
+  c.querySelector('.ti').onclick=e=>{if(e)e.preventDefault();location.hash='#/pack/'+encodeURIComponent(bslug(P))}
   c.querySelector('.cvlk').onclick=e=>{e.stopPropagation();toggleLike('p:'+P.id)}
   const fd=c.querySelector('.fd');if(fd)fd.onclick=()=>freeDownload(P);g.appendChild(c)});
  paintArt(el);syncCart();
@@ -727,13 +746,17 @@ function showView(v){
  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
 }
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
- if(location.hash.indexOf('#/beat/')===0||location.hash.indexOf('#/pack/')===0)history.pushState(null,'',location.pathname+location.search);
+ if(location.hash.indexOf('#/beat/')===0||location.hash.indexOf('#/pack/')===0)history.pushState(null,'',BASEPATH);
  pageIdx=-1;document.title=HOME_TITLE;showView(b.dataset.v);
 });
 const slugify=t=>String(t||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 const bslug=B=>B.slug||slugify(B.title)||String(B.id);
 let pageIdx=-1,pageKind='b',pwv=null;
 function route(){
+ {const P=window.__PAGE;if(P&&!P.used&&!location.hash){P.used=true;
+  if(P.kind==='beat'){showBeatPage(beats.findIndex(b=>bslug(b)===P.slug));return}
+  if(P.kind==='pack'){showPackPage(packs.findIndex(b=>bslug(b)===P.slug));return}
+  if(P.kind==='view'){showView(P.v);if(P.title)document.title=P.title;return}}}
  const m=location.hash.match(/^#\/beat\/(.+)$/);
  if(m){const sl=decodeURIComponent(m[1]);showBeatPage(beats.findIndex(b=>bslug(b)===sl));return}
  const mp=location.hash.match(/^#\/pack\/(.+)$/);
@@ -741,10 +764,10 @@ function route(){
  if($('#v-beat').classList.contains('on')){const wasPack=pageKind==='p';pageIdx=-1;showView(wasPack?'kits':'beats')}
  document.title=HOME_TITLE;
 }
-function closeBeatPage(){history.pushState(null,'',location.pathname+location.search);route();scrollTo(0,0)}
+function closeBeatPage(){history.pushState(null,'',BASEPATH);route();scrollTo(0,0)}
 function showBeatPage(i){
  const box=$('#bpage');pageIdx=i;pageKind='b';pwv=null;
- if(i<0||!beats[i]){box.innerHTML='<button class="back" id="bBack">&larr; ALL BEATS</button><div class="empty"><b>NOT FOUND</b>THIS BEAT IS NOT AVAILABLE</div>';$('#bBack').onclick=()=>{history.pushState(null,'',location.pathname+location.search);route()};showView('beat');return}
+ if(i<0||!beats[i]){box.innerHTML='<button class="back" id="bBack">&larr; ALL BEATS</button><div class="empty"><b>NOT FOUND</b>THIS BEAT IS NOT AVAILABLE</div>';$('#bBack').onclick=()=>{history.pushState(null,'',BASEPATH);route()};showView('beat');return}
  const B=beats[i],tg=(B.tags||'').split('/').map(x=>x.trim()).filter(Boolean),old=promo.promo_enabled&&eff(B)!==Number(B.price);
  const others=beats.map((b,k)=>[b,k]).filter(x=>x[1]!==i).slice(0,4);
  box.innerHTML='<button class="x" id="bX" aria-label="Close beat page">&times;</button><button class="back" id="bBack">&larr; ALL BEATS</button><div class="bp'+(cur===i&&playing?' play':'')+'"><div class="cov">'+thumb(B,i,'')+'</div><div><h1>'+esc(B.title)+'</h1><div class="tgs">'+tg.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div><div class="prc">'+money(eff(B))+(old?'<s>'+money(B.price)+'</s>':'')+'</div><canvas class="bwv" id="bwv"></canvas>'+(B.description?'<div class="d">'+esc(B.description)+'</div>':'')+'<div class="acts2"><button class="pl" id="bPlay" aria-label="Play"><i></i></button><button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bLike" style="border-color:#4a4a50;color:#fff">SAVE</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(B.preview_path?'<button class="cart" id="bRec" style="border-color:#4a4a50;color:#fff">RECORD OVER IT</button>':'')+(B.free_download&&B.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE BEATS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1],'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
@@ -753,13 +776,13 @@ function showBeatPage(i){
  $('#bPlay').onclick=()=>play(i);
  $('#bCart').onclick=e=>toggleCart('b:'+B.id,e.currentTarget);
  $('#bLike').onclick=()=>{const it=pageKind==='p'?packs[pageIdx]:beats[pageIdx];if(it)toggleLike(pageKind+':'+it.id)};
- $('#bShare').onclick=()=>{try{navigator.clipboard.writeText(location.origin+location.pathname+'#/beat/'+encodeURIComponent(bslug(B)))}catch(e){}toast('LINK COPIED')};
+ $('#bShare').onclick=()=>{try{navigator.clipboard.writeText(BASEURL+'beat/'+encodeURIComponent(bslug(B))+'/')}catch(e){}toast('LINK COPIED')};
  const f=$('#bFree');if(f)f.onclick=()=>freeDownload(B);
  const rb=$('#bRec');if(rb)rb.onclick=()=>openBooth(i);
  box.querySelectorAll('.mr a').forEach(a=>a.onclick=()=>{location.hash='#/beat/'+encodeURIComponent(a.dataset.s);scrollTo(0,0)});
  const bars=wvs[i]?wvs[i].bars:[...Array(110)].map(()=>.5);pwv={cv:$('#bwv'),bars:bars,p:-1,d:0,i:i};
  const cv=$('#bwv');cv.onclick=e=>{if(cur!==i){play(i);return}const r=cv.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration};
- document.title=B.title+' | MZPRD';
+ document.title=(window.__PAGE&&window.__PAGE.kind==='beat'&&window.__PAGE.slug===bslug(B))?SEO_TITLE:B.title+' | MZPRD';
  syncCart();showView('beat');
 }
 function showPackPage(i){
@@ -772,13 +795,13 @@ function showPackPage(i){
  const pl=$('#bPlay');if(pl)pl.onclick=()=>playPack(i);
  $('#bCart').onclick=e=>toggleCart('p:'+P.id,e.currentTarget);
  $('#bLike').onclick=()=>{const it=pageKind==='p'?packs[pageIdx]:beats[pageIdx];if(it)toggleLike(pageKind+':'+it.id)};
- $('#bShare').onclick=()=>{try{navigator.clipboard.writeText(location.origin+location.pathname+'#/pack/'+encodeURIComponent(bslug(P)))}catch(e){}toast('LINK COPIED')};
+ $('#bShare').onclick=()=>{try{navigator.clipboard.writeText(BASEURL+'pack/'+encodeURIComponent(bslug(P))+'/')}catch(e){}toast('LINK COPIED')};
  const f=$('#bFree');if(f)f.onclick=()=>freeDownload(P);
  box.querySelectorAll('.mr a').forEach(a=>a.onclick=()=>{location.hash='#/pack/'+encodeURIComponent(a.dataset.s);scrollTo(0,0)});
  const cv=$('#bwv');
  if(cv){seed=hashSeed(P.id);const bars=[...Array(110)].map((_,k)=>(.25+.75*rr())*(.65+.35*Math.sin(k/9+i)));pwv={cv:cv,bars:bars,p:-1,d:0,i:i,k:'p'};
   cv.onclick=e=>{if(curPack!==i){playPack(i);return}const r=cv.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration}}
- document.title=P.title+' | MZPRD';
+ document.title=(window.__PAGE&&window.__PAGE.kind==='pack'&&window.__PAGE.slug===bslug(P))?SEO_TITLE:P.title+' | MZPRD';
  syncCart();showView('beat');
 }
 addEventListener('hashchange',()=>{if(location.hash==='#demo')return;route()});
@@ -1263,10 +1286,10 @@ async function boRender(){
  const F=FIELDS[tab],e=editing||{};
  const files=F.files.map(([k,l,acc])=>`<label>${l}</label><input type="file" data-k="${k}" accept="${acc}">${e[k]?`<div class="cur">Current: ${esc(e[k].split('/').pop())} (choose a new file to replace)</div><label class="chk" style="margin-top:6px"><input type="checkbox" data-rm="${k}"> REMOVE THIS FILE</label>`:''}`).join('');
  const slugBit=`<label>PAGE URL NAME (auto from title if empty)</label><input type="text" id="f_slug" value="${esc(e.slug??'')}" placeholder="${tab==='beats'?'big-beat':'big-citi-vinyl'}">`;
- const beatBits=tab==='beats'?`<label>TAGS (Boom Bap / Sample / Gritty)</label><input type="text" id="f_tags" value="${esc(e.tags??'')}">`+slugBit:slugBit;
+ const beatBits=tab==='beats'?`<label>TAGS: GENRES PEOPLE SEARCH (hip hop / rap / r&amp;b / boom bap / trap)</label><input type="text" id="f_tags" value="${esc(e.tags??'')}">`+slugBit:slugBit;
  $('#bf').innerHTML=`<h3>${editing?'EDIT':'ADD'} ${F.title}</h3>
   <label>TITLE</label><input type="text" id="f_title" value="${esc(e.title??'')}" required>
-  <label>DESCRIPTION</label><textarea id="f_desc">${esc(e.description??'')}</textarea>
+  <label>DESCRIPTION (2 to 3 sentences using words people search, like dark hip hop beat)</label><textarea id="f_desc">${esc(e.description??'')}</textarea>
   ${beatBits}
   <label>PRICE (USD)</label><input type="number" step="0.01" min="0" id="f_price" value="${esc(e.price??(tab==='beats'?29.99:19.99))}">
   ${files}
