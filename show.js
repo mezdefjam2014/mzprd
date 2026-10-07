@@ -144,21 +144,21 @@ function makeStage(canvas,seed){
  }
  const pc=(g,A,k,x,y,sc)=>{const r=S.plate.meta.r[k];g.drawImage(A,r[0],r[1],r[2],r[3],x,y,r[2]*sc,r[3]*sc)};
  const sz=k=>S.plate.meta.r[k];
- function stageBase(g,Ly){g.drawImage(Ly.stage,0,0,W,H)}
+ function stageBase(g,Ly,cy,glow){g.drawImage(Ly.stage,0,0,W,H);const m=S.plate.meta,r=m.r.crown;if(!r)return;const x=m.crown[0]*PS,y=m.crown[1]*PS+(cy||0);g.drawImage(Ly.atlas,r[0],r[1],r[2],r[3],x,y,r[2]*PS,r[3]*PS);
+  if(glow>.02){g.save();g.globalCompositeOperation='lighter';g.globalAlpha=Math.min(.6,glow);g.drawImage(Ly.atlas,r[0],r[1],r[2],r[3],x,y,r[2]*PS,r[3]*PS);g.restore()}}
  function speakers(g,A,pump){
   pump=pump||0;{const r=sz('speakers'),sc=SPK.s*(1+pump*.05);pc(g,A,'speakers',SPK.x+r[2]*(SPK.s-sc)/2,SPK.b-r[3]*sc,sc)}
   {const r=sz('monitors'),sc=MON.s*(1+pump*.05);pc(g,A,'monitors',MON.x+r[2]*(MON.s-sc)/2,MON.b-r[3]*sc,sc)}
  }
  /* MPC pads (4 x 3 visible) in the producer piece's own pixels */
- const PADW=p=>{const c=p%4,r=(p/4)|0;return[BODY.x+(92+c*21)*BODY.s,BODY.y+(156+r*8)*BODY.s]};
- function producer(g,A,po){
+  function producer(g,A,po){
   po=po||{bounce:0,nod:0,hands:[0,0],pads:null,hue:230,t:0};
   pc(g,A,'table',TBL.x,TBL.y,TBL.s);
   const bs=BODY.s,dy=po.bounce*2.4;
   pc(g,A,'torso',BODY.x,BODY.y+dy,bs);
   {const px=BODY.x+150*bs,py=BODY.y+dy+86*bs,r=sz('head');g.save();g.translate(px,py+po.nod*2.2);g.rotate(po.nod*.06+Math.sin(po.t*1.3)*.012);g.drawImage(A,r[0],r[1],r[2],r[3],-150*bs,-86*bs,r[2]*bs,r[3]*bs);g.restore()}
   pc(g,A,'mpc',BODY.x,BODY.y,bs);
-  if(po.pads){g.save();g.globalCompositeOperation='lighter';for(let p=0;p<12;p++){const a=po.pads[p];if(a<.04)continue;const[hx,hy]=PADW(p),gr=g.createRadialGradient(hx,hy,0,hx,hy,15);gr.addColorStop(0,`hsla(${(p*47+po.hue)%360},100%,74%,${Math.min(1,a)})`);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(hx-15,hy-15,30,30)}g.restore()}
+  if(po.pads){const pd=S.plate.meta.pads;g.save();pd.forEach(([px,py],p)=>{const a=po.pads[p%12];if(a<.04)return;const r=sz('pad'+p),x=BODY.x+px*bs,y=BODY.y+py*bs;g.globalAlpha=Math.min(1,a*1.15);g.drawImage(A,r[0],r[1],r[2],r[3],x,y,r[2]*bs,r[3]*bs);g.globalCompositeOperation='lighter';g.globalAlpha=Math.min(.7,a*.6);g.drawImage(A,r[0],r[1],r[2],r[3],x-1,y-1,r[2]*bs+2,r[3]*bs+2);g.globalCompositeOperation='source-over'});g.restore()}
   pc(g,A,'hl',BODY.x,BODY.y+dy*.6+po.hands[0]*3.2,bs);pc(g,A,'hr',BODY.x,BODY.y+dy*.6+po.hands[1]*3.2,bs);
  }
  function crowdStatic(g,A){const r=sz('crowd');g.drawImage(A,r[0],r[1],r[2],r[3],CRW.x,CRW.y,r[2]*CRW.s,r[3]*CRW.s)}
@@ -225,7 +225,8 @@ function makeStage(canvas,seed){
   const sh=st.shake*5;c.translate(W/2+(Math.random()-.5)*sh,H/2+(Math.random()-.5)*sh);c.scale(st.cam.z,st.cam.z);c.translate(-W/2-clamp(st.cam.x,-lim,lim),-H/2-clamp(st.cam.y,-limy,limy));
   const pump=fx.speakers!==false?clamp(bass*.5+st.bounce*.7+st.cheer*.2,0,1):0;
   /* 1. the stage plate (cross-fades between per-beat looks) */
-  if(Ly){const pv=st.lookT<1&&st.prevLook!==st.look?layersFor(st.prevLook):null;if(pv){stageBase(c,pv);c.globalAlpha=st.lookT;stageBase(c,Ly);c.globalAlpha=1}else stageBase(c,Ly)}
+  const crY=mode==='live'?Math.sin(T*1.15)*5-st.bounce*4:Math.sin(T*.8)*3,crG=mode==='live'?bass*.25+st.bounce*.3:0;
+  if(Ly){const pv=st.lookT<1&&st.prevLook!==st.look?layersFor(st.prevLook):null;if(pv){stageBase(c,pv,crY,crG);c.globalAlpha=st.lookT;stageBase(c,Ly,crY,crG);c.globalAlpha=1}else stageBase(c,Ly,crY,crG)}
   else{c.fillStyle='#0b0716';c.fillRect(0,0,W,H)}
   /* 2. the venue dims in quiet moments; the plate's own lights come back up with the music */
   const dim=clamp(.6-int*.5,0,.58);if(dim>.02){c.fillStyle=`rgba(5,3,14,${dim})`;c.fillRect(0,0,W,H)}
@@ -267,13 +268,12 @@ function makeStage(canvas,seed){
   {const g=c.createLinearGradient(0,440,0,640);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.5,`hsla(${hue+20},70%,60%,${.06+int*.07+bass*.04})`);g.addColorStop(1,'rgba(0,0,0,0)');c.save();c.globalCompositeOperation='screen';c.fillStyle=g;c.fillRect(0,440,W,200);c.restore()}
   /* 8. the crowd: one smooth mesh warp so people sway and wave without tearing; energy follows the music */
   const E=st.energy;
-  if(A){const cw=MT.r.crowd,sc=CRW.s,SW=8,NS=6,sh0=cw[3]/NS,bump=(st.bounce*2.4+st.cheer*6)*(.4+E),amp=E*3.2+.9;
-   const off=(sx,w)=>{const n=.55+.45*Math.sin(sx*.021+seedP)*Math.sin(sx*.0073+2.1);return[Math.max(0,Math.sin(sx*.012+T*(2+E*2.2)+seedP))*amp*w*n+bump*w*(.5+.5*Math.sin(sx*.03+T*3)),Math.sin(sx*.017+T*(2.6+E*1.6)+seedP*2)*(.6+E*2.4)*w*w]};
-   for(let sx=0;sx<cw[2];sx+=SW){const ww=Math.min(SW,cw[2]-sx);
-    for(let j=0;j<NS;j++){const wgt=Math.pow(1-j/(NS-.5),1.5),[up,dx]=off(sx,wgt),sy=j*sh0,pad=j<NS-1?2:0;
-     c.drawImage(A,cw[0]+sx,cw[1]+sy,ww,Math.min(sh0+pad,cw[3]-sy),CRW.x+sx*sc+dx,CRW.y+sy*sc-up,ww*sc+.6,Math.min(sh0+pad,cw[3]-sy)*sc)}}
-   /* phone screens twinkle (softer once the crowd calms) */
-   if(fx.flash!==false&&MT.phones){c.save();c.globalCompositeOperation='lighter';MT.phones.forEach((p,i)=>{const wgt=Math.pow(Math.max(0,1-p[1]/cw[3]),1.5),[up,dx]=off(p[0],wgt),px=CRW.x+p[0]*sc+dx,py=CRW.y+p[1]*sc-up,r=Math.max(8,p[2]*sc*1.5),a=(.12+.28*(.5+.5*Math.sin(T*(3+(i%5)*1.3)+i*2.1)))*(.5+(1-E)*.5+(q.seg.preset==='breakdown'?.5:0)),gr=c.createRadialGradient(px,py,0,px,py,r);gr.addColorStop(0,`rgba(190,225,255,${a})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(px-r,py-r,r*2,r*2)});c.restore()}}
+  if(A){const cw=MT.r.crowd,sc=CRW.s,bp=(T/beatLen)%1,hop=playing?E*Math.pow(Math.max(0,Math.sin(Math.PI*bp)),2)*3.2:0,jy=hop+(st.bounce*1.6+st.cheer*3)*(.4+E);
+   c.drawImage(A,cw[0],cw[1],cw[2],cw[3],CRW.x,CRW.y-jy,cw[2]*sc,cw[3]*sc);
+   MT.arms.forEach(([ax,ay,pvx,pvy],i)=>{const r=MT.r['arm'+i],ang=Math.sin(T*(1.5+(i%5)*.33)+i*1.7+seedP)*(.04+E*.15)+st.cheer*.08*(i%2?1:-1)+hop*.012*(i%3-1),lift=hop*.6+st.cheer*2*E;
+    c.save();c.translate(CRW.x+pvx*sc,CRW.y+pvy*sc-jy-lift);c.rotate(ang);c.drawImage(A,r[0],r[1],r[2],r[3],(ax-pvx)*sc,(ay-pvy)*sc,r[2]*sc,r[3]*sc);c.restore()});
+  /* phone screens twinkle (softer once the crowd calms) */
+   if(fx.flash!==false&&MT.phones){c.save();c.globalCompositeOperation='lighter';MT.phones.forEach((p,i)=>{const px=CRW.x+p[0]*sc,py=CRW.y+p[1]*sc-jy,r=Math.max(8,p[2]*sc*1.5),a=(.12+.28*(.5+.5*Math.sin(T*(3+(i%5)*1.3)+i*2.1)))*(.5+(1-E)*.5+(q.seg.preset==='breakdown'?.5:0)),gr=c.createRadialGradient(px,py,0,px,py,r);gr.addColorStop(0,`rgba(190,225,255,${a})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(px-r,py-r,r*2,r*2)});c.restore()}}
   /* strobe flash on drops */
   if(st.flash>.02&&fx.flash!==false){c.fillStyle=`rgba(255,255,255,${Math.min(.5,st.flash*.45)})`;c.fillRect(0,0,W,H)}
   /* fireworks and confetti (unlocked by hearts, plus the finale) */
@@ -300,7 +300,7 @@ function makeStage(canvas,seed){
 
 /* ---------- helpers for loading ---------- */
 async function loadPlate(){
- const base=u=>new URL(u,document.baseURI).href,V='?v=6',ld=u=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=base(u+V)});
+ const base=u=>new URL(u,document.baseURI).href,V='?v=7',ld=u=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=base(u+V)});
  const [atlas,stage,lights,meta]=await Promise.all([ld('show-atlas.webp'),ld('show-stage.webp'),ld('show-lights.webp'),fetch(base('show-atlas.json'+V)).then(r=>r.json()).catch(()=>null)]);
  return(atlas&&stage&&lights&&meta)?{atlas,stage,lights,meta}:null;
 }
