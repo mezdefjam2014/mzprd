@@ -358,7 +358,7 @@ async function loadAll(){
 /* hero animation: hands tap on detected kick / snare */
 const stage=$('#stage'),hero=$('#hero'),root=document.documentElement;let mx=0,my=0;
 addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
-const IW=1672,IH=468,HP={L:{x:700,y:312,w:140,h:78,fx:[788,380,70,34]},R:{x:1000,y:320,w:110,h:82,fx:[950,352,120,22]}},amt={L:0,R:0};
+const IW=1672,IH=468,HP={L:{x:700,y:312,w:140,h:78,fx:[755,372,130,52]},R:{x:1000,y:320,w:110,h:82,fx:[950,352,120,22]}},amt={L:0,R:0};
 function place(){['L','R'].forEach(k=>{const q=HP[k],e=$('#hand'+k),f=$('#pfx'+k);
  Object.assign(e.style,{left:q.x/IW*100+'%',top:q.y/IH*100+'%',width:q.w/IW*100+'%',height:q.h/IH*100+'%',backgroundSize:IW/q.w*100+'% '+IH/q.h*100+'%',backgroundPosition:q.x/(IW-q.w)*100+'% '+q.y/(IH-q.h)*100+'%'});
  Object.assign(f.style,{left:q.fx[0]/IW*100+'%',top:q.fx[1]/IH*100+'%',width:q.fx[2]/IW*100+'%',height:q.fx[3]/IH*100+'%'})})}
@@ -382,15 +382,13 @@ function frame(){
   const lo=band(1,5),mi=band(7,45),hi=band(100,300);
   level+=(lo/255-level)*.35;
   const kL=onset(det.low,lo,1.35,14,110,now),kR=onset(det.mid,mi,1.4,10,110,now),kH=onset(det.hi,hi,1.6,5,70,now);
-  if(kL||kR||(kH&&!kL&&!kR)){pidx=(pidx+1+(kR?1:0))%PADS.length;pad=pidx;amt.L=kH&&!kL&&!kR?.4:1}
+  if(kL||kR)amt.L=1;else if(kH)amt.L=Math.max(amt.L,.35);
   if(kL)spk=1;
  }else level*=.9;
  const k=hero.clientWidth/IW,a=amt.L,t=now/1000;
- /* left hand: rigid press, lands on a different pad each hit, no scaling */
- const o=OFF[pad],pf=PADS[pad];
- $('#handL').style.transform=`translate(${(o[0]*a*k).toFixed(2)}px,${((o[1]+4)*a*k).toFixed(2)}px)`;
- Object.assign($('#pfxL').style,{opacity:a,transform:`translate(${(pf[0]*k).toFixed(1)}px,${(pf[1]*k).toFixed(1)}px)`});
- amt.L=a>.02?a*.8:0;
+ /* left hand: tap, same as the original */
+ $('#handL').style.transform=`translateY(${(a*9*k).toFixed(2)}px) scale(${1+a*.03})`;
+ $('#pfxL').style.opacity=a;amt.L=a>.02?a*.82:0;
  /* right hand: turns knobs while the beat plays, rigid rotation only */
  tw+=((playing?1:0)-tw)*.08;
  const rot=tw*(Math.sin(t*1.7)*2.4+Math.sin(t*4.1)*.7),tx=tw*Math.sin(t*1.1)*2.5*k;
