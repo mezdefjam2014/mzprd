@@ -147,7 +147,7 @@ function html(){return`<div class="eg"><div>
   <label>PASTE ANY EMAILS (Gmail, Yahoo, Outlook, anything), separated by commas, spaces or new lines</label><textarea id="emRec" placeholder="name@gmail.com, friend@yahoo.com"></textarea>
   <div class="cnt" id="emRc"></div>
   <label class="chk"><input type="checkbox" id="emBcc" checked> HIDE ADDRESSES FROM EACH OTHER (BCC)</label>
-  <div class="two"><button class="btn" id="emBuy">ADD PAST BUYERS</button><button class="btn" id="emSave">SAVE THIS LIST</button></div>
+  <div class="two"><button class="btn" id="emList">ADD MY EMAIL LIST (OPTED IN)</button><button class="btn" id="emBuy">ADD PAST BUYERS</button></div><button class="btn" id="emSave" style="width:100%;margin-top:8px">SAVE THIS LIST IN THIS BROWSER</button>
   <div class="two" style="margin-top:8px"><button class="btn" id="emLoad">LOAD SAVED LIST</button><button class="btn" id="emCopyRec">COPY EMAILS</button></div>
  </div></div>
  <div><div class="pn"><h4>PREVIEW</h4><iframe id="emFrame" title="Email preview"></iframe></div>
@@ -180,6 +180,7 @@ function wire(){
  $q('#emSubj').oninput=()=>{};
  $q('#emRec').oninput=e=>{E.rec=parseRec(e.target.value);refresh()};
  $q('#emBcc').onchange=e=>{E.bcc=e.target.checked};
+ $q('#emList').onclick=async()=>{try{const r=await sb.from('email_list').select('email').is('unsub_at',null);const list=(r.data||[]).map(o=>o.email);E.rec=parseRec(E.rec.join(',')+','+list.join(','));$q('#emRec').value=E.rec.join(', ');refresh();say('Added '+list.length+' people from your opted-in email list.')}catch(x){say('Could not load the list.')}};
  $q('#emBuy').onclick=async()=>{try{const r=await sb.from('orders').select('payer_email').eq('status','paid');const list=(r.data||[]).map(o=>o.payer_email).filter(Boolean);E.rec=parseRec(E.rec.join(',')+','+list.join(','));$q('#emRec').value=E.rec.join(', ');refresh();say('Added '+list.length+' past buyer emails. Only email people who are fine hearing from you, and keep the STOP line in the footer.')}catch(e){say('Could not load buyers.')}};
  $q('#emSave').onclick=()=>{try{localStorage.setItem(KEY,E.rec.join(','));say('List saved in this browser ('+E.rec.length+').')}catch(e){say('Could not save here.')}};
  $q('#emLoad').onclick=()=>{try{E.rec=parseRec(localStorage.getItem(KEY)||'');$q('#emRec').value=E.rec.join(', ');refresh();say('Loaded '+E.rec.length+' saved addresses.')}catch(e){say('Nothing saved yet.')}};

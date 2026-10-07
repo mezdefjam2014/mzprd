@@ -47,6 +47,14 @@ button{cursor:pointer}
 .slotnav[data-test="1"]:after{content:" (TEST)";color:#35e0ff}
 @keyframes slNav{0%,100%{text-shadow:0 0 0 rgba(255,211,74,0)}50%{text-shadow:0 0 12px rgba(255,211,74,.75)}}
 @media(max-width:700px){.slotnav .lg{display:none}}
+label.optin{display:flex;gap:9px;align-items:flex-start;margin:12px 0 4px;font:500 11px/1.5 Montserrat;color:#a9a9ae;letter-spacing:.04em;cursor:pointer}
+label.optin input{margin-top:2px;accent-color:var(--red);flex:none}
+.fsub{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:18px auto 6px;max-width:520px;padding:0 14px}
+.fsub label{flex-basis:100%;text-align:center;font:600 10px Montserrat;letter-spacing:.24em;color:#8e8e94}
+.fsub input[type=email]{flex:1;min-width:190px;background:#050506;border:1.5px solid #34343a;color:#fff;padding:11px;font:500 13px Montserrat}
+.fsub input.hp{position:absolute;left:-9999px;opacity:0;width:1px;height:1px}
+.fsub button{background:transparent;border:1.5px solid var(--gold);color:var(--gold);font:700 11px Montserrat;letter-spacing:.18em;padding:11px 16px;cursor:pointer}
+.fsub .sm{flex-basis:100%;text-align:center;font:500 11px Montserrat;color:#a9a9ae;min-height:14px}
 #cpnRow{display:none;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0 2px}
 #cpnRow input{flex:1;min-width:120px;background:#050506;border:1.5px solid #34343a;color:#fff;padding:9px;font:600 12px Montserrat;letter-spacing:.12em;text-transform:uppercase}
 #cpnRow button{background:transparent;border:1.5px solid var(--gold);color:var(--gold);font:700 11px Montserrat;letter-spacing:.18em;padding:10px 14px}
@@ -421,6 +429,7 @@ footer.f a:hover{color:#fff}
  <div class="view" id="v-about"><div class="about"><!--ABOUT:BOX--><h2>MZPRD (MEZTHEPROD)</h2><p>MZPRD is short for Meztheprod: a music producer making original beats and instrumentals for rap, hip hop and R&amp;B, plus sample packs, vinyl samples and producer loops for other producers.</p><p>Every beat has a preview you can play right here. When you find the one, pay securely with PayPal and download the full file straight away.</p><p><a href="about/" style="color:var(--gold)">Read more about MZPRD</a></p><!--/ABOUT:BOX--></div></div>
 </div>
 <!--SEO:CONTENT-->
+<form class="fsub" id="fSub"><label>NEW BEATS AND SHOW REMINDERS, NO SPAM</label><input type="email" id="fEm" placeholder="your@email.com" autocomplete="email" required aria-label="Your email"><input class="hp" type="text" id="fHp" tabindex="-1" autocomplete="off" aria-hidden="true"><button type="submit">JOIN THE LIST</button><div class="sm" id="fSm"></div></form>
 <footer class="f">MZPRD / ALL RIGHTS RESERVED<a id="loginLink">LOGIN</a></footer>
 
 <audio id="au" crossorigin="anonymous" preload="none"></audio>
@@ -436,7 +445,8 @@ footer.f a:hover{color:#fff}
  <button class="x" id="cx" aria-label="Close cart">&times;</button><div id="cartMain"><h3>YOUR CART</h3><div id="items"></div>
 <div id="cpnRow"><input id="cpnIn" maxlength="12" placeholder="COUPON CODE" autocomplete="off"><button id="cpnGo" type="button">APPLY</button><div id="cpnMsg"></div></div>
 <div class="tot"><span>TOTAL</span><span id="total">$0.00</span></div>
- <div id="ppbox"></div><div class="nt" id="nt"></div><div class="secure">SECURE CHECKOUT WITH PAYPAL / MZPRD</div></div>
+ <label class="optin"><input type="checkbox" id="optIn"> Email me new beats and show reminders (optional, you can stop any time)</label>
+<div id="ppbox"></div><div class="nt" id="nt"></div><div class="secure">SECURE CHECKOUT WITH PAYPAL / MZPRD</div></div>
  <div id="cartDone" style="display:none"></div>
 </div></div>
 
@@ -714,7 +724,7 @@ async function mountPaypal(){
   createOrder:async()=>{try{$('#nt').textContent='';if(!cart.size)throw new Error('Your cart is empty.');
    if(pre.p&&pre.sig===cartSig()&&Date.now()-pre.t<600000){try{return (await pre.p).id}catch(e){}}
    const r=await callCheckout({action:'create',items:[...cart].map(k=>({t:k[0],id:k.slice(2)})),coupon:coupon?coupon.code:undefined});return r.id}catch(e){$('#nt').textContent=e.message;throw e}},
-  onApprove:async d=>{try{$('#nt').textContent='Confirming your payment...';const r=await callCheckout({action:'capture',orderId:d.orderID});const o={token:r.token,secret:r.secret,exp:Date.now()+r.seconds_left*1000,downloads:r.downloads};cart.clear();coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}syncCart();dlStart(o);showDone(o,true);thanksPending=true;scrollTo({top:0,behavior:'smooth'})}catch(e){$('#nt').textContent=e.message}},
+  onApprove:async d=>{try{$('#nt').textContent='Confirming your payment...';const r=await callCheckout({action:'capture',orderId:d.orderID,optin:!!($('#optIn')&&$('#optIn').checked)});const o={token:r.token,secret:r.secret,exp:Date.now()+r.seconds_left*1000,downloads:r.downloads};cart.clear();coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}syncCart();dlStart(o);showDone(o,true);thanksPending=true;scrollTo({top:0,behavior:'smooth'})}catch(e){$('#nt').textContent=e.message}},
   onCancel:()=>{$('#nt').textContent='Payment cancelled. Your cart is still here.'},
   onError:()=>{if(!$('#nt').textContent)$('#nt').textContent='PayPal had a problem. Please try again.'}
  }).render('#ppbox');
@@ -1357,7 +1367,7 @@ async function boRender(){
  const vid=tab==='video';document.querySelector('#bo .bo2').style.display=vid?'none':'';
  document.getElementById('bo2b').style.display='none';document.getElementById('bo2c').style.display='none';
  if(window.emailClose)emailClose();if(window.showMakerClose)showMakerClose();
- if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=1');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
+ if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=2');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
  if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=3');if(!window.showMakerOpen)await loadScript('showmaker.js?v=4');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
  if(vid){try{await loadStudio();await studioOpen()}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
  if(window.studioClose)studioClose();
@@ -1475,6 +1485,21 @@ async function dashRender(){
  $('#drec').innerHTML=tbl(orders.slice(0,8).map(od=>[new Date(od.paid_at).toLocaleDateString(),esc((od.items||[]).map(i=>i.title).join(', ')),money(od.total)+(Number(od.discount)>0?' <span style="color:var(--gold)">(bundle)</span>':'')]),['DATE','ITEMS','TOTAL']);
 }
 
+async function emailListCard(){
+ const {data,error}=await sb.from('email_list').select('*').is('unsub_at',null).order('created_at',{ascending:false}).limit(2000);
+ const card=document.createElement('div');card.className='dcard';
+ if(error){card.innerHTML='<h4>EMAIL LIST</h4><div class="cur">'+esc(error.message)+'</div>';$('#bl').insertBefore(card,$('#bl').firstChild);return}
+ const rows=data||[],src={};rows.forEach(r=>src[r.source]=(src[r.source]||0)+1);
+ const draw=q=>{const f=rows.filter(r=>!q||r.email.toLowerCase().includes(q));
+  card.querySelector('#elRows').innerHTML=f.length?'<table class="dtab"><tr><th>EMAIL</th><th>FROM</th><th>JOINED</th><th></th></tr>'+f.slice(0,200).map(r=>'<tr><td>'+esc(r.email)+'</td><td>'+esc(r.source)+'</td><td>'+new Date(r.created_at).toLocaleDateString()+'</td><td><button class="bo-btn el-rm" data-id="'+r.id+'" style="padding:4px 8px;font-size:9px">REMOVE</button></td></tr>').join('')+'</table>'+(f.length>200?'<div class="cur">Showing 200 of '+f.length+'. Use search or export for the rest.</div>':''):'<div class="cur">Nobody here yet. People join from the footer box, the Show page, or the checkout tick box.</div>';
+  card.querySelectorAll('.el-rm').forEach(b=>b.onclick=async()=>{if(!(await askConfirm('REMOVE THIS EMAIL?','They will not get your emails any more.')))return;await sb.from('email_list').delete().eq('id',b.dataset.id);const i=rows.findIndex(x=>String(x.id)===b.dataset.id);if(i>=0)rows.splice(i,1);draw(card.querySelector('#elQ').value.toLowerCase())})};
+ card.innerHTML='<h4>EMAIL LIST (ONLY PEOPLE WHO OPTED IN)</h4><div class="cur" style="margin-bottom:8px"><b style="font-size:18px;color:#fff">'+rows.length+'</b> subscribers'+(rows.length?' ('+Object.entries(src).map(([k,v])=>v+' from '+k).join(', ')+')':'')+'</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><input type="text" id="elQ" placeholder="Search emails" style="flex:1;min-width:140px;background:#050506;border:1.5px solid #34343a;color:#fff;padding:9px;font:500 12px Montserrat"><button class="bo-btn" id="elCsv" type="button">EXPORT CSV</button><button class="bo-btn" id="elCopy" type="button">COPY ALL EMAILS</button></div><div style="display:flex;gap:8px;margin-bottom:8px"><input type="text" id="elAdd" placeholder="Add an email you have permission to contact" style="flex:1;background:#050506;border:1.5px solid #34343a;color:#fff;padding:9px;font:500 12px Montserrat"><button class="bo-btn" id="elAddB" type="button">ADD</button></div><div id="elRows"></div><div id="elMsg" class="cur"></div>';
+ $('#bl').insertBefore(card,$('#bl').firstChild);draw('');
+ card.querySelector('#elQ').oninput=e=>draw(e.target.value.toLowerCase());
+ card.querySelector('#elCsv').onclick=()=>{const csv='email,source,joined\n'+rows.map(r=>[r.email,r.source,r.created_at].join(',')).join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='mzprd-email-list.csv';document.body.appendChild(a);a.click();a.remove()};
+ card.querySelector('#elCopy').onclick=async()=>{try{await navigator.clipboard.writeText(rows.map(r=>r.email).join(', '));toast('EMAILS COPIED')}catch(e){toast('COPY FAILED')}};
+ card.querySelector('#elAddB').onclick=async()=>{const v=card.querySelector('#elAdd').value.trim().toLowerCase(),m=card.querySelector('#elMsg');if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v)){m.textContent='That email does not look right.';return}const x=await sb.from('email_list').insert({email:v,source:'admin'}).select().maybeSingle();m.textContent=x.error?'Could not add (maybe already on the list).':'Added.';if(!x.error){rows.unshift(x.data);card.querySelector('#elAdd').value='';draw('')}}
+}
 async function salesRender(){
  await dashRender();
  const {data,error}=await sb.from('orders').select('*').order('created_at',{ascending:false}).limit(100);
@@ -1484,6 +1509,7 @@ async function salesRender(){
  (data||[]).forEach(o=>{const d=document.createElement('div');d.className='bi';
   d.innerHTML='<div class="nc"></div><div><b>'+esc((o.items||[]).map(i=>i.title).join(', '))+'</b><span>'+money(o.total)+(Number(o.discount)>0?' (BUNDLE -'+money(o.discount)+')':'')+' / '+esc(o.status.toUpperCase())+' / '+esc(o.payer_email||'-')+' / '+new Date(o.created_at).toLocaleString()+'</span></div><div></div>';card.appendChild(d)});
  $('#bl').appendChild(card);
+ await emailListCard();
 }
 async function ordersRender(){
  const {data,error}=await sb.from('orders').select('*').order('created_at',{ascending:false}).limit(100);
@@ -1599,6 +1625,9 @@ function mzBid(){
  return b;
 }
 window.mzBid=mzBid;
+$('#fSub').onsubmit=async e=>{e.preventDefault();const sm=$('#fSm');sm.textContent='Saving...';
+ try{const r=await (await fetch(SB_URL+'/functions/v1/site',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},body:JSON.stringify({action:'subscribe',email:$('#fEm').value,website:$('#fHp').value,source:'site'})})).json();
+  sm.textContent=r.ok?'You are on the list. Thank you!':(r.error||'Something went wrong.');if(r.ok)$('#fEm').value=''}catch(x){sm.textContent='Network problem. Try again.'}};
 window.setCoupon=c=>{coupon={code:c.code,pct:c.pct};try{sessionStorage.setItem('mzprd_cpn',JSON.stringify(coupon))}catch(e){}};
 window.clearCoupon=()=>{coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}renderCart()};
 window.applyCoupon=async function(raw){
