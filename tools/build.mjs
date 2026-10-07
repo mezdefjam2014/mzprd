@@ -167,6 +167,7 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity
 
 fs.mkdirSync(DIST, { recursive: true })
 for (const e of fs.readdirSync(DIST)) fs.rmSync(path.join(DIST, e), { recursive: true, force: true })
+for (const f of fs.readdirSync(path.join(ROOT, 'pl')).map(x => 'pl/' + x)) { fs.mkdirSync(path.join(DIST, 'pl'), { recursive: true }); fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f)) }
 for (const f of ['hero.jpg', 'hero.webp', 'og.jpg', 'favicon.ico', 'favicon-32.png', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'site.webmanifest', 'girl.png', 'girl.webp', 'chain.png', 'studio.js', 'slots.js', 'show-stage.webp', 'packbuilder.js', 'show.js', 'showpage.js', 'showmaker.js', 'email.js', 'mix.js', 'thumbs.js', 'mp4-muxer.js', 'CNAME']) {
   if (fs.existsSync(path.join(ROOT, f))) fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f))
 }
