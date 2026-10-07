@@ -97,6 +97,9 @@ footer.f a:hover{color:#fff}
 .x{position:absolute;top:10px;right:12px;width:36px;height:36px;background:transparent;border:1.5px solid #4a4a50;color:#fff;font:600 18px/1 Montserrat;display:grid;place-items:center;padding:0}
 .x:hover{border-color:var(--red);background:var(--red)}
 .box{position:relative}
+.head{position:absolute;background-image:url(hero.jpg);background-repeat:no-repeat;pointer-events:none;will-change:transform;transform-origin:55% 100%;
+ -webkit-mask-image:radial-gradient(ellipse at 52% 42%,#000 60%,transparent 84%);mask-image:radial-gradient(ellipse at 52% 42%,#000 60%,transparent 84%)}
+.head canvas{position:absolute;image-rendering:auto}
 .lap{position:absolute;pointer-events:none}
 .fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen}
 .vin{position:absolute;pointer-events:none;mix-blend-mode:screen}
@@ -168,7 +171,7 @@ footer.f a:hover{color:#fff}
  <div class="stage" id="stage"><img src="hero.jpg" alt="MZPRD producing beats on an MPC">
   <div class="pfx" id="pfxL"></div><div class="pfx" id="pfxR"></div>
   <div class="hand" id="handL"></div><div class="hand" id="handR"></div>
-  <div class="spk" id="spkL"></div><div class="spk" id="spkR"></div><canvas class="vin" id="vin"></canvas><canvas class="lap" id="lap"></canvas><canvas class="fx" id="fx"></canvas></div>
+  <div class="spk" id="spkL"></div><div class="spk" id="spkR"></div><div class="head" id="head"><canvas id="eyes"></canvas></div><canvas class="vin" id="vin"></canvas><canvas class="lap" id="lap"></canvas><canvas class="fx" id="fx"></canvas></div>
  <div class="lamp"></div>
  <header>
   <nav>
@@ -425,6 +428,33 @@ function drawLap(pr,t){
  x.fillStyle='rgba(120,140,220,.25)';x.fillRect(8,H-12,W-16,5);x.fillStyle=level>.7?'#e0242f':'#5ad48c';x.fillRect(8,H-12,(W-16)*Math.min(1,level*1.3),5);
  x.fillStyle='rgba(255,255,255,.05)';for(let y=0;y<H;y+=3)x.fillRect(0,y,W,1);
 }
+const HD={x:770,y:0,w:235,h:190},EY={x:858,y:116,w:56,h:44};
+(function(){const e=$('#head');Object.assign(e.style,{left:HD.x/IW*100+'%',top:HD.y/IH*100+'%',width:HD.w/IW*100+'%',height:HD.h/IH*100+'%',backgroundSize:IW/HD.w*100+'% '+IH/HD.h*100+'%',backgroundPosition:HD.x/(IW-HD.w)*100+'% '+HD.y/(IH-HD.h)*100+'%'});
+ Object.assign($('#eyes').style,{left:(EY.x-HD.x)/HD.w*100+'%',top:(EY.y-HD.y)/HD.h*100+'%',width:EY.w/HD.w*100+'%',height:EY.h/HD.h*100+'%'})})();
+function eyesSize(){const c=$('#eyes'),d=Math.min(devicePixelRatio||1,2)*Math.max(1,hero.clientWidth/IW)*3;c.width=Math.round(EY.w*d);c.height=Math.round(EY.h*d)}
+eyesSize();
+let nod=0,blinkAt=2.5,blinkT=-1,blinkDbl=false,gl={x:0,y:0,tx:0,ty:0,next:3};
+const GL=[[0,0],[0,0],[1.3,-1.1],[-1,.7],[.9,.9],[1.6,-.4],[0,0]];
+function drawEyes(t){
+ /* blink + glance schedule */
+ if(blinkT<0&&t>blinkAt){blinkT=0}
+ let b=0;
+ if(blinkT>=0){blinkT+=1/30;const d=blinkT;b=d<.07?d/.07:d<.11?1:d<.20?1-(d-.11)/.09:0;
+  if(d>=.2){blinkT=-1;if(!blinkDbl&&Math.random()<.2){blinkDbl=true;blinkAt=t+.12}else{blinkDbl=false;blinkAt=t+3.2+Math.random()*4}}}
+ if(t>gl.next){const g=GL[Math.random()*GL.length|0];gl.tx=g[0];gl.ty=g[1];gl.next=t+(g[0]||g[1]?.5+Math.random()*.9:2+Math.random()*4);if((g[0]||g[1])&&Math.random()<.35){blinkAt=Math.min(blinkAt,t+.25)}}
+ gl.x+=(gl.tx-gl.x)*.22;gl.y+=(gl.ty-gl.y)*.22;
+ const sq=Math.max(b,Math.min(.35,level*.4)),c=$('#eyes'),x=c.getContext('2d'),u=c.width/EY.w;
+ x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,c.width,c.height);x.setTransform(u,0,0,u,-EY.x*u,-EY.y*u);
+ const eyes=[[878.5,135,35,22,9],[895,144.3,35,17,7]];
+ eyes.forEach(([ex,ey,ang,len,th])=>{
+  const gx=ex+gl.x,gy=ey+gl.y;
+  const g=x.createRadialGradient(ex,ey,0,ex,ey,5.2);g.addColorStop(0,'rgba(20,6,6,1)');g.addColorStop(.7,'rgba(20,6,6,.96)');g.addColorStop(1,'rgba(20,6,6,0)');x.fillStyle=g;x.beginPath();x.arc(ex,ey,5.2,0,7);x.fill();
+  if(b<.55){x.fillStyle=`rgba(250,244,240,${1-b*1.6})`;x.beginPath();x.arc(gx,gy,1.5,0,7);x.fill();x.fillRect(gx-1.5,gy-1,3,2)}
+  if(sq>.02){x.save();x.translate(ex,ey);x.rotate(ang*Math.PI/180);
+   x.fillStyle=`rgba(48,22,15,${Math.min(.92,sq*1.3)})`;x.beginPath();x.ellipse(0,-1.2*(1-sq),len/2,th/2*sq*.8,0,0,7);x.fill();
+   x.strokeStyle=`rgba(10,0,0,${Math.min(.9,sq*1.4)})`;x.lineWidth=1.1;x.beginPath();x.moveTo(-len/2,0);x.lineTo(len/2,0);x.stroke();x.restore()}
+ });
+}
 fxSize();
 function puff(x,cx,cy,r,rgb,a){const g=x.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,`rgba(${rgb},${a})`);g.addColorStop(1,`rgba(${rgb},0)`);x.fillStyle=g;x.beginPath();x.arc(cx,cy,r,0,7);x.fill()}
 function drawFx(t){
@@ -458,7 +488,7 @@ function frame(){
   level+=(lo/255-level)*.35;
   const kL=onset(det.low,lo,1.35,14,110,now),kR=onset(det.mid,mi,1.4,10,110,now),kH=onset(det.hi,hi,1.6,5,70,now);
   if(kL||kR)amt.L=1;else if(kH)amt.L=Math.max(amt.L,.35);
-  if(kL)spk=1;
+  if(kL){spk=1;nod=1}
  }else level*=.9;
  const k=hero.clientWidth/IW,a=amt.L,t=now/1000;
  /* left hand: tap, same as the original */
@@ -469,7 +499,8 @@ function frame(){
  const rot=tw*(Math.sin(t*1.7)*2.4+Math.sin(t*4.1)*.7),tx=tw*Math.sin(t*1.1)*2.5*k;
  Object.assign($('#handR').style,{transformOrigin:'85% 90%',transform:`translate(${tx.toFixed(2)}px,${(tw*Math.sin(t*2.3)*1.2*k).toFixed(2)}px) rotate(${rot.toFixed(2)}deg)`});
  $('#pfxR').style.opacity=tw*(.12+.18*Math.max(0,Math.sin(t*3.3)));
- if((fxN++&1)===0)drawFx(t);
+ if((fxN++&1)===0){drawFx(t);drawEyes(t)}
+ nod*=.86;$('#head').style.transform=`rotate(${(nod*.6+Math.sin(t*1.3)*.1+(playing?Math.sin(t*2.4)*.06:0)).toFixed(3)}deg) translateY(${(nod*1.1*k).toFixed(2)}px)`;
  /* vinyl spins while a beat plays, coasts to a stop */
  vw+=((playing?3.5:0)-vw)*.03;vang+=vw*.0167;drawVinyl();
  /* speakers pump on the kick and follow the bass */
@@ -489,7 +520,7 @@ function drawWv(w,p){
  const n=w.bars.length,s=W/n;
  w.bars.forEach((a,k)=>{x.fillStyle=k/n<p?'#e0242f':'#8a8a90';const h=Math.max(2,a*38);x.fillRect(k*s,21-h/2,Math.max(1,s*.55),h)});
 }
-addEventListener('resize',()=>{wvs.forEach(w=>w.d=0);vinSize();fxSize();lapSize()});
+addEventListener('resize',()=>{wvs.forEach(w=>w.d=0);vinSize();fxSize();lapSize();eyesSize()});
 
 /* ---------- admin: login + back office ---------- */
 let isAdmin=false,tab='beats',editing=null;
