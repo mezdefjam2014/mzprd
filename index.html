@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MZPRD | Beats</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e0242f;--gold:#e8b94a;--ink:#060507;--line:#1d1d21;--lvl:0}
+*{box-sizing:border-box;margin:0}
+html{background:var(--ink)}
+body{background:var(--ink);color:#d9d9dc;font-family:Montserrat,sans-serif;font-weight:500;min-height:100vh;padding-bottom:90px}
+button{font-family:inherit;cursor:pointer}
+.hero{position:relative;width:100%;aspect-ratio:1672/468;overflow:hidden;background:#000}
+.stage{position:absolute;inset:0;transform:scale(1.03);will-change:transform;filter:brightness(calc(1 + var(--lvl)*.22)) saturate(calc(1 + var(--lvl)*.25))}
+.stage img{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hand{position:absolute;background-image:url(hero.jpg);background-repeat:no-repeat;pointer-events:none;will-change:transform;
+ -webkit-mask-image:radial-gradient(ellipse at 50% 50%,#000 62%,transparent 78%);mask-image:radial-gradient(ellipse at 50% 50%,#000 62%,transparent 78%)}
+.pfx{position:absolute;pointer-events:none;opacity:0;mix-blend-mode:screen;background:radial-gradient(ellipse,rgba(255,235,210,.9),rgba(255,60,50,.55) 45%,transparent 72%)}
+.lamp{position:absolute;left:12%;top:12%;width:20%;height:48%;background:radial-gradient(ellipse,rgba(255,40,40,.55),transparent 65%);opacity:calc(.12 + var(--lvl)*.9);mix-blend-mode:screen;pointer-events:none}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),transparent 22%,transparent 80%,rgba(6,5,7,.9));pointer-events:none}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:30;opacity:.07;background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
+header{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:clamp(14px,2.8vw,40px) 8.1%}
+nav{display:flex;gap:clamp(18px,3.4vw,50px)}
+nav button{background:none;border:0;color:#a9a9ae;font:600 clamp(11px,1.12vw,16px) Montserrat;letter-spacing:.34em;padding:6px 0;border-bottom:2px solid transparent}
+nav button:hover{color:#fff}
+nav button.on{color:var(--red);border-color:var(--red);text-shadow:0 0 14px rgba(224,36,47,.6)}
+.tools{display:flex;gap:clamp(14px,2.2vw,32px);align-items:center}
+.tools button{background:none;border:0;color:#fff;position:relative;display:grid;place-items:center}
+.tools svg{width:clamp(22px,2.2vw,32px);height:clamp(22px,2.2vw,32px);stroke:#fff;fill:none;stroke-width:1.8}
+.badge{position:absolute;top:-8px;right:-10px;min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font:700 11px/18px Montserrat;text-align:center;padding:0 4px}
+.case{position:relative;width:calc(100% - 3.6vw);margin:-2.2vw auto 0;z-index:6;padding:clamp(14px,2.6vw,38px) clamp(12px,4.4vw,70px) 10px;
+ background:linear-gradient(180deg,#0e0e10,#09090a);border:2px solid #2a2a2e;border-radius:14px;
+ box-shadow:0 -10px 40px rgba(0,0,0,.8),inset 0 0 0 5px #0a0a0b,inset 0 0 60px rgba(0,0,0,.9)}
+.case:before{content:"";position:absolute;inset:0;border-radius:12px;pointer-events:none;opacity:.5;
+ background:repeating-linear-gradient(115deg,transparent 0 9px,rgba(255,255,255,.012) 9px 10px),radial-gradient(ellipse at 20% 0,rgba(255,255,255,.04),transparent 50%)}
+.rv{position:absolute;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#666,#1a1a1c 70%);box-shadow:0 2px 3px #000}
+.rv.a{left:12px;top:12px}.rv.b{right:12px;top:12px}.rv.c{left:12px;bottom:12px}.rv.d{right:12px;bottom:12px}
+.view{display:none}.view.on{display:block}
+.row{display:grid;grid-template-columns:66px 28px minmax(130px,1.1fr) 44px minmax(120px,2.3fr) 56px 56px 62px 62px 126px 40px;gap:clamp(8px,1.3vw,20px);align-items:center;padding:6px 0;border-bottom:1px solid var(--line);position:relative}
+.row:last-child{border:0}
+.row.play{background:linear-gradient(90deg,rgba(224,36,47,.10),transparent 70%)}
+.th{width:66px;height:66px;image-rendering:pixelated;display:block;border:1px solid #2b2b30}
+.no{font:500 12px Montserrat;letter-spacing:.2em;color:#8e8e94}
+.ti{font:700 clamp(12px,1.05vw,15px) Montserrat;letter-spacing:.3em;color:#f1f1f3;text-transform:uppercase}
+.tg{font:500 10px Montserrat;letter-spacing:.28em;color:#6c6c73;margin-top:7px;text-transform:uppercase;white-space:nowrap}
+.pl{width:38px;height:38px;border:1.5px solid #6c6c73;background:#0b0b0c;display:grid;place-items:center;padding:0}
+.pl:hover{border-color:#fff}.row.play .pl{border-color:var(--red);box-shadow:0 0 14px rgba(224,36,47,.5)}
+.pl i{width:0;height:0;border-left:13px solid #fff;border-top:8px solid transparent;border-bottom:8px solid transparent;margin-left:3px}
+.row.play .pl i{width:12px;height:14px;border:0;margin:0;background:linear-gradient(90deg,#fff 0 4px,transparent 4px 8px,#fff 8px 12px)}
+.wv{width:100%;height:42px;display:block;cursor:pointer}
+.st{text-align:center;font:600 14px Montserrat;color:#e8e8ea;letter-spacing:.06em}
+.st small{display:block;font:500 9px Montserrat;letter-spacing:.3em;color:#6c6c73;margin-top:5px}
+.ic{display:flex;gap:14px;justify-content:center}
+.ic button{background:none;border:0;padding:2px;color:#c8c8cc}
+.ic svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7;display:block}
+.ic button:hover{color:#fff}.ic .lk.on{color:var(--red)}.ic .lk.on svg{fill:var(--red)}
+.cart{border:1.5px solid var(--red);background:transparent;color:var(--red);font:600 11px Montserrat;letter-spacing:.3em;padding:12px 0;width:100%}
+.cart:hover{background:var(--red);color:#fff;box-shadow:0 0 18px rgba(224,36,47,.5)}
+.cart.in{background:var(--red);color:#fff}
+.dl{width:38px;height:38px;border:1.5px solid #6c6c73;background:#0b0b0c;color:#fff;display:grid;place-items:center;padding:0}
+.dl:hover{border-color:#fff}.dl svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.8}
+.soon{padding:60px 10px;text-align:center;font:600 12px/2.2 Montserrat;letter-spacing:.4em;color:#7a7a82}
+.soon b{display:block;color:var(--gold);font:400 14px 'Press Start 2P';letter-spacing:.1em;margin-bottom:14px}
+.about{max-width:680px;margin:20px auto;line-height:1.9;font-size:15px;color:#b8b8be}
+.about h2,.soon h2{font:400 15px 'Press Start 2P';color:var(--gold);margin-bottom:18px}
+footer.f{margin:34px auto 0;text-align:center;font:500 10px Montserrat;letter-spacing:.4em;color:#55555c}
+#bar{position:fixed;left:0;right:0;bottom:0;height:72px;z-index:40;background:#09090b;border-top:2px solid var(--red);box-shadow:0 -8px 30px rgba(224,36,47,.25);display:flex;align-items:center;gap:20px;padding:0 24px;transform:translateY(100%);transition:.3s}
+#bar.on{transform:none}
+#bt{font:700 12px Montserrat;letter-spacing:.28em;color:#fff;min-width:170px;white-space:nowrap}
+#bm{font:500 10px Montserrat;letter-spacing:.25em;color:#6c6c73;margin-top:6px}
+.bc{display:flex;gap:8px}
+.bc button{width:40px;height:40px;border:1.5px solid #4a4a50;background:#0b0b0c;color:#fff;font:700 12px Montserrat}
+.bc button:hover{border-color:var(--red)}
+#pg{flex:1;height:6px;background:#222226;cursor:pointer;position:relative}
+#pg b{display:block;height:100%;width:0;background:var(--red);box-shadow:0 0 10px var(--red)}
+#vol{width:90px;accent-color:var(--red)}
+.modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;padding:16px}
+.modal.on{display:flex}
+.box{width:min(480px,100%);background:#0c0c0e;border:2px solid #2a2a2e;border-top:3px solid var(--red);padding:26px;box-shadow:0 0 60px rgba(224,36,47,.2)}
+.box h3{font:700 13px Montserrat;letter-spacing:.35em;margin-bottom:18px;color:#fff}
+.ci{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font:600 12px Montserrat;letter-spacing:.2em}
+.ci button{background:none;border:0;color:#8e8e94;font-size:11px;letter-spacing:.15em;margin-left:12px}
+.tot{display:flex;justify-content:space-between;margin:18px 0;font:700 14px Montserrat;letter-spacing:.2em}
+.go{width:100%;border:0;background:var(--red);color:#fff;font:700 12px Montserrat;letter-spacing:.35em;padding:15px}
+.nt{margin-top:12px;font-size:12px;color:var(--gold);min-height:16px}
+#toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);background:#111;border:1px solid var(--red);color:#fff;font:600 11px Montserrat;letter-spacing:.2em;padding:12px 18px;opacity:0;pointer-events:none;transition:.25s;z-index:70}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#enter{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;background:linear-gradient(rgba(6,5,7,.78),rgba(6,5,7,.92)),url(hero.jpg) center/cover}
+#enter.off{display:none}
+#enter h1{font:400 clamp(30px,8vw,76px) 'Press Start 2P';color:#fff;text-shadow:0 0 30px rgba(224,36,47,.7),4px 4px 0 var(--red)}
+#enter p{font:600 11px Montserrat;letter-spacing:.5em;color:#7a7a82}
+#enter button{font:700 13px Montserrat;letter-spacing:.5em;padding:18px 40px;background:transparent;color:var(--red);border:2px solid var(--red)}
+#enter button:hover{background:var(--red);color:#fff;box-shadow:0 0 30px var(--red)}
+@media(max-width:1000px){
+ .row{grid-template-columns:56px minmax(0,1fr) 38px 112px;gap:10px}
+ .no,.wv,.st,.ic,.dl{display:none}
+ .th{width:56px;height:56px}
+ .ms{display:block!important}
+ .case{width:calc(100% - 16px);padding:22px 12px 14px}
+ header{padding:14px 14px}
+ nav{gap:14px}nav button{letter-spacing:.18em;font-size:10px}
+ .cart{padding:11px 0;font-size:9px;letter-spacing:.2em}
+ #vol,#bt{display:none}#bar{padding:0 12px;gap:10px}
+}
+.ms{display:none;font:500 10px Montserrat;letter-spacing:.2em;color:#6c6c73;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="hero" id="hero">
+ <div class="stage" id="stage"><img src="hero.jpg" alt="MZPRD producing beats on an MPC">
+  <div class="pfx" id="pfxL"></div><div class="pfx" id="pfxR"></div>
+  <div class="hand" id="handL"></div><div class="hand" id="handR"></div></div>
+ <div class="lamp"></div>
+ <header>
+  <nav>
+   <button class="on" data-v="beats">BEATS</button>
+   <button data-v="kits">KITS</button>
+   <button data-v="merch">MERCH</button>
+   <button data-v="about">ABOUT</button>
+  </nav>
+  <div class="tools">
+   <button id="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></button>
+   <button id="cartBtn" aria-label="Cart"><svg viewBox="0 0 24 24"><path d="M2 3h3l2.5 12h11L21 7H6"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span class="badge" id="badge">0</span></button>
+  </div>
+ </header>
+</div>
+
+<div class="case">
+ <i class="rv a"></i><i class="rv b"></i><i class="rv c"></i><i class="rv d"></i>
+ <div class="view on" id="v-beats"><div id="list"></div></div>
+ <div class="view" id="v-kits"><div class="soon"><b>KITS</b>DRUM KITS AND LOOP PACKS<br>DROPPING SOON</div></div>
+ <div class="view" id="v-merch"><div class="soon"><b>MERCH</b>HOODIES, TEES AND CROWN GEAR<br>DROPPING SOON</div></div>
+ <div class="view" id="v-about"><div class="about"><h2>MZPRD</h2><p>Dark, heavy, sample-driven beats for artists who want something that sounds like the city at 3 AM.</p><p>Placeholder bio: replace with your story, credits and how to reach you for custom work and exclusives.</p><p>Contact: your@email.com</p></div></div>
+</div>
+<footer class="f">MZPRD / ALL RIGHTS RESERVED</footer>
+
+<div id="bar">
+ <div><div id="bt">--</div><div id="bm"></div></div>
+ <div class="bc"><button id="prev" aria-label="Previous">&lt;</button><button id="pp" aria-label="Play or pause">&gt;</button><button id="next" aria-label="Next">&gt;&gt;</button></div>
+ <div id="pg"><b></b></div>
+ <input id="vol" type="range" min="0" max="1" step=".01" value=".8" aria-label="Volume">
+</div>
+
+<div class="modal" id="modal"><div class="box">
+ <h3>YOUR CART</h3><div id="items"></div>
+ <div class="tot"><span>TOTAL</span><span id="total">$0.00</span></div>
+ <button class="go" id="checkout">CHECKOUT</button><div class="nt" id="nt"></div>
+</div></div>
+<div id="toast"></div>
+<div class="grain"></div>
+<div id="enter"><h1>MZPRD</h1><button id="go">ENTER</button><p>SOUND ON</p></div>
+
+<script>
+const BEATS=[
+ {n:'Black Gold',tags:'Boom Bap / Sample / Gritty',bpm:92,key:'D#m',dur:'03:14',root:27,sw:.12,k:'1001000010100010',s:'0000100000001000',h:'1011101110111011',b:'1000000100100000',ch:[0,3,7,10]},
+ {n:'Midnight Drive',tags:'R&B / Soul / Sample',bpm:85,key:'Fm',dur:'03:27',root:29,sw:.1,k:'1000000110000010',s:'0000100000001000',h:'1010101010101010',b:'1000000010000100',ch:[0,3,7,10]},
+ {n:'Concrete Dreams',tags:'Boom Bap / Dark / Strings',bpm:90,key:'Cm',dur:'03:02',root:36,sw:.12,k:'1001000010100000',s:'0000100000001000',h:'1011101110111011',b:'1000001000100000',ch:[0,3,7]},
+ {n:'No Return',tags:'Trap / Hard / Atmospheric',bpm:140,key:'Gm',dur:'02:48',root:31,sw:0,k:'1000000010100000',s:'0000000010000000',h:'1010101010101011',b:'1000001000100000',ch:[0,3,7]},
+ {n:'Lost Files',tags:'Lofi / Sample / Chill',bpm:78,key:'A#m',dur:'03:36',root:34,sw:.14,k:'1000000000100100',s:'0000100000001000',h:'1010101110101011',b:'1000000010000100',ch:[0,3,7,10]},
+ {n:'City Lights',tags:'R&B / Smooth / Sample',bpm:86,key:'Em',dur:'03:11',root:28,sw:.1,k:'1000000110000010',s:'0000100000001000',h:'1010101010101010',b:'1000000010000000',ch:[0,3,7,10]}
+];
+const PRICE=29.99,$=s=>document.querySelector(s),hz=m=>440*Math.pow(2,(m-69)/12);
+let hits=[],ac,master,an,data,cur=-1,playing=false,step=0,nextT=0,timer=null,started=0,level=0,cart=new Set(),liked=new Set();
+const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1800)};
+
+function initAudio(){
+ if(ac)return;
+ ac=new (window.AudioContext||window.webkitAudioContext)();
+ master=ac.createGain();master.gain.value=$('#vol').value;
+ const comp=ac.createDynamicsCompressor();an=ac.createAnalyser();an.fftSize=256;data=new Uint8Array(an.frequencyBinCount);
+ master.connect(comp);comp.connect(an);an.connect(ac.destination);
+ const nb=ac.createBuffer(1,ac.sampleRate,ac.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;ac.noise=nb;
+}
+function env(g,t,a,d,v){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+d)}
+function kick(t){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(40,t+.12);env(g,t,.003,.35,1);o.connect(g).connect(master);o.start(t);o.stop(t+.4)}
+function nz(t,dur,f,type,v){const s=ac.createBufferSource();s.buffer=ac.noise;const q=ac.createBiquadFilter();q.type=type;q.frequency.value=f;const g=ac.createGain();env(g,t,.001,dur,v);s.connect(q).connect(g).connect(master);s.start(t);s.stop(t+dur+.05)}
+function snare(t){nz(t,.18,1800,'bandpass',.7);const o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.value=190;env(g,t,.001,.1,.4);o.connect(g).connect(master);o.start(t);o.stop(t+.15)}
+function bass(t,m,d){const o=ac.createOscillator(),f=ac.createBiquadFilter(),g=ac.createGain();o.type='sawtooth';o.frequency.value=hz(m);f.type='lowpass';f.frequency.value=260;env(g,t,.01,d,.5);o.connect(f).connect(g).connect(master);o.start(t);o.stop(t+d+.1)}
+function pad(t,r,ch,d){ch.forEach(i=>{const o=ac.createOscillator(),g=ac.createGain(),f=ac.createBiquadFilter();o.type='square';o.frequency.value=hz(r+24+i);f.type='lowpass';f.frequency.value=900;env(g,t,.15,d,.035);o.connect(f).connect(g).connect(master);o.start(t);o.stop(t+d+.3)})}
+function sched(){
+ const B=BEATS[cur],sec=60/B.bpm/4;
+ while(nextT<ac.currentTime+.12){
+  const i=step%16,t=nextT+((i%2)?B.sw*sec:0);
+  if(B.k[i]==='1'){kick(t);hits.push({t,h:'L',a:1})}
+  if(B.s[i]==='1'){snare(t);hits.push({t,h:'R',a:1})}
+  if(B.h[i]==='1'){nz(t,.05,7500,'highpass',i%4?.14:.28);if(B.k[i]!=='1'&&B.s[i]!=='1'&&i%2===0)hits.push({t,h:(i%4)?'R':'L',a:.35})}
+  if(B.b[i]==='1')bass(t,B.root,sec*2);
+  if(i===0&&(step/16)%2===0)pad(t,B.root,B.ch,sec*30);
+  nextT+=sec;step++;
+ }
+}
+function play(i){
+ initAudio();ac.resume();
+ if(i===cur&&playing){pause();return}
+ if(i!==cur){cur=i;step=0;started=ac.currentTime;hits=[]}
+ nextT=ac.currentTime+.05;clearInterval(timer);timer=setInterval(sched,25);playing=true;ui();
+}
+function pause(){hits=[];clearInterval(timer);playing=false;ui()}
+function go(d){if(cur<0){play(0);return}const n=(cur+d+BEATS.length)%BEATS.length;cur=-1;play(n)}
+function ui(){
+ document.querySelectorAll('.row').forEach((e,i)=>e.classList.toggle('play',i===cur&&playing));
+ $('#pp').textContent=playing?'||':'>';
+ if(cur>=0){$('#bar').classList.add('on');$('#bt').textContent=BEATS[cur].n.toUpperCase();$('#bm').textContent=BEATS[cur].bpm+' BPM / '+BEATS[cur].key}
+}
+
+const PAL=[['#050505','#1a1408','#000','#e8b94a'],['#2a0a5e','#e0409a','#0d0626','#ffd0f0'],['#16213e','#c0503a','#0b0f1f','#ffb070'],['#2a0510','#c8203a','#12030a','#ff6a50'],['#cfcfcf','#777','#222','#e0242f'],['#0b1a5e','#3a6ad0','#080d2e','#80e0ff']];
+function art(c,i){
+ const x=c.getContext('2d'),W=32,p=PAL[i];seed=i*97+13;
+ for(let y=0;y<W;y++){x.fillStyle=mix(p[0],p[1],y/W);x.fillRect(0,y,W,1)}
+ if(i===1||i===3){x.fillStyle=p[3];x.beginPath();x.arc(16,16,7,0,7);x.fill()}
+ if(i===4){x.fillStyle=p[2];x.fillRect(4,8,24,16);x.fillStyle='#ddd';x.fillRect(8,11,16,7);x.fillStyle=p[2];x.beginPath();x.arc(12,14,2,0,7);x.arc(20,14,2,0,7);x.fill();x.fillStyle=p[3];x.fillRect(6,20,20,2);return}
+ if(i!==0){x.fillStyle=p[2];let bx=0;while(bx<W){const w=3+r()*4|0,h=6+r()*(i===2?16:11)|0;x.fillRect(bx,W-h,w,h);bx+=w}
+  x.fillStyle=p[3];for(let k=0;k<22;k++)x.fillRect(r()*W|0,18+r()*13|0,1,1);
+  if(i===1){x.fillStyle='#000';x.fillRect(8,24,16,4);x.fillStyle=p[3];x.fillRect(10,22,10,2)}}
+ if(i===0){x.fillStyle=p[3];x.fillRect(8,16,16,8);for(const px of[8,13,18,23])x.fillRect(px,10,2,7);x.fillRect(15,8,3,9);x.fillStyle='#fff6';x.fillRect(8,16,16,1);x.fillStyle='#0008';x.fillRect(8,22,16,2)}
+}
+let seed=1;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+function mix(a,b,t){const A=[1,3,5].map(i=>parseInt(a.substr(i,2),16)),B=[1,3,5].map(i=>parseInt(b.substr(i,2),16));return'rgb('+A.map((v,i)=>v+(B[i]-v)*t|0)+')'}
+const I={heart:'<svg viewBox="0 0 24 24"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 5.800-8 11-8 11z"/></svg>',share:'<svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="5.5" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.3 10.800l7.400-4M8.3 13.200l7.400 4"/></svg>',dl:'<svg viewBox="0 0 24 24"><path d="M12 3v12M7 10.500l5 5 5-5M4 20h16"/></svg>'};
+const list=$('#list'),wvs=[];
+BEATS.forEach((B,i)=>{
+ const d=document.createElement('div');d.className='row';
+ d.innerHTML=`<canvas class="th" width="32" height="32"></canvas><span class="no">${String(i+1).padStart(2,'0')}</span>
+ <div><div class="ti">${B.n}</div><div class="tg">${B.tags.replace(/ \/ /g,'&nbsp;&nbsp;&nbsp;')}</div><div class="ms">${B.bpm} BPM / ${B.key}</div></div>
+ <button class="pl" aria-label="Play ${B.n}"><i></i></button>
+ <canvas class="wv" height="42"></canvas>
+ <div class="st">${B.bpm}<small>BPM</small></div><div class="st">${B.key}<small>KEY</small></div><div class="st">${B.dur}<small>TIME</small></div>
+ <div class="ic"><button class="lk" aria-label="Like">${I.heart}</button><button class="sh" aria-label="Share">${I.share}</button></div>
+ <button class="cart">ADD TO CART</button><button class="dl" aria-label="Download preview">${I.dl}</button>`;
+ list.appendChild(d);art(d.querySelector('.th'),i);
+ const cv=d.querySelector('.wv');seed=i*31+5;const bars=[...Array(110)].map((_,k)=>(.25+.75*r())*(.65+.35*Math.sin(k/9+i)));wvs.push({cv,bars,p:-1});
+ d.querySelector('.pl').onclick=()=>play(i);
+ cv.onclick=()=>{if(cur!==i)play(i)};
+ d.querySelector('.lk').onclick=e=>{const b=e.currentTarget;liked.has(i)?liked.delete(i):liked.add(i);b.classList.toggle('on',liked.has(i))};
+ d.querySelector('.sh').onclick=()=>{try{navigator.clipboard.writeText(location.href.split('#')[0]+'#'+B.n.replace(/ /g,'-'))}catch(e){}toast('LINK COPIED')};
+ d.querySelector('.dl').onclick=()=>toast('FREE TAGGED PREVIEW COMING SOON');
+ d.querySelector('.cart').onclick=e=>{cart.has(i)?cart.delete(i):cart.add(i);syncCart()};
+});
+function drawWv(w,p){
+ const c=w.cv,dpr=devicePixelRatio||1,W=c.clientWidth;if(!W)return;
+ if(c.width!==W*dpr){c.width=W*dpr;c.height=42*dpr}
+ const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,42);
+ const n=w.bars.length,s=W/n;
+ w.bars.forEach((a,k)=>{x.fillStyle=k/n<p?'#e0242f':'#8a8a90';const h=Math.max(2,a*38);x.fillRect(k*s,21-h/2,Math.max(1,s*.55),h)});
+}
+function syncCart(){
+ document.querySelectorAll('.cart').forEach((b,i)=>{b.classList.toggle('in',cart.has(i));b.textContent=cart.has(i)?'IN CART':'ADD TO CART'});
+ $('#badge').textContent=cart.size;
+}
+function renderCart(){
+ $('#items').innerHTML=cart.size?[...cart].map(i=>`<div class="ci"><span>${BEATS[i].n.toUpperCase()}</span><span>$${PRICE}<button data-i="${i}">REMOVE</button></span></div>`).join(''):'<div class="ci"><span>EMPTY</span></div>';
+ $('#total').textContent='$'+(cart.size*PRICE).toFixed(2);$('#nt').textContent='';
+ document.querySelectorAll('#items button').forEach(b=>b.onclick=()=>{cart.delete(+b.dataset.i);syncCart();renderCart()});
+}
+$('#cartBtn').onclick=()=>{renderCart();$('#modal').classList.add('on')};
+$('#modal').onclick=e=>{if(e.target.id==='modal')e.target.classList.remove('on')};
+$('#checkout').onclick=()=>$('#nt').textContent=cart.size?'Checkout not connected yet. Your payment setup goes here.':'Add a beat first.';
+$('#search').onclick=()=>toast('SEARCH COMING SOON');
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));
+});
+$('#pp').onclick=()=>cur<0?play(0):play(cur);$('#next').onclick=()=>go(1);$('#prev').onclick=()=>go(-1);
+$('#vol').oninput=e=>{if(master)master.gain.value=e.target.value};
+$('#go').onclick=()=>{initAudio();ac.resume();$('#enter').classList.add('off')};
+addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body){e.preventDefault();$('#pp').click()}});
+
+const root=document.documentElement,stage=$('#stage'),hero=$('#hero');let mx=0,my=0,tick=0;
+const IW=1672,IH=468,HP={L:{x:700,y:312,w:140,h:78,fx:[755,372,130,52]},R:{x:1000,y:320,w:110,h:82,fx:[880,376,100,44]}},amt={L:0,R:0};
+function place(){['L','R'].forEach(k=>{const q=HP[k],e=$('#hand'+k),f=$('#pfx'+k);
+ Object.assign(e.style,{left:q.x/IW*100+'%',top:q.y/IH*100+'%',width:q.w/IW*100+'%',height:q.h/IH*100+'%',backgroundSize:IW/q.w*100+'% '+IH/q.h*100+'%',backgroundPosition:q.x/(IW-q.w)*100+'% '+q.y/(IH-q.h)*100+'%'});
+ Object.assign(f.style,{left:q.fx[0]/IW*100+'%',top:q.fx[1]/IH*100+'%',width:q.fx[2]/IW*100+'%',height:q.fx[3]/IH*100+'%'})})}
+place();
+addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+function frame(){
+ tick++;
+ if(an&&playing){an.getByteFrequencyData(data);let s=0;for(let i=0;i<12;i++)s+=data[i];level+=(s/12/255-level)*.35}else level*=.9;
+ root.style.setProperty('--lvl',level.toFixed(3));
+ if(an&&playing)while(hits.length&&hits[0].t<=ac.currentTime){const h=hits.shift();amt[h.h]=Math.max(amt[h.h],h.a)}
+ const k=hero.clientWidth/IW;
+ ['L','R'].forEach(c=>{const a=amt[c];$('#hand'+c).style.transform=`translateY(${(a*9*k).toFixed(2)}px) scale(${1+a*.03})`;$('#pfx'+c).style.opacity=a;amt[c]=a>.02?a*.82:0});
+ stage.style.transform=`translate(${(-mx*14).toFixed(1)}px,${(-my*8).toFixed(1)}px) scale(${1.03+level*.012})`;
+ let pr=0;
+ if(cur>=0&&playing){pr=((ac.currentTime-started)/(60/BEATS[cur].bpm*4*32))%1;$('#pg b').style.width=pr*100+'%'}
+ wvs.forEach((w,i)=>{const p=i===cur?pr:0;if(w.p!==p||!w.d){w.p=p;w.d=1;drawWv(w,p)}});
+ requestAnimationFrame(frame);
+}
+addEventListener('resize',()=>wvs.forEach(w=>w.d=0));
+frame();
+</script>
+</body>
+</html>
