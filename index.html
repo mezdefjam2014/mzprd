@@ -1397,7 +1397,7 @@ async function boRender(){
  document.getElementById('bo2b').style.display='none';document.getElementById('bo2c').style.display='none';
  if(window.emailClose)emailClose();if(window.showMakerClose)showMakerClose();
  if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=2');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
- if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=7');if(!window.showMakerOpen)await loadScript('showmaker.js?v=6');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
+ if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=7');if(!window.showMakerOpen)await loadScript('showmaker.js?v=7');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
  if(vid){try{await loadStudio();await studioOpen()}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
  if(window.studioClose)studioClose();
  document.getElementById('bo2b').style.display=tab==='promo'?'':'none';

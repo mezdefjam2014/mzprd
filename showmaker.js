@@ -35,9 +35,9 @@ function css(){
 #showmk .ctl{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}#showmk .ctl input[type=range]{flex:1;min-width:140px;accent-color:var(--red)}
 #showmk .time{font:600 12px Montserrat;color:#c9c9ce;min-width:92px;text-align:right}
 #showmk .seg{height:10px;display:flex;margin:6px 0 0;border:1px solid #2a2a2e}#showmk .seg i{display:block;height:100%}
-#showmk .th{display:flex;flex-wrap:wrap;gap:8px}
-#showmk .th button{flex:1 1 calc(50% - 8px);min-width:130px;background:#050506;border:2px solid #34343a;padding:4px;cursor:pointer;color:#fff;font:700 10px Montserrat;letter-spacing:.14em}
-#showmk .th button.on{border-color:var(--red)}#showmk .th canvas{width:100%;height:auto;aspect-ratio:160/116;display:block;margin-bottom:4px}
+#showmk .smths{display:flex;flex-wrap:wrap;gap:8px}
+#showmk .smths button{flex:1 1 calc(50% - 8px);min-width:130px;background:#050506;border:2px solid #34343a;padding:4px;cursor:pointer;color:#fff;font:700 10px Montserrat;letter-spacing:.14em}
+#showmk .smths button.on{border-color:var(--red)}#showmk .smths canvas{width:100%;height:auto;aspect-ratio:160/116;display:block;margin-bottom:4px}
 #showmk .sec{border:1px solid #2a2a2e;margin:10px 0;background:#08080a}
 #showmk .sec summary{cursor:pointer;padding:12px;font:700 11px Montserrat;letter-spacing:.22em;color:var(--gold);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #showmk .sec summary::-webkit-details-marker{display:none}
@@ -73,7 +73,7 @@ function html(){return`<div class="mg"><div>
  <div class="msg" id="smAutoNote" style="margin:0 0 4px"></div>
  <details class="sec" open><summary>1. BEATS <small id="smS1"></small></summary><div class="in"><div id="smTracks"></div>
   <div class="two"><button class="btn" id="smAddT">+ ADD A BEAT</button><button class="btn" id="smSpread">SHUFFLE THE SHOW</button></div></div></details>
- <details class="sec" open><summary>2. STAGE LOOK <small id="smS2"></small></summary><div class="in"><div class="th" id="smTh"></div>
+ <details class="sec" open><summary>2. STAGE LOOK <small id="smS2"></small></summary><div class="in"><div class="smths" id="smTh"></div>
   <label class="chk" style="margin-top:10px"><input type="checkbox" id="smVary" checked> GIVE EACH BEAT ITS OWN STAGE LOOK</label></div></details>
  <details class="sec"><summary>3. TIMELINE <small id="smS3"></small></summary><div class="in">
   <div class="two"><div><label>LENGTH (MINUTES, 5 TO 20)</label><input type="number" id="smLen" min="5" max="20" step="1" value="5"></div><div><label>&nbsp;</label><button class="btn" id="smSurprise" style="width:100%">SURPRISE ME</button></div></div>
