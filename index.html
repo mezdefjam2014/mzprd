@@ -21,7 +21,8 @@
 <style>
 :root{--red:#e0242f;--gold:#e8b94a;--ink:#060507;--line:#1d1d21;--lvl:0}
 *{box-sizing:border-box;margin:0}
-html{background:var(--ink)}
+html{background:var(--ink);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overflow-x:hidden}
 body{background:var(--ink);color:#d9d9dc;font-family:Montserrat,sans-serif;font-weight:500;min-height:100vh;padding-bottom:90px}
 button,input,select,textarea{font-family:inherit}
 button{cursor:pointer}
@@ -246,6 +247,54 @@ footer.f a:hover{color:#fff}
  nav{gap:14px}nav button{letter-spacing:.18em;font-size:10px}
  .cart{padding:11px 0;font-size:9px;letter-spacing:.2em}
  #vol,#bt{display:none}#bar{padding:0 12px;gap:10px}
+}
+@media(max-width:700px){
+ :root{--hh:clamp(250px,74vw,360px)}
+ .hero{aspect-ratio:auto;height:var(--hh)}
+ .stage{inset:auto;top:0;height:100%;width:calc(var(--hh)*3.5726);left:calc(50% - var(--hh)*3.5726*.52)}
+ header{padding:12px 12px;gap:8px}
+ nav{gap:11px}
+ nav button{font-size:10px;letter-spacing:.12em;padding:8px 0}
+ .tools{gap:12px}
+ #search{display:none!important}
+ .tools svg{width:24px;height:24px}
+ .pill{font-size:8px!important;letter-spacing:.1em!important;padding:8px 8px!important}
+ .badge{top:-6px;right:-8px}
+ #girl{height:66%}
+ .case{width:calc(100% - 14px);margin-top:-14px;padding:20px 10px 12px;border-radius:12px}
+ .rv{display:none}
+ .row{grid-template-columns:54px minmax(0,1fr) 44px 104px;gap:9px;padding:9px 0}
+ .th{width:54px;height:54px}
+ .ti{font-size:11px;letter-spacing:.2em}
+ .pl{width:44px;height:44px}
+ .cart{padding:13px 0;font-size:9px;letter-spacing:.16em}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .card{padding:8px;gap:8px}
+ .card .ds{font-size:12px;min-height:54px}
+ .card .cv .pl{width:46px;height:46px}
+ .bp{gap:16px}
+ .bp h1{letter-spacing:.2em}
+ .bp .acts2 .cart{padding:14px 18px}
+ footer.f{letter-spacing:.2em;font-size:9px;padding:0 10px;margin-top:22px}
+ footer.f a{display:inline-block;margin-left:8px}
+ #bar{padding:0 10px calc(env(safe-area-inset-bottom) + 0px);gap:8px;height:calc(66px + env(safe-area-inset-bottom))}
+ #bt{display:block!important;min-width:0;max-width:98px;overflow:hidden;text-overflow:ellipsis;font-size:10px;letter-spacing:.14em}
+ #bm{font-size:8px;letter-spacing:.12em;white-space:nowrap}
+ .bc{gap:5px}.bc button{width:38px;height:38px}
+ #vol{display:none}
+ body{padding-bottom:96px}
+ .box{padding:20px 16px}
+ .x{width:40px;height:40px}
+ .box input,.bf input[type=text],.bf input[type=number],.bf textarea{font-size:16px}
+ .bh{gap:8px}.bh h2{width:100%;font-size:12px}.bh button{padding:10px 12px;font-size:10px;letter-spacing:.15em}
+ .bi{grid-template-columns:48px 1fr;gap:10px}
+ .bi .acts{grid-column:1/-1;flex-wrap:wrap}
+ #bo{padding:16px 12px 60px}
+ #toast{max-width:90vw;text-align:center;bottom:84px}
+ #enter button{padding:16px 30px}
+ #girl .bx{min-width:30px;min-height:30px;font-size:20px}
+ .sign .shop{font-size:max(8px,1.6cqw);padding:max(6px,1.2cqw) max(10px,2cqw)}
+ .sign span{font-size:max(7px,1.5cqw)}
 }
 .ms{display:none;font:500 10px Montserrat;letter-spacing:.2em;color:#6c6c73;margin-top:6px}
 </style>
@@ -618,7 +667,7 @@ function place(){['L','R'].forEach(k=>{const q=HP[k],e=$('#hand'+k),f=$('#pfx'+k
  Object.assign(f.style,{left:q.fx[0]/IW*100+'%',top:q.fx[1]/IH*100+'%',width:q.fx[2]/IW*100+'%',height:q.fx[3]/IH*100+'%'})})}
 let tw=0,vang=0,vw=0;
 const VR={x:1425,y:370,w:240,h:80,cx:116,cy:36,R:105,flat:.26};
-function vinSize(){const c=$('#vin'),d=Math.min(devicePixelRatio||1,2),W=hero.clientWidth*VR.w/IW;c.width=Math.round(W*d);c.height=Math.round(W*VR.h/VR.w*d);
+function vinSize(){const c=$('#vin'),d=Math.min(devicePixelRatio||1,2),W=stage.offsetWidth*VR.w/IW;c.width=Math.round(W*d);c.height=Math.round(W*VR.h/VR.w*d);
  Object.assign(c.style,{left:VR.x/IW*100+'%',top:VR.y/IH*100+'%',width:VR.w/IW*100+'%',height:VR.h/IH*100+'%'})}
 function drawVinyl(){
  const c=$('#vin'),x=c.getContext('2d'),u=c.width/VR.w;if(!c.width)return;
@@ -642,9 +691,9 @@ let fxN=0;const rnd2=(a)=>{a=Math.sin(a*127.1)*43758.5453;return a-Math.floor(a)
 const STEAM=[...Array(14)].map((_,i)=>({ph:rnd2(i+1)*6.28,sp:.07+rnd2(i+9)*.05,o:rnd2(i+3),x:402+rnd2(i+5)*38}));
 const MIST=[...Array(9)].map((_,i)=>({o:rnd2(i+20),sp:.012+rnd2(i+30)*.012,r:34+rnd2(i+40)*40,ph:rnd2(i+50)*6.28,dx:rnd2(i+60)}));
 const MOTE=[...Array(26)].map((_,i)=>({a:rnd2(i+70),b:rnd2(i+80),sp:.01+rnd2(i+90)*.02,tw:rnd2(i+95)*6.28}));
-function fxSize(){const c=$('#fx'),w=Math.max(1,Math.round(hero.clientWidth*.6));c.width=w;c.height=Math.round(w*IH/IW)}
+function fxSize(){const c=$('#fx'),w=Math.max(1,Math.round(stage.offsetWidth*.6));c.width=w;c.height=Math.round(w*IH/IW)}
 const LP={x:1228,y:284,w:196,h:118,ox:1272,oy:294,ux:130,vx:-26,vy:96,W:260,H:180};
-function lapSize(){const c=$('#lap'),d=Math.min(devicePixelRatio||1,2),w=hero.clientWidth*LP.w/IW;c.width=Math.round(w*d);c.height=Math.round(w*LP.h/LP.w*d);
+function lapSize(){const c=$('#lap'),d=Math.min(devicePixelRatio||1,2),w=stage.offsetWidth*LP.w/IW;c.width=Math.round(w*d);c.height=Math.round(w*LP.h/LP.w*d);
  Object.assign(c.style,{left:LP.x/IW*100+'%',top:LP.y/IH*100+'%',width:LP.w/IW*100+'%',height:LP.h/IH*100+'%'})}
 lapSize();
 function drawLap(pr,t){
@@ -667,7 +716,7 @@ function drawLap(pr,t){
 const HD={x:770,y:0,w:235,h:190},EY={x:858,y:116,w:56,h:44};
 (function(){const e=$('#head');Object.assign(e.style,{left:HD.x/IW*100+'%',top:HD.y/IH*100+'%',width:HD.w/IW*100+'%',height:HD.h/IH*100+'%',backgroundSize:IW/HD.w*100+'% '+IH/HD.h*100+'%',backgroundPosition:HD.x/(IW-HD.w)*100+'% '+HD.y/(IH-HD.h)*100+'%'});
  Object.assign($('#eyes').style,{left:(EY.x-HD.x)/HD.w*100+'%',top:(EY.y-HD.y)/HD.h*100+'%',width:EY.w/HD.w*100+'%',height:EY.h/HD.h*100+'%'})})();
-function eyesSize(){const c=$('#eyes'),d=Math.min(devicePixelRatio||1,2)*Math.max(1,hero.clientWidth/IW)*3;c.width=Math.round(EY.w*d);c.height=Math.round(EY.h*d)}
+function eyesSize(){const c=$('#eyes'),d=Math.min(devicePixelRatio||1,2)*Math.max(1,stage.offsetWidth/IW)*3;c.width=Math.round(EY.w*d);c.height=Math.round(EY.h*d)}
 eyesSize();
 let nod=0,blinkAt=2.5,blinkT=-1,blinkDbl=false,gl={x:0,y:0,tx:0,ty:0,next:3};
 const GL=[[0,0],[0,0],[1.3,-1.1],[-1,.7],[.9,.9],[1.6,-.4],[0,0]];
@@ -692,7 +741,7 @@ function drawEyes(t){
  });
 }
 const MP={x:940,y:372,w:200,h:76,ox:998,oy:410,ux:80,uy:-6,vx:12,vy:10,W:160,H:24};
-function mpcSize(){['mpc','lcd'].forEach(id=>{const c=$('#'+id),d=Math.min(devicePixelRatio||1,2),w=hero.clientWidth*MP.w/IW;c.width=Math.round(w*d*1.5);c.height=Math.round(w*MP.h/MP.w*d*1.5);
+function mpcSize(){['mpc','lcd'].forEach(id=>{const c=$('#'+id),d=Math.min(devicePixelRatio||1,2),w=stage.offsetWidth*MP.w/IW;c.width=Math.round(w*d*1.5);c.height=Math.round(w*MP.h/MP.w*d*1.5);
  Object.assign(c.style,{left:MP.x/IW*100+'%',top:MP.y/IH*100+'%',width:MP.w/IW*100+'%',height:MP.h/IH*100+'%'})})}
 mpcSize();
 function drawMpc(t){
@@ -738,7 +787,7 @@ function sparkle(x){
 /* lit drum pads + MZPRD on the headphone cup */
 const PD={x:730,y:362,w:260,h:90},PADS16=[[777,393,26],[810,390,28],[846,386,28],[873,385,26],[792,402,30],[828,401,30],[860,397,30],[897,395,30],[806,414,32],[842,411,32],[878,409,32],[913,406,32],[825,428,38],[860,424,38],[900,421,38],[935,419,38]];
 const padG=new Float32Array(16),padC=[];
-function padSize(){const c=$('#padfx'),d=Math.min(devicePixelRatio||1,2),w=hero.clientWidth*PD.w/IW;c.width=Math.round(w*d*1.5);c.height=Math.round(w*PD.h/PD.w*d*1.5);
+function padSize(){const c=$('#padfx'),d=Math.min(devicePixelRatio||1,2),w=stage.offsetWidth*PD.w/IW;c.width=Math.round(w*d*1.5);c.height=Math.round(w*PD.h/PD.w*d*1.5);
  Object.assign(c.style,{left:PD.x/IW*100+'%',top:PD.y/IH*100+'%',width:PD.w/IW*100+'%',height:PD.h/IH*100+'%'})}
 padSize();
 function lightPad(i,col,a){padG[i]=Math.max(padG[i],a);padC[i]=col}
@@ -765,7 +814,7 @@ function drawPads(){
   padG[i]=g*.86}
 }
 const HPC={x:750,y:62,w:70,h:70,cx:783,cy:100},GLY={M:['101','111','111','101','101'],Z:['111','001','010','100','111'],P:['111','101','111','100','100'],R:['110','101','110','101','101'],D:['110','101','101','101','110']};
-function hpSize(){const c=$('#hpfx'),d=Math.min(devicePixelRatio||1,2),w=hero.clientWidth*HPC.w/IW;c.width=Math.round(w*d*3);c.height=Math.round(w*d*3);
+function hpSize(){const c=$('#hpfx'),d=Math.min(devicePixelRatio||1,2),w=stage.offsetWidth*HPC.w/IW;c.width=Math.round(w*d*3);c.height=Math.round(w*d*3);
  Object.assign(c.style,{left:HPC.x/IW*100+'%',top:HPC.y/IH*100+'%',width:HPC.w/IW*100+'%',height:HPC.h/IH*100+'%'})}
 hpSize();
 function drawHp(t){
@@ -816,7 +865,7 @@ function frame(){
   if(kR)padSnare();
   if(kH&&!kL&&!kR)padHat();
  }else level*=.9;
- const k=hero.clientWidth/IW,a=amt.L,t=now/1000;
+ const k=stage.offsetWidth/IW,a=amt.L,t=now/1000;
  /* left hand: tap, same as the original */
  $('#handL').style.transform=`translateY(${(a*9*k).toFixed(2)}px) scale(${1+a*.03})`;
  $('#pfxL').style.opacity=a;amt.L=a>.02?a*.82:0;
