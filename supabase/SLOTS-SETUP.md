@@ -1,52 +1,20 @@
-# MZPRD Slots: setup (do these in order)
+# MZPRD Slots: setup status
 
-The site code is already live. Slots stay hidden until the three server pieces below are done.
-No passwords or secret keys are needed for any of this.
+Everything below was done for you on 2026-10-07 in the Supabase project `mzprd`.
 
-## 1. Create the tables (one time)
-Supabase > SQL Editor > New query > paste all of `supabase/slots.sql` > Run.
+## Done
+1. Tables created from `supabase/slots.sql`: `slot_settings`, `slot_spins`, `coupons` (admin-only access).
+2. Orders got two columns: `coupon_code` and `coupon_discount`.
+3. Edge function `slots` deployed from `supabase/slots-function.ts` (JWT check off, because the site uses a publishable key; the function checks admins itself).
+4. Edge function `checkout` updated for coupons:
+   - `create`: validates the code, takes the percent off the single most expensive beat (after bundles), lowers the PayPal amount, saves the code and discount on the order, reserves the coupon.
+   - `capture`: claims the coupon in one step before taking payment, so a code can only be used once; releases it if the payment fails.
+   - The original function is saved in `supabase/checkout-original-backup.ts`. To roll back, paste that file into the checkout function and deploy.
+5. `slot_settings.checkout_ready` is set to true.
 
-## 2. Deploy the game function
-Supabase > Edge Functions > Deploy a new function > name it exactly `slots` > paste all of `supabase/slots-function.ts` > Deploy.
-It uses the project's built-in keys, no extra secrets.
+Tested against the live backend: a normal $10.00 order is unchanged; with a 15% test coupon the order was $8.50 (coupon_discount 1.5, coupon reserved); an invalid code and a packs-only cart are refused with clear messages. The test rows were deleted afterwards.
 
-## 3. Update the checkout function so coupons really take money off
-This is the step that makes a coupon work when someone pays. Do not tick the checkbox in step 4 until this is done,
-otherwise the cart would show a discount that PayPal does not charge.
-
-Add the helpers below to the checkout function, then use them in three places.
-
-```ts
-// ---- coupons ----
-const COUPON_RE = /^MZ-[A-Z0-9]{8}$/
-async function loadCoupon(sb: any, raw: unknown) {
-  const code = String(raw || '').trim().toUpperCase()
-  if (!COUPON_RE.test(code)) return null
-  const { data: c } = await sb.from('coupons').select('*').eq('code', code).maybeSingle()
-  if (!c || c.used_at || new Date(c.expires_at).getTime() < Date.now()) return null
-  return c
-}
-// percent off the single most expensive BEAT in the cart (same rule as the cart on the site)
-function couponDiscount(pct: number, items: { t: string; price: number }[], subtotalAfterBundles: number) {
-  const top = Math.max(0, ...items.filter((i) => i.t === 'b').map((i) => i.price))
-  const d = Math.round(top * pct) / 100
-  return Math.max(0, Math.min(d, subtotalAfterBundles))
-}
-```
-
-1. In `create`: after the promo and bundle math, if `body.coupon` is sent: `const c = await loadCoupon(sb, body.coupon)`;
-   if it is null return the error "That coupon is not valid or has expired."; otherwise subtract
-   `couponDiscount(c.pct, pricedItems, totalAfterBundles)` from the total BEFORE creating the PayPal order, and store the
-   code and discount on the order row (so capture knows). Also set `reserved_order` on the coupon.
-2. In `capture`, before capturing the payment: claim the coupon in one step so it can only be used once:
-   `update coupons set used_at = now(), order_id = <id> where code = <order coupon> and used_at is null returning code`.
-   If nothing comes back, refuse with "That coupon was already used" and do not capture. If the PayPal capture then fails,
-   set `used_at` back to null.
-3. In the amount check that compares what PayPal captured with the server price, use the discounted total.
-
-Paste your current checkout function to Claude and ask it to merge these in. It cannot see the function from here.
-
-## 4. Turn it on
-Back office > PROMO > SLOTS: save the settings, tick "I updated the checkout function", then tick "Game is open to visitors".
-To try it first without opening it to visitors: tick "Turn on test slots on this browser". PLAY SLOTS then shows only for you,
-with buttons to force a win, the jackpot or a loss.
+## Still yours to do (the game is closed to visitors right now)
+Back office > PROMO > SLOTS:
+- Tick **Turn on test slots on this browser** and try it (force a win, then use the code in your cart with the cheapest beat).
+- When happy, tick **Game is open to visitors** and Save. That shows PLAY SLOTS on the banner for everyone.
