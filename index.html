@@ -41,7 +41,7 @@ nav button.on{color:var(--red);border-color:var(--red);text-shadow:0 0 14px rgba
 .rv{position:absolute;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#666,#1a1a1c 70%);box-shadow:0 2px 3px #000}
 .rv.a{left:12px;top:12px}.rv.b{right:12px;top:12px}.rv.c{left:12px;bottom:12px}.rv.d{right:12px;bottom:12px}
 .view{display:none}.view.on{display:block}
-.row{display:grid;grid-template-columns:66px 28px minmax(130px,1.1fr) 44px minmax(120px,2.3fr) 56px 56px 62px 70px 62px 126px 40px;gap:clamp(8px,1.3vw,20px);align-items:center;padding:6px 0;border-bottom:1px solid var(--line);position:relative}
+.row{display:grid;grid-template-columns:66px 28px minmax(130px,1.1fr) 44px minmax(120px,2.3fr) 62px 70px 62px 126px 40px;gap:clamp(8px,1.3vw,20px);align-items:center;padding:6px 0;border-bottom:1px solid var(--line);position:relative}
 .row:last-child{border:0}
 .row.play{background:linear-gradient(90deg,rgba(224,36,47,.10),transparent 70%)}
 .th{width:66px;height:66px;image-rendering:pixelated;display:block;border:1px solid #2b2b30;object-fit:cover}
@@ -255,7 +255,7 @@ au.onended=()=>go(1);
 function ui(){
  document.querySelectorAll('.row').forEach((e,i)=>e.classList.toggle('play',i===cur&&playing));
  $('#pp').textContent=playing?'||':'>';
- if(cur>=0&&beats[cur]){const B=beats[cur];$('#bar').classList.add('on');$('#bt').textContent=B.title.toUpperCase();$('#bm').textContent=[B.bpm&&B.bpm+' BPM',B.musical_key].filter(Boolean).join(' / ')}
+ if(cur>=0&&beats[cur]){const B=beats[cur];$('#bar').classList.add('on');$('#bt').textContent=B.title.toUpperCase();$('#bm').textContent=money(B.price)}
 }
 
 /* thumbnails for beats without a cover */
@@ -288,10 +288,10 @@ function renderBeats(){
   const d=document.createElement('div');d.className='row';
   const tags=esc(B.tags||'').replace(/ ?\/ ?/g,'&nbsp;&nbsp;&nbsp;');
   d.innerHTML=`${thumb(B,i,'th')}<span class="no">${String(i+1).padStart(2,'0')}</span>
-  <div><div class="ti">${esc(B.title)}</div><div class="tg">${tags}</div><div class="ms">${esc(B.bpm||'--')} BPM / ${esc(B.musical_key||'--')} / ${money(B.price)}</div></div>
+  <div><div class="ti">${esc(B.title)}</div><div class="tg">${tags}</div><div class="ms">${money(B.price)}</div></div>
   <button class="pl" aria-label="Play ${esc(B.title)}"><i></i></button>
   <canvas class="wv" height="42"></canvas>
-  <div class="st">${esc(B.bpm||'--')}<small>BPM</small></div><div class="st">${esc(B.musical_key||'--')}<small>KEY</small></div><div class="st tm">--:--<small>TIME</small></div><div class="st pc">${money(B.price)}<small>PRICE</small></div>
+  <div class="st tm">--:--<small>TIME</small></div><div class="st pc">${money(B.price)}<small>PRICE</small></div>
   <div class="ic"><button class="lk" aria-label="Like">${I.heart}</button><button class="sh" aria-label="Share">${I.share}</button></div>
   <button class="cart">ADD TO CART</button>${B.free_download&&B.preview_path?`<button class="dl" aria-label="Free download">${I.dl}</button>`:'<span></span>'}`;
   list.appendChild(d);
@@ -452,7 +452,7 @@ const FIELDS={
 async function boRender(){
  const F=FIELDS[tab],e=editing||{};
  const files=F.files.map(([k,l,acc])=>`<label>${l}</label><input type="file" data-k="${k}" accept="${acc}">${e[k]?`<div class="cur">Current: ${esc(e[k].split('/').pop())} (choose a new file to replace)</div><label class="chk" style="margin-top:6px"><input type="checkbox" data-rm="${k}"> REMOVE THIS FILE</label>`:''}`).join('');
- const beatBits=tab==='beats'?`<div class="two"><div><label>BPM</label><input type="number" id="f_bpm" value="${esc(e.bpm??'')}"></div><div><label>KEY</label><input type="text" id="f_key" value="${esc(e.musical_key??'')}" placeholder="Fm"></div></div><label>TAGS (Boom Bap / Sample / Gritty)</label><input type="text" id="f_tags" value="${esc(e.tags??'')}">`:'';
+ const beatBits=tab==='beats'?`<label>TAGS (Boom Bap / Sample / Gritty)</label><input type="text" id="f_tags" value="${esc(e.tags??'')}">`:'';
  $('#bf').innerHTML=`<h3>${editing?'EDIT':'ADD'} ${F.title}</h3>
   <label>TITLE</label><input type="text" id="f_title" value="${esc(e.title??'')}" required>
   <label>DESCRIPTION</label><textarea id="f_desc">${esc(e.description??'')}</textarea>
@@ -474,7 +474,7 @@ async function boRender(){
  rows.forEach(r=>{
   const d=document.createElement('div');d.className='bi';
   const u=pub(r.cover_path);
-  d.innerHTML=`${u?`<img src="${esc(u)}" alt="">`:'<div class="nc"></div>'}<div><b>${esc(r.title)}</b><span>${money(r.price)}${r.published?'':' <i class="draft">/ HIDDEN</i>'}${r.free_download?' / FREE DL':''}${tab==='beats'&&r.bpm?' / '+esc(r.bpm)+' BPM':''}</span></div><div class="acts"><button class="ed">EDIT</button><button class="del">DELETE</button></div>`;
+  d.innerHTML=`${u?`<img src="${esc(u)}" alt="">`:'<div class="nc"></div>'}<div><b>${esc(r.title)}</b><span>${money(r.price)}${r.published?'':' <i class="draft">/ HIDDEN</i>'}${r.free_download?' / FREE DL':''}</span></div><div class="acts"><button class="ed">EDIT</button><button class="del">DELETE</button></div>`;
   d.querySelector('.ed').onclick=()=>{editing=r;boRender();scrollTo(0,0)};
   d.querySelector('.del').onclick=()=>boDelete(r);
   bl.appendChild(d);
@@ -490,7 +490,7 @@ async function boSave(ev){
  ev.preventDefault();const F=FIELDS[tab],msg=$('#bmsg'),btn=$('#f_save');btn.disabled=true;
  const row={title:$('#f_title').value.trim(),description:$('#f_desc').value.trim()||null,price:parseFloat($('#f_price').value)||0,published:$('#f_pub').checked,free_download:$('#f_free').checked,sort_order:parseInt($('#f_sort').value)||0};
  if(!row.title){msg.textContent='Title is required.';btn.disabled=false;return}
- if(tab==='beats'){row.bpm=parseInt($('#f_bpm').value)||null;row.musical_key=$('#f_key').value.trim()||null;row.tags=$('#f_tags').value.trim()||null}
+ if(tab==='beats'){row.tags=$('#f_tags').value.trim()||null}
  const oldFiles=[],newUploaded=[];
  try{
   for(const [k,l,acc,bucket,folder] of F.files){
