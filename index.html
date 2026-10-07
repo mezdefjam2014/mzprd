@@ -609,7 +609,7 @@ async function syncStock(x,gone){
   if(want&&!names.includes(want)){try{await document.fonts.load('800 100px Inter')}catch(e){}
    const blob=await (await fetch(stockCover(x.title,1024))).blob();
    const {error}=await sb.storage.from('public-media').upload('stock/'+want,blob,{contentType:'image/jpeg',upsert:true,cacheControl:'31536000'});if(error)throw error}
- }catch(e){console.warn('stock cover sync',e)}}
+ return ''}catch(e){console.warn('stock cover sync',e);return (e&&e.message)||String(e)}}
 try{document.fonts.load('800 100px Inter').then(()=>{if(typeof beats!=='undefined'&&beats.length){renderBeats();if(typeof ui==='function')ui()}}).catch(()=>{})}catch(e){}
 function thumb(item,i,cls){
  const u=coverUrl(item,512);
@@ -1411,7 +1411,7 @@ async function boRender(){
  const vid=tab==='video';document.querySelector('#bo .bo2').style.display=vid?'none':'';
  document.getElementById('bo2b').style.display='none';document.getElementById('bo2c').style.display='none';
  if(window.emailClose)emailClose();if(window.showMakerClose)showMakerClose();
- if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=3');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
+ if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=4');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
  if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=12');if(!window.showMakerOpen)await loadScript('showmaker.js?v=10');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
  if(vid){try{await loadStudio();await studioOpen()}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
  if(window.studioClose)studioClose();

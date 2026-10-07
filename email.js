@@ -25,7 +25,7 @@ const BODY={
  last:[x=>'"'+x.T+'" is still available, but not for long. If it has been on your list, now is the time.',x=>'Quick reminder: "'+x.T+'" is waiting for you. Preview it again and get it today.',x=>'You listened, now finish the job. "'+x.T+'" is ready to download.'],
  promo:[x=>x.promoLine+'. Every beat on the site, one price. Preview anything and download instantly.',x=>'The sale is on: all beats '+x.promoPrice+' for a limited time. Start with "'+x.T+'".',x=>'Grab more for less. All beats '+x.promoPrice+' right now.']
 };
-const E={items:[],kind:'beats',item:null,type:'drop',style:'dark',sj:0,bd:0,rec:[],bcc:true,when:'',dt:'',headline:'',body:'',cta:'',addr:'',foot:true};
+const E={stk:{},stkBusy:{},items:[],kind:'beats',item:null,type:'drop',style:'dark',sj:0,bd:0,rec:[],bcc:true,when:'',dt:'',headline:'',body:'',cta:'',addr:'',foot:true};
 let root=null,mounted=false;
 const $q=s=>root.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -39,7 +39,7 @@ function ctx(){
  if(E.dt){const d=new Date(E.dt);if(!isNaN(d))when=when||d.toLocaleString([], {weekday:'long',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'})}
  const pr=(typeof promo!=='undefined'&&promo)||{};
  return{it,isB,noun:isB?'beat':'pack',T:it.title||'Untitled',mood:tags[1]||'hard',genre:(tags[0]||'hip hop').toLowerCase(),info,when,
-  url:SITE+'/'+(isB?'beat':'pack')+'/'+sl+'/',cover:(typeof hostedCover==='function'?hostedCover(isB?{...it,_k:'beats'}:it):(it.cover_path?pub(it.cover_path):'')),
+  url:SITE+'/'+(isB?'beat':'pack')+'/'+sl+'/',cover:it.cover_path?pub(it.cover_path):(isB&&E.stk[it.id]||''),
   promoPrice:pr.promo_price!=null?'$'+Number(pr.promo_price).toFixed(0):'$10',promoLine:((pr.promo_text||'ALL BEATS')+' '+(pr.promo_price!=null?'$'+Number(pr.promo_price).toFixed(0):'$10')).trim()};
 }
 function content(){
@@ -158,8 +158,16 @@ function html(){return`<div class="eg"><div>
   <div class="two" style="margin-top:8px"><button class="btn" id="emEml">DOWNLOAD .EML DRAFT</button><button class="btn" id="emTxt">COPY PLAIN TEXT</button></div>
   <div class="msg" id="emMsg">COPY FOR GMAIL puts the finished design on your clipboard and opens Gmail. Paste it into the message with Ctrl+V. It works the same way in Outlook, Yahoo and Apple Mail. Nothing is sent from here, you press send yourself.</div>
  </div></div></div>`}
+/* beats on the generated cover: make sure the hosted image really exists before it goes into an email (never a broken image) */
+async function ensureStock(it){
+ if(!it||it.cover_path||it._k!=='beats'||E.stk[it.id]||E.stkBusy[it.id])return;E.stkBusy[it.id]=1;say('Preparing the cover image for the email...');
+ let err=typeof syncStock==='function'?await syncStock(it):'missing';const u=stockPub(it);
+ let ok=false;for(let i=0;i<4&&!ok;i++){try{ok=(await fetch(u+'?check='+Date.now(),{method:'HEAD',cache:'no-store'})).ok}catch(e){}if(!ok)await new Promise(r=>setTimeout(r,700))}
+ E.stkBusy[it.id]=0;if(ok){E.stk[it.id]=u;say('Cover image ready.');if(E.item===it)refresh()}else say('Could not put the cover image online'+(err?' ('+err+')':'')+'. The email is sent without a picture until this works.');
+}
 function refresh(){
  if(!E.item){return}
+ ensureStock(E.item);
  const c=content(),S=SUBJ[E.type];$q('#emSubj').value=c.subject;$q('#emSi').textContent='('+(E.sj%S.length+1)+'/'+S.length+')';
  $q('#emFrame').srcdoc=mailHtml();
  $q('#emRc').textContent=E.rec.length+' address'+(E.rec.length===1?'':'es')+(E.rec.length>400?' (Gmail limits how many you can send per day, split big lists)':'');
