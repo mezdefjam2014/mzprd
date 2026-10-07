@@ -14,12 +14,14 @@ body{background:var(--ink);color:#d9d9dc;font-family:Montserrat,sans-serif;font-
 button,input,select,textarea{font-family:inherit}
 button{cursor:pointer}
 .hero{position:relative;width:100%;aspect-ratio:1672/468;overflow:hidden;background:#000}
-.stage{position:absolute;inset:0;transform:scale(1.03);will-change:transform;filter:brightness(calc(1 + var(--lvl)*.22)) saturate(calc(1 + var(--lvl)*.25))}
+.stage{position:absolute;inset:0;transform:scale(1.03);will-change:transform}
 .stage img{position:absolute;inset:0;width:100%;height:100%;display:block}
 .hand{position:absolute;background-image:url(hero.jpg);background-repeat:no-repeat;pointer-events:none;will-change:transform;
  -webkit-mask-image:radial-gradient(ellipse at 50% 50%,#000 62%,transparent 78%);mask-image:radial-gradient(ellipse at 50% 50%,#000 62%,transparent 78%)}
+.spk{position:absolute;background-image:url(hero.jpg);background-repeat:no-repeat;pointer-events:none;will-change:transform,filter;border-radius:50%;
+ -webkit-mask-image:radial-gradient(circle,#000 80%,transparent 94%);mask-image:radial-gradient(circle,#000 80%,transparent 94%)}
 .pfx{position:absolute;pointer-events:none;opacity:0;mix-blend-mode:screen;background:radial-gradient(ellipse,rgba(255,235,210,.9),rgba(255,60,50,.55) 45%,transparent 72%)}
-.lamp{position:absolute;left:12%;top:12%;width:20%;height:48%;background:radial-gradient(ellipse,rgba(255,40,40,.55),transparent 65%);opacity:calc(.12 + var(--lvl)*.9);mix-blend-mode:screen;pointer-events:none}
+.lamp{position:absolute;left:12%;top:12%;width:20%;height:48%;background:radial-gradient(ellipse,rgba(255,40,40,.55),transparent 65%);opacity:.14;mix-blend-mode:screen;pointer-events:none}
 .hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),transparent 22%,transparent 80%,rgba(6,5,7,.9));pointer-events:none}
 .grain{position:fixed;inset:0;pointer-events:none;z-index:30;opacity:.07;background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
 header{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:clamp(14px,2.8vw,40px) 8.1%}
@@ -158,7 +160,8 @@ footer.f a:hover{color:#fff}
 <div class="hero" id="hero">
  <div class="stage" id="stage"><img src="hero.jpg" alt="MZPRD producing beats on an MPC">
   <div class="pfx" id="pfxL"></div><div class="pfx" id="pfxR"></div>
-  <div class="hand" id="handL"></div><div class="hand" id="handR"></div></div>
+  <div class="hand" id="handL"></div><div class="hand" id="handR"></div>
+  <div class="spk" id="spkL"></div><div class="spk" id="spkR"></div></div>
  <div class="lamp"></div>
  <header>
   <nav>
@@ -355,11 +358,15 @@ async function loadAll(){
 /* hero animation: hands tap on detected kick / snare */
 const stage=$('#stage'),hero=$('#hero'),root=document.documentElement;let mx=0,my=0;
 addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
-const IW=1672,IH=468,HP={L:{x:700,y:312,w:140,h:78,fx:[755,372,130,52]},R:{x:1000,y:320,w:110,h:82,fx:[880,376,100,44]}},amt={L:0,R:0};
+const IW=1672,IH=468,HP={L:{x:700,y:312,w:140,h:78,fx:[788,380,70,34]},R:{x:1000,y:320,w:110,h:82,fx:[950,352,120,22]}},amt={L:0,R:0};
 function place(){['L','R'].forEach(k=>{const q=HP[k],e=$('#hand'+k),f=$('#pfx'+k);
  Object.assign(e.style,{left:q.x/IW*100+'%',top:q.y/IH*100+'%',width:q.w/IW*100+'%',height:q.h/IH*100+'%',backgroundSize:IW/q.w*100+'% '+IH/q.h*100+'%',backgroundPosition:q.x/(IW-q.w)*100+'% '+q.y/(IH-q.h)*100+'%'});
  Object.assign(f.style,{left:q.fx[0]/IW*100+'%',top:q.fx[1]/IH*100+'%',width:q.fx[2]/IW*100+'%',height:q.fx[3]/IH*100+'%'})})}
+let tw=0;
+const SP={L:[352,204,76],R:[1188,177,76]};
+['L','R'].forEach(k=>{const [x,y,d]=SP[k],e=$('#spk'+k);Object.assign(e.style,{left:x/IW*100+'%',top:y/IH*100+'%',width:d/IW*100+'%',height:d/IH*100+'%',backgroundSize:IW/d*100+'% '+IH/d*100+'%',backgroundPosition:x/(IW-d)*100+'% '+y/(IH-d)*100+'%'})});
 place();
+const PADS=[[-30,6],[0,0],[34,8],[70,14],[104,18]],OFF=[[-6,2],[0,0],[5,3],[8,5],[3,7]];let pidx=0,spk=0;
 const det={low:{avg:0,on:false,last:0},mid:{avg:0,on:false,last:0},hi:{avg:0,on:false,last:0}};
 function onset(d,e,k,floor,gap,now){
  const hot=e>d.avg*k+floor;let hit=false;
@@ -367,7 +374,7 @@ function onset(d,e,k,floor,gap,now){
  d.on=hot;d.avg+=(e-d.avg)*(hot?.05:.12);return hit;
 }
 const band=(a,b)=>{let s=0;for(let i=a;i<b;i++)s+=data[i];return s/(b-a)};
-let hat=0;
+let pad=0;
 function frame(){
  const now=performance.now();
  if(an&&playing){
@@ -375,13 +382,24 @@ function frame(){
   const lo=band(1,5),mi=band(7,45),hi=band(100,300);
   level+=(lo/255-level)*.35;
   const kL=onset(det.low,lo,1.35,14,110,now),kR=onset(det.mid,mi,1.4,10,110,now),kH=onset(det.hi,hi,1.6,5,70,now);
-  if(kL)amt.L=1;if(kR)amt.R=1;
-  if(kH&&!kL&&!kR){hat^=1;const c=hat?'L':'R';amt[c]=Math.max(amt[c],.35)}
+  if(kL||kR||(kH&&!kL&&!kR)){pidx=(pidx+1+(kR?1:0))%PADS.length;pad=pidx;amt.L=kH&&!kL&&!kR?.4:1}
+  if(kL)spk=1;
  }else level*=.9;
- root.style.setProperty('--lvl',level.toFixed(3));
- const k=hero.clientWidth/IW;
- ['L','R'].forEach(c=>{const a=amt[c];$('#hand'+c).style.transform=`translateY(${(a*9*k).toFixed(2)}px) scale(${1+a*.03})`;$('#pfx'+c).style.opacity=a;amt[c]=a>.02?a*.82:0});
- stage.style.transform=`translate(${(-mx*14).toFixed(1)}px,${(-my*8).toFixed(1)}px) scale(${1.03+level*.012})`;
+ const k=hero.clientWidth/IW,a=amt.L,t=now/1000;
+ /* left hand: rigid press, lands on a different pad each hit, no scaling */
+ const o=OFF[pad],pf=PADS[pad];
+ $('#handL').style.transform=`translate(${(o[0]*a*k).toFixed(2)}px,${((o[1]+4)*a*k).toFixed(2)}px)`;
+ Object.assign($('#pfxL').style,{opacity:a,transform:`translate(${(pf[0]*k).toFixed(1)}px,${(pf[1]*k).toFixed(1)}px)`});
+ amt.L=a>.02?a*.8:0;
+ /* right hand: turns knobs while the beat plays, rigid rotation only */
+ tw+=((playing?1:0)-tw)*.08;
+ const rot=tw*(Math.sin(t*1.7)*2.4+Math.sin(t*4.1)*.7),tx=tw*Math.sin(t*1.1)*2.5*k;
+ Object.assign($('#handR').style,{transformOrigin:'85% 90%',transform:`translate(${tx.toFixed(2)}px,${(tw*Math.sin(t*2.3)*1.2*k).toFixed(2)}px) rotate(${rot.toFixed(2)}deg)`});
+ $('#pfxR').style.opacity=tw*(.12+.18*Math.max(0,Math.sin(t*3.3)));
+ /* speakers pump on the kick and follow the bass */
+ spk=Math.max(spk*.82,playing?level*.55:0);
+ ['L','R'].forEach(c=>Object.assign($('#spk'+c).style,{transform:`scale(${(1+spk*.11).toFixed(3)})`,filter:`brightness(${(1+spk*.5).toFixed(2)})`}));
+ stage.style.transform=`translate(${(-mx*14).toFixed(1)}px,${(-my*8).toFixed(1)}px) scale(1.03)`;
  const pr=playing&&au.duration?au.currentTime/au.duration:0;
  if(playing)$('#pg b').style.width=pr*100+'%';
  wvs.forEach((w,i)=>{const p=i===cur?pr:0;if(w.p!==p||!w.d){w.p=p;w.d=1;drawWv(w,p)}});
