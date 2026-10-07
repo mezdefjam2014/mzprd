@@ -13,7 +13,7 @@ const HEART=['0110110','1111111','1111111','0111110','0011100','0001000'];
 function css(){
  if(document.getElementById('shCss'))return;const s=document.createElement('style');s.id='shCss';
  s.textContent=`.shw{position:relative}
-.shbox{position:relative;width:min(100%,calc(86vh*1.382));margin:0 auto;aspect-ratio:1092/790;background:#05040a;border:2px solid #1d1a2e;overflow:hidden;box-shadow:0 0 40px rgba(120,60,200,.2)}
+.shbox{position:relative;width:min(100%,calc(86vh*1.778));margin:0 auto;aspect-ratio:16/9;background:#05040a;border:2px solid #1d1a2e;overflow:hidden;box-shadow:0 0 40px rgba(120,60,200,.2)}
 .shbox canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
 .shbox canvas.hv{pointer-events:none;image-rendering:auto}
 .shnp{position:absolute;left:12px;top:12px;display:flex;gap:10px;align-items:center;background:rgba(8,6,16,.78);border:1px solid #2a2542;padding:8px 12px 8px 8px;backdrop-filter:blur(3px);max-width:46%}

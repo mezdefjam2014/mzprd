@@ -30,14 +30,14 @@ function css(){
 #showmk .row{display:grid;gap:6px;align-items:center}
 #showmk .two{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 #showmk .chk{display:flex;gap:8px;align-items:center;letter-spacing:.1em;margin:6px 0}#showmk .chk input{width:auto}
-#showmk .box{position:relative;width:100%;aspect-ratio:1092/790;background:#05040a;border:1px solid #2a2a2e;max-height:78vh;margin:0 auto}
+#showmk .box{position:relative;width:100%;aspect-ratio:16/9;background:#05040a;border:1px solid #2a2a2e;max-height:78vh;margin:0 auto}
 #showmk .box canvas{width:100%;height:100%;image-rendering:pixelated;display:block}
 #showmk .ctl{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}#showmk .ctl input[type=range]{flex:1;min-width:140px;accent-color:var(--red)}
 #showmk .time{font:600 12px Montserrat;color:#c9c9ce;min-width:92px;text-align:right}
 #showmk .seg{height:10px;display:flex;margin:6px 0 0;border:1px solid #2a2a2e}#showmk .seg i{display:block;height:100%}
 #showmk .smths{display:flex;flex-wrap:wrap;gap:8px}
 #showmk .smths button{flex:1 1 calc(50% - 8px);min-width:130px;background:#050506;border:2px solid #34343a;padding:4px;cursor:pointer;color:#fff;font:700 10px Montserrat;letter-spacing:.14em}
-#showmk .smths button.on{border-color:var(--red)}#showmk .smths canvas{width:100%;height:auto;aspect-ratio:160/116;display:block;margin-bottom:4px}
+#showmk .smths button.on{border-color:var(--red)}#showmk .smths canvas{width:100%;height:auto;aspect-ratio:16/9;display:block;margin-bottom:4px}
 #showmk .sec{border:1px solid #2a2a2e;margin:10px 0;background:#08080a}
 #showmk .sec summary{cursor:pointer;padding:12px;font:700 11px Montserrat;letter-spacing:.22em;color:var(--gold);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #showmk .sec summary::-webkit-details-marker{display:none}
@@ -141,8 +141,8 @@ function rTracks(){
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function spread(){const sc=E.script,n=sc.tracks.length;if(!n)return;const slot=sc.len/n;sc.tracks.forEach((t,i)=>{t.start=Math.round(i*slot);t.end=Math.round((i+1)*slot-(i<n-1?3:0))});rTracks();refreshHits()}
 function rTheme(){
- const el=$q('#smTh');el.innerHTML=Object.keys(M.THEMES).map(k=>`<button data-k="${k}" class="${k===E.script.theme?'on':''}"><canvas width="160" height="116"></canvas>${M.THEMES[k]}</button>`).join('');
- el.querySelectorAll('button').forEach(b=>{const cv=b.querySelector('canvas');if(E.stage){const t=E.stage.themeThumb(b.dataset.k);if(t)cv.getContext('2d').drawImage(t,0,0,160,116)}
+ const el=$q('#smTh');el.innerHTML=Object.keys(M.THEMES).map(k=>`<button data-k="${k}" class="${k===E.script.theme?'on':''}"><canvas width="160" height="90"></canvas>${M.THEMES[k]}</button>`).join('');
+ el.querySelectorAll('button').forEach(b=>{const cv=b.querySelector('canvas');if(E.stage){const t=E.stage.themeThumb(b.dataset.k);if(t)cv.getContext('2d').drawImage(t,0,0,160,90)}
   b.onclick=()=>{E.script.theme=b.dataset.k;applyLooks();E.stage.setTheme(b.dataset.k);rTheme();syncAutoUi()}});
 }
 function rSegs(){
