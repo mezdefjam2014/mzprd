@@ -1001,91 +1001,134 @@ function thanksMoment(){
 }
 
 /* ---------- mini recording booth: try your voice over a beat preview (play only, never saved) ---------- */
-const bth={ctx:null,idx:-1,buf:null,vocal:null,stream:null,rec:null,chunks:[],beatSrc:null,play:null,raf:0,an:null,busy:false,bufCache:{}};
+const bth={ctx:null,idx:-1,buf:null,vocal:null,stream:null,rec:null,chunks:[],beatSrc:null,raf:0,an:null,busy:false,sess:0,bufCache:{}};
+let bthS=null; /* the ONE current mix playback: beat + voice + effect. Everything is stopped through bthKill so nothing can overlap. */
 const bthCtx=()=>{if(!bth.ctx)bth.ctx=new (window.AudioContext||window.webkitAudioContext)();return bth.ctx};
 const bthMsg=t=>{$('#bthMsg').textContent=t};
 function bthImpulse(ctx,sec,decay){const n=Math.floor(ctx.sampleRate*sec),b=ctx.createBuffer(2,n,ctx.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,decay)}return b}
+
+/* stop the current mix completely: sources, effect tails and output are all silenced and disconnected */
+function bthKill(){
+ const S=bthS;bthS=null;$('#bthPlay').textContent='PLAY MIX';if(!S)return;
+ const ctx=bth.ctx;
+ try{S.out.gain.cancelScheduledValues(0);S.out.gain.setValueAtTime(0,ctx.currentTime)}catch(e){}
+ [S.bs,S.vs].forEach(n=>{try{n.onended=null;n.stop()}catch(e){}});
+ S.fxc.nodes.forEach(n=>{try{n.disconnect()}catch(e){}});
+ try{S.vg.disconnect()}catch(e){}
+ setTimeout(()=>{try{S.out.disconnect()}catch(e){}try{S.comp.disconnect()}catch(e){}},80);
+}
+
+/* build one effect chain: vocal gain -> [effect] -> output. Returns every node so it can be removed cleanly. */
+function bthFxChain(ctx,fx,vg,out){
+ const nodes=[],mk=n=>{nodes.push(n);return n};
+ const inn=mk(ctx.createGain()),outG=mk(ctx.createGain());outG.gain.value=0;outG.gain.setTargetAtTime(1,ctx.currentTime,.012);outG.connect(out);vg.connect(inn);
+ if(fx==='room'){const dry=mk(ctx.createGain());dry.gain.value=.85;inn.connect(dry);dry.connect(outG);const cv=mk(ctx.createConvolver());cv.buffer=bthImpulse(ctx,1.7,3);const wet=mk(ctx.createGain());wet.gain.value=.4;inn.connect(cv);cv.connect(wet);wet.connect(outG)}
+ else if(fx==='echo'){const dry=mk(ctx.createGain());dry.gain.value=.9;inn.connect(dry);dry.connect(outG);const dl=mk(ctx.createDelay(1));dl.delayTime.value=.28;const fb=mk(ctx.createGain());fb.gain.value=.38;const wet=mk(ctx.createGain());wet.gain.value=.5;inn.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(outG)}
+ else if(fx==='radio'){const hp=mk(ctx.createBiquadFilter());hp.type='highpass';hp.frequency.value=520;const lp=mk(ctx.createBiquadFilter());lp.type='lowpass';lp.frequency.value=3400;const sh=mk(ctx.createWaveShaper());const cu=new Float32Array(256);for(let k=0;k<256;k++){cu[k]=Math.tanh((k/128-1)*2.4)}sh.curve=cu;inn.connect(hp);hp.connect(lp);lp.connect(sh);sh.connect(outG)}
+ else inn.connect(outG);
+ return {inn:inn,outG:outG,nodes:nodes};
+}
+
+/* start (or restart) the mix from the beginning. Always kills the previous one first. */
+function bthPlay(){
+ bthKill();if(!bth.vocal||!bth.buf)return;
+ const ctx=bthCtx();
+ const comp=ctx.createDynamicsCompressor();comp.connect(ctx.destination);
+ const out=ctx.createGain();out.gain.value=.9;out.connect(comp);
+ const bg=ctx.createGain();bg.gain.value=+$('#bthBeat').value;const bs=ctx.createBufferSource();bs.buffer=bth.buf;bs.connect(bg);bg.connect(out);
+ const vg=ctx.createGain();vg.gain.value=+$('#bthVoc').value;const vs=ctx.createBufferSource();vs.buffer=bth.vocal;
+ vs.connect(vg);
+ const fxc=bthFxChain(ctx,$('#bthFx').value,vg,out);
+ const off=(+$('#bthSync').value)/1000,t0=ctx.currentTime+.06;
+ bs.start(t0);
+ if(off>=0)vs.start(t0+off);else vs.start(t0,Math.min(-off,Math.max(0,bth.vocal.duration-.01)));
+ const S={out:out,comp:comp,bs:bs,vs:vs,bg:bg,vg:vg,fxc:fxc};bthS=S;
+ bs.onended=()=>{if(bthS===S)bthKill()};
+ $('#bthPlay').textContent='STOP';
+}
+
+/* change the effect on the fly: the old chain is cut off instantly, the new one fades in. The voice and beat keep playing, so nothing doubles. */
+function bthSwapFx(){
+ const S=bthS;if(!S)return;const ctx=bth.ctx,old=S.fxc;
+ try{S.vg.disconnect(old.inn)}catch(e){}
+ old.outG.gain.cancelScheduledValues(0);old.outG.gain.setTargetAtTime(0,ctx.currentTime,.01);
+ S.fxc=bthFxChain(ctx,$('#bthFx').value,S.vg,S.out);
+ setTimeout(()=>{old.nodes.forEach(n=>{try{n.disconnect()}catch(e){}})},160);
+}
+
 async function openBooth(i){
  const B=beats[i];if(!B||!B.preview_path){toast('NO PREVIEW TO RECORD OVER');return}
  try{au.pause()}catch(e){}
+ bthStopAll();bth.sess++;bth.busy=false;
  bth.idx=i;bth.vocal=null;$('#bthT').textContent='MZPRD BOOTH: '+String(B.title).toUpperCase();
- $('#bthRecSec').style.display='block';$('#bthRevSec').style.display='none';$('#bthRec').disabled=true;$('#bthRec').textContent='...';
+ $('#bthRecSec').style.display='block';$('#bthRevSec').style.display='none';$('#bthRec').disabled=true;$('#bthRec').textContent='...';$('#bthRec').onclick=bthRecord;
  $('#booth').classList.add('on');bthMsg('LOADING THE BEAT...');
+ const my=bth.sess;
  try{
   const ctx=bthCtx();await ctx.resume();
   if(!bth.bufCache[B.id]){const r=await fetch(pub(B.preview_path));bth.bufCache[B.id]=await ctx.decodeAudioData(await r.arrayBuffer())}
+  if(my!==bth.sess)return;
   bth.buf=bth.bufCache[B.id];$('#bthRec').disabled=false;$('#bthRec').textContent='REC';bthMsg("LET'S HEAR IT. HIT REC WHEN YOU'RE READY.");
- }catch(e){bthMsg('COULD NOT LOAD THE BEAT. TRY AGAIN.')}
+ }catch(e){if(my===bth.sess)bthMsg('COULD NOT LOAD THE BEAT. TRY AGAIN.')}
 }
 function bthStopAll(){
- try{bth.beatSrc&&bth.beatSrc.stop()}catch(e){}bth.beatSrc=null;
- try{bth.play&&bth.play.stop()}catch(e){}bth.play=null;
+ bthKill();
+ try{bth.beatSrc&&(bth.beatSrc.onended=null,bth.beatSrc.stop())}catch(e){}bth.beatSrc=null;
  if(bth.rec&&bth.rec.state!=='inactive'){bth.rec.onstop=null;try{bth.rec.stop()}catch(e){}}
  bth.rec=null;cancelAnimationFrame(bth.raf);$('#bthMtr').style.width='0';$('#bthRec').classList.remove('live');
 }
 function closeBooth(){
- bthStopAll();if(bth.stream){bth.stream.getTracks().forEach(t=>t.stop());bth.stream=null}
+ bth.sess++;bthStopAll();bth.busy=false;
+ if(bth.stream){bth.stream.getTracks().forEach(t=>t.stop());bth.stream=null}
  bth.vocal=null;bth.chunks=[];$('#booth').classList.remove('on');
 }
 async function bthRecord(){
- if(bth.busy)return;bth.busy=true;const ctx=bthCtx();
+ if(bth.busy||!bth.buf)return;bth.busy=true;const ctx=bthCtx(),my=bth.sess;
  try{
-  await ctx.resume();
-  if(!bth.stream){bthMsg('ALLOW YOUR MICROPHONE...');bth.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})}
+  bthKill();await ctx.resume();
+  if(!bth.stream||!bth.stream.active){bthMsg('ALLOW YOUR MICROPHONE...');bth.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})}
+  if(my!==bth.sess){bth.busy=false;return}
   const msrc=ctx.createMediaStreamSource(bth.stream);bth.an=ctx.createAnalyser();bth.an.fftSize=512;msrc.connect(bth.an);
   const td=new Uint8Array(bth.an.fftSize);
+  cancelAnimationFrame(bth.raf);
   const meter=()=>{bth.an.getByteTimeDomainData(td);let m=0;for(let k=0;k<td.length;k++)m=Math.max(m,Math.abs(td[k]-128));$('#bthMtr').style.width=Math.min(100,m/128*140)+'%';bth.raf=requestAnimationFrame(meter)};meter();
-  for(const n of ['3','2','1']){bthMsg('GET READY... '+n);await new Promise(r=>setTimeout(r,700))}
+  for(const n of ['3','2','1']){bthMsg('GET READY... '+n);await new Promise(r=>setTimeout(r,700));if(my!==bth.sess){bth.busy=false;return}}
   bth.chunks=[];const mr=new MediaRecorder(bth.stream);bth.rec=mr;mr.ondataavailable=e=>{if(e.data&&e.data.size)bth.chunks.push(e.data)};
   const g=ctx.createGain();g.gain.value=.85;g.connect(ctx.destination);
   const src=ctx.createBufferSource();src.buffer=bth.buf;src.connect(g);bth.beatSrc=src;
   mr.onstop=bthFinish;
   src.onended=()=>{if(bth.rec&&bth.rec.state==='recording')bth.rec.stop()};
   $('#bthRec').classList.add('live');$('#bthRec').textContent='STOP';bthMsg('RECORDING... GO CRAZY');
+  $('#bthRec').onclick=()=>{if(bth.rec&&bth.rec.state==='recording'){try{bth.beatSrc&&(bth.beatSrc.onended=null,bth.beatSrc.stop())}catch(e){}bth.rec.stop()}};
   mr.start();src.start();
-  $('#bthRec').onclick=()=>{if(bth.rec&&bth.rec.state==='recording'){try{bth.beatSrc&&bth.beatSrc.stop()}catch(e){}bth.rec.stop()}};
  }catch(e){
   bthMsg(e&&e.name==='NotAllowedError'?'MIC BLOCKED. ALLOW IT IN YOUR BROWSER AND TRY AGAIN.':'COULD NOT USE THE MICROPHONE.');
+  cancelAnimationFrame(bth.raf);$('#bthMtr').style.width='0';
  }
  bth.busy=false;
 }
 async function bthFinish(){
  cancelAnimationFrame(bth.raf);$('#bthMtr').style.width='0';$('#bthRec').classList.remove('live');
+ const my=bth.sess;
  try{
   const blob=new Blob(bth.chunks,{type:(bth.rec&&bth.rec.mimeType)||'audio/webm'});
-  bth.vocal=await bthCtx().decodeAudioData(await blob.arrayBuffer());
+  const vocal=await bthCtx().decodeAudioData(await blob.arrayBuffer());
   bth.chunks=[];bth.rec=null;
+  if(my!==bth.sess)return;
+  if(vocal.duration<.4){bthMsg('THAT WAS TOO SHORT. TRY AGAIN.');$('#bthRec').textContent='REC';$('#bthRec').onclick=bthRecord;return}
+  bth.vocal=vocal;
   $('#bthRecSec').style.display='none';$('#bthRevSec').style.display='block';
   bthMsg(rp(["THAT'S FIRE.",'RUN THAT BACK.','OKAY, I HEAR YOU.','CROWN APPROVED.']));
   bthPlay();
- }catch(e){bthMsg('THE TAKE COULD NOT BE READ. TRY AGAIN.');$('#bthRec').textContent='REC'}
+ }catch(e){bthMsg('THE TAKE COULD NOT BE READ. TRY AGAIN.');$('#bthRec').textContent='REC';$('#bthRec').onclick=bthRecord}
 }
-let bthG={};
-function bthPlay(){
- const ctx=bthCtx();try{bth.play&&bth.play.stop()}catch(e){}
- if(!bth.vocal)return;
- const out=ctx.createGain();out.gain.value=.9;out.connect(ctx.destination);
- const bg=ctx.createGain();bg.gain.value=+$('#bthBeat').value;const bs=ctx.createBufferSource();bs.buffer=bth.buf;bs.connect(bg);bg.connect(out);
- const vg=ctx.createGain();vg.gain.value=+$('#bthVoc').value;const vs=ctx.createBufferSource();vs.buffer=bth.vocal;vs.connect(vg);
- const fx=$('#bthFx').value;
- if(fx==='room'){const dry=ctx.createGain();dry.gain.value=.85;vg.connect(dry);dry.connect(out);const cv=ctx.createConvolver();cv.buffer=bthImpulse(ctx,1.7,3);const wet=ctx.createGain();wet.gain.value=.4;vg.connect(cv);cv.connect(wet);wet.connect(out)}
- else if(fx==='echo'){const dry=ctx.createGain();dry.gain.value=.9;vg.connect(dry);dry.connect(out);const dl=ctx.createDelay(1);dl.delayTime.value=.28;const fb=ctx.createGain();fb.gain.value=.38;const wet=ctx.createGain();wet.gain.value=.5;vg.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(out)}
- else if(fx==='radio'){const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=520;const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3400;const sh=ctx.createWaveShaper();const cu=new Float32Array(256);for(let k=0;k<256;k++){const x=k/128-1;cu[k]=Math.tanh(x*2.4)}sh.curve=cu;vg.connect(hp);hp.connect(lp);lp.connect(sh);sh.connect(out)}
- else vg.connect(out);
- const off=(+$('#bthSync').value)/1000,t0=ctx.currentTime+.06;
- bs.start(t0);
- if(off>=0)vs.start(t0+off);else vs.start(t0,Math.min(-off,bth.vocal.duration-.01));
- bth.play=bs;bthG={bg:bg,vg:vg};
- $('#bthPlay').textContent='STOP';
- bs.onended=()=>{if(bth.play===bs){bth.play=null;$('#bthPlay').textContent='PLAY MIX'}};
-}
-$('#bthPlay').onclick=()=>{if(bth.play){try{bth.play.stop()}catch(e){}bth.play=null;$('#bthPlay').textContent='PLAY MIX'}else bthPlay()};
-$('#bthVoc').oninput=e=>{if(bthG.vg)bthG.vg.gain.value=+e.target.value};
-$('#bthBeat').oninput=e=>{if(bthG.bg)bthG.bg.gain.value=+e.target.value};
-$('#bthFx').onchange=()=>{if(bth.play)bthPlay()};
+$('#bthPlay').onclick=()=>{if(bthS)bthKill();else bthPlay()};
+$('#bthVoc').oninput=e=>{if(bthS)bthS.vg.gain.value=+e.target.value};
+$('#bthBeat').oninput=e=>{if(bthS)bthS.bg.gain.value=+e.target.value};
+$('#bthFx').onchange=()=>{if(bthS)bthSwapFx()};
 $('#bthSync').oninput=e=>{$('#bthSyncV').textContent=e.target.value+'ms'};
-$('#bthSync').onchange=()=>{if(bth.play)bthPlay()};
-$('#bthAgain').onclick=()=>{bthStopAll();$('#bthPlay').textContent='PLAY MIX';$('#bthRecSec').style.display='block';$('#bthRevSec').style.display='none';$('#bthRec').textContent='REC';$('#bthRec').onclick=bthRecord;bthMsg('AGAIN. HIT REC WHEN YOU ARE READY.')};
+$('#bthSync').onchange=()=>{if(bthS)bthPlay()};
+$('#bthAgain').onclick=()=>{bthStopAll();bth.vocal=null;bth.busy=false;$('#bthRecSec').style.display='block';$('#bthRevSec').style.display='none';$('#bthRec').textContent='REC';$('#bthRec').onclick=bthRecord;bthMsg('AGAIN. HIT REC WHEN YOU ARE READY.')};
 $('#bthBuy').onclick=()=>{const B=beats[bth.idx];closeBooth();if(B&&!cart.has('b:'+B.id)){toggleCart('b:'+B.id,$('#cartBtn'))}setTimeout(()=>$('#cartBtn').click(),400)};
 $('#bthRec').onclick=bthRecord;$('#bthX').onclick=closeBooth;
 $('#booth').onclick=e=>{if(e.target.id==='booth')closeBooth()};
