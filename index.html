@@ -47,6 +47,20 @@ button{cursor:pointer}
 .crate .card:last-child{margin-right:0}
 .crate .cfront{height:46px;margin:0 22px;background:linear-gradient(#1c1510,#0a0705);border:2px solid #2b2118;border-top:3px solid #43331f;display:flex;align-items:center;justify-content:center;font:400 9px 'Press Start 2P';letter-spacing:.25em;color:var(--gold);box-shadow:0 10px 24px rgba(0,0,0,.6)}
 @media(max-width:700px){.say{right:8px;bottom:12px;font-size:11px}.crate .grid{padding:28px 24px 22px}}
+.mtr{height:10px;background:#1b1b20;border:1px solid #34343a;margin:10px 0}
+.mtr b{display:block;height:100%;width:0;background:linear-gradient(90deg,#3ddc84,#e8b94a,#e0242f);transition:width .06s}
+.recbig{width:88px;height:88px;border-radius:50%;background:#e0242f;border:4px solid #fff;color:#fff;font:700 12px Montserrat;letter-spacing:.2em;display:block;margin:14px auto}
+.recbig.live{animation:recp 1s infinite}
+@keyframes recp{0%,100%{box-shadow:0 0 0 0 rgba(224,36,47,.7)}50%{box-shadow:0 0 0 18px rgba(224,36,47,0)}}
+.bthrow{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center;margin:12px 0;font:600 10px Montserrat;letter-spacing:.2em;color:#8e8e94}
+.bthrow input[type=range]{width:100%;accent-color:var(--red)}
+.bthrow select{background:#050506;color:#fff;border:1.5px solid #34343a;padding:10px;font:600 12px Montserrat}
+.bthmsg{font:600 13px/1.5 Montserrat;color:var(--gold);min-height:20px;margin:8px 0;letter-spacing:.04em;text-align:center}
+.bthnote{font:500 11px/1.6 Montserrat;color:#6c6c73;text-align:center;margin-top:12px;letter-spacing:.06em}
+.bthbtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.bthbtns .go{flex:1;margin:0;min-width:120px}
+#recBtn{background:transparent;border:1.5px solid var(--red);color:var(--red);font:700 10px Montserrat;letter-spacing:.2em;padding:0 12px;height:40px;display:none}
+#recBtn:hover{background:var(--red);color:#fff}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .grain{position:fixed;inset:0;pointer-events:none;z-index:30;opacity:.07;background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
 header{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:clamp(14px,2.8vw,40px) 8.1%}
@@ -350,6 +364,7 @@ footer.f a:hover{color:#fff}
 <div id="bar">
  <div><div id="bt">--</div><div id="bm"></div></div>
  <div class="bc"><button id="prev" aria-label="Previous">&lt;</button><button id="pp" aria-label="Play or pause">&gt;</button><button id="next" aria-label="Next">&gt;&gt;</button></div>
+ <button id="recBtn" aria-label="Record your voice over this beat">REC</button>
  <div id="pg"><b></b></div>
  <input id="vol" type="range" min="0" max="1" step=".01" value=".8" aria-label="Volume">
 </div>
@@ -376,6 +391,25 @@ footer.f a:hover{color:#fff}
  </div>
 </div>
 
+<div class="modal" id="booth"><div class="box" oncontextmenu="return false">
+ <button class="x" id="bthX" aria-label="Close booth">&times;</button>
+ <h3 id="bthT">MZPRD BOOTH</h3>
+ <div class="bthnote" style="margin:0 0 6px">USE HEADPHONES. THE BEAT PLAYS IN YOUR EARS WHILE YOUR VOICE IS RECORDED.</div>
+ <div class="bthmsg" id="bthMsg">LOADING THE BEAT...</div>
+ <div id="bthRecSec">
+  <div class="mtr"><b id="bthMtr"></b></div>
+  <button class="recbig" id="bthRec">REC</button>
+ </div>
+ <div id="bthRevSec" style="display:none">
+  <div class="bthrow"><span>YOUR VOICE</span><input type="range" id="bthVoc" min="0" max="1.6" step=".01" value="1"></div>
+  <div class="bthrow"><span>BEAT</span><input type="range" id="bthBeat" min="0" max="1.2" step=".01" value=".8"></div>
+  <div class="bthrow"><span>EFFECT</span><select id="bthFx"><option value="dry">DRY</option><option value="room">ROOM</option><option value="echo">ECHO</option><option value="radio">RADIO</option></select></div>
+  <div class="bthrow"><span>SYNC <em id="bthSyncV" style="font-style:normal;color:#fff">-90ms</em></span><input type="range" id="bthSync" min="-300" max="300" step="5" value="-90"></div>
+  <div class="bthbtns"><button class="go" id="bthPlay">PLAY MIX</button><button class="go" id="bthAgain" style="background:#2a2a2e">RE-RECORD</button></div>
+  <div class="bthbtns"><button class="go" id="bthBuy" style="background:var(--gold);color:#1a0f00">BUY THIS BEAT</button></div>
+ </div>
+ <div class="bthnote">YOUR TAKE STAYS IN THIS PAGE ONLY. IT CANNOT BE SAVED OR DOWNLOADED. BUY THE BEAT TO GET THE FILES.</div>
+</div></div>
 <div class="modal" id="cfm" style="z-index:95"><div class="box"><h3 id="cfmT">CONFIRM</h3><div id="cfmM" style="font:500 14px/1.7 Montserrat;color:#d9d9dc"></div><div style="display:flex;gap:10px;margin-top:20px"><button class="go" id="cfmNo" style="background:#2a2a2e;margin:0">CANCEL</button><button class="go" id="cfmYes" style="margin:0">DELETE</button></div></div></div>
 <div id="toast"></div>
 <div class="grain"></div>
@@ -429,6 +463,7 @@ function ui(){
  const bpEl=document.querySelector('.bp');if(bpEl)bpEl.classList.toggle('play',pageIdx>=0&&((pageKind==='b'&&pageIdx===cur)||(pageKind==='p'&&pageIdx===curPack))&&playing);
  document.querySelectorAll('.row').forEach((e,i)=>e.classList.toggle('play',i===cur&&playing));
  $('#pp').textContent=playing?'||':'>';
+ $('#recBtn').style.display=(cur>=0&&beats[cur]&&beats[cur].preview_path&&curPack<0)?'block':'none';
  document.querySelectorAll('#packs .card').forEach((e,i)=>{e.classList.toggle('play',i===curPack&&playing);if(i!==curPack){const b=e.querySelector('.cprog b');if(b)b.style.width='0'}});
  if(curPack>=0&&packs[curPack]){const P=packs[curPack];$('#bar').classList.add('on');$('#bt').textContent=P.title.toUpperCase();$('#bm').textContent='SAMPLE PACK / '+money(P.price)}
  else if(cur>=0&&beats[cur]){const B=beats[cur];$('#bar').classList.add('on');$('#bt').textContent=B.title.toUpperCase();$('#bm').textContent=money(eff(B))}
@@ -624,13 +659,14 @@ function showBeatPage(i){
  if(i<0||!beats[i]){box.innerHTML='<button class="back" id="bBack">&larr; ALL BEATS</button><div class="empty"><b>NOT FOUND</b>THIS BEAT IS NOT AVAILABLE</div>';$('#bBack').onclick=()=>{history.pushState(null,'',location.pathname+location.search);route()};showView('beat');return}
  const B=beats[i],tg=(B.tags||'').split('/').map(x=>x.trim()).filter(Boolean),old=promo.promo_enabled&&eff(B)!==Number(B.price);
  const others=beats.map((b,k)=>[b,k]).filter(x=>x[1]!==i).slice(0,4);
- box.innerHTML='<button class="x" id="bX" aria-label="Close beat page">&times;</button><button class="back" id="bBack">&larr; ALL BEATS</button><div class="bp'+(cur===i&&playing?' play':'')+'"><div class="cov">'+thumb(B,i,'')+'</div><div><h1>'+esc(B.title)+'</h1><div class="tgs">'+tg.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div><div class="prc">'+money(eff(B))+(old?'<s>'+money(B.price)+'</s>':'')+'</div><canvas class="bwv" id="bwv"></canvas>'+(B.description?'<div class="d">'+esc(B.description)+'</div>':'')+'<div class="acts2"><button class="pl" id="bPlay" aria-label="Play"><i></i></button><button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(B.free_download&&B.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE BEATS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1],'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
+ box.innerHTML='<button class="x" id="bX" aria-label="Close beat page">&times;</button><button class="back" id="bBack">&larr; ALL BEATS</button><div class="bp'+(cur===i&&playing?' play':'')+'"><div class="cov">'+thumb(B,i,'')+'</div><div><h1>'+esc(B.title)+'</h1><div class="tgs">'+tg.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div><div class="prc">'+money(eff(B))+(old?'<s>'+money(B.price)+'</s>':'')+'</div><canvas class="bwv" id="bwv"></canvas>'+(B.description?'<div class="d">'+esc(B.description)+'</div>':'')+'<div class="acts2"><button class="pl" id="bPlay" aria-label="Play"><i></i></button><button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(B.preview_path?'<button class="cart" id="bRec" style="border-color:#4a4a50;color:#fff">RECORD OVER IT</button>':'')+(B.free_download&&B.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE BEATS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1],'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
  paintArt(box);
  $('#bBack').onclick=$('#bX').onclick=closeBeatPage;
  $('#bPlay').onclick=()=>play(i);
  $('#bCart').onclick=e=>toggleCart('b:'+B.id,e.currentTarget);
  $('#bShare').onclick=()=>{try{navigator.clipboard.writeText(location.origin+location.pathname+'#/beat/'+encodeURIComponent(bslug(B)))}catch(e){}toast('LINK COPIED')};
  const f=$('#bFree');if(f)f.onclick=()=>freeDownload(B);
+ const rb=$('#bRec');if(rb)rb.onclick=()=>openBooth(i);
  box.querySelectorAll('.mr a').forEach(a=>a.onclick=()=>{location.hash='#/beat/'+encodeURIComponent(a.dataset.s);scrollTo(0,0)});
  const bars=wvs[i]?wvs[i].bars:[...Array(110)].map(()=>.5);pwv={cv:$('#bwv'),bars:bars,p:-1,d:0,i:i};
  const cv=$('#bwv');cv.onclick=e=>{if(cur!==i){play(i);return}const r=cv.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration};
@@ -963,6 +999,97 @@ function thanksMoment(){
  g.classList.add('in');
  girlTimer=setTimeout(()=>{g.classList.remove('in');setTimeout(()=>{if(sp)sp.textContent='LIMITED TIME';$('#girlShop').style.display='';setupPromo()},900)},6800);
 }
+
+/* ---------- mini recording booth: try your voice over a beat preview (play only, never saved) ---------- */
+const bth={ctx:null,idx:-1,buf:null,vocal:null,stream:null,rec:null,chunks:[],beatSrc:null,play:null,raf:0,an:null,busy:false,bufCache:{}};
+const bthCtx=()=>{if(!bth.ctx)bth.ctx=new (window.AudioContext||window.webkitAudioContext)();return bth.ctx};
+const bthMsg=t=>{$('#bthMsg').textContent=t};
+function bthImpulse(ctx,sec,decay){const n=Math.floor(ctx.sampleRate*sec),b=ctx.createBuffer(2,n,ctx.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,decay)}return b}
+async function openBooth(i){
+ const B=beats[i];if(!B||!B.preview_path){toast('NO PREVIEW TO RECORD OVER');return}
+ try{au.pause()}catch(e){}
+ bth.idx=i;bth.vocal=null;$('#bthT').textContent='MZPRD BOOTH: '+String(B.title).toUpperCase();
+ $('#bthRecSec').style.display='block';$('#bthRevSec').style.display='none';$('#bthRec').disabled=true;$('#bthRec').textContent='...';
+ $('#booth').classList.add('on');bthMsg('LOADING THE BEAT...');
+ try{
+  const ctx=bthCtx();await ctx.resume();
+  if(!bth.bufCache[B.id]){const r=await fetch(pub(B.preview_path));bth.bufCache[B.id]=await ctx.decodeAudioData(await r.arrayBuffer())}
+  bth.buf=bth.bufCache[B.id];$('#bthRec').disabled=false;$('#bthRec').textContent='REC';bthMsg("LET'S HEAR IT. HIT REC WHEN YOU'RE READY.");
+ }catch(e){bthMsg('COULD NOT LOAD THE BEAT. TRY AGAIN.')}
+}
+function bthStopAll(){
+ try{bth.beatSrc&&bth.beatSrc.stop()}catch(e){}bth.beatSrc=null;
+ try{bth.play&&bth.play.stop()}catch(e){}bth.play=null;
+ if(bth.rec&&bth.rec.state!=='inactive'){bth.rec.onstop=null;try{bth.rec.stop()}catch(e){}}
+ bth.rec=null;cancelAnimationFrame(bth.raf);$('#bthMtr').style.width='0';$('#bthRec').classList.remove('live');
+}
+function closeBooth(){
+ bthStopAll();if(bth.stream){bth.stream.getTracks().forEach(t=>t.stop());bth.stream=null}
+ bth.vocal=null;bth.chunks=[];$('#booth').classList.remove('on');
+}
+async function bthRecord(){
+ if(bth.busy)return;bth.busy=true;const ctx=bthCtx();
+ try{
+  await ctx.resume();
+  if(!bth.stream){bthMsg('ALLOW YOUR MICROPHONE...');bth.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})}
+  const msrc=ctx.createMediaStreamSource(bth.stream);bth.an=ctx.createAnalyser();bth.an.fftSize=512;msrc.connect(bth.an);
+  const td=new Uint8Array(bth.an.fftSize);
+  const meter=()=>{bth.an.getByteTimeDomainData(td);let m=0;for(let k=0;k<td.length;k++)m=Math.max(m,Math.abs(td[k]-128));$('#bthMtr').style.width=Math.min(100,m/128*140)+'%';bth.raf=requestAnimationFrame(meter)};meter();
+  for(const n of ['3','2','1']){bthMsg('GET READY... '+n);await new Promise(r=>setTimeout(r,700))}
+  bth.chunks=[];const mr=new MediaRecorder(bth.stream);bth.rec=mr;mr.ondataavailable=e=>{if(e.data&&e.data.size)bth.chunks.push(e.data)};
+  const g=ctx.createGain();g.gain.value=.85;g.connect(ctx.destination);
+  const src=ctx.createBufferSource();src.buffer=bth.buf;src.connect(g);bth.beatSrc=src;
+  mr.onstop=bthFinish;
+  src.onended=()=>{if(bth.rec&&bth.rec.state==='recording')bth.rec.stop()};
+  $('#bthRec').classList.add('live');$('#bthRec').textContent='STOP';bthMsg('RECORDING... GO CRAZY');
+  mr.start();src.start();
+  $('#bthRec').onclick=()=>{if(bth.rec&&bth.rec.state==='recording'){try{bth.beatSrc&&bth.beatSrc.stop()}catch(e){}bth.rec.stop()}};
+ }catch(e){
+  bthMsg(e&&e.name==='NotAllowedError'?'MIC BLOCKED. ALLOW IT IN YOUR BROWSER AND TRY AGAIN.':'COULD NOT USE THE MICROPHONE.');
+ }
+ bth.busy=false;
+}
+async function bthFinish(){
+ cancelAnimationFrame(bth.raf);$('#bthMtr').style.width='0';$('#bthRec').classList.remove('live');
+ try{
+  const blob=new Blob(bth.chunks,{type:(bth.rec&&bth.rec.mimeType)||'audio/webm'});
+  bth.vocal=await bthCtx().decodeAudioData(await blob.arrayBuffer());
+  bth.chunks=[];bth.rec=null;
+  $('#bthRecSec').style.display='none';$('#bthRevSec').style.display='block';
+  bthMsg(rp(["THAT'S FIRE.",'RUN THAT BACK.','OKAY, I HEAR YOU.','CROWN APPROVED.']));
+  bthPlay();
+ }catch(e){bthMsg('THE TAKE COULD NOT BE READ. TRY AGAIN.');$('#bthRec').textContent='REC'}
+}
+let bthG={};
+function bthPlay(){
+ const ctx=bthCtx();try{bth.play&&bth.play.stop()}catch(e){}
+ if(!bth.vocal)return;
+ const out=ctx.createGain();out.gain.value=.9;out.connect(ctx.destination);
+ const bg=ctx.createGain();bg.gain.value=+$('#bthBeat').value;const bs=ctx.createBufferSource();bs.buffer=bth.buf;bs.connect(bg);bg.connect(out);
+ const vg=ctx.createGain();vg.gain.value=+$('#bthVoc').value;const vs=ctx.createBufferSource();vs.buffer=bth.vocal;vs.connect(vg);
+ const fx=$('#bthFx').value;
+ if(fx==='room'){const dry=ctx.createGain();dry.gain.value=.85;vg.connect(dry);dry.connect(out);const cv=ctx.createConvolver();cv.buffer=bthImpulse(ctx,1.7,3);const wet=ctx.createGain();wet.gain.value=.4;vg.connect(cv);cv.connect(wet);wet.connect(out)}
+ else if(fx==='echo'){const dry=ctx.createGain();dry.gain.value=.9;vg.connect(dry);dry.connect(out);const dl=ctx.createDelay(1);dl.delayTime.value=.28;const fb=ctx.createGain();fb.gain.value=.38;const wet=ctx.createGain();wet.gain.value=.5;vg.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(out)}
+ else if(fx==='radio'){const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=520;const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3400;const sh=ctx.createWaveShaper();const cu=new Float32Array(256);for(let k=0;k<256;k++){const x=k/128-1;cu[k]=Math.tanh(x*2.4)}sh.curve=cu;vg.connect(hp);hp.connect(lp);lp.connect(sh);sh.connect(out)}
+ else vg.connect(out);
+ const off=(+$('#bthSync').value)/1000,t0=ctx.currentTime+.06;
+ bs.start(t0);
+ if(off>=0)vs.start(t0+off);else vs.start(t0,Math.min(-off,bth.vocal.duration-.01));
+ bth.play=bs;bthG={bg:bg,vg:vg};
+ $('#bthPlay').textContent='STOP';
+ bs.onended=()=>{if(bth.play===bs){bth.play=null;$('#bthPlay').textContent='PLAY MIX'}};
+}
+$('#bthPlay').onclick=()=>{if(bth.play){try{bth.play.stop()}catch(e){}bth.play=null;$('#bthPlay').textContent='PLAY MIX'}else bthPlay()};
+$('#bthVoc').oninput=e=>{if(bthG.vg)bthG.vg.gain.value=+e.target.value};
+$('#bthBeat').oninput=e=>{if(bthG.bg)bthG.bg.gain.value=+e.target.value};
+$('#bthFx').onchange=()=>{if(bth.play)bthPlay()};
+$('#bthSync').oninput=e=>{$('#bthSyncV').textContent=e.target.value+'ms'};
+$('#bthSync').onchange=()=>{if(bth.play)bthPlay()};
+$('#bthAgain').onclick=()=>{bthStopAll();$('#bthPlay').textContent='PLAY MIX';$('#bthRecSec').style.display='block';$('#bthRevSec').style.display='none';$('#bthRec').textContent='REC';$('#bthRec').onclick=bthRecord;bthMsg('AGAIN. HIT REC WHEN YOU ARE READY.')};
+$('#bthBuy').onclick=()=>{const B=beats[bth.idx];closeBooth();if(B&&!cart.has('b:'+B.id)){toggleCart('b:'+B.id,$('#cartBtn'))}setTimeout(()=>$('#cartBtn').click(),400)};
+$('#bthRec').onclick=bthRecord;$('#bthX').onclick=closeBooth;
+$('#booth').onclick=e=>{if(e.target.id==='booth')closeBooth()};
+$('#recBtn').onclick=()=>{if(cur>=0)openBooth(cur)};
 
 /* ---------- admin: login + back office ---------- */
 let isAdmin=false,tab='beats',editing=null;
