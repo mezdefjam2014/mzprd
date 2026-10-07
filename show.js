@@ -77,6 +77,11 @@ let _noise=null;
 function noiseBuf(ctx){if(_noise&&_noise.sampleRate===ctx.sampleRate)return _noise;const b=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;_noise=b;return b}
 /* schedules the show audio from time `from` to `until` (seconds of show time). t0 = ctx time that matches `from`.
    returns {stop()}. bufs[i] is the decoded AudioBuffer of script.tracks[i]. */
+/* real crowd recordings (CC0, bigsoundbank.com): cheers, applause and the closing roar. Loaded once, shared by live play and video render */
+let _sfx=null,_sfxP=null;
+function loadSfx(){if(_sfxP)return _sfxP;const dc=new OfflineAudioContext(2,1,48000),base=u=>new URL(u,document.baseURI).href,
+ ld=u=>fetch(base('sfx/'+u+'.mp3?v=1')).then(r=>r.arrayBuffer()).then(b=>dc.decodeAudioData(b)).catch(()=>null);
+ _sfxP=Promise.all(['crowd-cheer1','crowd-cheer2','crowd-roar','crowd-applause'].map(ld)).then(([c1,c2,roar,app])=>{_sfx={cheers:[c1,c2].filter(Boolean),roar,app};return _sfx});return _sfxP}
 function schedule(ctx,dest,script,bufs,from,until,o){
  o=o||{};const t0=o.t0||0,srcs=[],C=T=>t0+(T-from);
  const bus=ctx.createGain(),lp=ctx.createBiquadFilter(),comp=ctx.createDynamicsCompressor();lp.type='lowpass';lp.Q.value=.7;
@@ -112,13 +117,16 @@ function schedule(ctx,dest,script,bufs,from,until,o){
  });
  /* the crowd: a cheer when a beat starts, applause when it fades, a roar at the end */
  if(script.fx.crowdSound!==false){
-  const cbus=ctx.createGain();cbus.gain.value=.22;cbus.connect(dest);
-  const cheer=(T0,len,peak)=>{if(T0<from-len||T0>=until)return;const T=Math.max(C(T0),C(from)),nz=ctx.createBufferSource();nz.buffer=noiseBuf(ctx);nz.loop=true;const bp=ctx.createBiquadFilter(),bp2=ctx.createBiquadFilter(),g=ctx.createGain();bp.type='bandpass';bp.frequency.value=1100;bp.Q.value=.8;bp2.type='bandpass';bp2.frequency.value=2300;bp2.Q.value=.6;
+  const cbus=ctx.createGain();cbus.gain.value=.45;cbus.connect(dest);
+  const rec=(buf,T0,len,peak,fin,off)=>{if(!buf||T0+len<=from||T0>=until)return true;const s0=Math.max(T0,from),o0=(off||0)+(s0-T0);if(o0>=buf.duration)return true;const src=ctx.createBufferSource();src.buffer=buf;const g=ctx.createGain(),T=C(s0),e=C(Math.min(T0+len,T0+buf.duration-(off||0)));
+   src.playbackRate.value=.94+Math.random()*.12;g.gain.setValueAtTime(s0>T0?peak:.0001,T);if(s0<=T0)g.gain.linearRampToValueAtTime(peak,T+fin);g.gain.setValueAtTime(peak,Math.max(T+fin,e-Math.min(1.5,len*.4)));g.gain.linearRampToValueAtTime(.0001,e);
+   src.connect(g);g.connect(cbus);src.start(T,o0);src.stop(e+.05);srcs.push(src);return true};
+  const cheer=(T0,len,peak)=>{if(_sfx&&_sfx.cheers.length){const b=_sfx.cheers[Math.floor(Math.random()*_sfx.cheers.length)];return rec(b,T0,Math.min(len+1.5,b.duration),peak*1.5,.15)}if(T0<from-len||T0>=until)return;const T=Math.max(C(T0),C(from)),nz=ctx.createBufferSource();nz.buffer=noiseBuf(ctx);nz.loop=true;const bp=ctx.createBiquadFilter(),bp2=ctx.createBiquadFilter(),g=ctx.createGain();bp.type='bandpass';bp.frequency.value=1100;bp.Q.value=.8;bp2.type='bandpass';bp2.frequency.value=2300;bp2.Q.value=.6;
    g.gain.setValueAtTime(.0001,T);g.gain.linearRampToValueAtTime(peak,T+Math.min(.5,len*.2));g.gain.exponentialRampToValueAtTime(.0001,T+len);nz.connect(bp);bp.connect(bp2);bp2.connect(g);g.connect(cbus);nz.start(T,Math.random());nz.stop(T+len+.1);srcs.push(nz)};
-  const clap=(T0,T1,dens)=>{const cnt=Math.floor((T1-T0)*dens);for(let k=0;k<cnt;k++){const T=T0+Math.random()*(T1-T0);if(T<from||T>=until)continue;const e=Math.sin(Math.PI*(T-T0)/(T1-T0)),nz=ctx.createBufferSource();nz.buffer=noiseBuf(ctx);const bp=ctx.createBiquadFilter(),g=ctx.createGain();bp.type='bandpass';bp.frequency.value=1500+Math.random()*2500;bp.Q.value=1.4;const gg=.05+.28*e*Math.random();g.gain.setValueAtTime(gg,C(T));g.gain.exponentialRampToValueAtTime(.0001,C(T)+.045);nz.connect(bp);bp.connect(g);g.connect(cbus);nz.start(C(T),Math.random()*1.5,.06);srcs.push(nz)}};
+  const clap=(T0,T1,dens)=>{if(_sfx&&_sfx.app){const b=_sfx.app;for(let t=T0;t<T1;t+=b.duration-1)rec(b,t,Math.min(b.duration,T1-t+1),.7,.4);return}const cnt=Math.floor((T1-T0)*dens);for(let k=0;k<cnt;k++){const T=T0+Math.random()*(T1-T0);if(T<from||T>=until)continue;const e=Math.sin(Math.PI*(T-T0)/(T1-T0)),nz=ctx.createBufferSource();nz.buffer=noiseBuf(ctx);const bp=ctx.createBiquadFilter(),g=ctx.createGain();bp.type='bandpass';bp.frequency.value=1500+Math.random()*2500;bp.Q.value=1.4;const gg=.05+.28*e*Math.random();g.gain.setValueAtTime(gg,C(T));g.gain.exponentialRampToValueAtTime(.0001,C(T)+.045);nz.connect(bp);bp.connect(g);g.connect(cbus);nz.start(C(T),Math.random()*1.5,.06);srcs.push(nz)}};
   script.tracks.forEach((tr,i)=>{cheer(tr.start,2.4,.55);const nx=script.tracks[i+1],ge=nx?nx.start:Math.min(script.len,tr.end+3);if(ge-tr.end>=1.2)clap(tr.end-1.2,ge-.2,26)});
   script.segments.forEach(sg=>{if(sg.preset==='drop')cheer(sg.start,2.2,.5)});
-  cheer(script.len-5,4.5,.7);
+  if(_sfx&&_sfx.roar)rec(_sfx.roar,script.len-7,7,1,.6);else cheer(script.len-5,4.5,.7);
  }
  return{stop(){srcs.forEach(s=>{try{s.stop()}catch(e){}});try{bus.disconnect();comp.disconnect()}catch(e){}}};
 }
@@ -306,7 +314,7 @@ async function loadPlate(){
 }
 async function loadFonts(){await Promise.all(['28px Anton','13px "Press Start 2P"'].map(f=>document.fonts.load(f).catch(()=>{})))}
 async function loadTracks(script,ctx){
- const bufs=[],data=[];
+ const bufs=[],data=[];await loadSfx();
  for(const tr of script.tracks){
   try{const r=await fetch(tr.audio);if(!r.ok)throw 0;const b=await ctx.decodeAudioData(await r.arrayBuffer());bufs.push(b);data.push(await analyze(b))}catch(e){bufs.push(null);data.push(null)}
  }
@@ -320,5 +328,5 @@ function dataFromBuffer(L,sr,t,prev){
  return{fd,bass:avg(1,8),mid:avg(8,60),high:avg(60,200),loud:clamp(Math.sqrt(rms/N)*3,0,1)};
 }
 
-window.MZShow={W,H,PRESETS,THEMES,defaultScript,segAt,trackAt,analyze,hitTimeline,schedule,makeStage,loadPlate,loadFonts,loadTracks,dataFromBuffer,fmt,mulberry};
+window.MZShow={loadSfx,W,H,PRESETS,THEMES,defaultScript,segAt,trackAt,analyze,hitTimeline,schedule,makeStage,loadPlate,loadFonts,loadTracks,dataFromBuffer,fmt,mulberry};
 })();

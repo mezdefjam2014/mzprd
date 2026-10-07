@@ -97,7 +97,7 @@ async function prep(){ /* decode and analyse every beat in the setlist (cached) 
  const a=await ctxA(),sc=E.script;
  for(const tr of sc.tracks){
   if(!tr.id||E.cache[tr.id])continue;const b=beatById(tr.id);if(!b||!b.preview_path)continue;
-  try{const buf=await a.decodeAudioData(await (await fetch(pub(b.preview_path))).arrayBuffer());const an=await M.analyze(buf);E.cache[tr.id]={buf,an};if(!b.bpm&&!tr.bpm)tr.bpm=an.bpm}catch(e){}
+  M.loadSfx();try{const buf=await a.decodeAudioData(await (await fetch(pub(b.preview_path))).arrayBuffer());const an=await M.analyze(buf);E.cache[tr.id]={buf,an};if(!b.bpm&&!tr.bpm)tr.bpm=an.bpm}catch(e){}
  }
  refreshHits();
 }
@@ -181,7 +181,7 @@ async function play(){
  await prep();const a=await ctxA();await a.resume();stopA();
  E.master=a.createGain();E.an=a.createAnalyser();E.an.fftSize=1024;E.an.smoothingTimeConstant=.6;E.master.connect(E.an);E.an.connect(a.destination);E.fd=new Uint8Array(E.an.frequencyBinCount);E.td=new Uint8Array(1024);
  E.t0=a.currentTime+.12;E.from=E.T>=E.script.len-1?0:E.T;const sc=E.script;sc.tracks.forEach(t=>{if(t.audio&&!/^https?:/.test(t.audio))t.audio=t.audio});
- E.sched=M.schedule(a,E.master,sc,E.bufs||[],E.from,sc.len,{t0:E.t0});E.stage.reset();E.playing=true;$q('#smPlay').textContent='STOP PREVIEW'
+ M.loadSfx();E.sched=M.schedule(a,E.master,sc,E.bufs||[],E.from,sc.len,{t0:E.t0});E.stage.reset();E.playing=true;$q('#smPlay').textContent='STOP PREVIEW'
 }
 function frame(ts){
  E.raf=requestAnimationFrame(frame);if(document.hidden||!root||!root.classList.contains('on'))return;
@@ -253,6 +253,7 @@ async function renderVideo(){
   venc=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>{err=e}});venc.configure(vc.cfg);
   aenc=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>{err=e}});aenc.configure({codec:ac.codec,sampleRate:48000,numberOfChannels:2,bitrate:160000});
   const prev=new Float32Array(512),CH=30,heartsF=[];let f=0;const t0=performance.now(),N=Math.ceil(TOTAL*FPS),fl=[];
+  await M.loadSfx();
   for(let from=0;from<TOTAL;from+=CH){
    const until=Math.min(TOTAL,from+CH),len=until-from,octx=new OfflineAudioContext(2,Math.ceil(len*48000),48000);
    M.schedule(octx,octx.destination,sc,bufs,from,until,{t0:0});const rb=await octx.startRendering(),L0=rb.getChannelData(0),R0=rb.getChannelData(1);

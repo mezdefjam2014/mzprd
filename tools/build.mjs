@@ -167,6 +167,7 @@ for (const e of fs.readdirSync(DIST)) fs.rmSync(path.join(DIST, e), { recursive:
 for (const f of ['hero.jpg', 'girl.png', 'chain.png', 'studio.js', 'slots.js', 'show-stage.webp', 'show-atlas.webp', 'show-lights.webp', 'show-atlas.json', 'packbuilder.js', 'show.js', 'showpage.js', 'showmaker.js', 'email.js', 'mix.js', 'thumbs.js', 'mp4-muxer.js', 'CNAME']) {
   if (fs.existsSync(path.join(ROOT, f))) fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f))
 }
+if (fs.existsSync(path.join(ROOT, 'sfx'))) fs.cpSync(path.join(ROOT, 'sfx'), path.join(DIST, 'sfx'), { recursive: true })
 const urls = []
 const addUrl = (rel, lastmod) => urls.push({ loc: SITE + '/' + rel, lastmod: lastmod || today })
 
