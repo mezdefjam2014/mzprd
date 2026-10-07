@@ -97,6 +97,7 @@ footer.f a:hover{color:#fff}
 .x{position:absolute;top:10px;right:12px;width:36px;height:36px;background:transparent;border:1.5px solid #4a4a50;color:#fff;font:600 18px/1 Montserrat;display:grid;place-items:center;padding:0}
 .x:hover{border-color:var(--red);background:var(--red)}
 .box{position:relative}
+.fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen}
 .vin{position:absolute;pointer-events:none;mix-blend-mode:screen}
 .box h3{font:700 13px Montserrat;letter-spacing:.35em;margin-bottom:18px;color:#fff}
 .box label{display:block;font:600 10px Montserrat;letter-spacing:.3em;color:#8e8e94;margin:14px 0 6px}
@@ -166,7 +167,7 @@ footer.f a:hover{color:#fff}
  <div class="stage" id="stage"><img src="hero.jpg" alt="MZPRD producing beats on an MPC">
   <div class="pfx" id="pfxL"></div><div class="pfx" id="pfxR"></div>
   <div class="hand" id="handL"></div><div class="hand" id="handR"></div>
-  <div class="spk" id="spkL"></div><div class="spk" id="spkR"></div><canvas class="vin" id="vin"></canvas></div>
+  <div class="spk" id="spkL"></div><div class="spk" id="spkR"></div><canvas class="vin" id="vin"></canvas><canvas class="fx" id="fx"></canvas></div>
  <div class="lamp"></div>
  <header>
   <nav>
@@ -396,7 +397,26 @@ function drawVinyl(){
  x.fillStyle='rgba(255,230,170,.5)';x.beginPath();x.arc(Math.cos(vang+3.14)*26,Math.sin(vang+3.14)*26,2,0,7);x.fill();
 }
 vinSize();
-const SP={L:[352,204,76],R:[1188,177,76]};
+/* ambient atmosphere: misty lamp ray + steam from the mug (not tied to the beat) */
+let fxN=0;const rnd2=(a)=>{a=Math.sin(a*127.1)*43758.5453;return a-Math.floor(a)};
+const STEAM=[...Array(14)].map((_,i)=>({ph:rnd2(i+1)*6.28,sp:.07+rnd2(i+9)*.05,o:rnd2(i+3),x:402+rnd2(i+5)*38}));
+const MIST=[...Array(9)].map((_,i)=>({o:rnd2(i+20),sp:.012+rnd2(i+30)*.012,r:34+rnd2(i+40)*40,ph:rnd2(i+50)*6.28,dx:rnd2(i+60)}));
+const MOTE=[...Array(26)].map((_,i)=>({a:rnd2(i+70),b:rnd2(i+80),sp:.01+rnd2(i+90)*.02,tw:rnd2(i+95)*6.28}));
+function fxSize(){const c=$('#fx'),w=Math.max(1,Math.round(hero.clientWidth*.6));c.width=w;c.height=Math.round(w*IH/IW)}
+fxSize();
+function puff(x,cx,cy,r,rgb,a){const g=x.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,`rgba(${rgb},${a})`);g.addColorStop(1,`rgba(${rgb},0)`);x.fillStyle=g;x.beginPath();x.arc(cx,cy,r,0,7);x.fill()}
+function drawFx(t){
+ const c=$('#fx'),x=c.getContext('2d'),u=c.width/IW;x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,c.width,c.height);x.setTransform(u,0,0,u,0,0);
+ /* lamp ray */
+ const g=x.createLinearGradient(0,120,0,440);g.addColorStop(0,'rgba(255,110,70,.20)');g.addColorStop(.55,'rgba(255,70,50,.07)');g.addColorStop(1,'rgba(255,60,40,0)');
+ x.fillStyle=g;x.beginPath();x.moveTo(206,157);x.lineTo(352,113);x.lineTo(575,440);x.lineTo(215,440);x.closePath();x.fill();
+ x.save();x.beginPath();x.moveTo(206,157);x.lineTo(352,113);x.lineTo(575,440);x.lineTo(215,440);x.closePath();x.clip();
+ MIST.forEach(m=>{const k=(t*m.sp+m.o)%1,px=260+k*190+Math.sin(t*.25+m.ph)*28+m.dx*50,py=150+k*270;puff(x,px,py,m.r*(.7+k*.6),'255,170,140',Math.sin(k*3.14)*.085)});
+ MOTE.forEach(m=>{const k=(t*m.sp+m.a)%1,px=215+m.b*150+k*230,py=150+k*280,tw=.5+.5*Math.sin(t*1.7+m.tw);x.fillStyle=`rgba(255,200,170,${(.12+tw*.4)*Math.sin(k*3.14)})`;x.fillRect(px,py,1.6,1.6)});
+ x.restore();
+ /* steam from the mug */
+ STEAM.forEach(s=>{const k=(t*s.sp+s.o)%1,px=s.x+Math.sin(k*5+s.ph)*(6+k*16)+k*6,py=322-k*120;puff(x,px,py,6+k*22,'255,238,220',Math.sin(k*3.14)*.32)});
+}const SP={L:[352,204,76],R:[1188,177,76]};
 ['L','R'].forEach(k=>{const [x,y,d]=SP[k],e=$('#spk'+k);Object.assign(e.style,{left:x/IW*100+'%',top:y/IH*100+'%',width:d/IW*100+'%',height:d/IH*100+'%',backgroundSize:IW/d*100+'% '+IH/d*100+'%',backgroundPosition:x/(IW-d)*100+'% '+y/(IH-d)*100+'%'})});
 place();
 const PADS=[[-30,6],[0,0],[34,8],[70,14],[104,18]],OFF=[[-6,2],[0,0],[5,3],[8,5],[3,7]];let pidx=0,spk=0;
@@ -427,6 +447,7 @@ function frame(){
  const rot=tw*(Math.sin(t*1.7)*2.4+Math.sin(t*4.1)*.7),tx=tw*Math.sin(t*1.1)*2.5*k;
  Object.assign($('#handR').style,{transformOrigin:'85% 90%',transform:`translate(${tx.toFixed(2)}px,${(tw*Math.sin(t*2.3)*1.2*k).toFixed(2)}px) rotate(${rot.toFixed(2)}deg)`});
  $('#pfxR').style.opacity=tw*(.12+.18*Math.max(0,Math.sin(t*3.3)));
+ if((fxN++&1)===0)drawFx(t);
  /* vinyl spins while a beat plays, coasts to a stop */
  vw+=((playing?3.5:0)-vw)*.03;vang+=vw*.0167;drawVinyl();
  /* speakers pump on the kick and follow the bass */
@@ -445,7 +466,7 @@ function drawWv(w,p){
  const n=w.bars.length,s=W/n;
  w.bars.forEach((a,k)=>{x.fillStyle=k/n<p?'#e0242f':'#8a8a90';const h=Math.max(2,a*38);x.fillRect(k*s,21-h/2,Math.max(1,s*.55),h)});
 }
-addEventListener('resize',()=>{wvs.forEach(w=>w.d=0);vinSize()});
+addEventListener('resize',()=>{wvs.forEach(w=>w.d=0);vinSize();fxSize()});
 
 /* ---------- admin: login + back office ---------- */
 let isAdmin=false,tab='beats',editing=null;
