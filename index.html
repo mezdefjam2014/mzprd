@@ -1404,7 +1404,7 @@ async function boRender(){
  if(tab==='promo'){document.getElementById('bo2c').style.display='';await promoRender();await bundlesRender();try{await loadScript('slots.js?v=4');await slotsAdmin($('#bf3'),$('#bl3'))}catch(e){$('#bf3').innerHTML='<h3>SLOTS</h3><div class="cur">Could not load the slots panel.</div>'}return}
  if(tab==='sales')return salesRender();
  const F=FIELDS[tab],e=editing||{};
- const files=F.files.map(([k,l,acc])=>`<label>${l}</label><input type="file" data-k="${k}" accept="${acc}">${e[k]?`<div class="cur">Current: ${esc(e[k].split('/').pop())} (choose a new file to replace)</div><label class="chk" style="margin-top:6px"><input type="checkbox" data-rm="${k}"> REMOVE THIS FILE</label>`:''}`).join('');
+ const files=F.files.map(([k,l,acc])=>`<label>${l}</label><input type="file" data-k="${k}" accept="${acc}">${e[k]?`<div class="cur">Current: ${esc(e[k].split('/').pop())} (choose a new file to replace)</div><label class="chk" style="margin-top:6px"><input type="checkbox" data-rm="${k}"${tab==='beats'&&k==='cover_path'?' id="f_usestk"':''}> ${tab==='beats'&&k==='cover_path'?'USE THE GENERATED COVER INSTEAD (removes the uploaded one, frees the space)':'REMOVE THIS FILE'}</label>`:''}`).join('');
  const slugBit=`<label>PAGE URL NAME (auto from title if empty)</label><input type="text" id="f_slug" value="${esc(e.slug??'')}" placeholder="${tab==='beats'?'big-beat':'big-citi-vinyl'}">`;
  const beatBits=tab==='beats'?`<label>TAGS: GENRES PEOPLE SEARCH (hip hop / rap / r&amp;b / boom bap / trap)</label><input type="text" id="f_tags" value="${esc(e.tags??'')}">`+slugBit:slugBit;
  $('#bf').innerHTML=`<h3>${editing?'EDIT':'ADD'} ${F.title}</h3>
@@ -1421,6 +1421,7 @@ async function boRender(){
   ${editing?'<button class="bo-btn" type="button" id="f_cancel" style="width:100%;margin-top:10px">CANCEL EDIT</button>':''}
   <div id="bmsg"></div>`;
  $('#bf').onsubmit=boSave;
+ if(tab==='beats'&&$('#f_usestk')){const u=$('#f_usestk'),fi=document.querySelector('#bf input[data-k="cover_path"]');u.onchange=()=>{if(u.checked)fi.value=''};fi.addEventListener('change',()=>{if(fi.files[0])u.checked=false})}
  if(tab==='beats'&&$('#f_stk')){const up=()=>{$('#f_stk').src=stockCover($('#f_title').value||'BEAT NAME',420)};$('#f_title').addEventListener('input',up);up();document.fonts&&document.fonts.load('800 100px Inter').then(up).catch(()=>{})}
  if(editing)$('#f_cancel').onclick=()=>{editing=null;boRender()};
  const {data:rows,error}=await sb.from(F.table).select('*').order('created_at',{ascending:false});
