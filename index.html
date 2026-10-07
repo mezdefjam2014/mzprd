@@ -100,6 +100,8 @@ footer.f a:hover{color:#fff}
 .head{position:absolute;background-image:url(hero.jpg);background-repeat:no-repeat;pointer-events:none;will-change:transform;transform-origin:55% 100%;
  -webkit-mask-image:radial-gradient(ellipse at 52% 42%,#000 60%,transparent 84%);mask-image:radial-gradient(ellipse at 52% 42%,#000 60%,transparent 84%)}
 .head canvas{position:absolute;image-rendering:auto}
+.mpc{position:absolute;pointer-events:none;mix-blend-mode:screen}
+.lcd{position:absolute;pointer-events:none}
 .lap{position:absolute;pointer-events:none}
 .fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen}
 .vin{position:absolute;pointer-events:none;mix-blend-mode:screen}
@@ -171,7 +173,7 @@ footer.f a:hover{color:#fff}
  <div class="stage" id="stage"><img src="hero.jpg" alt="MZPRD producing beats on an MPC">
   <div class="pfx" id="pfxL"></div><div class="pfx" id="pfxR"></div>
   <div class="hand" id="handL"></div><div class="hand" id="handR"></div>
-  <div class="spk" id="spkL"></div><div class="spk" id="spkR"></div><div class="head" id="head"><canvas id="eyes"></canvas></div><canvas class="vin" id="vin"></canvas><canvas class="lap" id="lap"></canvas><canvas class="fx" id="fx"></canvas></div>
+  <div class="spk" id="spkL"></div><div class="spk" id="spkR"></div><div class="head" id="head"><canvas id="eyes"></canvas></div><canvas class="vin" id="vin"></canvas><canvas class="lap" id="lap"></canvas><canvas class="lcd" id="lcd"></canvas><canvas class="mpc" id="mpc"></canvas><canvas class="fx" id="fx"></canvas></div>
  <div class="lamp"></div>
  <header>
   <nav>
@@ -455,6 +457,33 @@ function drawEyes(t){
    x.strokeStyle=`rgba(10,0,0,${Math.min(.9,sq*1.4)})`;x.lineWidth=1.1;x.beginPath();x.moveTo(-len/2,0);x.lineTo(len/2,0);x.stroke();x.restore()}
  });
 }
+const MP={x:940,y:372,w:200,h:76,ox:998,oy:410,ux:80,uy:-6,vx:12,vy:10,W:160,H:24};
+function mpcSize(){['mpc','lcd'].forEach(id=>{const c=$('#'+id),d=Math.min(devicePixelRatio||1,2),w=hero.clientWidth*MP.w/IW;c.width=Math.round(w*d*1.5);c.height=Math.round(w*MP.h/MP.w*d*1.5);
+ Object.assign(c.style,{left:MP.x/IW*100+'%',top:MP.y/IH*100+'%',width:MP.w/IW*100+'%',height:MP.h/IH*100+'%'})})}
+mpcSize();
+function drawMpc(t){
+ const c=$('#mpc'),x=c.getContext('2d'),u=c.width/MP.w;if(!c.width)return;
+ const pulse=.5+.5*Math.sin(t*1.6),lit=playing?Math.min(1,.35+spk*.7+level*.5):.18+.1*pulse;
+ /* glow spilling onto the pads and the hand */
+ x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,c.width,c.height);x.setTransform(u,0,0,u,-MP.x*u,-MP.y*u);
+ let g=x.createRadialGradient(1045,412,2,1045,412,80);g.addColorStop(0,`rgba(110,210,255,${.12+lit*.55})`);g.addColorStop(.45,`rgba(50,150,255,${.05+lit*.2})`);g.addColorStop(1,'rgba(40,120,255,0)');
+ x.save();x.translate(1045,412);x.scale(1,.5);x.translate(-1045,-412);x.fillStyle=g;x.beginPath();x.arc(1045,412,80,0,7);x.fill();x.restore();
+ /* the LCD itself */
+ const l=$('#lcd'),y=l.getContext('2d'),w=l.width/MP.w;
+ y.setTransform(1,0,0,1,0,0);y.clearRect(0,0,l.width,l.height);
+ y.setTransform(w*MP.ux/MP.W,w*MP.uy/MP.W,w*MP.vx/MP.H,w*MP.vy/MP.H,(MP.ox-MP.x)*w,(MP.oy-MP.y)*w);
+ const W=MP.W,H=MP.H;
+ const bg=y.createLinearGradient(0,0,0,H);bg.addColorStop(0,`rgb(${10+lit*30|0},${70+lit*60|0},${140+lit*60|0})`);bg.addColorStop(1,`rgb(5,${35+lit*30|0},${90+lit*40|0})`);
+ y.fillStyle=bg;y.fillRect(0,0,W,H);
+ y.fillStyle='rgba(255,255,255,.07)';for(let r=3;r<H;r+=3)y.fillRect(0,r,W,.8);
+ if(playing&&data){
+  const n=22,bw=(W-8)/n;for(let i=0;i<n;i++){const bin=1+Math.floor(1.05*Math.pow(i,1.5)),v=Math.min(1,(data[Math.min(bin,data.length-1)]||0)/170),h=Math.max(1.5,v*(H-6));
+   const gr=y.createLinearGradient(0,H-3-h,0,H-3);gr.addColorStop(0,'#e8fbff');gr.addColorStop(1,'#35c4ff');y.fillStyle=gr;y.fillRect(4+i*bw,H-3-h,bw*.72,h)}
+  if(cur>=0&&au.duration){const px=4+(au.currentTime/au.duration)*(W-8);y.fillStyle='rgba(255,255,255,.95)';y.fillRect(px-.6,1,1.2,H-2)}
+ }else{const sx=(t*26)%(W+40)-20;const sg=y.createLinearGradient(sx,0,sx+20,0);sg.addColorStop(0,'rgba(120,220,255,0)');sg.addColorStop(1,'rgba(120,220,255,.55)');y.fillStyle=sg;y.fillRect(sx,0,20,H);
+  y.fillStyle='rgba(90,200,255,.55)';for(let i=0;i<22;i++)y.fillRect(4+i*7,H-4,5,1.6)}
+ y.fillStyle='rgba(255,255,255,.16)';y.fillRect(0,0,W,2);
+}
 fxSize();
 function puff(x,cx,cy,r,rgb,a){const g=x.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,`rgba(${rgb},${a})`);g.addColorStop(1,`rgba(${rgb},0)`);x.fillStyle=g;x.beginPath();x.arc(cx,cy,r,0,7);x.fill()}
 function drawFx(t){
@@ -499,7 +528,7 @@ function frame(){
  const rot=tw*(Math.sin(t*1.7)*2.4+Math.sin(t*4.1)*.7),tx=tw*Math.sin(t*1.1)*2.5*k;
  Object.assign($('#handR').style,{transformOrigin:'85% 90%',transform:`translate(${tx.toFixed(2)}px,${(tw*Math.sin(t*2.3)*1.2*k).toFixed(2)}px) rotate(${rot.toFixed(2)}deg)`});
  $('#pfxR').style.opacity=tw*(.12+.18*Math.max(0,Math.sin(t*3.3)));
- if((fxN++&1)===0){drawFx(t);drawEyes(t)}
+ if((fxN++&1)===0){drawFx(t);drawEyes(t);drawMpc(t)}
  nod*=.86;$('#head').style.transform=`rotate(${(nod*.6+Math.sin(t*1.3)*.1+(playing?Math.sin(t*2.4)*.06:0)).toFixed(3)}deg) translateY(${(nod*1.1*k).toFixed(2)}px)`;
  /* vinyl spins while a beat plays, coasts to a stop */
  vw+=((playing?3.5:0)-vw)*.03;vang+=vw*.0167;drawVinyl();
@@ -520,7 +549,7 @@ function drawWv(w,p){
  const n=w.bars.length,s=W/n;
  w.bars.forEach((a,k)=>{x.fillStyle=k/n<p?'#e0242f':'#8a8a90';const h=Math.max(2,a*38);x.fillRect(k*s,21-h/2,Math.max(1,s*.55),h)});
 }
-addEventListener('resize',()=>{wvs.forEach(w=>w.d=0);vinSize();fxSize();lapSize();eyesSize()});
+addEventListener('resize',()=>{wvs.forEach(w=>w.d=0);vinSize();fxSize();lapSize();eyesSize();mpcSize()});
 
 /* ---------- admin: login + back office ---------- */
 let isAdmin=false,tab='beats',editing=null;
