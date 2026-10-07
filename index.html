@@ -106,6 +106,11 @@ img.th{image-rendering:auto}
 #ppbox{margin-top:14px;min-height:46px}
 .secure{font:600 10px Montserrat;letter-spacing:.22em;color:#6c6c73;text-align:center;margin-top:12px}
 .dlr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font:600 12px Montserrat;letter-spacing:.15em}
+.pill{background:var(--red)!important;color:#fff!important;font:700 10px Montserrat;letter-spacing:.2em;padding:9px 12px;white-space:nowrap}
+.dlt{font:600 11px/1.6 Montserrat;letter-spacing:.14em;color:#b8b8be;margin:6px 0 12px}
+.dlt b{color:var(--gold)}
+.dbtn{background:var(--red);color:#fff;border:0;font:700 10px Montserrat;letter-spacing:.25em;padding:10px 14px;white-space:nowrap;cursor:pointer}
+.dbtn:disabled{opacity:.5;cursor:default}
 .dlr a{background:var(--red);color:#fff;text-decoration:none;font:700 10px Montserrat;letter-spacing:.25em;padding:10px 14px;white-space:nowrap}
 .dlr em{color:#8e8e94;font:500 11px Montserrat;font-style:normal;letter-spacing:.1em}
 .about{max-width:680px;margin:20px auto;line-height:1.9;font-size:15px;color:#b8b8be}
@@ -242,6 +247,7 @@ footer.f a:hover{color:#fff}
    <button data-v="about">ABOUT</button>
   </nav>
   <div class="tools">
+   <button id="dlPill" class="pill" style="display:none" aria-label="Your downloads"></button>
    <button id="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></button>
    <button id="cartBtn" aria-label="Cart"><svg viewBox="0 0 24 24"><path d="M2 3h3l2.5 12h11L21 7H6"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span class="badge" id="badge">0</span></button>
   </div>
@@ -451,24 +457,41 @@ async function mountPaypal(){
   createOrder:async()=>{try{$('#nt').textContent='';if(!cart.size)throw new Error('Your cart is empty.');
    if(pre.p&&pre.sig===cartSig()&&Date.now()-pre.t<600000){try{return (await pre.p).id}catch(e){}}
    const r=await callCheckout({action:'create',items:[...cart].map(k=>({t:k[0],id:k.slice(2)}))});return r.id}catch(e){$('#nt').textContent=e.message;throw e}},
-  onApprove:async d=>{try{$('#nt').textContent='Confirming your payment...';const r=await callCheckout({action:'capture',orderId:d.orderID});cart.clear();syncCart();showDone(r,true)}catch(e){$('#nt').textContent=e.message}},
+  onApprove:async d=>{try{$('#nt').textContent='Confirming your payment...';const r=await callCheckout({action:'capture',orderId:d.orderID});const o={token:r.token,secret:r.secret,exp:Date.now()+r.seconds_left*1000,downloads:r.downloads};cart.clear();syncCart();dlStart(o);showDone(o,true)}catch(e){$('#nt').textContent=e.message}},
   onCancel:()=>{$('#nt').textContent='Payment cancelled. Your cart is still here.'},
   onError:()=>{if(!$('#nt').textContent)$('#nt').textContent='PayPal had a problem. Please try again.'}
  }).render('#ppbox');
 }
 function showCartMain(){$('#cartMain').style.display='block';$('#cartDone').style.display='none'}
-function showDone(r,fresh){
- $('#cartMain').style.display='none';const d=$('#cartDone');d.style.display='block';
- const link=location.origin+location.pathname+'#/order/'+r.token;
- d.innerHTML='<h3>'+(fresh?'THANK YOU!':'YOUR DOWNLOADS')+'</h3>'+(fresh?'<div class="sub" style="font:500 13px/1.6 Montserrat;color:#b8b8be;margin-bottom:10px">Payment received. PayPal has emailed you a receipt.</div>':'')+
-  r.downloads.map(x=>'<div class="dlr"><span>'+esc(x.title).toUpperCase()+'</span>'+(x.url?'<a href="'+esc(x.url)+'" download>DOWNLOAD</a>':'<em>FILE COMING SOON</em>')+'</div>').join('')+
-  '<div class="nt" style="color:#b8b8be">Download links last 1 hour. Save this page link to get new ones any time:</div><input type="text" readonly value="'+esc(link)+'" style="width:100%;margin-top:6px;background:#050506;border:1.5px solid #34343a;color:#fff;padding:10px;font:500 12px Montserrat" onclick="this.select()"><button class="go" id="dClose">CLOSE</button>';
- $('#dClose').onclick=()=>{$('#modal').classList.remove('on');if(location.hash.indexOf('#/order/')===0){history.pushState(null,'',location.pathname+location.search);route()}};
+const DLK='mzprd_dl';let dlTimer=null;
+const mmss=ms=>{const t=Math.max(0,Math.floor(ms/1000));return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0')};
+function dlLoad(){try{const o=JSON.parse(sessionStorage.getItem(DLK)||'null');if(o&&o.exp>Date.now())return o;sessionStorage.removeItem(DLK)}catch(e){}return null}
+function dlStart(o){try{sessionStorage.setItem(DLK,JSON.stringify(o))}catch(e){}tickDl();clearInterval(dlTimer);dlTimer=setInterval(tickDl,1000)}
+function tickDl(){
+ const o=dlLoad(),pill=$('#dlPill'),t=$('#dlTime');
+ if(!o){clearInterval(dlTimer);pill.style.display='none';if(t)t.textContent='EXPIRED';document.querySelectorAll('#cartDone .dbtn').forEach(x=>{x.disabled=true;x.textContent='EXPIRED'});return}
+ pill.style.display='';pill.textContent='DOWNLOADS '+mmss(o.exp-Date.now());if(t)t.textContent=mmss(o.exp-Date.now())+' LEFT';
 }
-async function showOrder(token){
- $('#modal').classList.add('on');$('#cartMain').style.display='none';const d=$('#cartDone');d.style.display='block';d.innerHTML='<h3>YOUR DOWNLOADS</h3><div class="nt">Loading your order...</div>';
- try{showDone(await callCheckout({action:'files',token:token}),false)}catch(e){d.innerHTML='<h3>YOUR DOWNLOADS</h3><div class="nt">'+esc(e.message)+'</div><button class="go" id="dClose">CLOSE</button>';$('#dClose').onclick=()=>{$('#modal').classList.remove('on');history.pushState(null,'',location.pathname+location.search);route()}}
+function showDone(o,fresh){
+ $('#modal').classList.add('on');$('#cartMain').style.display='none';const d=$('#cartDone');d.style.display='block';
+ d.innerHTML='<h3>'+(fresh?'THANK YOU!':'YOUR DOWNLOADS')+'</h3>'+(fresh?'<div style="font:500 13px/1.6 Montserrat;color:#b8b8be;margin-bottom:6px">Payment received. PayPal has emailed you a receipt.</div>':'')+
+  '<div class="dlt">AVAILABLE FOR <b id="dlTime">'+mmss(o.exp-Date.now())+' LEFT</b> IN THIS BROWSER ONLY</div>'+
+  o.downloads.map(x=>'<div class="dlr"><span>'+esc(x.title).toUpperCase()+'</span>'+(x.available?'<button class="dbtn" data-i="'+x.i+'">DOWNLOAD</button>':'<em>FILE COMING SOON</em>')+'</div>').join('')+
+  '<div class="nt" style="color:#b8b8be">Save your files to your device now. After 15 minutes the downloads stop working and cannot be reopened.</div><button class="go" id="dClose">CLOSE</button>';
+ d.querySelectorAll('.dbtn').forEach(b=>b.onclick=()=>dlGet(b));
+ $('#dClose').onclick=()=>$('#modal').classList.remove('on');
+ tickDl();
 }
+async function dlGet(b){
+ const cur=dlLoad();if(!cur){toast('DOWNLOAD WINDOW ENDED');tickDl();return}
+ b.disabled=true;b.textContent='...';
+ try{const r=await callCheckout({action:'download',token:cur.token,secret:cur.secret,i:+b.dataset.i});
+  const a=document.createElement('a');a.href=r.url;a.download='';document.body.appendChild(a);a.click();a.remove();b.textContent='DOWNLOAD AGAIN'}
+ catch(e){toast(String(e.message).toUpperCase().slice(0,60));b.textContent='DOWNLOAD'}
+ b.disabled=false;
+}
+$('#dlPill').onclick=()=>{const o=dlLoad();if(o)showDone(o,false)};
+{const o=dlLoad();if(o)dlStart(o)}
 $('#cartBtn').onclick=()=>{showCartMain();renderCart();$('#modal').classList.add('on');mountPaypal();prefetchOrder()};
 $('#cx').onclick=()=>$('#modal').classList.remove('on');$('#lx').onclick=()=>$('#login').classList.remove('on');
 addEventListener('keydown',e=>{if(e.key==='Escape'){const open=$('#modal').classList.contains('on')||$('#login').classList.contains('on');$('#modal').classList.remove('on');$('#login').classList.remove('on');if(!open&&pageIdx>=0)closeBeatPage()}});
@@ -486,8 +509,6 @@ const slugify=t=>String(t||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(
 const bslug=B=>B.slug||slugify(B.title)||String(B.id);
 let pageIdx=-1,pwv=null;
 function route(){
- const mo=location.hash.match(/^#\/order\/([0-9a-fA-F-]+)$/);
- if(mo){showOrder(mo[1]);return}
  const m=location.hash.match(/^#\/beat\/(.+)$/);
  if(m){const sl=decodeURIComponent(m[1]);showBeatPage(beats.findIndex(b=>bslug(b)===sl));return}
  if($('#v-beat').classList.contains('on')){pageIdx=-1;showView('beats')}
