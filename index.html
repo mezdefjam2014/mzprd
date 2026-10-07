@@ -104,6 +104,18 @@ footer.f a:hover{color:#fff}
  background-image:linear-gradient(112deg,transparent 0 41%,rgba(255,236,170,.55) 46%,rgba(255,252,235,1) 50%,rgba(255,236,170,.55) 54%,transparent 59% 100%);background-size:260% 100%;background-position:100% 0;opacity:.9}
 .mpc{position:absolute;pointer-events:none;mix-blend-mode:screen}
 .lcd{position:absolute;pointer-events:none}
+#girl{position:fixed;left:0;bottom:0;z-index:45;display:flex;align-items:flex-end;gap:0;transform:translateX(-115%);transition:transform .7s cubic-bezier(.34,1.45,.64,1);pointer-events:none}
+#girl.in{transform:none;pointer-events:auto}
+#girl img{display:block;height:min(46vh,400px);width:auto;filter:drop-shadow(0 0 14px rgba(224,36,47,.45))}
+#girl img[hidden]{display:none}
+.bub{position:relative;align-self:center;margin:0 0 34vh 6px;background:#fff;color:#0b0b0d;padding:16px 38px 14px 18px;border:3px solid var(--red);box-shadow:5px 5px 0 #000;max-width:min(260px,52vw);transform:scale(.4);transform-origin:0 70%;transition:transform .45s .35s cubic-bezier(.34,1.7,.64,1)}
+#girl.in .bub{transform:scale(1)}
+.bub:before{content:"";position:absolute;left:-14px;top:60%;border:8px solid transparent;border-right:14px solid var(--red)}
+.bub b{display:block;font:400 clamp(11px,1.5vw,15px)/1.5 'Press Start 2P';color:var(--red);text-transform:uppercase}
+.bub span{display:block;font:600 11px Montserrat;letter-spacing:.18em;margin-top:8px;color:#333}
+.bub button.shop{margin-top:12px;background:var(--red);color:#fff;border:0;font:700 10px Montserrat;letter-spacing:.3em;padding:9px 12px}
+.bub .bx{position:absolute;top:4px;right:6px;background:none;border:0;font:700 16px Montserrat;color:#555}
+@media(max-width:700px){#girl img{height:34vh}.bub{margin-bottom:22vh}}
 .lap{position:absolute;pointer-events:none}
 .fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen}
 .vin{position:absolute;pointer-events:none;mix-blend-mode:screen}
@@ -222,13 +234,14 @@ footer.f a:hover{color:#fff}
 </div></div>
 
 <div id="bo">
- <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
+ <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="promo">PROMO</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
  <div class="bo2">
   <form class="bf" id="bf"></form>
   <div><div class="bl" id="bl"></div></div>
  </div>
 </div>
 
+<div id="girl"><img id="girlImg" alt="" hidden><div class="bub"><button class="bx" id="girlX" aria-label="Close">&times;</button><b id="girlMsg">ALL BEATS $10</b><span>LIMITED TIME</span><button class="shop" id="girlShop">SHOP NOW</button></div></div>
 <div id="toast"></div>
 <div class="grain"></div>
 <div id="enter"><h1>MZPRD</h1><button id="go">ENTER</button><p>SOUND ON</p></div>
@@ -240,12 +253,13 @@ const sb=window.supabase.createClient(SB_URL,SB_KEY);
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pub=p=>!p?'':/^(https?:|[\w.-]+\.(wav|mp3|jpg|png)$)/.test(p)?p:sb.storage.from('public-media').getPublicUrl(p).data.publicUrl;
+const eff=B=>promo.promo_enabled?Number(promo.promo_price):Number(B.price);
 const money=n=>'$'+Number(n||0).toFixed(2);
 const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)};
 const DEMO=[
  {id:'d1',title:'Demo Loop One',musical_key:'D#m',bpm:92,tags:'Boom Bap / Demo',price:29.99,preview_path:'demo.wav'},
  {id:'d2',title:'Demo Loop Two',musical_key:'Fm',bpm:92,tags:'Trap / Demo',price:29.99,preview_path:'demo.wav'}];
-let beats=[],packs=[],cur=-1,playing=false,cart=new Set(),liked=new Set(),level=0,ac,an,data,hits=[];
+let promo={promo_enabled:false,promo_price:10,promo_text:'ALL BEATS',promo_image_path:null},beats=[],packs=[],cur=-1,playing=false,cart=new Set(),liked=new Set(),level=0,ac,an,data,hits=[];
 const au=$('#au');
 
 /* audio */
@@ -268,7 +282,7 @@ au.onended=()=>go(1);
 function ui(){
  document.querySelectorAll('.row').forEach((e,i)=>e.classList.toggle('play',i===cur&&playing));
  $('#pp').textContent=playing?'||':'>';
- if(cur>=0&&beats[cur]){const B=beats[cur];$('#bar').classList.add('on');$('#bt').textContent=B.title.toUpperCase();$('#bm').textContent=money(B.price)}
+ if(cur>=0&&beats[cur]){const B=beats[cur];$('#bar').classList.add('on');$('#bt').textContent=B.title.toUpperCase();$('#bm').textContent=money(eff(B))}
 }
 
 /* thumbnails for beats without a cover */
@@ -301,10 +315,10 @@ function renderBeats(){
   const d=document.createElement('div');d.className='row';
   const tags=esc(B.tags||'').replace(/ ?\/ ?/g,'&nbsp;&nbsp;&nbsp;');
   d.innerHTML=`${thumb(B,i,'th')}<span class="no">${String(i+1).padStart(2,'0')}</span>
-  <div><div class="ti">${esc(B.title)}</div><div class="tg">${tags}</div><div class="ms">${money(B.price)}</div></div>
+  <div><div class="ti">${esc(B.title)}</div><div class="tg">${tags}</div><div class="ms">${money(eff(B))}</div></div>
   <button class="pl" aria-label="Play ${esc(B.title)}"><i></i></button>
   <canvas class="wv" height="42"></canvas>
-  <div class="st tm">--:--<small>TIME</small></div><div class="st pc">${money(B.price)}<small>PRICE</small></div>
+  <div class="st tm">--:--<small>TIME</small></div><div class="st pc">${money(eff(B))}<small>${promo.promo_enabled&&eff(B)!==Number(B.price)?'<s>'+money(B.price)+'</s>':'PRICE'}</small></div>
   <div class="ic"><button class="lk" aria-label="Like">${I.heart}</button><button class="sh" aria-label="Share">${I.share}</button></div>
   <button class="cart">ADD TO CART</button>${B.free_download&&B.preview_path?`<button class="dl" aria-label="Free download">${I.dl}</button>`:'<span></span>'}`;
   list.appendChild(d);
@@ -345,8 +359,8 @@ function syncCart(){
 }
 function renderCart(){
  const its=[...cart].map(k=>[k,lookup(k)]).filter(x=>x[1]);
- $('#items').innerHTML=its.length?its.map(([k,x])=>`<div class="ci"><span>${esc(x.title).toUpperCase()}</span><span>${money(x.price)}<button data-k="${k}">REMOVE</button></span></div>`).join(''):'<div class="ci"><span>EMPTY</span></div>';
- $('#total').textContent=money(its.reduce((s,[,x])=>s+Number(x.price),0));$('#nt').textContent='';
+ $('#items').innerHTML=its.length?its.map(([k,x])=>`<div class="ci"><span>${esc(x.title).toUpperCase()}</span><span>${money(k[0]==='b'?eff(x):x.price)}<button data-k="${k}">REMOVE</button></span></div>`).join(''):'<div class="ci"><span>EMPTY</span></div>';
+ $('#total').textContent=money(its.reduce((s,[k,x])=>s+(k[0]==='b'?eff(x):Number(x.price)),0));$('#nt').textContent='';
  document.querySelectorAll('#items button').forEach(b=>b.onclick=()=>{cart.delete(b.dataset.k);syncCart();renderCart()});
 }
 $('#cartBtn').onclick=()=>{renderCart();$('#modal').classList.add('on')};
@@ -368,13 +382,14 @@ addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body){e.
 async function loadAll(){
  if(location.hash==='#demo'){beats=DEMO;packs=[]}
  else{
+  const st=await sb.from('site_settings').select('*').eq('id',1).maybeSingle();if(st.data)promo=st.data;
   const [b,p]=await Promise.all([
    sb.from('beats').select('*').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
    sb.from('packs').select('*').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false})]);
   if(b.error||p.error)toast('COULD NOT LOAD STORE');
   beats=b.data||[];packs=p.data||[];
  }
- cur=-1;renderBeats();renderPacks();
+ cur=-1;renderBeats();renderPacks();setupPromo();
 }
 
 /* hero animation: hands tap on detected kick / snare */
@@ -571,6 +586,21 @@ function drawWv(w,p){
 }
 addEventListener('resize',()=>{wvs.forEach(w=>w.d=0);vinSize();fxSize();lapSize();eyesSize();mpcSize()});
 
+/* ---------- promo girl ---------- */
+let girlTimer=null,girlGone=false;
+function promoLabel(){const p=Number(promo.promo_price);return (promo.promo_text||'ALL BEATS')+' '+money(p).replace(/\.00$/,'')}
+function setupPromo(){
+ const g=$('#girl'),img=$('#girlImg');clearTimeout(girlTimer);g.classList.remove('in');
+ if(!promo.promo_enabled||girlGone||location.hash==='#nopromo')return;
+ $('#girlMsg').textContent=promoLabel();
+ const src=promo.promo_image_path?pub(promo.promo_image_path):'girl.png';
+ img.hidden=true;img.onload=()=>{img.hidden=false};img.onerror=()=>{img.hidden=true};img.src=src;
+ const cycle=()=>{if(girlGone||!promo.promo_enabled)return;g.classList.add('in');girlTimer=setTimeout(()=>{g.classList.remove('in');girlTimer=setTimeout(cycle,45000)},11000)};
+ girlTimer=setTimeout(cycle,4000);
+}
+$('#girlX').onclick=()=>{girlGone=true;clearTimeout(girlTimer);$('#girl').classList.remove('in')};
+$('#girlShop').onclick=()=>{$('#girl').classList.remove('in');document.querySelector('.case').scrollIntoView({behavior:'smooth'})};
+
 /* ---------- admin: login + back office ---------- */
 let isAdmin=false,tab='beats',editing=null;
 const LINK=$('#loginLink');
@@ -602,6 +632,7 @@ const FIELDS={
  packs:{table:'packs',title:'SAMPLE PACK',files:[['cover_path','PACK IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (optional, public)','audio/*','public-media','previews'],['file_path','PACK FILE (.zip, private)','.zip,application/zip,audio/*','private-files','packs']]}
 };
 async function boRender(){
+ if(tab==='promo')return promoRender();
  const F=FIELDS[tab],e=editing||{};
  const files=F.files.map(([k,l,acc])=>`<label>${l}</label><input type="file" data-k="${k}" accept="${acc}">${e[k]?`<div class="cur">Current: ${esc(e[k].split('/').pop())} (choose a new file to replace)</div><label class="chk" style="margin-top:6px"><input type="checkbox" data-rm="${k}"> REMOVE THIS FILE</label>`:''}`).join('');
  const beatBits=tab==='beats'?`<label>TAGS (Boom Bap / Sample / Gritty)</label><input type="text" id="f_tags" value="${esc(e.tags??'')}">`:'';
@@ -631,6 +662,33 @@ async function boRender(){
   d.querySelector('.del').onclick=()=>boDelete(r);
   bl.appendChild(d);
  });
+}
+async function promoRender(){
+ const {data:st}=await sb.from('site_settings').select('*').eq('id',1).maybeSingle();const e=st||promo;
+ $('#bf').innerHTML=`<h3>STORE PROMO</h3>
+  <label class="chk"><input type="checkbox" id="p_on" ${e.promo_enabled?'checked':''}> PROMO ON (the girl pops in and every beat sells at the promo price)</label>
+  <label>PROMO PRICE FOR ALL BEATS (USD)</label><input type="number" step="0.01" min="0" id="p_price" value="${esc(e.promo_price)}">
+  <label>MESSAGE (shows before the price)</label><input type="text" id="p_text" value="${esc(e.promo_text)}">
+  <label>GIRL IMAGE (transparent PNG works best)</label><input type="file" id="p_img" accept="image/*">
+  ${e.promo_image_path?`<div class="cur">Current: ${esc(e.promo_image_path.split('/').pop())}</div><label class="chk" style="margin-top:6px"><input type="checkbox" id="p_rm"> REMOVE THIS IMAGE</label>`:''}
+  <button class="go" type="submit" id="p_save">SAVE PROMO</button><div id="bmsg"></div>`;
+ $('#bf').onsubmit=promoSave;
+ $('#bl').innerHTML='<div class="bi"><span>While the promo is on, every beat on the site sells at the promo price and the girl pops in with your message. Turn it off to go back to the price set on each beat. Sample packs are not affected.</span></div>';
+}
+async function promoSave(ev){
+ ev.preventDefault();const msg=$('#bmsg'),btn=$('#p_save');btn.disabled=true;
+ const row={id:1,promo_enabled:$('#p_on').checked,promo_price:parseFloat($('#p_price').value)||0,promo_text:$('#p_text').value.trim()||'ALL BEATS'};
+ let oldImg=null,newImg=null;
+ try{
+  const cur=(await sb.from('site_settings').select('promo_image_path').eq('id',1).maybeSingle()).data?.promo_image_path||null;
+  const f=$('#p_img').files[0],rm=$('#p_rm');
+  if(f){msg.textContent='Uploading image...';newImg=await upload(f,'public-media','promo');row.promo_image_path=newImg;oldImg=cur}
+  else if(rm&&rm.checked){row.promo_image_path=null;oldImg=cur}
+  msg.textContent='Saving...';
+  const {error}=await sb.from('site_settings').upsert(row);if(error)throw error;
+  if(oldImg)await sb.storage.from('public-media').remove([oldImg]);
+  girlGone=false;await loadAll();promoRender();toast('PROMO SAVED');
+ }catch(err){if(newImg)await sb.storage.from('public-media').remove([newImg]);msg.textContent='Error: '+(err.message||err);btn.disabled=false}
 }
 async function upload(file,bucket,folder){
  const ext=(file.name.match(/\.[A-Za-z0-9]+$/)||[''])[0].toLowerCase();
