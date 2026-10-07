@@ -229,6 +229,18 @@ for (const c of [...beatCats, ...packCats]) {
   addUrl('about/')
 }
 
+/* ----- merch ----- */
+{
+  const content = '<p>Hoodies, tees and crown gear are dropping soon.</p>'
+  write('merch', render({
+    path: 'merch/', title: 'Merch | MZPRD (Meztheprod)',
+    desc: 'MZPRD merch: hoodies, tees and crown gear, dropping soon.',
+    h1: 'MZPRD Merch', page: { kind: 'view', v: 'merch', title: 'Merch | MZPRD (Meztheprod)' }, content,
+    ld: [crumbsLd([['Home', ''], ['Merch', 'merch/']])],
+  }))
+  addUrl('merch/')
+}
+
 /* ----- one page per beat ----- */
 for (const b of beats) {
   const rel = 'beat/' + slug(b), g = genreOf(b), price = eff(b)

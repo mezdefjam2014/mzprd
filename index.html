@@ -755,10 +755,15 @@ function showView(v){
  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.v===(v==='beat'?'beats':v)));
  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
 }
+const VPATH={beats:'beats/',kits:'sample-packs/',merch:'merch/',about:'about/'},VTITLE={beats:'Rap, Hip Hop & R&B Beats and Instrumentals for Sale | MZPRD',kits:'Sample Packs, Vinyl Samples & Producer Loops | MZPRD',merch:'Merch | MZPRD',about:'About MZPRD (Meztheprod) | Beat Producer'};
+function pathView(){const p=location.pathname.slice(BASEPATH.length).replace(/\/?$/,'/');return Object.keys(VPATH).find(k=>VPATH[k]===p)||null}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
- if(location.hash.indexOf('#/beat/')===0||location.hash.indexOf('#/pack/')===0)history.pushState(null,'',BASEPATH);
- hideSeo();pageIdx=-1;document.title=HOME_TITLE;showView(b.dataset.v);
+ const v=b.dataset.v,u=BASEPATH+VPATH[v];
+ hideSeo();pageIdx=-1;document.title=VTITLE[v]||HOME_TITLE;
+ if(location.hash||location.pathname!==u)history.pushState(null,'',u);
+ showView(v);scrollTo(0,0);
 });
+addEventListener('popstate',()=>{if(!location.hash)route()});
 const slugify=t=>String(t||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 const bslug=B=>B.slug||slugify(B.title)||String(B.id);
 let pageIdx=-1,pageKind='b',pwv=null;
@@ -771,7 +776,9 @@ function route(){
  if(m){const sl=decodeURIComponent(m[1]);showBeatPage(beats.findIndex(b=>bslug(b)===sl));return}
  const mp=location.hash.match(/^#\/pack\/(.+)$/);
  if(mp){const sl=decodeURIComponent(mp[1]);showPackPage(packs.findIndex(b=>bslug(b)===sl));return}
+ {const pv=pathView();if(pv){pageIdx=-1;hideSeo();showView(pv);document.title=VTITLE[pv];return}}
  if($('#v-beat').classList.contains('on')){const wasPack=pageKind==='p';pageIdx=-1;showView(wasPack?'kits':'beats')}
+ else if(!location.hash&&location.pathname===BASEPATH&&!document.querySelector('#v-beats.on'))showView('beats');
  document.title=HOME_TITLE;
 }
 function closeBeatPage(){hideSeo();history.pushState(null,'',BASEPATH);route();scrollTo(0,0)}
@@ -1084,7 +1091,7 @@ function frame(){
  ['L','R'].forEach(c=>Object.assign($('#spk'+c).style,{transform:`scale(${(1+spk*.11).toFixed(3)})`,filter:`brightness(${(1+spk*.5).toFixed(2)})`}));
  {
   const sxb=innerWidth<=700?.52:.5,F=CAMF[camT],ct=F?{fx:F[0],fy:F[1],z:F[2]}:{fx:sxb,fy:.5,z:1};
-  cam.fx+=(ct.fx-cam.fx)*.085;cam.fy+=(ct.fy-cam.fy)*.085;cam.z+=(ct.z-cam.z)*.085;
+  cam.fx+=(ct.fx-cam.fx)*.04;cam.fy+=(ct.fy-cam.fy)*.04;cam.z+=(ct.z-cam.z)*.04;
   const W=stage.offsetWidth,H=stage.offsetHeight,hw=hero.clientWidth,hh=hero.clientHeight,z=cam.z*1.03;
   let tx=(sxb-.5)*W-(cam.fx-.5)*W*z,ty=-(cam.fy-.5)*H*z;
   tx=Math.min((sxb-.5)*W-hw/2+z*W/2,Math.max((sxb-.5)*W+hw/2-z*W/2,tx));
