@@ -89,6 +89,8 @@ img.th{image-rendering:auto}
 .bp .acts2{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:18px}
 .bp .acts2 .cart{width:auto;padding:15px 26px}
 .bp .pl{width:54px;height:54px}
+.view#v-beat{position:relative}
+#v-beat .x{top:0;right:0;z-index:3}
 .bwv{width:100%;height:64px;display:block;cursor:pointer;margin-top:4px}
 .back{background:none;border:0;color:#8e8e94;font:600 11px Montserrat;letter-spacing:.3em;margin-bottom:16px;padding:4px 0;cursor:pointer}
 .back:hover{color:#fff}
@@ -416,7 +418,7 @@ function renderCart(){
 }
 $('#cartBtn').onclick=()=>{renderCart();$('#modal').classList.add('on')};
 $('#cx').onclick=()=>$('#modal').classList.remove('on');$('#lx').onclick=()=>$('#login').classList.remove('on');
-addEventListener('keydown',e=>{if(e.key==='Escape'){$('#modal').classList.remove('on');$('#login').classList.remove('on')}});
+addEventListener('keydown',e=>{if(e.key==='Escape'){const open=$('#modal').classList.contains('on')||$('#login').classList.contains('on');$('#modal').classList.remove('on');$('#login').classList.remove('on');if(!open&&pageIdx>=0)closeBeatPage()}});
 $('#modal').onclick=e=>{if(e.target.id==='modal')e.target.classList.remove('on')};
 $('#checkout').onclick=()=>$('#nt').textContent=cart.size?'Checkout not connected yet. Payments come next.':'Add something first.';
 $('#search').onclick=()=>toast('SEARCH COMING SOON');
@@ -437,14 +439,15 @@ function route(){
  if($('#v-beat').classList.contains('on')){pageIdx=-1;showView('beats')}
  document.title='MZPRD | Beats';
 }
+function closeBeatPage(){history.pushState(null,'',location.pathname+location.search);route();scrollTo(0,0)}
 function showBeatPage(i){
  const box=$('#bpage');pageIdx=i;pwv=null;
  if(i<0||!beats[i]){box.innerHTML='<button class="back" id="bBack">&larr; ALL BEATS</button><div class="empty"><b>NOT FOUND</b>THIS BEAT IS NOT AVAILABLE</div>';$('#bBack').onclick=()=>{history.pushState(null,'',location.pathname+location.search);route()};showView('beat');return}
  const B=beats[i],tg=(B.tags||'').split('/').map(x=>x.trim()).filter(Boolean),old=promo.promo_enabled&&eff(B)!==Number(B.price);
  const others=beats.map((b,k)=>[b,k]).filter(x=>x[1]!==i).slice(0,4);
- box.innerHTML='<button class="back" id="bBack">&larr; ALL BEATS</button><div class="bp'+(cur===i&&playing?' play':'')+'"><div class="cov">'+thumb(B,i,'')+'</div><div><h1>'+esc(B.title)+'</h1><div class="tgs">'+tg.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div><div class="prc">'+money(eff(B))+(old?'<s>'+money(B.price)+'</s>':'')+'</div><canvas class="bwv" id="bwv"></canvas>'+(B.description?'<div class="d">'+esc(B.description)+'</div>':'')+'<div class="acts2"><button class="pl" id="bPlay" aria-label="Play"><i></i></button><button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(B.free_download&&B.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE BEATS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1],'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
+ box.innerHTML='<button class="x" id="bX" aria-label="Close beat page">&times;</button><button class="back" id="bBack">&larr; ALL BEATS</button><div class="bp'+(cur===i&&playing?' play':'')+'"><div class="cov">'+thumb(B,i,'')+'</div><div><h1>'+esc(B.title)+'</h1><div class="tgs">'+tg.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div><div class="prc">'+money(eff(B))+(old?'<s>'+money(B.price)+'</s>':'')+'</div><canvas class="bwv" id="bwv"></canvas>'+(B.description?'<div class="d">'+esc(B.description)+'</div>':'')+'<div class="acts2"><button class="pl" id="bPlay" aria-label="Play"><i></i></button><button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(B.free_download&&B.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE BEATS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1],'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
  paintArt(box);
- $('#bBack').onclick=()=>{history.pushState(null,'',location.pathname+location.search);route()};
+ $('#bBack').onclick=$('#bX').onclick=closeBeatPage;
  $('#bPlay').onclick=()=>play(i);
  $('#bCart').onclick=e=>toggleCart('b:'+B.id,e.currentTarget);
  $('#bShare').onclick=()=>{try{navigator.clipboard.writeText(location.origin+location.pathname+'#/beat/'+encodeURIComponent(bslug(B)))}catch(e){}toast('LINK COPIED')};
