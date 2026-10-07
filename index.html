@@ -436,7 +436,8 @@ footer.f a:hover{color:#fff}
 </div></div>
 
 <div id="bo">
- <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="bundles">BUNDLES</button><button data-t="promo">PROMO</button><button data-t="orders">ORDERS</button><button data-t="dash">DASHBOARD</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
+ <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="bundles">BUNDLES</button><button data-t="promo">PROMO</button><button data-t="orders">ORDERS</button><button data-t="dash">DASHBOARD</button><button data-t="video">VIDEO STUDIO</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
+ <div id="studio"></div>
  <div class="bo2">
   <form class="bf" id="bf"></form>
   <div><div class="bl" id="bl"></div></div>
@@ -1304,7 +1305,11 @@ const FIELDS={
  beats:{table:'beats',title:'BEAT',files:[['cover_path','COVER IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (tagged MP3/WAV, public)','audio/*','public-media','previews'],['audio_path','FULL FILE (private, for buyers, any size)','audio/*,.zip','private-files','beats']]},
  packs:{table:'packs',title:'SAMPLE PACK',files:[['cover_path','PACK IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (optional, public)','audio/*','public-media','previews'],['file_path','PACK FILE (.zip, private, any size)','.zip,application/zip,audio/*','private-files','packs']]}
 };
+function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=1';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
 async function boRender(){
+ const vid=tab==='video';document.querySelector('#bo .bo2').style.display=vid?'none':'';
+ if(vid){try{await loadStudio();await studioOpen()}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
+ if(window.studioClose)studioClose();
  if(tab==='promo')return promoRender();
  if(tab==='orders')return ordersRender();
  if(tab==='bundles')return bundlesRender();
