@@ -37,7 +37,9 @@ const eff = (b) => (promo.promo_enabled ? Number(promo.promo_price) : Number(b.p
 const slug = (x) => x.slug || slugify(x.title) || x.id
 const tagsOf = (b) => String(b.tags || '').split(/[\/,]/).map((t) => t.trim()).filter(Boolean)
 const hay = (x) => (String(x.tags || '') + ' ' + x.title + ' ' + String(x.description || '')).toLowerCase()
-const cover = (x) => (x.cover_path ? PUB + x.cover_path : SITE + '/hero.jpg')
+const stockH = (t) => { const s = String(t || 'BEAT').toUpperCase().replace(/\s+/g, ' ').trim() || 'BEAT'; let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return h.toString(36) }
+for (const b of beats) if (!b.cover_path) { const u = PUB + 'stock/' + b.id + '-' + stockH(b.title) + '.jpg'; try { if ((await fetch(u, { method: 'HEAD' })).ok) b._stock = u } catch {} }
+const cover = (x) => (x.cover_path ? PUB + x.cover_path : x._stock || SITE + '/hero.jpg')
 const genreOf = (b) => tagsOf(b)[0] || 'Rap and Hip Hop'
 const today = new Date().toISOString().slice(0, 10)
 

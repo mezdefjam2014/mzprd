@@ -39,7 +39,7 @@ function ctx(){
  if(E.dt){const d=new Date(E.dt);if(!isNaN(d))when=when||d.toLocaleString([], {weekday:'long',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'})}
  const pr=(typeof promo!=='undefined'&&promo)||{};
  return{it,isB,noun:isB?'beat':'pack',T:it.title||'Untitled',mood:tags[1]||'hard',genre:(tags[0]||'hip hop').toLowerCase(),info,when,
-  url:SITE+'/'+(isB?'beat':'pack')+'/'+sl+'/',cover:it.cover_path?pub(it.cover_path):'',
+  url:SITE+'/'+(isB?'beat':'pack')+'/'+sl+'/',cover:(typeof hostedCover==='function'?hostedCover(isB?{...it,_k:'beats'}:it):(it.cover_path?pub(it.cover_path):'')),
   promoPrice:pr.promo_price!=null?'$'+Number(pr.promo_price).toFixed(0):'$10',promoLine:((pr.promo_text||'ALL BEATS')+' '+(pr.promo_price!=null?'$'+Number(pr.promo_price).toFixed(0):'$10')).trim()};
 }
 function content(){

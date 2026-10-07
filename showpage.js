@@ -118,7 +118,7 @@ async function start(live){
  try{
   if(!P.actx)P.actx=new (window.AudioContext||window.webkitAudioContext)();await P.actx.resume();
   await M.loadFonts();if(!P.hero){P.hero=await M.loadPlate();P.stage.setPlate(P.hero)}
-  const script=s.script;script.tracks.forEach(t=>{if(t.audio&&!/^https?:/.test(t.audio))t.audio=pub(t.audio);if(t.cover&&!/^https?:/.test(t.cover))t.cover=pub(t.cover);if(!t.cover)t.cover=stockCover(t.title,96)});
+  const script=s.script;script.tracks.forEach(t=>{if(t.audio&&!/^https?:/.test(t.audio))t.audio=pub(t.audio);const lb=(typeof beats!=='undefined'&&beats||[]).find(b=>String(b.id)===String(t.id));if(lb){t.title=lb.title;t.cover=coverUrl(lb,96);return}if(t.cover&&!/^https?:/.test(t.cover))t.cover=pub(t.cover);if(!t.cover)t.cover=stockCover(t.title,96)});
   const L=await M.loadTracks(script,P.actx);P.data=L;
   P.hits=M.hitTimeline(script,L.data);P.stage.setScript(script,P.hits);P.stage.setHearts(P.hearts);P.stage.reset();
   const from=live?clampT((now()-new Date(s.schedule_at).getTime())/1000,script.len):0;

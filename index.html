@@ -596,6 +596,20 @@ function stockCover(title,size){
 }
 const isBeatRow=x=>x&&('audio_path' in x||x._k==='beats'||x.bpm!==undefined&&!('file_path' in x));
 const coverUrl=(x,px)=>x&&x.cover_path?pub(x.cover_path):(isBeatRow(x)?stockCover(x.title,px||512):'');
+/* one small hosted copy of the generated cover per beat (emails and link previews cannot use a drawn image).
+   The file name carries a hash of the title, so a rename makes a fresh file and nothing shows a stale copy. */
+const stockH=t=>{const s=String(t||'BEAT').toUpperCase().replace(/\s+/g,' ').trim()||'BEAT';let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36)};
+const stockPath=x=>'stock/'+x.id+'-'+stockH(x.title)+'.jpg';
+const stockPub=x=>sb.storage.from('public-media').getPublicUrl(stockPath(x)).data.publicUrl;
+const hostedCover=x=>x&&x.cover_path?pub(x.cover_path):(x&&isBeatRow(x)?stockPub(x):'');
+async function syncStock(x,gone){
+ try{const {data:l}=await sb.storage.from('public-media').list('stock',{search:x.id+'-',limit:100});const names=(l||[]).map(f=>f.name).filter(n=>n.startsWith(x.id+'-'));
+  const want=gone||x.cover_path?null:stockPath(x).slice(6),old=names.filter(n=>n!==want);
+  if(old.length)await sb.storage.from('public-media').remove(old.map(n=>'stock/'+n));
+  if(want&&!names.includes(want)){try{await document.fonts.load('800 100px Inter')}catch(e){}
+   const blob=await (await fetch(stockCover(x.title,1024))).blob();
+   const {error}=await sb.storage.from('public-media').upload('stock/'+want,blob,{contentType:'image/jpeg',upsert:true,cacheControl:'31536000'});if(error)throw error}
+ }catch(e){console.warn('stock cover sync',e)}}
 try{document.fonts.load('800 100px Inter').then(()=>{if(typeof beats!=='undefined'&&beats.length){renderBeats();if(typeof ui==='function')ui()}}).catch(()=>{})}catch(e){}
 function thumb(item,i,cls){
  const u=coverUrl(item,512);
@@ -821,7 +835,7 @@ $('#search').onclick=()=>toast('SEARCH COMING SOON');
 const CAMF={beats:null,kits:[.108,.705,1.8],show:[.287,.15,1.8],about:[.897,.43,1.8]};
 let camT='beats';const cam={fx:.5,fy:.5,z:1};
 function hideSeo(){const e=document.getElementById('seo');if(e)e.style.display='none'}
-async function openShow(){try{if(!window.MZShow)await loadScript('show.js?v=12');if(!window.showPageOpen)await loadScript('showpage.js?v=9');await window.showPageOpen(document.getElementById('shRoot'))}catch(e){toast('SHOW FAILED TO LOAD')}}
+async function openShow(){try{if(!window.MZShow)await loadScript('show.js?v=12');if(!window.showPageOpen)await loadScript('showpage.js?v=10');await window.showPageOpen(document.getElementById('shRoot'))}catch(e){toast('SHOW FAILED TO LOAD')}}
 function showView(v){
  camT=v==='beat'?(pageKind==='p'?'kits':'beats'):v;
  {const dl=$('#deals');if(dl)dl.style.display=(v==='about'||v==='show')?'none':''}
@@ -1397,7 +1411,7 @@ async function boRender(){
  const vid=tab==='video';document.querySelector('#bo .bo2').style.display=vid?'none':'';
  document.getElementById('bo2b').style.display='none';document.getElementById('bo2c').style.display='none';
  if(window.emailClose)emailClose();if(window.showMakerClose)showMakerClose();
- if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=2');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
+ if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=3');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
  if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=12');if(!window.showMakerOpen)await loadScript('showmaker.js?v=10');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
  if(vid){try{await loadStudio();await studioOpen()}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
  if(window.studioClose)studioClose();
@@ -1429,6 +1443,7 @@ async function boRender(){
  const bl=$('#bl');
  if(error){bl.innerHTML='<div class="bi"><span>'+esc(error.message)+'</span></div>';return}
  bl.innerHTML=rows.length?'':'<div class="bi"><span>Nothing here yet. Add your first one on the left.</span></div>';
+ if(tab==='beats'&&!window.__stkOk){window.__stkOk=1;(async()=>{for(const r of rows)await syncStock(r)})()}
  rows.forEach(r=>{
   const d=document.createElement('div');d.className='bi';
   const u=coverUrl(r,160);
@@ -1626,8 +1641,9 @@ async function boSave(ev){
    if(editing&&editing[k])oldFiles.push([bucket,editing[k]]);
   }
   msg.textContent='Saving...';
-  const q=editing?sb.from(F.table).update(row).eq('id',editing.id):sb.from(F.table).insert(row);
-  const {error}=await q;if(error)throw error;
+  const q=editing?sb.from(F.table).update(row).eq('id',editing.id).select().single():sb.from(F.table).insert(row).select().single();
+  const {data:saved,error}=await q;if(error)throw error;
+  if(tab==='beats'&&saved){msg.textContent='Updating the cover everywhere...';await syncStock(saved)}
   for(const [b,p] of oldFiles)await rmObj(b,p);
   msg.textContent='Saved.';editing=null;await loadAll();boRender();toast('SAVED TO SUPABASE');
  }catch(err){
@@ -1641,6 +1657,7 @@ async function boDelete(r){
  const F=FIELDS[tab];toast('DELETING...');
  let failed=0;
  for(const f of F.files){const k=f[0],bucket=f[3];if(r[k]){if(!(await rmObj(bucket,r[k])))failed++}}
+ if(tab==='beats')await syncStock(r,true);
  const {error}=await sb.from(F.table).delete().eq('id',r.id);
  if(error){toast('DELETE FAILED: '+error.message);return}
  toast(failed?'DELETED (but '+failed+' file(s) could not be removed - check storage)':'DELETED EVERYWHERE');
