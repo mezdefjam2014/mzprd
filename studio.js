@@ -98,6 +98,7 @@ function html(){
  <div>
   <div class="pn">
    <div class="seg"><button data-f="16:9" class="on">16:9 YOUTUBE</button><button data-f="9:16">9:16 SHORTS</button></div>
+   <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font:700 10px Montserrat;letter-spacing:.14em;color:#d8d8dc;cursor:pointer"><input type="checkbox" id="sBoth"> RENDER BOTH AT ONCE (16:9 + 9:16)</label>
    <div class="cvw"><canvas id="sCv"></canvas></div>
    <div class="row" style="margin-top:10px"><button class="btn" id="sPlay">PLAY PREVIEW</button><canvas id="sWave"></canvas><span id="sTime" style="flex:none;font:600 11px Montserrat;color:#c9c9ce;min-width:84px;text-align:right">0:00 / 0:00</span></div>
    <h4>TEXT (shows from the second you set)</h4>
@@ -137,6 +138,7 @@ function html(){
   <button class="go" id="sRender">RENDER VIDEO</button>
   <div class="bar"><b id="sProg"></b></div><div class="msg" id="sMsg">Keep this tab open and visible while it renders. A 3 minute beat takes about 3 minutes.</div>
   <a id="sDl" class="btn" style="display:none;text-align:center;margin-top:8px;text-decoration:none">DOWNLOAD VIDEO</a>
+  <a id="sDl2" class="btn" style="display:none;text-align:center;margin-top:8px;text-decoration:none">DOWNLOAD 9:16 VIDEO</a>
   <button id="mixBtn" type="button">&#9835; MIX VIDEO (10-15 MIN)</button>
   <button id="thOpen" type="button">&#9733; THUMBNAILS</button>
  </div></div>`;
@@ -357,14 +359,22 @@ function loadMuxer(){return window.Mp4Muxer?Promise.resolve():new Promise((ok,no
 async function render(){
  if(R.busy)return;if(!S.buf){msg('Add audio first (preview or your own file).');return}
  stopPlay();
- if(window.VideoEncoder&&window.AudioEncoder&&window.VideoFrame&&window.AudioData&&window.OfflineAudioContext){
+ const fastOK=window.VideoEncoder&&window.AudioEncoder&&window.VideoFrame&&window.AudioData&&window.OfflineAudioContext,both=$s('#sBoth')&&$s('#sBoth').checked;
+ $s('#sDl2').style.display='none';
+ /* both ratios: 16:9 first, then 9:16 (each keeps its own length rules), one download button each */
+ if(both&&fastOK){const f0=S.fmt;try{S.fmt='16:9';await renderFast({tag:'16:9 ',dl:$s('#sDl')});S.fmt='9:16';await renderFast({tag:'9:16 ',dl:$s('#sDl2')});
+   msg('Both videos are ready. Click each DOWNLOAD button.');try{toast('BOTH VIDEOS READY')}catch(e){}}
+  catch(e){console.warn('both render failed',e);OFF=null;R.busy=false;badge();$s('#sRender').disabled=false;document.getElementById('studio').classList.remove('busy');msg('Render failed ('+((e&&e.message)||e)+'). Try one ratio at a time.')}
+  finally{S.fmt=f0;redraw()}return}
+ if(both&&!fastOK)msg('This browser can only render one ratio at a time. Rendering '+S.fmt+'.');
+ if(fastOK){
   try{await renderFast();return}catch(e){console.warn('fast render failed',e);OFF=null;R.busy=false;badge();$s('#sRender').disabled=false;document.getElementById('studio').classList.remove('busy');msg('Fast render is not available here ('+((e&&e.message)||e)+'). Using real-time render.')}
  }
  return renderRT();
 }
-async function renderFast(){
- await loadMuxer();
- const[w,h]=dims(),fps=30,dur=len(),N=Math.ceil(dur*fps),btn=$s('#sRender'),dl=$s('#sDl'),root=document.getElementById('studio');
+async function renderFast(o){
+ o=o||{};await loadMuxer();
+ const[w,h]=dims(),fps=30,dur=len(),N=Math.ceil(dur*fps),btn=$s('#sRender'),dl=o.dl||$s('#sDl'),root=document.getElementById('studio'),tag=o.tag||'';
  const pickV=async()=>{for(const c of [{codec:'avc1.640028',mux:'avc'},{codec:'avc1.4d0028',mux:'avc'},{codec:'avc1.42E028',mux:'avc'},{codec:'vp09.00.40.08',mux:'vp9'}]){const cfg={codec:c.codec,width:w,height:h,bitrate:8e6,framerate:fps};try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return{...c,cfg}}catch(e){}}return null};
  const pickA=async()=>{for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){try{const r=await AudioEncoder.isConfigSupported({codec:c.codec,sampleRate:48000,numberOfChannels:2,bitrate:192000});if(r&&r.supported)return c}catch(e){}}return null};
  const vc=await pickV(),ac=await pickA();if(!vc||!ac)throw new Error('no codec');
@@ -388,14 +398,14 @@ async function renderFast(){
    frame(cv,Math.min(i/fps,dur),dur);
    const vf=new VideoFrame(cv,{timestamp:Math.round(i*1e6/fps),duration:Math.round(1e6/fps)});venc.encode(vf,{keyFrame:i%90===0});vf.close();
    while(venc.encodeQueueSize>8){await Promise.race([new Promise(r=>venc.addEventListener('dequeue',r,{once:true})),new Promise(r=>setTimeout(r,40))]);if(err)throw err}
-   if(i%4===0){const p=Math.round(i/N*100);$s('#sProg').style.width=p+'%';badge(p);msg('Rendering '+p+'% ... you can switch tabs, it keeps going.');await yieldNow()}
+   if(i%4===0){const p=Math.round(i/N*100);$s('#sProg').style.width=p+'%';badge(p);msg(tag+'Rendering '+p+'% ... you can switch tabs, it keeps going.');await yieldNow()}
   }
   OFF=null;await venc.flush();await aenc.flush();if(err)throw err;muxer.finalize();
  }finally{OFF=null;try{venc.close()}catch(e){}try{aenc.close()}catch(e){}removeEventListener('beforeunload',beforeUnload)}
  const blob=new Blob([target.buffer],{type:'video/mp4'}),url=URL.createObjectURL(blob);
- dl.href=url;dl.download=((S.item&&S.item.slug)||'video')+'-'+(S.fmt==='16:9'?'16x9':'9x16')+'.mp4';dl.style.display='block';
+ dl.href=url;dl.download=((S.item&&S.item.slug)||'video')+'-'+(S.fmt==='16:9'?'16x9':'9x16')+'.mp4';dl.textContent='DOWNLOAD '+S.fmt+' VIDEO';dl.style.display='block';
  R.busy=false;root.classList.remove('busy');btn.disabled=false;badge();$s('#sProg').style.width='100%';
- msg('Done in '+Math.round((performance.now()-t0)/1000)+'s. '+(blob.size/1048576).toFixed(1)+' MB MP4. Click DOWNLOAD VIDEO.');
+ msg(tag+'Done in '+Math.round((performance.now()-t0)/1000)+'s. '+(blob.size/1048576).toFixed(1)+' MB MP4. Click DOWNLOAD VIDEO.');
  try{toast('VIDEO READY: '+dl.download)}catch(e){}
  redraw();
 }

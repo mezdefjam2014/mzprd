@@ -388,6 +388,7 @@ footer.f a:hover{color:#fff}
  .sign span{font-size:max(7px,1.5cqw)}
 }
 .ms{display:none;font:500 10px Montserrat;letter-spacing:.2em;color:#6c6c73;margin-top:6px}
+@media(max-width:380px){header{padding:12px 8px;gap:6px}nav{gap:8px}nav button{letter-spacing:.06em;font-size:9.5px}.tools{gap:6px}.tools>*{transform:scale(.9)}}
 </style>
 </head>
 <body>
@@ -1390,7 +1391,7 @@ const FIELDS={
  packs:{table:'packs',title:'SAMPLE PACK',files:[['cover_path','PACK IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (optional, public)','audio/*','public-media','previews'],['file_path','PACK FILE (.zip, private, any size)','.zip,application/zip,audio/*','private-files','packs']]}
 };
 function loadScript(f){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+f;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
-function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=17';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=18';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
 async function boRender(){
  {const pb=document.getElementById('pbkBar');if(pb)pb.style.display=tab==='packs'?'block':'none'}
  const vid=tab==='video';document.querySelector('#bo .bo2').style.display=vid?'none':'';
