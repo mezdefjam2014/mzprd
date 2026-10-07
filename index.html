@@ -502,8 +502,6 @@ function playPack(i){
  initAudio();ac.resume();
  if(i===curPack&&au.src){au.paused?au.play():au.pause();return}
  curPack=i;cur=-1;au.src=pub(P.preview_path);au.play().catch(()=>toast('COULD NOT PLAY'));ui();track('pack_play',P.id);
- const g=document.querySelector('#packs .grid'),cd=g&&g.children[i];
- if(cd){const a=g.getBoundingClientRect(),b=cd.getBoundingClientRect();g.scrollTo({left:g.scrollLeft+(b.left+b.width/2)-(a.left+a.width/2),behavior:'smooth'})}
 }
 function goPack(d){const ok=packs.map((p,k)=>p.preview_path?k:-1).filter(k=>k>=0);if(!ok.length)return;let pos=ok.indexOf(curPack);pos=pos<0?0:(pos+d+ok.length)%ok.length;playPack(ok[pos])}
 function play(i){
@@ -579,7 +577,7 @@ function renderBeats(){
 function renderPacks(){
  const el=$('#packs');
  if(!packs.length){el.innerHTML='<div class="empty"><b>KITS</b>DRUM KITS AND SAMPLE PACKS<br>DROPPING SOON</div>';return}
- el.innerHTML='<div class="crate"><div class="grid"></div><div class="cfront">SAMPLE PACK CRATE</div></div>';const g=el.querySelector('.grid');
+ el.innerHTML='<div class="grid"></div>';const g=el.querySelector('.grid');
  packs.forEach((P,i)=>{
   const c=document.createElement('div');c.className='card';
   c.innerHTML=`<div class="cv">${thumb(P,i+2,'')}${P.preview_path?'<button class="pl" aria-label="Play preview of '+esc(P.title)+'"><i></i></button><div class="cprog"><b></b></div>':'<span class="nop">NO PREVIEW</span>'}<button class="cvlk" aria-label="Save">${I.heart}</button></div><div class="ti"><a class="tl" href="pack/${esc(bslug(P))}/">${esc(P.title)}</a></div><div class="ds">${esc(P.description||'')}</div><div class="pr">${money(P.price)}</div><button class="cart">ADD TO CART</button>${P.free_download&&P.preview_path?'<button class="cart fd" style="margin-top:-2px">FREE DOWNLOAD</button>':''}`;
@@ -588,22 +586,7 @@ function renderPacks(){
   c.querySelector('.ti').onclick=e=>{if(e)e.preventDefault();location.hash='#/pack/'+encodeURIComponent(bslug(P))}
   c.querySelector('.cvlk').onclick=e=>{e.stopPropagation();toggleLike('p:'+P.id)}
   const fd=c.querySelector('.fd');if(fd)fd.onclick=()=>freeDownload(P);g.appendChild(c)});
- paintArt(el);syncCart();crateGesture(g);
-}
-function crateGesture(g){
- if(g._gest)return;g._gest=1;
- let down=false,sx=0,sl=0,moved=false,edge=0,raf=0;
- const step=()=>{if(edge){g.scrollLeft+=edge;raf=requestAnimationFrame(step)}else raf=0};
- g.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button!==0)return;down=true;moved=false;sx=e.clientX;sl=g.scrollLeft});
- addEventListener('pointermove',e=>{if(!down)return;const dx=e.clientX-sx;if(Math.abs(dx)>5&&!moved){moved=true;g.style.scrollSnapType='none';g.style.cursor='grabbing'}if(moved)g.scrollLeft=sl-dx});
- addEventListener('pointerup',()=>{if(!down)return;down=false;g.style.scrollSnapType='';g.style.cursor=''});
- g.addEventListener('click',e=>{if(moved){e.preventDefault();e.stopPropagation();moved=false}},true);
- g.addEventListener('mousemove',e=>{if(down)return;const r=g.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,z=.14;
-  edge=x<z?-Math.round((z-x)/z*14):x>1-z?Math.round((x-(1-z))/z*14):0;if(edge&&!raf)raf=requestAnimationFrame(step)});
- g.addEventListener('mouseleave',()=>{edge=0});
- g.addEventListener('wheel',e=>{if(Math.abs(e.deltaX)>Math.abs(e.deltaY))return;const max=g.scrollWidth-g.clientWidth;if(max<=0)return;
-  if((e.deltaY<0&&g.scrollLeft<=0)||(e.deltaY>0&&g.scrollLeft>=max-1))return;e.preventDefault();g.scrollLeft+=e.deltaY},{passive:false});
- g.style.cursor='';g.ondragstart=e=>e.preventDefault();
+ paintArt(el);syncCart();
 }
 async function freeDownload(x){
  try{const u=pub(x.preview_path),r=await fetch(u);if(!r.ok)throw 0;const b=await r.blob();
