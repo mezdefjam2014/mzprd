@@ -66,6 +66,7 @@ function html(){return`<div class="mg"><div>
    <span class="msg" style="margin:0;flex:1;min-width:160px">Unlocks the milestone effects in the preview so you can see them.</span></div></div>
  <div class="pn" style="margin-top:16px"><h4 style="margin-top:0">YOUR SHOWS</h4><div id="smList"></div>
   <h4>VIDEO RENDERS (STAY IN THIS BROWSER 7 DAYS, THEN DELETE THEMSELVES)</h4><div id="smRend"></div></div>
+ <div class="pn" id="smYTd" style="margin-top:16px"><h4 style="margin-top:0">YOUTUBE PACKAGE <span style="font:500 10px Montserrat;letter-spacing:.06em;color:#8e8e94">premiere, straight upload, or your site</span></h4><div id="smYT"></div></div>
 </div>
 <div><div class="pn" style="max-height:none">
  <div class="row" style="grid-template-columns:1fr auto"><h3>SHOW MAKER</h3><button class="btn" id="smSave">SAVE DRAFT</button></div>
@@ -91,7 +92,6 @@ function html(){return`<div class="mg"><div>
   <button class="btn big" id="smPub" style="margin-top:8px">PUBLISH SHOW</button>
   <button class="btn big" id="smRender" style="margin-top:8px;background:transparent;border-color:#4a4a50">RENDER TO VIDEO FILE</button>
   <div class="bar"><b id="smProg"></b></div><div class="msg" id="smRMsg"></div></div></details>
- <details class="sec" id="smYTd"><summary>8. YOUTUBE PACKAGE <small>YouTube premiere, straight upload, or your site</small></summary><div class="in" id="smYT"></div></details>
 </div></div></div>`}
 /* ---------- helpers ---------- */
 const beatById=id=>E.beats.find(b=>String(b.id)===String(id));
@@ -404,7 +404,7 @@ async function renderVideo(){
   const blob=new Blob([target.buffer],{type:'video/mp4'}),id='r'+Date.now();
   let kept=true;try{await lib.put({id,title:sc.title,created:Date.now(),expires:Date.now()+7*DAY,size:blob.size,blob})}catch(e){kept=false}
   $q('#smProg').style.width='100%';rm('Done: '+(blob.size/1048576).toFixed(0)+' MB, '+mmss(TOTAL)+' long. '+(kept?'Saved in this browser for 7 days (see Video Renders).':'Could not keep a copy here, so download it now.'));
-  dl(blob,(sc.title||'show').replace(/[^\w -]+/g,'')+'.mp4');await rRend();ytRender();{const d=$q('#smYTd');if(d)d.open=true}rm('Done: '+(blob.size/1048576).toFixed(0)+' MB. Your YouTube package (titles, tags, description with every beat link) is ready in section 8.');
+  dl(blob,(sc.title||'show').replace(/[^\w -]+/g,'')+'.mp4');await rRend();ytRender();{const d=$q('#smYTd');if(d)d.scrollIntoView({behavior:'smooth',block:'start'})}rm('Done: '+(blob.size/1048576).toFixed(0)+' MB. Your YouTube package (titles, tags, description with every beat link) is ready in section 8.');
  }catch(e){console.warn(e);rm('Render failed: '+((e&&e.message)||e))}
  finally{try{venc&&venc.close()}catch(e){}try{aenc&&aenc.close()}catch(e){}E.busy=false;btn.disabled=false;badge();removeEventListener('beforeunload',beforeUnload)}
 }
