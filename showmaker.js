@@ -91,6 +91,7 @@ function html(){return`<div class="mg"><div>
   <button class="btn big" id="smPub" style="margin-top:8px">PUBLISH SHOW</button>
   <button class="btn big" id="smRender" style="margin-top:8px;background:transparent;border-color:#4a4a50">RENDER TO VIDEO FILE</button>
   <div class="bar"><b id="smProg"></b></div><div class="msg" id="smRMsg"></div></div></details>
+ <details class="sec" id="smYTd"><summary>8. YOUTUBE PACKAGE <small>YouTube premiere, straight upload, or your site</small></summary><div class="in" id="smYT"></div></details>
 </div></div></div>`}
 /* ---------- helpers ---------- */
 const beatById=id=>E.beats.find(b=>String(b.id)===String(id));
@@ -123,7 +124,7 @@ function autoBuild(){
  m[0].start=0;m[m.length-1].end=len;sc.segments=m;sc.auto=true;
 }
 function rebuild(){const sc=E.script;if(sc.auto!==false)autoBuild();else{spread();applyLooks()}fillStruct()}
-function fillStruct(){const sc=E.script;$q('#smLen').value=sc.len/60;$q('#smScrub').max=sc.len;rTracks();rSegs();segBar();refreshHits();syncAutoUi();rDirList();dirCount();rPicks();setT();seek(E.T)}
+function fillStruct(){const sc=E.script;$q('#smLen').value=sc.len/60;$q('#smScrub').max=sc.len;rTracks();rSegs();segBar();refreshHits();syncAutoUi();rDirList();dirCount();rPicks();ytRender();setT();seek(E.T)}
 function manual(){const sc=E.script;if(sc.auto!==false){sc.auto=false;syncAutoUi()}}
 function syncAutoUi(){
  const sc=E.script,auto=sc.auto!==false,looks=new Set(sc.tracks.map(t=>t.look).filter(Boolean)),nl=Math.max(1,looks.size);
@@ -174,7 +175,95 @@ function rMs(){
 function setWhen(){const d=E.when?new Date(E.when):null;$q('#smDate').value=d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:'';$q('#smClock').value=d?`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:'20:00'}
 function readWhen(){const d=$q('#smDate').value,t=$q('#smClock').value||'20:00';return d?new Date(d+'T'+t).toISOString():''}
 function msg(t){$q('#smMsg').textContent=t}
-function fillAll(){syncAutoUi();rDir();$q('#smTitle').value=E.title;$q('#smLen').value=E.script.len/60;$q('#smScrub').max=E.script.len;rTracks();rTheme();rSegs();rFx();rMs();setWhen();segBar();setT();syncAutoUi()}
+function fillAll(){syncAutoUi();rDir();ytRender();$q('#smTitle').value=E.title;$q('#smLen').value=E.script.len/60;$q('#smScrub').max=E.script.len;rTracks();rTheme();rSegs();rFx();rMs();setWhen();segBar();setT();syncAutoUi()}
+
+/* ---------- YouTube package for the downloaded video (premiere or straight upload) ----------
+   Built from what works on YouTube: keyword-first titles (about 60-70 characters show in search), a hook in the first 150 characters of the
+   description, chapters that start at 0:00, 3 to 5 hashtags, a few accurate tags under 500 characters and no artist names. */
+const YT={mode:'premiere',variant:0,out:null};
+const ytTitleCase=s=>String(s||'').replace(/\w\S*/g,w=>w[0].toUpperCase()+w.slice(1).toLowerCase());
+const ytSlug=t=>String(t||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+const ytStamp=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return(h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0')};
+const ytUrl=b=>'https://mzprd.com/beat/'+((b&&typeof bslug==='function'?bslug(b):(b&&(b.slug||ytSlug(b.title)))||String(b&&b.id))||'')+'/';
+function ytInfo(){
+ const sc=E.script,tr=sc.tracks.slice().sort((a,b)=>a.start-b.start),rows=tr.map(t=>{const b=beatById(t.id)||{};return{t,b,title:String(t.title||b.title||'Beat').trim(),bpm:t.bpm||b.bpm||0,key:t.key||b.musical_key||'',url:ytUrl(b.id?b:{title:t.title,id:t.id}),tags:String(b.tags||'').split('/').map(x=>x.trim().toLowerCase()).filter(Boolean)}});
+ const cnt={};rows.forEach(r=>r.tags.forEach(g=>cnt[g]=(cnt[g]||0)+1));
+ const gen=Object.keys(cnt).filter(g=>!/demo|free/.test(g)).sort((a,b)=>cnt[b]-cnt[a]);
+ return{sc,rows,genres:gen,g:ytTitleCase(gen[0]||'Hip Hop'),g2:gen[1]?ytTitleCase(gen[1]):'',n:rows.length,mins:Math.max(1,Math.round(sc.len/60)),year:new Date().getFullYear(),title:(sc.title||$q('#smTitle').value||'Weekly Show').trim()};
+}
+function ytWhen(){return E.when?new Date(E.when).toLocaleString([],{weekday:'long',month:'long',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'}):''}
+function ytBuild(){
+ const I=ytInfo(),{rows,n,g,g2,mins,year,title:T}=I,pre=YT.mode==='premiere',first=rows[0]?rows[0].title:'';
+ const nb=n===1?'1 Original Beat':n+' Original Beats';
+ const pool=[
+  `${g} Beats Showcase: ${nb} in ${mins} Min | ${T}`,
+  `${T} | ${n===1?'1':n} ${g} ${n===1?'Beat':'Beats'} (Pixel Concert Beat Show) | MZPRD`,
+  `Hard ${g} Instrumentals ${year} | ${T} | Meztheprod`,
+  `${g} Type Beats for Artists | ${T} | MZPRD`,
+  first?`${T}: ${first}${n>1?' + '+(n-1)+' more '+g+' beats':''} | MZPRD`:`${T} | ${g} Beats | MZPRD`,
+  g2?`${g} & ${g2} Instrumentals ${year} | Beat Showcase | MZPRD`:`${g} Instrumentals ${year} | Beat Showcase | MZPRD`,
+  `Rap Beats ${year} | ${T} | Beats for Sale (Link in Description)`,
+  `${T} | Beat Show ${year}${first?' | '+first+' & more':''}`
+ ];
+ const k=YT.variant%pool.length,titles=pool.slice(k).concat(pool.slice(0,k)).map(t=>t.length>100?t.slice(0,97).replace(/\s+\S*$/,'')+'...':t);
+ /* chapters: start at 0:00, at least 3 stamps, 10+ seconds apart */
+ let ch=rows.map(r=>({t:Math.round(r.t.start),l:r.title+(r.bpm?' ('+r.bpm+' BPM'+(r.key?', '+r.key:'')+')':'')}));
+ if(!ch.length||ch[0].t>0)ch.unshift({t:0,l:'Intro'});
+ if(ch.length<3){I.sc.segments.forEach(s=>{const nm=ytTitleCase(s.name||s.preset);if(s.start>0&&!ch.some(c=>Math.abs(c.t-Math.round(s.start))<10))ch.push({t:Math.round(s.start),l:nm})});ch.sort((a,b)=>a.t-b.t)}
+ ch=ch.filter((c,i)=>i===0||c.t-ch[i-1].t>=10);
+ const chapters=ch.map(c=>ytStamp(c.t)+' '+c.l).join('\n');
+
+ if(YT.mode==='site'){ /* the live show on mzprd.com: page title, meta description, intro, beat links, keywords, share post */
+  const pt=[`${T} | Live ${g} Beat Show | MZPRD`,`${T}: ${nb} | Meztheprod`,`${g} Beats Live Show ${year} | MZPRD`,`Watch ${T} | Pixel Concert Beat Show | MZPRD`,`${n===1?'1':n} ${g} ${n===1?'Beat':'Beats'} Live | ${T}`,`${T} | ${g} Instrumentals Live | MZPRD`].map(t=>t.length>60?t.slice(0,57).replace(/\s+\S*$/,'')+'...':t);
+  const k2=YT.variant%pt.length,titles=pt.slice(k2).concat(pt.slice(0,k2));
+  const meta=`Watch ${T} live on MZPRD: ${n===1?'an original':n+' original'} ${g.toLowerCase()} ${n===1?'beat':'beats'} in a pixel concert. Tap the hearts, then grab your favorite beat.`.slice(0,155);
+  const rel=rows.map((r,i)=>`${i+1}. ${r.title}${r.bpm?' ('+r.bpm+' BPM'+(r.key?', '+r.key:'')+')':''}\n${r.url}`).join('\n\n');
+  const when=ytWhen();
+  const desc=['PAGE TITLE (about 60 characters)',titles[0],'','META DESCRIPTION (155 characters)',meta,'','PAGE INTRO',
+   `${when?'Starts '+when+'. ':''}${T} is a live pixel concert of ${n===1?'one original':n+' original'} ${g.toLowerCase()} ${n===1?'beat':'beats'} by MZPRD (Meztheprod). Tap the heart to unlock lights, lasers and fireworks for the whole crowd, then grab the beat you like. Every beat played is linked below.`,
+   '','BEATS PLAYED (every beat in this show)',rel,'','SHOP','https://mzprd.com','https://mzprd.com/sample-packs/','',
+   'CHAPTERS',chapters,'','KEYWORDS',[g.toLowerCase()+' beats','live beat show','rap beats','hip hop beats','r&b beats','instrumentals','mzprd','meztheprod'].join(', ')].join('\n');
+  const tagsS=[g.toLowerCase()+' beats','live beat show','beat showcase','rap beats','hip hop beats','r&b beats','instrumentals','sample packs','mzprd','meztheprod'].concat(I.genres.map(x=>x+' beats')).filter((x,i,a)=>a.indexOf(x)===i).slice(0,12);
+  return{titles,desc,tags:tagsS.join(', '),pinned:`${when?'Starts '+when+'. ':'Live now. '}${T}: ${nb} on MZPRD. Tap the heart and unlock the show. https://mzprd.com`,thumbs:[`${T.toUpperCase().slice(0,22)}`,`LIVE BEAT SHOW`,`${n} ${g.toUpperCase()} BEATS`],chapters,hashtags:'',site:true};
+ }
+ const gslug=g.replace(/\s+/g,''),tagsH=['#'+gslug+'Beats','#Instrumentals','#MZPRD','#RapBeats','#HipHopBeats'].filter((x,i,a)=>a.indexOf(x)===i);
+ const hook=pre?`Premiering ${ytWhen()||'soon'}: ${n===1?'an original':n+' original'} ${g.toLowerCase()} ${n===1?'beat':'beats'} by MZPRD (Meztheprod). Join the chat and tell us your favorite.`:`${T}: ${n===1?'an original':n+' original'} ${g.toLowerCase()} ${n===1?'beat':'beats'} by MZPRD (Meztheprod). Listen, then grab your favorite for your next song.`;
+ const links=rows.map((r,i)=>`${i+1}. ${r.title}${r.bpm?' ('+r.bpm+' BPM'+(r.key?', '+r.key:'')+')':''}\n${r.url}`).join('\n\n');
+ const desc=[hook,tagsH.slice(0,3).join(' '),'',
+  pre?'Set a reminder so you do not miss the premiere, then drop a heart in the live chat on the beat you want.':'Which beat was your favorite? Comment its number.',
+  '','TIMESTAMPS',chapters,'','GET THE BEATS (every beat played in this show)',links,'',
+  'Buy beats and sample packs: https://mzprd.com','Sample packs, vinyl samples and producer loops: https://mzprd.com/sample-packs/','',
+  'MZPRD (short for Meztheprod) makes original beats and instrumentals for rap, hip hop and R&B, plus sample packs and loops. Every beat in this video is an original MZPRD production.','',tagsH.join(' ')].join('\n');
+ /* tags: main keyword first, accurate, under 500 characters total, no artist names */
+ const raw=[g.toLowerCase()+' beats',g.toLowerCase()+' instrumentals','rap beats','hip hop beats','r&b beats','instrumentals','beat showcase','beats for sale','producer','mzprd','meztheprod'].concat(I.genres.map(x=>x+' beats')).concat(rows.slice(0,4).map(r=>r.title.toLowerCase()+' beat'));
+ const tags=[];let len=0;raw.forEach(t=>{t=t.slice(0,30);if(!t||tags.includes(t)||tags.length>=12)return;if(len+t.length+1>480)return;tags.push(t);len+=t.length+1});
+ const pinned=pre?`Which beat is your favorite? Drop its number (1-${n}) in the chat. Full beats and downloads: https://mzprd.com`:`Which beat was your favorite? Comment its number (1-${n}). Full beats and downloads: https://mzprd.com`;
+ const thumbs=[`${n} ${g.toUpperCase()} BEATS`,`${g.toUpperCase()} BEAT SHOW`,`NEW ${year}: ${first?first.toUpperCase().slice(0,18):T.toUpperCase().slice(0,18)}`];
+ return{titles,desc,tags:tags.join(', '),pinned,thumbs,chapters,hashtags:tagsH.join(' ')};
+}
+const ytCopy=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}a.remove();return ok}};
+function ytRender(){
+ const el=$q('#smYT');if(!el)return;
+ if(!E.script.tracks.length||!E.script.tracks.some(t=>t.audio||t.title)){el.innerHTML='<div class="msg">Add at least one beat and your YouTube package will appear here.</div>';return}
+ const O=YT.out=ytBuild(),cc=(n,max,soft)=>`<span style="font:600 10px Montserrat;letter-spacing:.1em;color:${n>max?'#ff5c5c':soft&&n>soft?'#e8b94a':'#7ad47a'}">${n}/${max}</span>`;
+ el.innerHTML=`<div class="two"><label class="chk"><input type="radio" name="ytm" value="premiere"${YT.mode==='premiere'?' checked':''}> YOUTUBE PREMIERE</label><label class="chk"><input type="radio" name="ytm" value="straight"${YT.mode==='straight'?' checked':''}> YOUTUBE STRAIGHT UPLOAD</label></div>
+ <label class="chk" style="margin-top:2px"><input type="radio" name="ytm" value="site"${YT.mode==='site'?' checked':''}> MY SITE: THE LIVE SHOW / BEAT PAGE</label>
+ <div class="msg">${YT.mode==='site'?'Copy for the live show page on mzprd.com. Nothing is published for you, you paste it where you want it.':'For the video you render and download here. Paste it into YouTube when you upload.'}</div>
+ <h4>${YT.mode==='site'?'PAGE TITLES (ABOUT 60 CHARACTERS)':'TITLES (PICK ONE, ABOUT 60-70 CHARACTERS SHOW IN SEARCH)'}</h4>${O.titles.map((t,i)=>`<div class="it" style="gap:6px"><b style="font-weight:600;white-space:normal">${esc(t)}</b>${cc(t.length,YT.mode==='site'?60:100,YT.mode==='site'?60:70)}<button data-c="t${i}">COPY</button></div>`).join('')}
+ <button class="btn" id="ytMore" style="width:100%;margin-top:6px">MORE TITLE IDEAS</button>
+ <h4>${YT.mode==='site'?'PAGE COPY':'DESCRIPTION'} ${cc(O.desc.length,5000)}</h4><textarea id="ytD" rows="14" style="width:100%;background:#050506;border:1.5px solid #34343a;color:#fff;padding:8px;font:500 12px/1.5 monospace">${esc(O.desc)}</textarea><button class="btn" data-c="desc" style="width:100%;margin-top:6px">COPY ${YT.mode==='site'?'PAGE COPY':'DESCRIPTION'}</button>
+ <h4>${YT.mode==='site'?'KEYWORDS':'TAGS'} ${cc(O.tags.length,500)}</h4><textarea id="ytT" rows="3" style="width:100%;background:#050506;border:1.5px solid #34343a;color:#fff;padding:8px;font:500 12px/1.5 monospace">${esc(O.tags)}</textarea><button class="btn" data-c="tags" style="width:100%;margin-top:6px">COPY TAGS</button>
+ <h4>${YT.mode==='site'?'SHARE POST (SOCIALS)':'PINNED COMMENT'}</h4><div class="msg" style="color:#d9d9dc">${esc(O.pinned)}</div><button class="btn" data-c="pin" style="width:100%">COPY ${YT.mode==='site'?'SHARE POST':'PINNED COMMENT'}</button>
+ <h4>THUMBNAIL TEXT IDEAS</h4><div class="msg" style="color:#d9d9dc">${O.thumbs.map(esc).join('<br>')}</div>
+ <div class="two" style="margin-top:10px"><button class="btn" id="ytAll">COPY EVERYTHING</button><button class="btn" id="ytTxt">DOWNLOAD .TXT</button></div><div class="msg" id="ytMsg"></div>`;
+ el.querySelectorAll('[name=ytm]').forEach(r=>r.onchange=()=>{YT.mode=r.value;ytRender()});
+ $q('#ytMore').onclick=()=>{YT.variant+=3;ytRender()};
+ const text=()=>({desc:$q('#ytD').value,tags:$q('#ytT').value,pin:O.pinned});
+ el.querySelectorAll('[data-c]').forEach(b=>b.onclick=async()=>{const k=b.dataset.c,v=k[0]==='t'&&/^t\d+$/.test(k)?O.titles[+k.slice(1)]:text()[k];const ok=await ytCopy(v);$q('#ytMsg').textContent=ok?'Copied.':'Copy failed. Select the text and copy it by hand.'});
+ const all=()=>{const x=text();return'TITLES\n'+O.titles.map((t,i)=>(i+1)+'. '+t).join('\n')+'\n\nDESCRIPTION\n'+x.desc+'\n\nTAGS\n'+x.tags+'\n\nPINNED COMMENT\n'+x.pin+'\n\nTHUMBNAIL TEXT\n'+O.thumbs.join('\n')};
+ $q('#ytAll').onclick=async()=>{$q('#ytMsg').textContent=(await ytCopy(all()))?'Everything copied.':'Copy failed.'};
+ $q('#ytTxt').onclick=()=>dl(new Blob([all()],{type:'text/plain'}),(E.script.title||'show').replace(/[^\w -]+/g,'')+' - YouTube package.txt');
+}
 /* ---------- director: the 52 camera moves, effects and hooks ---------- */
 const dd=()=>{const s=E.script;if(!s.dir)s.dir={on:false,amount:1,off:window.MZShowFX?MZShowFX.allOff():{}};if(!s.dir.off)s.dir.off={};return s.dir};
 function rPicks(){const FX=window.MZShowFX,el=$q('#dPicks');if(!FX||!el)return;const L=FX.describePicks(E.script);el.innerHTML=L.length?L.map(g=>g.hooks?'<b>HOOKS (whole show):</b> '+g.codes.join(' '):'<b>'+mmss(g.from)+' - '+mmss(g.to)+':</b> '+g.codes.join(' ')).join('<br>'):(E.script.auto===false?'Auto-build is off, so only the items you tick are used.':'Nothing is chosen automatically right now.')}
@@ -315,7 +404,7 @@ async function renderVideo(){
   const blob=new Blob([target.buffer],{type:'video/mp4'}),id='r'+Date.now();
   let kept=true;try{await lib.put({id,title:sc.title,created:Date.now(),expires:Date.now()+7*DAY,size:blob.size,blob})}catch(e){kept=false}
   $q('#smProg').style.width='100%';rm('Done: '+(blob.size/1048576).toFixed(0)+' MB, '+mmss(TOTAL)+' long. '+(kept?'Saved in this browser for 7 days (see Video Renders).':'Could not keep a copy here, so download it now.'));
-  dl(blob,(sc.title||'show').replace(/[^\w -]+/g,'')+'.mp4');await rRend();
+  dl(blob,(sc.title||'show').replace(/[^\w -]+/g,'')+'.mp4');await rRend();ytRender();{const d=$q('#smYTd');if(d)d.open=true}rm('Done: '+(blob.size/1048576).toFixed(0)+' MB. Your YouTube package (titles, tags, description with every beat link) is ready in section 8.');
  }catch(e){console.warn(e);rm('Render failed: '+((e&&e.message)||e))}
  finally{try{venc&&venc.close()}catch(e){}try{aenc&&aenc.close()}catch(e){}E.busy=false;btn.disabled=false;badge();removeEventListener('beforeunload',beforeUnload)}
 }
@@ -354,7 +443,7 @@ function wire(){
 window.showMakerOpen=async function(){
  css();root=document.getElementById('showmk');root.classList.add('on');
  if(!mounted){root.innerHTML=html();mounted=true;wire();await M.loadFonts();E.plate=await M.loadPlate();E.stage=M.makeStage($q('#smCv'));E.stage.setPlate(E.plate);
-  const {data:bt}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,cover_path').order('created_at',{ascending:false});E.beats=(bt||[]).filter(b=>b.preview_path);
+  const {data:bt}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,cover_path,slug,tags').order('created_at',{ascending:false});E.beats=(bt||[]).filter(b=>b.preview_path);
   if(!E.script.tracks.length&&E.beats.length){const b=E.beats[0];E.script.tracks=[{id:b.id,title:b.title,bpm:b.bpm||0,key:b.musical_key||'',audio:b.preview_path,cover:b.cover_path,start:0,end:E.script.len}]}
   E.stage.setScript(E.script,[]);if(E.script.auto!==false)autoBuild();fillAll();await loadShows();await rRend();prep();
   cancelAnimationFrame(E.raf);E.raf=requestAnimationFrame(frame)}
