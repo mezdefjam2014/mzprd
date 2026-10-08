@@ -122,6 +122,10 @@ label.optin input{margin-top:2px;accent-color:var(--red);flex:none}
 .seo summary{cursor:pointer;color:#e6e6ea;font-weight:600}
 .seo .crumbs{font:600 10px Montserrat;letter-spacing:.22em;color:#6c6c73;margin-bottom:14px;text-transform:uppercase}
 .seo .crumbs a{color:#8e8e94;border:0}
+.acr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1d1d21;font:600 11px Montserrat;letter-spacing:.08em}
+.acr .dbtn{flex:none}
+.aco{font:600 10px Montserrat;letter-spacing:.25em;color:var(--gold);margin:16px 0 4px}
+.acl{background:none;border:0;color:#8e8e94;font:600 10px Montserrat;letter-spacing:.2em;cursor:pointer;margin-top:12px;padding:0;text-decoration:underline}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .grain{position:fixed;inset:0;pointer-events:none;z-index:30;opacity:.07;background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
 header{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:clamp(14px,2.8vw,40px) 8.1%}
@@ -416,6 +420,7 @@ footer.f a:hover{color:#fff}
   <div class="tools">
    <button id="dlPill" class="pill" style="display:none" aria-label="Your downloads"></button>
    <button id="search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></button>
+   <button id="acctBtn" aria-label="Account"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.500 4-6.500 8-6.500s7 2 8 6.500"/></svg></button>
    <button id="favBtn" aria-label="Saved beats and packs"><svg viewBox="0 0 24 24"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 5.800-8 11-8 11z"/></svg><span class="badge" id="favN" style="display:none">0</span></button>
    <button id="cartBtn" aria-label="Cart"><svg viewBox="0 0 24 24"><path d="M2 3h3l2.5 12h11L21 7H6"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg><span class="badge" id="badge">0</span></button>
   </div>
@@ -452,6 +457,10 @@ footer.f a:hover{color:#fff}
  <label class="optin"><input type="checkbox" id="optIn"> Email me new beats and show reminders (optional, you can stop any time)</label>
 <div id="ppbox"></div><div class="nt" id="nt"></div><div class="secure">SECURE CHECKOUT WITH PAYPAL / MZPRD</div></div>
  <div id="cartDone" style="display:none"></div>
+</div></div>
+
+<div class="modal" id="acct"><div class="box" style="max-height:90vh;overflow:auto">
+ <button class="x" id="acx" aria-label="Close account">&times;</button><div id="acBody"></div>
 </div></div>
 
 <div class="modal" id="login"><div class="box">
@@ -770,7 +779,7 @@ async function mountPaypal(){
   createOrder:async()=>{try{$('#nt').textContent='';if(!cart.size)throw new Error('Your cart is empty.');
    if(pre.p&&pre.sig===cartSig()&&Date.now()-pre.t<600000){try{return (await pre.p).id}catch(e){}}
    const r=await callCheckout({action:'create',items:[...cart].map(k=>({t:k[0],id:k.slice(2)})),coupon:coupon?coupon.code:undefined});return r.id}catch(e){$('#nt').textContent=e.message;throw e}},
-  onApprove:async d=>{try{$('#nt').textContent='Confirming your payment...';const r=await callCheckout({action:'capture',orderId:d.orderID,optin:!!($('#optIn')&&$('#optIn').checked)});const o={token:r.token,secret:r.secret,exp:Date.now()+r.seconds_left*1000,downloads:r.downloads};cart.clear();coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}syncCart();dlStart(o);showDone(o,true);thanksPending=true;scrollTo({top:0,behavior:'smooth'})}catch(e){$('#nt').textContent=e.message}},
+  onApprove:async d=>{try{$('#nt').textContent='Confirming your payment...';const r=await callCheckout({action:'capture',orderId:d.orderID,optin:!!($('#optIn')&&$('#optIn').checked)});const o={token:r.token,secret:r.secret,exp:Date.now()+r.seconds_left*1000,downloads:r.downloads};cart.clear();coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}syncCart();dlStart(o);acctClaim();showDone(o,true);thanksPending=true;scrollTo({top:0,behavior:'smooth'})}catch(e){$('#nt').textContent=e.message}},
   onCancel:()=>{$('#nt').textContent='Payment cancelled. Your cart is still here.'},
   onError:()=>{if(!$('#nt').textContent)$('#nt').textContent='PayPal had a problem. Please try again.'}
  }).render('#ppbox');
@@ -807,7 +816,7 @@ $('#dlPill').onclick=()=>{const o=dlLoad();if(o)showDone(o,false)};
 {const o=dlLoad();if(o)dlStart(o)}
 const LK='mzprd_likes';
 function likedLoad(){try{return new Set(JSON.parse(localStorage.getItem(LK)||'[]'))}catch(e){return new Set()}}
-function likedSave(){try{localStorage.setItem(LK,JSON.stringify([...liked]))}catch(e){}}
+function likedSave(){try{localStorage.setItem(LK,JSON.stringify([...liked]))}catch(e){}acctPushLikes()}
 liked=likedLoad();
 function toggleLike(k){const had=liked.has(k);had?liked.delete(k):liked.add(k);likedSave();syncLikes();toast(had?'REMOVED FROM SAVED':'SAVED')}
 function syncLikes(){
@@ -1580,13 +1589,14 @@ async function promoRender(){
   <label>MESSAGE (shows before the price)</label><input type="text" id="p_text" value="${esc(e.promo_text)}">
   <label>GIRL IMAGE (transparent PNG works best)</label><input type="file" id="p_img" accept="image/*">
   ${e.promo_image_path?`<div class="cur">Current: ${esc(e.promo_image_path.split('/').pop())}</div><label class="chk" style="margin-top:6px"><input type="checkbox" id="p_rm"> REMOVE THIS IMAGE</label>`:''}
+  <label class="chk"><input type="checkbox" id="p_acc" ${e.accounts_redownload===false?'':'checked'}> LET SIGNED-IN CUSTOMERS RE-DOWNLOAD THEIR PURCHASES (turn off to stop all account downloads)</label>
   <button class="go" type="submit" id="p_save">SAVE PROMO</button><div id="bmsg"></div>`;
  $('#bf').onsubmit=promoSave;
  $('#bl').innerHTML='<div class="bi"><span>While the promo is on, every beat on the site sells at the promo price and the girl pops in with your message. Turn it off to go back to the price set on each beat. Sample packs are not affected.</span></div>';
 }
 async function promoSave(ev){
  ev.preventDefault();const msg=$('#bmsg'),btn=$('#p_save');btn.disabled=true;
- const row={id:1,promo_enabled:$('#p_on').checked,promo_price:parseFloat($('#p_price').value)||0,promo_text:$('#p_text').value.trim()||'ALL BEATS'};
+ const row={id:1,promo_enabled:$('#p_on').checked,promo_price:parseFloat($('#p_price').value)||0,promo_text:$('#p_text').value.trim()||'ALL BEATS',accounts_redownload:$('#p_acc').checked};
  let oldImg=null,newImg=null;
  try{
   const cur=(await sb.from('site_settings').select('promo_image_path').eq('id',1).maybeSingle()).data?.promo_image_path||null;
@@ -1668,7 +1678,76 @@ async function boDelete(r){
  editing=null;await loadAll();boRender();
 }
 
+/* ---------- customer accounts (optional; guests can still buy) ---------- */
+const ACFN=SB_URL+'/functions/v1/account';let acUser=null,acMode='in';
+async function acCall(body){
+ const {data:{session}}=await sb.auth.getSession();
+ const r=await fetch(ACFN,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+(session?session.access_token:SB_KEY)},body:JSON.stringify(body)});
+ const j=await r.json().catch(()=>({error:'Network problem. Try again.'}));
+ if(!r.ok||j.error)throw new Error(j.error||'Something went wrong.');return j;
+}
+let acPushT=null;
+function acctPushLikes(){if(!acUser)return;clearTimeout(acPushT);acPushT=setTimeout(()=>{sb.from('favorites').upsert({user_id:acUser.id,likes:[...liked],updated_at:new Date().toISOString()}).then(()=>{})},600)}
+async function acctSyncLikes(){
+ if(!acUser)return;
+ try{const {data}=await sb.from('favorites').select('likes').eq('user_id',acUser.id).maybeSingle();
+  const before=liked.size;(data&&data.likes||[]).forEach(k=>liked.add(k));
+  try{localStorage.setItem(LK,JSON.stringify([...liked]))}catch(e){}
+  if(!data||liked.size>(data.likes||[]).length)acctPushLikes();
+  if(liked.size!==before)syncLikes();
+ }catch(e){}
+}
+async function acctClaim(){
+ if(!acUser)return;const o=dlLoad();if(!o)return;
+ try{await acCall({action:'claim',token:o.token,secret:o.secret})}catch(e){}
+}
+async function acctRefresh(){
+ const {data:{session}}=await sb.auth.getSession();acUser=session?session.user:null;
+ $('#acctBtn').classList.toggle('on',!!acUser);
+ if(acUser){acctSyncLikes();acctClaim()}
+}
+function acctMsg(t){const m=$('#acMsg');if(m)m.textContent=t||''}
+async function acctRender(){
+ const b=$('#acBody');
+ if(!acUser){
+  const up=acMode==='up';
+  b.innerHTML='<h3>'+(up?'CREATE ACCOUNT':'SIGN IN')+'</h3><div class="nt" style="margin:-8px 0 8px;color:#b8b8be">Optional. Save your favorites and re-download what you bought. You can always buy as a guest.</div>'+
+   '<label for="acE">EMAIL</label><input id="acE" type="email" autocomplete="username"><label for="acP">PASSWORD</label><input id="acP" type="password" autocomplete="'+(up?'new-password':'current-password')+'">'+
+   '<button class="go" id="acGo">'+(up?'CREATE ACCOUNT':'SIGN IN')+'</button><div class="nt" id="acMsg"></div>'+
+   '<button class="acl" id="acSw">'+(up?'I ALREADY HAVE AN ACCOUNT':'NEW HERE? CREATE AN ACCOUNT')+'</button>';
+  const go=async()=>{
+   const email=$('#acE').value.trim(),password=$('#acP').value;if(!email||password.length<6){acctMsg('Enter an email and a password of 6+ characters.');return}
+   $('#acGo').disabled=true;acctMsg('One moment...');
+   const r=up?await sb.auth.signUp({email,password}):await sb.auth.signInWithPassword({email,password});
+   $('#acGo').disabled=false;
+   if(r.error){acctMsg(r.error.message);return}
+   if(up&&!r.data.session){acctMsg('Check your email to confirm your account, then sign in.');return}
+   await acctRefresh();await checkAdmin();acctRender();toast('SIGNED IN');
+  };
+  $('#acGo').onclick=go;$('#acP').onkeydown=e=>{if(e.key==='Enter')go()};
+  $('#acSw').onclick=()=>{acMode=up?'in':'up';acctRender()};
+  return;
+ }
+ b.innerHTML='<h3>MY ACCOUNT</h3><div class="nt" style="margin:-8px 0 0;color:#b8b8be">'+esc(acUser.email)+'</div><div class="aco">MY PURCHASES</div><div id="acOrders" class="nt">Loading...</div>'+
+  '<button class="acl" id="acFav">MY SAVED BEATS &amp; PACKS</button><br><button class="acl" id="acOut">LOG OUT</button>';
+ $('#acFav').onclick=()=>{$('#acct').classList.remove('on');openFav()};
+ $('#acOut').onclick=async()=>{await sb.auth.signOut();isAdmin=false;LINK.textContent='LOGIN';acUser=null;$('#acctBtn').classList.remove('on');$('#acct').classList.remove('on');toast('LOGGED OUT')};
+ try{
+  await acctClaim();
+  const r=await acCall({action:'orders'}),box=$('#acOrders');
+  if(!r.orders.length){box.textContent='Nothing yet. Purchases made while signed in show up here.';return}
+  box.className='';box.innerHTML=(r.redownload?'':'<div class="nt">Re-downloads are switched off right now.</div>')+r.orders.map(o=>'<div class="aco">'+new Date(o.paid_at).toLocaleDateString()+'</div>'+o.items.map(x=>'<div class="acr"><span>'+esc(x.title).toUpperCase()+'</span>'+(x.available?'<button class="dbtn" data-t="'+esc(o.token)+'" data-i="'+x.i+'">DOWNLOAD</button>':'<em>-</em>')+'</div>').join('')).join('');
+  box.querySelectorAll('.dbtn').forEach(d=>d.onclick=async()=>{d.disabled=true;d.textContent='...';
+   try{const j=await acCall({action:'download',token:d.dataset.t,i:Number(d.dataset.i)});const a=document.createElement('a');a.href=j.url;a.download='';document.body.appendChild(a);a.click();a.remove();d.textContent='DONE'}
+   catch(e){d.textContent='ERROR';toast(e.message.toUpperCase())}
+   setTimeout(()=>{d.disabled=false;d.textContent='DOWNLOAD'},2500)});
+ }catch(e){const box=$('#acOrders');if(box)box.textContent=e.message}
+}
+$('#acctBtn').onclick=async()=>{await acctRefresh();$('#acct').classList.add('on');acctRender()};
+$('#acx').onclick=()=>$('#acct').classList.remove('on');
+$('#acct').onclick=e=>{if(e.target.id==='acct')e.target.classList.remove('on')};
 sb.auth.onAuthStateChange(()=>{});
+acctRefresh();
 /* ---------- slots button + coupons ---------- */
 const SLOTFN=SB_URL+'/functions/v1/slots';
 function mzBid(){
