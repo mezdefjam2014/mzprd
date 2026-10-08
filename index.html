@@ -94,6 +94,7 @@ label.optin input{margin-top:2px;accent-color:var(--red);flex:none}
 #favBtn .badge{background:var(--red)}
 #favList .ci button{margin-left:8px;border:1px solid #4a4a50;padding:6px 8px;color:#fff}
 #favList .ci button:hover{border-color:var(--red)}
+.acd span{display:block;margin-top:3px}
 .bf select{width:100%;background:#050506;border:1.5px solid #34343a;color:#fff;padding:11px;font:500 14px Montserrat}
 .chks{max-height:210px;overflow:auto;border:1px solid #2a2a2e;padding:6px 10px;background:#050506}
 .chks div{display:flex;gap:10px;align-items:center;padding:7px 0;font:500 13px Montserrat;color:#d9d9dc;border-bottom:1px solid #16161a}
@@ -314,7 +315,9 @@ footer.f a:hover{color:#fff}
 .bh button.on{background:var(--red);border-color:var(--red)}
 .bh button:hover,.bo-btn:hover{border-color:#fff}
 .bo2{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:26px;align-items:start}
-@media(max-width:900px){.bo2{grid-template-columns:1fr}}
+@media(max-width:900px){.bo2{grid-template-columns:minmax(0,1fr)}}
+.bf select{width:100%;max-width:100%}.bi>div{min-width:0;overflow-wrap:anywhere}
+@media(max-width:560px){.bi.ac2,.bi[style*='1fr auto']{grid-template-columns:minmax(0,1fr)!important}.acb{justify-content:flex-start}}
 .bf{background:#0c0c0f;border:1px solid #2a2a2e;padding:18px}
 .bf h3{font:700 12px Montserrat;letter-spacing:.3em;color:var(--gold);margin-bottom:6px}
 .bf label{display:block;font:600 10px Montserrat;letter-spacing:.28em;color:#8e8e94;margin:14px 0 6px}
@@ -1589,7 +1592,7 @@ async function accountsRender(){
   const to=$('#am_to');const keep=to.value;to.innerHTML='<option value="">EVERYONE WITH AN ACCOUNT ('+users.length+')</option>'+users.map(u=>'<option value="'+u.id+'">'+esc(u.email)+'</option>').join('');to.value=keep;
   bl.innerHTML='';
   const card=document.createElement('div');card.className='dcard';card.innerHTML='<h4>CUSTOMER ACCOUNTS ('+users.length+')</h4>'+(users.length?'':'<div class="cur">No customer accounts yet.</div>');
-  users.forEach(u=>{const d=document.createElement('div');d.className='bi';d.style.gridTemplateColumns='1fr auto';
+  users.forEach(u=>{const d=document.createElement('div');d.className='bi acd';d.style.gridTemplateColumns='1fr auto';
    d.innerHTML='<div><b>'+esc(u.email)+'</b><span>'+(u.banned?'BANNED / ':'')+(u.verified?'VERIFIED':'NOT VERIFIED')+' / JOINED '+new Date(u.created_at).toLocaleDateString()+(u.last_sign_in_at?' / LAST SEEN '+new Date(u.last_sign_in_at).toLocaleDateString():'')+' / SPENT '+money(u.spent)+'</span>'+
     (u.bought.length?'<span style="color:#b8b8be">BOUGHT: '+esc(u.bought.map(x=>x.title).join(', '))+'</span>':'<span style="color:#6c6c73">No purchases yet</span>')+'</div>'+
     '<div class="acb"><button data-a="msg">MESSAGE</button><button data-a="mail">EMAIL</button>'+(u.verified?'':'<button data-a="ver">VERIFY</button>')+'<button data-a="ban">'+(u.banned?'UNBAN':'BAN')+'</button><button data-a="del">DELETE</button></div>';
