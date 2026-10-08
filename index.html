@@ -124,7 +124,10 @@ label.optin input{margin-top:2px;accent-color:var(--red);flex:none}
 .seo .crumbs a{color:#8e8e94;border:0}
 .acr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1d1d21;font:600 11px Montserrat;letter-spacing:.08em}
 .acr .dbtn{flex:none}
+.acb{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.acb button{background:#17171b;border:1px solid #2a2a2e;color:#fff;font:600 10px Montserrat;letter-spacing:.14em;padding:7px 9px;cursor:pointer}.acb button:hover{border-color:var(--gold)}
 .aco{font:600 10px Montserrat;letter-spacing:.25em;color:var(--gold);margin:16px 0 4px}
+#acctBtn{position:relative}#acctBtn.on svg{stroke:var(--gold)}
+#acctBtn[data-n]:not([data-n=""])::after{content:attr(data-n);position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:var(--red);color:#fff;font:700 10px/16px Montserrat;text-align:center}
 .acl{background:none;border:0;color:#8e8e94;font:600 10px Montserrat;letter-spacing:.2em;cursor:pointer;margin-top:12px;padding:0;text-decoration:underline}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .grain{position:fixed;inset:0;pointer-events:none;z-index:30;opacity:.07;background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)}
@@ -471,7 +474,7 @@ footer.f a:hover{color:#fff}
 </div></div>
 
 <div id="bo">
- <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="promo">PROMO</button><button data-t="sales">SALES</button><button data-t="video">VIDEO STUDIO</button><button data-t="email">EMAIL</button><button data-t="show">SHOW MAKER</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
+ <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="promo">PROMO</button><button data-t="sales">SALES</button><button data-t="accounts">ACCOUNTS</button><button data-t="video">VIDEO STUDIO</button><button data-t="email">EMAIL</button><button data-t="show">SHOW MAKER</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
  <div id="pbk"></div>
  <div id="pbkBar" style="display:none;margin:0 0 16px"><button class="bo-btn" id="pbkOpen" type="button" style="border-color:var(--gold);color:var(--gold)">&#9733; PACK BUILDER: BUILD A PACK FASTER (DRAFTS USE NO CLOUD SPACE UNTIL YOU PUBLISH)</button></div>
  <div id="studio"></div>
@@ -1387,7 +1390,7 @@ async function checkAdmin(){
  LINK.textContent=isAdmin?'BACK OFFICE':'LOGIN';
  if(window.slotsBoot)window.slotsBoot();
 }
-const ADM=['beats','packs','promo','sales','video','email','show'],adminRel=()=>location.pathname.slice(BASEPATH.length).match(/^admin\/(?:([a-z]+)\/)?$/);
+const ADM=['beats','packs','promo','sales','accounts','video','email','show'],adminRel=()=>location.pathname.slice(BASEPATH.length).match(/^admin\/(?:([a-z]+)\/)?$/);
 function syncBoTabs(){document.querySelectorAll('.bh [data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t===tab))}
 function goAdmin(t){if(!ADM.includes(t))t='beats';tab=t;editing=null;if(!adminRel()||adminRel()[1]!==t)history.pushState(null,'',BASEPATH+'admin/'+t+'/');syncBoTabs();openBO()}
 function leaveAdmin(){$('#bo').classList.remove('on');if(window.studioClose)studioClose();if(adminRel())history.pushState(null,'',BASEPATH);route()}
@@ -1431,6 +1434,7 @@ async function boRender(){
  document.getElementById('bo2b').style.display=tab==='promo'?'':'none';
  if(tab==='promo'){document.getElementById('bo2c').style.display='';await promoRender();await bundlesRender();try{await loadScript('slots.js?v=4');await slotsAdmin($('#bf3'),$('#bl3'))}catch(e){$('#bf3').innerHTML='<h3>SLOTS</h3><div class="cur">Could not load the slots panel.</div>'}return}
  if(tab==='sales')return salesRender();
+ if(tab==='accounts')return accountsRender();
  const F=FIELDS[tab],e=editing||{};
  const files=F.files.map(([k,l,acc])=>`<label>${l}</label><input type="file" data-k="${k}" accept="${acc}">${e[k]?`<div class="cur">Current: ${esc(e[k].split('/').pop())} (choose a new file to replace)</div><label class="chk" style="margin-top:6px"><input type="checkbox" data-rm="${k}"${tab==='beats'&&k==='cover_path'?' id="f_usestk"':''}> ${tab==='beats'&&k==='cover_path'?'USE THE GENERATED COVER INSTEAD (removes the uploaded one, frees the space)':'REMOVE THIS FILE'}</label>`:''}`).join('');
  const slugBit=`<label>PAGE URL NAME (auto from title if empty)</label><input type="text" id="f_slug" value="${esc(e.slug??'')}" placeholder="${tab==='beats'?'big-beat':'big-citi-vinyl'}">`;
@@ -1572,6 +1576,47 @@ async function salesRender(){
  $('#bl').appendChild(card);
  await emailListCard();
 }
+async function accountsRender(){
+ const bf=$('#bf'),bl=$('#bl');
+ bf.onsubmit=e=>e.preventDefault();
+ bf.innerHTML='<h3>MESSAGE CUSTOMERS</h3><label>TO</label><select id="am_to"><option value="">EVERYONE WITH AN ACCOUNT</option></select><label>TYPE</label><select id="am_kind"><option value="message">MESSAGE</option><option value="promo">PROMO</option></select><label>SUBJECT</label><input type="text" id="am_sub" maxlength="140"><label>MESSAGE (shows in their account inbox on the site)</label><textarea id="am_body" rows="6"></textarea><button class="go" type="button" id="am_send">SEND TO SITE INBOX</button><button class="go" type="button" id="am_mail" style="margin-top:8px;background:#1b1b20;color:#fff">ALSO EMAIL THEM (OPENS GMAIL)</button><div id="bmsg"></div><div id="am_sent"></div>';
+ bl.innerHTML='<div class="cur">Loading accounts...</div>';
+ let users=[];
+ const call=a=>acCall(a);
+ const sentRender=async()=>{try{const r=await call({action:'admin-messages'});$('#am_sent').innerHTML='<label>SENT RECENTLY</label>'+(r.messages.length?r.messages.map(m=>'<div class="acr"><span>'+esc(m.subject)+' <em style="color:#6c6c73">'+(m.user_id?((users.find(u=>u.id===m.user_id)||{}).email||'one account'):'everyone')+'</em></span><button class="dbtn" data-m="'+m.id+'">UNSEND</button></div>').join(''):'<div class="cur">Nothing sent yet.</div>');
+  $('#am_sent').querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{await call({action:'admin-unsend',mid:b.dataset.m});sentRender()})}catch(e){}};
+ const draw=()=>{
+  const to=$('#am_to');const keep=to.value;to.innerHTML='<option value="">EVERYONE WITH AN ACCOUNT ('+users.length+')</option>'+users.map(u=>'<option value="'+u.id+'">'+esc(u.email)+'</option>').join('');to.value=keep;
+  bl.innerHTML='';
+  const card=document.createElement('div');card.className='dcard';card.innerHTML='<h4>CUSTOMER ACCOUNTS ('+users.length+')</h4>'+(users.length?'':'<div class="cur">No customer accounts yet.</div>');
+  users.forEach(u=>{const d=document.createElement('div');d.className='bi';d.style.gridTemplateColumns='1fr auto';
+   d.innerHTML='<div><b>'+esc(u.email)+'</b><span>'+(u.banned?'BANNED / ':'')+(u.verified?'VERIFIED':'NOT VERIFIED')+' / JOINED '+new Date(u.created_at).toLocaleDateString()+(u.last_sign_in_at?' / LAST SEEN '+new Date(u.last_sign_in_at).toLocaleDateString():'')+' / SPENT '+money(u.spent)+'</span>'+
+    (u.bought.length?'<span style="color:#b8b8be">BOUGHT: '+esc(u.bought.map(x=>x.title).join(', '))+'</span>':'<span style="color:#6c6c73">No purchases yet</span>')+'</div>'+
+    '<div class="acb"><button data-a="msg">MESSAGE</button><button data-a="mail">EMAIL</button>'+(u.verified?'':'<button data-a="ver">VERIFY</button>')+'<button data-a="ban">'+(u.banned?'UNBAN':'BAN')+'</button><button data-a="del">DELETE</button></div>';
+   d.querySelectorAll('[data-a]').forEach(b=>b.onclick=async()=>{
+    const a=b.dataset.a;
+    try{
+     if(a==='msg'){$('#am_to').value=u.id;$('#am_sub').focus();bf.scrollIntoView({behavior:'smooth'});return}
+     if(a==='mail'){open('https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(u.email),'_blank');return}
+     if(a==='ver'){await call({action:'admin-verify',id:u.id});toast('VERIFIED')}
+     if(a==='ban'){if(!u.banned&&!await askConfirm('Ban '+u.email+'? They cannot use their account until you unban them.'))return;await call({action:'admin-ban',id:u.id,ban:!u.banned});toast(u.banned?'UNBANNED':'BANNED')}
+     if(a==='del'){if(!await askConfirm('Delete '+u.email+' permanently? Their purchase records stay in SALES.'))return;await call({action:'admin-delete',id:u.id});toast('DELETED')}
+     load();
+    }catch(e){toast(String(e.message).toUpperCase())}});
+   card.appendChild(d)});
+  bl.appendChild(card);
+ };
+ const load=async()=>{try{users=(await call({action:'admin-list'})).users;draw();sentRender()}catch(e){bl.innerHTML='<div class="cur">'+esc(e.message)+'</div>'}};
+ $('#am_send').onclick=async()=>{
+  const id=$('#am_to').value,subject=$('#am_sub').value.trim(),text=$('#am_body').value.trim(),m=$('#bmsg');
+  if(!subject||!text){m.textContent='Add a subject and a message.';return}
+  if(!id&&!await askConfirm('Send this to all '+users.length+' accounts?'))return;
+  try{await call({action:'admin-send',id:id||null,kind:$('#am_kind').value,subject,body:text});m.textContent='Sent. They see it in their account inbox.';$('#am_sub').value='';$('#am_body').value='';sentRender()}catch(e){m.textContent=e.message}};
+ $('#am_mail').onclick=()=>{
+  const id=$('#am_to').value,list=id?users.filter(u=>u.id===id):users;if(!list.length){toast('NO ACCOUNTS');return}
+  open('https://mail.google.com/mail/?view=cm&fs=1&bcc='+encodeURIComponent(list.map(u=>u.email).join(','))+'&su='+encodeURIComponent($('#am_sub').value)+'&body='+encodeURIComponent($('#am_body').value),'_blank')};
+ load();
+}
 async function ordersRender(){
  const {data,error}=await sb.from('orders').select('*').order('created_at',{ascending:false}).limit(100);
  if(error){$('#bf').innerHTML='<h3>ORDERS</h3>';$('#bl').innerHTML='<div class="bi"><span>'+esc(error.message)+'</span></div>';return}
@@ -1704,7 +1749,24 @@ async function acctClaim(){
 async function acctRefresh(){
  const {data:{session}}=await sb.auth.getSession();acUser=session?session.user:null;
  $('#acctBtn').classList.toggle('on',!!acUser);
- if(acUser){acctSyncLikes();acctClaim()}
+ if(acUser){acctSyncLikes();acctClaim();acctInbox()}else $('#acctBtn').dataset.n=''
+}
+async function acctInbox(read){
+ if(!acUser)return 0;
+ try{
+  const {data:ms}=await sb.from('messages').select('*').order('created_at',{ascending:false}).limit(30);
+  const {data:f}=await sb.from('favorites').select('msgs_read_at').eq('user_id',acUser.id).maybeSingle();
+  const last=f&&f.msgs_read_at?new Date(f.msgs_read_at).getTime():0;
+  const unread=(ms||[]).filter(m=>new Date(m.created_at).getTime()>last).length;
+  const dot=$('#acctBtn');dot.dataset.n=unread&&!read?String(unread):'';
+  const box=$('#acMsgs'),mn=$('#acMN');
+  if(read&&box){box.className='';box.innerHTML=(ms||[]).map(m=>'<div class="acr" style="display:block"><b style="color:'+(m.kind==='promo'?'var(--gold)':'#fff')+'">'+esc(m.subject).toUpperCase()+'</b><div style="font:500 12px/1.6 Montserrat;color:#b8b8be;letter-spacing:0;white-space:pre-wrap;margin-top:4px">'+esc(m.body)+'</div></div>').join('');
+   await sb.from('favorites').upsert({user_id:acUser.id,msgs_read_at:new Date().toISOString()});dot.dataset.n='';if(mn)mn.textContent=''}
+  else if(box){if(mn)mn.textContent=unread?'('+unread+' NEW)':'';
+   if(!(ms||[]).length)box.textContent='No messages yet.';
+   else{box.className='';box.innerHTML='<button class="acl" id="acOpenM" style="margin:0">OPEN '+ms.length+' MESSAGE'+(ms.length>1?'S':'')+'</button>';$('#acOpenM').onclick=()=>acctInbox(true)}}
+  return unread;
+ }catch(e){return 0}
 }
 function acctMsg(t){const m=$('#acMsg');if(m)m.textContent=t||''}
 async function acctRender(){
@@ -1729,9 +1791,11 @@ async function acctRender(){
   return;
  }
  b.innerHTML='<h3>MY ACCOUNT</h3><div class="nt" style="margin:-8px 0 0;color:#b8b8be">'+esc(acUser.email)+'</div><div class="aco">MY PURCHASES</div><div id="acOrders" class="nt">Loading...</div>'+
+  '<div class="aco">MESSAGES <span id="acMN"></span></div><div id="acMsgs" class="nt">Loading...</div>'+
   '<button class="acl" id="acFav">MY SAVED BEATS &amp; PACKS</button><br><button class="acl" id="acOut">LOG OUT</button>';
  $('#acFav').onclick=()=>{$('#acct').classList.remove('on');openFav()};
  $('#acOut').onclick=async()=>{await sb.auth.signOut();isAdmin=false;LINK.textContent='LOGIN';acUser=null;$('#acctBtn').classList.remove('on');$('#acct').classList.remove('on');toast('LOGGED OUT')};
+ acctInbox();
  try{
   await acctClaim();
   const r=await acCall({action:'orders'}),box=$('#acOrders');
