@@ -176,10 +176,10 @@ function readWhen(){const d=$q('#smDate').value,t=$q('#smClock').value||'20:00';
 function msg(t){$q('#smMsg').textContent=t}
 function fillAll(){syncAutoUi();rDir();$q('#smTitle').value=E.title;$q('#smLen').value=E.script.len/60;$q('#smScrub').max=E.script.len;rTracks();rTheme();rSegs();rFx();rMs();setWhen();segBar();setT();syncAutoUi()}
 /* ---------- director: the 52 camera moves, effects and hooks ---------- */
-const dd=()=>{const s=E.script;if(!s.dir)s.dir={on:false,amount:1,off:{}};if(!s.dir.off)s.dir.off={};return s.dir};
+const dd=()=>{const s=E.script;if(!s.dir)s.dir={on:false,amount:1,off:window.MZShowFX?MZShowFX.allOff():{}};if(!s.dir.off)s.dir.off={};return s.dir};
 function dirApply(){refreshHits();rDirList();dirCount()}
 function dirManual(){const d=dd();if(d.auto===false)return;d.events=window.MZShowFX.plan(E.script);d.auto=false}
-function dirCount(){const FX=window.MZShowFX,d=dd();if(!FX)return;let on=0,tot=0;FX.GROUPS.forEach(([n,L,c])=>{let k=0;for(let i=1;i<=c;i++){tot++;if(d.on!==false&&!d.off[L+i]){on++;k++}}const el=$q('#dc'+L);if(el)el.textContent=k+' of '+c+' on'});const s=$q('#smS7');if(s)s.textContent=d.on===false?'off':on+' of '+tot+' on'}
+function dirCount(){const FX=window.MZShowFX,d=dd();if(!FX)return;let on=0,tot=0;FX.GROUPS.forEach(([n,L,nums])=>{let k=0;nums.forEach(i=>{tot++;if(d.on!==false&&!d.off[L+i]){on++;k++}});const el=$q('#dc'+L);if(el)el.textContent=k+' of '+nums.length+' on'});const s=$q('#smS7');if(s)s.textContent=d.on===false?'off':on+' of '+tot+' on'}
 function rDirList(){
  const FX=window.MZShowFX,el=$q('#dList');if(!FX||!el)return;const d=dd(),ev=FX.plan(E.script);
  $q('#dAuto').textContent=d.auto===false?'Manual: you control the list. Edit it below or go back to auto.':ev.length+' moves placed automatically from your sections and beats. Re-roll for a new arrangement, or edit them by hand.';
@@ -194,8 +194,8 @@ function rDir(){
  <label>HOOK WORDS (pop on the beat in drops)</label><input type="text" id="dHook" value="${esc(d.hook||FX.DEFAULT_HOOK)}">
  <div class="two"><div><label>LOWER-THIRD TAG</label><input type="text" id="dTag" value="${esc(d.tag||'PROD. MZPRD')}"></div><div><label>CALLOUTS (COMMA SEPARATED)</label><input type="text" id="dCalls" value="${esc((d.callouts&&d.callouts.length?d.callouts:FX.DEFAULT_CALLS).join(', '))}"></div></div>
  <label>COMMENT BAIT (LAST SECONDS)</label><input type="text" id="dBait" value="${esc(d.bait||FX.DEFAULT_BAIT)}">`;
- FX.GROUPS.forEach(([name,L,n])=>{h+=`<details class="sec"><summary>${name} <small id="dc${L}"></small></summary><div class="in"><div class="two"><button class="btn" data-all="${L}:1">ALL ON</button><button class="btn" data-all="${L}:0">ALL OFF</button></div>`;
-  for(let i=1;i<=n;i++){const c=L+i;h+=`<label class="chk"><input type="checkbox" data-code="${c}"${d.off[c]?'':' checked'}> <b style="color:var(--gold)">${c}</b> ${esc(FX.CODES[c])}</label>`}h+='</div></details>'});
+ FX.GROUPS.forEach(([name,L,nums])=>{h+=`<details class="sec"><summary>${name} <small id="dc${L}"></small></summary><div class="in"><div class="two"><button class="btn" data-all="${L}:1">ALL ON</button><button class="btn" data-all="${L}:0">ALL OFF</button></div>`;
+  for(const i of nums){const c=L+i;h+=`<label class="chk"><input type="checkbox" data-code="${c}"${d.off[c]?'':' checked'}> <b style="color:var(--gold)">${c}</b> ${esc(FX.CODES[c])}</label>`}h+='</div></details>'});
  h+=`<h4>PLANNED MOVES</h4><div class="msg" id="dAuto"></div><div id="dList"></div>
  <div class="two" style="margin-top:6px"><select id="dAddC">${Object.keys(FX.DEFD).map(k=>`<option value="${k}">${k} ${esc(FX.CODES[k])}</option>`).join('')}</select><div class="row" style="grid-template-columns:1fr auto"><input type="text" id="dAddT" value="0:30"><button class="btn" id="dAddB">+ ADD</button></div></div>
  <button class="btn" id="dReset" style="width:100%;margin-top:6px">BACK TO AUTO</button>`;
@@ -206,7 +206,7 @@ function rDir(){
  const txt=(id,k)=>$q(id).onchange=e=>{const v=e.target.value.trim();if(k==='callouts')dd().callouts=v.split(',').map(x=>x.trim()).filter(Boolean);else dd()[k]=v;refreshHits()};
  txt('#dHook','hook');txt('#dTag','tag');txt('#dCalls','callouts');txt('#dBait','bait');
  box.querySelectorAll('[data-code]').forEach(c=>c.onchange=()=>{const o=dd().off;if(c.checked)delete o[c.dataset.code];else o[c.dataset.code]=true;dirApply()});
- box.querySelectorAll('[data-all]').forEach(b=>b.onclick=()=>{const [L,v]=b.dataset.all.split(':'),o=dd().off,n=FX.GROUPS.find(g=>g[1]===L)[2];for(let i=1;i<=n;i++){if(v==='1')delete o[L+i];else o[L+i]=true}rDir();dirApply()});
+ box.querySelectorAll('[data-all]').forEach(b=>b.onclick=()=>{const [L,v]=b.dataset.all.split(':'),o=dd().off,nums=FX.GROUPS.find(g=>g[1]===L)[2];nums.forEach(i=>{if(v==='1')delete o[L+i];else o[L+i]=true});rDir();dirApply()});
  $q('#dAddB').onclick=()=>{const id=$q('#dAddC').value,t=clamp(parseT($q('#dAddT').value),0,E.script.len);dirManual();dd().events.push({id,t,d:FX.DEFD[id]});dd().events.sort((a,b)=>a.t-b.t);dirApply();seek(Math.max(0,t-1))};
  $q('#dReset').onclick=()=>{const d2=dd();d2.auto=true;delete d2.events;dirApply()};
  rDirList();dirCount();

@@ -853,7 +853,7 @@ $('#search').onclick=()=>toast('SEARCH COMING SOON');
 const CAMF={beats:null,kits:[.108,.705,1.8],show:[.287,.15,1.8],about:[.897,.43,1.8]};
 let camT='beats';const cam={fx:.5,fy:.5,z:1};
 function hideSeo(){const e=document.getElementById('seo');if(e)e.style.display='none'}
-async function openShow(){try{if(!window.MZShow)await loadScript('show.js?v=14');if(!window.MZShowFX)await loadScript('showfx.js?v=1');if(!window.showPageOpen)await loadScript('showpage.js?v=13');await window.showPageOpen(document.getElementById('shRoot'))}catch(e){toast('SHOW FAILED TO LOAD')}}
+async function openShow(){try{if(!window.MZShow)await loadScript('show.js?v=15');if(!window.MZShowFX)await loadScript('showfx.js?v=2');if(!window.showPageOpen)await loadScript('showpage.js?v=13');await window.showPageOpen(document.getElementById('shRoot'))}catch(e){toast('SHOW FAILED TO LOAD')}}
 function showView(v){
  camT=v==='beat'?(pageKind==='p'?'kits':'beats'):v;
  {const pl=document.querySelector('.plc');if(pl)pl.style.display=v==='beats'?'':'none'}
@@ -1431,7 +1431,7 @@ async function boRender(){
  document.getElementById('bo2b').style.display='none';document.getElementById('bo2c').style.display='none';
  if(window.emailClose)emailClose();if(window.showMakerClose)showMakerClose();
  if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=4');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
- if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=14');if(!window.MZShowFX)await loadScript('showfx.js?v=1');if(!window.showMakerOpen)await loadScript('showmaker.js?v=11');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
+ if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=15');if(!window.MZShowFX)await loadScript('showfx.js?v=2');if(!window.showMakerOpen)await loadScript('showmaker.js?v=12');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
  if(vid){try{await loadStudio();await studioOpen()}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
  if(window.studioClose)studioClose();
  document.getElementById('bo2b').style.display=tab==='promo'?'':'none';

@@ -20,7 +20,7 @@ const PRESETS={
 const THEMES={city:'CITY NIGHT',neon:'NEON NIGHT',ice:'ICE',ember:'EMBER'};
 function defaultScript(len){
  len=len||300;const k=len/300,sg=(n,a,b)=>({name:PRESETS[n].n,preset:n,start:Math.round(a*k),end:Math.round(b*k)});
- return{v:2,len,theme:'city',title:'Weekly Show',tracks:[],dir:{on:true,amount:1,off:{}},
+ return{v:2,len,theme:'city',title:'Weekly Show',tracks:[],dir:{on:true,amount:1,off:(window.MZShowFX&&MZShowFX.allOff?MZShowFX.allOff():{})},
   segments:[sg('intro',0,30),sg('build',30,90),sg('drop',90,180),sg('breakdown',180,240),sg('finale',240,300)],
   fx:{lights:true,fog:true,lasers:true,flash:true,fireworks:true,intensity:.85,cuts:'dynamic',crowd:'high',crowdSound:true},
   milestones:[{at:250,fx:'lights',label:'LIGHTS UP'},{at:500,fx:'lasers',label:'LASERS'},{at:1000,fx:'fireworks',label:'FIREWORKS'},{at:2000,fx:'special',label:'SPECIAL EFFECT'}]};
