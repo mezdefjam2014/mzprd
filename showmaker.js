@@ -53,6 +53,7 @@ function css(){
 #showmk .it b{flex:1;min-width:0}#showmk .it span{font:500 11px Montserrat;color:#8e8e94}
 #showmk .it button{background:transparent;border:1px solid #4a4a50;color:#fff;font:600 9px Montserrat;letter-spacing:.12em;padding:6px 8px;cursor:pointer}
 #showmk .tag{font:700 9px Montserrat;letter-spacing:.14em;padding:3px 7px;margin-left:6px}
+#showmk .dr{display:grid;grid-template-columns:48px 44px 1fr 28px 28px;gap:6px;align-items:center;padding:5px 6px;border:1px solid #1d1d21;margin-bottom:4px;font:600 11px Montserrat;color:#d9d9dc}#showmk .dr b{color:var(--gold)}
 #showmk .tag.d{background:#3a3a44}#showmk .tag.p{background:#e0242f}#showmk .tag.a{background:#2b2748}`;
  document.head.appendChild(s);
 }
@@ -83,7 +84,8 @@ function html(){return`<div class="mg"><div>
   <div class="two"><div><label>INTENSITY</label><input type="range" id="fxI" min="30" max="130" step="5" style="width:100%;accent-color:var(--red)"></div><div><label>CAMERA CUTS</label><select id="fxC"><option value="dynamic">Dynamic</option><option value="slow">Slow</option><option value="static">Static</option></select></div></div>
   <label>CROWD ENERGY</label><select id="fxE"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div></details>
  <details class="sec"><summary>5. HEART MILESTONES <small>effects the crowd unlocks</small></summary><div class="in"><div id="smMs"></div></div></details>
- <details class="sec" open><summary>6. SCHEDULE AND PUBLISH <small id="smS6"></small></summary><div class="in">
+ <details class="sec"><summary>6. DIRECTOR: CAMERA, EFFECTS, HOOKS <small id="smS7"></small></summary><div class="in" id="smDir"></div></details>
+ <details class="sec" open><summary>7. SCHEDULE AND PUBLISH <small id="smS6"></small></summary><div class="in">
   <div class="two"><div><label>DATE</label><input type="date" id="smDate"></div><div><label>TIME</label><input type="time" id="smClock"></div></div>
   <div class="msg" id="smMsg">Drafts are hidden from visitors. Only a published show appears on the SHOW page.</div>
   <button class="btn big" id="smPub" style="margin-top:8px">PUBLISH SHOW</button>
@@ -172,7 +174,43 @@ function rMs(){
 function setWhen(){const d=E.when?new Date(E.when):null;$q('#smDate').value=d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:'';$q('#smClock').value=d?`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:'20:00'}
 function readWhen(){const d=$q('#smDate').value,t=$q('#smClock').value||'20:00';return d?new Date(d+'T'+t).toISOString():''}
 function msg(t){$q('#smMsg').textContent=t}
-function fillAll(){syncAutoUi();$q('#smTitle').value=E.title;$q('#smLen').value=E.script.len/60;$q('#smScrub').max=E.script.len;rTracks();rTheme();rSegs();rFx();rMs();setWhen();segBar();setT();syncAutoUi()}
+function fillAll(){syncAutoUi();rDir();$q('#smTitle').value=E.title;$q('#smLen').value=E.script.len/60;$q('#smScrub').max=E.script.len;rTracks();rTheme();rSegs();rFx();rMs();setWhen();segBar();setT();syncAutoUi()}
+/* ---------- director: the 52 camera moves, effects and hooks ---------- */
+const dd=()=>{const s=E.script;if(!s.dir)s.dir={on:false,amount:1,off:{}};if(!s.dir.off)s.dir.off={};return s.dir};
+function dirApply(){refreshHits();rDirList();dirCount()}
+function dirManual(){const d=dd();if(d.auto===false)return;d.events=window.MZShowFX.plan(E.script);d.auto=false}
+function dirCount(){const FX=window.MZShowFX,d=dd();if(!FX)return;let on=0,tot=0;FX.GROUPS.forEach(([n,L,c])=>{let k=0;for(let i=1;i<=c;i++){tot++;if(d.on!==false&&!d.off[L+i]){on++;k++}}const el=$q('#dc'+L);if(el)el.textContent=k+' of '+c+' on'});const s=$q('#smS7');if(s)s.textContent=d.on===false?'off':on+' of '+tot+' on'}
+function rDirList(){
+ const FX=window.MZShowFX,el=$q('#dList');if(!FX||!el)return;const d=dd(),ev=FX.plan(E.script);
+ $q('#dAuto').textContent=d.auto===false?'Manual: you control the list. Edit it below or go back to auto.':ev.length+' moves placed automatically from your sections and beats. Re-roll for a new arrangement, or edit them by hand.';
+ el.innerHTML=ev.length?ev.map((e,i)=>`<div class="dr" data-i="${i}"><button class="x" data-a="go" title="Jump here">${mmss(e.t)}</button><b>${e.id}</b><span>${esc(FX.CODES[e.id])}</span><span style="color:#8e8e94">${(+e.d).toFixed(1)}s</span><button class="x" data-a="rm">&times;</button></div>`).join(''):'<div class="msg">No moves yet. Turn items on above or add one.</div>';
+ el.querySelectorAll('.dr').forEach(r=>{const i=+r.dataset.i;r.querySelector('[data-a=go]').onclick=()=>seek(Math.max(0,ev[i].t-1));r.querySelector('[data-a=rm]').onclick=()=>{dirManual();const L=dd().events;const k=L.findIndex(x=>x.id===ev[i].id&&x.t===ev[i].t);if(k>=0)L.splice(k,1);dirApply()}});
+}
+function rDir(){
+ const FX=window.MZShowFX,box=$q('#smDir');if(!box)return;if(!FX){box.innerHTML='<div class="msg">The director did not load. Refresh the page.</div>';return}
+ const d=dd();
+ let h=`<label class="chk"><input type="checkbox" id="dOn"${d.on!==false?' checked':''}> DIRECTOR ON (camera moves, effects and hooks)</label>
+ <div class="two"><div><label>AMOUNT</label><input type="range" id="dAmt" min="20" max="160" step="5" value="${Math.round((d.amount==null?1:d.amount)*100)}" style="width:100%;accent-color:var(--red)"></div><div><label>&nbsp;</label><button class="btn" id="dRoll" style="width:100%">RE-ROLL THE DIRECTOR</button></div></div>
+ <label>HOOK WORDS (pop on the beat in drops)</label><input type="text" id="dHook" value="${esc(d.hook||FX.DEFAULT_HOOK)}">
+ <div class="two"><div><label>LOWER-THIRD TAG</label><input type="text" id="dTag" value="${esc(d.tag||'PROD. MZPRD')}"></div><div><label>CALLOUTS (COMMA SEPARATED)</label><input type="text" id="dCalls" value="${esc((d.callouts&&d.callouts.length?d.callouts:FX.DEFAULT_CALLS).join(', '))}"></div></div>
+ <label>COMMENT BAIT (LAST SECONDS)</label><input type="text" id="dBait" value="${esc(d.bait||FX.DEFAULT_BAIT)}">`;
+ FX.GROUPS.forEach(([name,L,n])=>{h+=`<details class="sec"><summary>${name} <small id="dc${L}"></small></summary><div class="in"><div class="two"><button class="btn" data-all="${L}:1">ALL ON</button><button class="btn" data-all="${L}:0">ALL OFF</button></div>`;
+  for(let i=1;i<=n;i++){const c=L+i;h+=`<label class="chk"><input type="checkbox" data-code="${c}"${d.off[c]?'':' checked'}> <b style="color:var(--gold)">${c}</b> ${esc(FX.CODES[c])}</label>`}h+='</div></details>'});
+ h+=`<h4>PLANNED MOVES</h4><div class="msg" id="dAuto"></div><div id="dList"></div>
+ <div class="two" style="margin-top:6px"><select id="dAddC">${Object.keys(FX.DEFD).map(k=>`<option value="${k}">${k} ${esc(FX.CODES[k])}</option>`).join('')}</select><div class="row" style="grid-template-columns:1fr auto"><input type="text" id="dAddT" value="0:30"><button class="btn" id="dAddB">+ ADD</button></div></div>
+ <button class="btn" id="dReset" style="width:100%;margin-top:6px">BACK TO AUTO</button>`;
+ box.innerHTML=h;
+ $q('#dOn').onchange=e=>{dd().on=e.target.checked;dirApply()};
+ $q('#dAmt').oninput=e=>{dd().amount=+e.target.value/100;refreshHits()};
+ $q('#dRoll').onclick=()=>{const d2=dd();d2.seed=Math.floor(Math.random()*9973);d2.auto=true;delete d2.events;dirApply();seek(E.T);msg('A new arrangement of camera moves, effects and hooks.')};
+ const txt=(id,k)=>$q(id).onchange=e=>{const v=e.target.value.trim();if(k==='callouts')dd().callouts=v.split(',').map(x=>x.trim()).filter(Boolean);else dd()[k]=v;refreshHits()};
+ txt('#dHook','hook');txt('#dTag','tag');txt('#dCalls','callouts');txt('#dBait','bait');
+ box.querySelectorAll('[data-code]').forEach(c=>c.onchange=()=>{const o=dd().off;if(c.checked)delete o[c.dataset.code];else o[c.dataset.code]=true;dirApply()});
+ box.querySelectorAll('[data-all]').forEach(b=>b.onclick=()=>{const [L,v]=b.dataset.all.split(':'),o=dd().off,n=FX.GROUPS.find(g=>g[1]===L)[2];for(let i=1;i<=n;i++){if(v==='1')delete o[L+i];else o[L+i]=true}rDir();dirApply()});
+ $q('#dAddB').onclick=()=>{const id=$q('#dAddC').value,t=clamp(parseT($q('#dAddT').value),0,E.script.len);dirManual();dd().events.push({id,t,d:FX.DEFD[id]});dd().events.sort((a,b)=>a.t-b.t);dirApply();seek(Math.max(0,t-1))};
+ $q('#dReset').onclick=()=>{const d2=dd();d2.auto=true;delete d2.events;dirApply()};
+ rDirList();dirCount();
+}
 /* ---------- preview playback ---------- */
 function setT(){const el=$q('#smTime');if(el)el.textContent=mmss(E.T)+' / '+mmss(E.script.len);const sc=$q('#smScrub');if(sc&&document.activeElement!==sc)sc.value=E.T}
 async function seek(T){E.T=clamp(T,0,E.script.len);const was=E.playing;stopA();if(was)await play();else{E.stage.reset();setT()}}

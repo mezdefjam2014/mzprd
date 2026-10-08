@@ -20,7 +20,7 @@ const PRESETS={
 const THEMES={city:'CITY NIGHT',neon:'NEON NIGHT',ice:'ICE',ember:'EMBER'};
 function defaultScript(len){
  len=len||300;const k=len/300,sg=(n,a,b)=>({name:PRESETS[n].n,preset:n,start:Math.round(a*k),end:Math.round(b*k)});
- return{v:2,len,theme:'city',title:'Weekly Show',tracks:[],
+ return{v:2,len,theme:'city',title:'Weekly Show',tracks:[],dir:{on:true,amount:1,off:{}},
   segments:[sg('intro',0,30),sg('build',30,90),sg('drop',90,180),sg('breakdown',180,240),sg('finale',240,300)],
   fx:{lights:true,fog:true,lasers:true,flash:true,fireworks:true,intensity:.85,cuts:'dynamic',crowd:'high',crowdSound:true},
   milestones:[{at:250,fx:'lights',label:'LIGHTS UP'},{at:500,fx:'lasers',label:'LASERS'},{at:1000,fx:'fireworks',label:'FIREWORKS'},{at:2000,fx:'special',label:'SPECIAL EFFECT'}]};
@@ -86,7 +86,8 @@ function schedule(ctx,dest,script,bufs,from,until,o){
  o=o||{};const t0=o.t0||0,srcs=[],C=T=>t0+(T-from);
  const bus=ctx.createGain(),lp=ctx.createBiquadFilter(),comp=ctx.createDynamicsCompressor();lp.type='lowpass';lp.Q.value=.7;
  comp.threshold.value=-10;comp.ratio.value=6;comp.attack.value=.004;comp.release.value=.2;
- bus.connect(lp);lp.connect(comp);comp.connect(dest);
+ const dip=ctx.createGain(),FX=window.MZShowFX;bus.connect(lp);lp.connect(dip);dip.connect(comp);comp.connect(dest);
+ if(FX)FX.audioDips(script).forEach(d=>{if(d.b<=from||d.a>=until)return;const a=Math.max(d.a,from),T1=C(a);dip.gain.setValueAtTime(1,Math.max(0,T1));dip.gain.linearRampToValueAtTime(.02,T1+.05);dip.gain.setValueAtTime(.02,Math.max(0,C(d.b)-.03));dip.gain.setValueAtTime(1,C(d.b))});
  const dur=until-from,STEP=.25,n=Math.max(2,Math.ceil(dur/STEP)+1);
  try{lp.frequency.setValueCurveAtTime(curve(n,i=>freqAt(script,from+i*STEP)),t0,Math.max(.01,(n-1)*STEP));bus.gain.setValueCurveAtTime(curve(n,i=>gainAt(script,from+i*STEP)),t0,Math.max(.01,(n-1)*STEP))}catch(e){lp.frequency.value=18000}
  /* the show ends with a long fade */
@@ -109,7 +110,8 @@ function schedule(ctx,dest,script,bufs,from,until,o){
   }
  });
  /* impacts and risers on the segments */
- script.segments.forEach(sg=>{
+ const segsFx=script.segments.slice();if(FX&&FX.coldEnd(script)>0)segsFx.push({preset:'drop',start:FX.coldEnd(script),end:FX.coldEnd(script)});
+ segsFx.forEach(sg=>{
   if(sg.preset==='drop'&&sg.start>=from&&sg.start<until){
    const T=C(sg.start),o1=ctx.createOscillator(),g=ctx.createGain();o1.type='sine';o1.frequency.setValueAtTime(75,T);o1.frequency.exponentialRampToValueAtTime(28,T+.9);g.gain.setValueAtTime(.0001,T);g.gain.exponentialRampToValueAtTime(.85,T+.02);g.gain.exponentialRampToValueAtTime(.0001,T+1.1);o1.connect(g);g.connect(comp);o1.start(T);o1.stop(T+1.2);srcs.push(o1);
    const nz=ctx.createBufferSource();nz.buffer=noiseBuf(ctx);const ng=ctx.createGain(),nf=ctx.createBiquadFilter();nf.type='lowpass';nf.frequency.value=3000;ng.gain.setValueAtTime(.5,T);ng.gain.exponentialRampToValueAtTime(.0001,T+.7);nz.connect(nf);nf.connect(ng);ng.connect(comp);nz.start(T,0,.8);srcs.push(nz)}
@@ -140,6 +142,7 @@ function makeStage(canvas,seed){
  const R=mulberry(seed||((Math.random()*1e9)|0)),S={script:defaultScript(300),theme:'city',hits:[],plate:null},plates={};
  const st={t:0,cam:{z:1,x:0,y:0},energy:.1,cheer:0,nod:0,bounce:0,flash:0,shake:0,hands:[0,0],pads:new Float32Array(12),hearts:0,
   hue:230,fireworks:[],confetti:[],lastHit:-1,hitIdx:0,lastCutBar:-1,lastDrop:-1,fogP:[],endT:-1,lastStartTrack:-2};
+ st.fx=(window.MZShowFX&&MZShowFX.create)?MZShowFX.create(st):null;
  /* a fresh random front-row crowd every time */
  const front=[];for(let i=0;i<13;i++)front.push({x:(i+.5)*W/13+(R()-.5)*60,s:1.9+R()*1.1,ph:R()*6.28,sp:.8+R()*.6,look:Math.floor(R()*4),arm:R(),y:H-6+R()*28});
  const phones=PHONES.map(p=>({x:p[0],y:p[1],r:Math.max(6,p[2]*.6),ph:R()*6.28,sp:3+R()*5,on:R()<.85}));
@@ -167,7 +170,8 @@ function makeStage(canvas,seed){
  }
  const PADS=[];for(let r=0;r<3;r++)for(let k=0;k<4;k++)PADS.push([544+k*25,473+r*6]);
  st.draw=function(T,dt,au,ctl){
-  ctl=ctl||{};dt=clamp(dt||.016,.001,.1);st.t=T;const sc=S.script,fx=sc.fx,q=segAt(sc,Math.max(0,T)),P=PRESETS[q.seg.preset]||PRESETS.drop;
+  ctl=ctl||{};dt=clamp(dt||.016,.001,.1);st.t=T;const sc=S.script,fx=sc.fx,Dm=ctl.mode||'live',D=(st.fx&&st.fx.active(Dm))?st.fx:null,Treal=T;if(D)T=D.warp(T);
+  const q=segAt(sc,Math.max(0,T)),P=(D&&D.coldOn(Treal,Dm))?PRESETS.drop:(PRESETS[q.seg.preset]||PRESETS.drop);
   const mode=ctl.mode||'live',tr=trackAt(sc,T),trk=tr>=0?sc.tracks[tr]:null,bpm=(trk&&trk.bpm)||92,beatLen=60/bpm;
   const fg=flags(),bass=au.bass||0,loud=au.loud||0;
   /* hits: the producer taps on the real drum hits, the crowd pulses */
@@ -192,6 +196,7 @@ function makeStage(canvas,seed){
   /* palette + intensity */
   const hh=lerp(P.hue[0],P.hue[1],(Math.sin(T*.35)+1)/2);st.hue+=(hh-st.hue)*.05;const hue=st.hue;
   const int=clamp(P.int*(fx.intensity==null?.85:fx.intensity)*(fg.lights?1.25:1)*(mode==='wait'?.5:1)*(.34+loud*1.35),0,1.35);
+  const ex=D?D.frame(Treal,T,dt,q,P,mode,bpm,int,hue,au,st.energy,PADS):null;
   /* camera */
   const cp=pickCam(Math.max(0,T),q.seg,bpm);let tz=FR[cp.k].z,tx=FR[cp.k].x,ty=FR[cp.k].y;
   if(cp.push){tz=1+q.p*.16;tx=0;ty=q.p*20}
@@ -199,9 +204,12 @@ function makeStage(canvas,seed){
   if(fg.special&&mode==='live'&&st.bounce>.5)tz*=1.03;
   const kk=1-Math.exp(-dt*((cp.bar!=null&&cp.bar!==st.lastCutBar)?9:2.6));st.lastCutBar=cp.bar;
   st.cam.z=lerp(st.cam.z,tz,kk);st.cam.x=lerp(st.cam.x,tx,kk);st.cam.y=lerp(st.cam.y,ty,kk);
-  const lim=Math.max(0,W/2*(1-1/st.cam.z)),limy=Math.max(0,H/2*(1-1/st.cam.z)),pl=plateFor(S.theme);
+  const dr=D?D.cam(Treal,dt,q,mode):null;let cz=st.cam.z*(dr?dr.z:1),ccx=st.cam.x+(dr?dr.x:0),ccy=st.cam.y+(dr?dr.y:0);
+  if(dr&&dr.ab){const w=dr.ab.w;cz=lerp(cz,dr.ab.z,w);ccx=lerp(ccx,dr.ab.x,w);ccy=lerp(ccy,dr.ab.y,w)}
+  if(dr){dr.z=cz;dr.hy=ccy}
+  const lim=Math.max(0,W/2*(1-1/cz)),limy=Math.max(0,H/2*(1-1/cz)),pl=plateFor(S.theme);
   c.save();c.fillStyle='#04030a';c.fillRect(0,0,W,H);
-  const sh=st.shake*5;c.translate(W/2+(Math.random()-.5)*sh,H/2+(Math.random()-.5)*sh);c.scale(st.cam.z,st.cam.z);c.translate(-W/2-clamp(st.cam.x,-lim,lim),-H/2-clamp(st.cam.y,-limy,limy));
+  const sh=st.shake*5;c.translate(W/2+(Math.random()-.5)*sh,H/2+(Math.random()-.5)*sh);if(dr&&dr.rot)c.rotate(dr.rot);if(dr&&dr.flip)c.scale(-1,1);c.scale(cz,cz);c.translate(-W/2-clamp(ccx,-lim,lim),-H/2-clamp(ccy,-limy,limy));
   if(pl)c.drawImage(pl,0,0);
   else{const g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#14102a');g.addColorStop(1,'#050409');c.fillStyle=g;c.fillRect(0,0,W,H)}
   /* the venue dims in quiet moments and comes up with the music */
@@ -213,6 +221,7 @@ function makeStage(canvas,seed){
    else{c.globalCompositeOperation='lighter';const gr=c.createRadialGradient(sx+sw/2,sy+120,10,sx+sw/2,sy+120,190);gr.addColorStop(0,`hsla(${hue+10},90%,70%,${.25+bass*.4+st.bounce*.25})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(sx,sy,sw,sh2);
     if(fg.special&&mode==='live'){c.fillStyle=`hsla(${(T*90)%360},100%,60%,.16)`;c.fillRect(sx,sy,sw,sh2)}
     const bn=36,bw2=sw/bn;for(let b2=0;b2<bn;b2++){const v=au.fd?au.fd[Math.floor(Math.pow(b2/bn,1.6)*260)]/255:bass*(.4+.6*Math.sin(b2+T*5)**2);c.fillStyle=`hsla(${hue+b2*4},100%,${55+v*18}%,${.35+v*.5})`;c.fillRect(sx+b2*bw2+1,sy+sh2-4-v*58,bw2-2,v*58+3)}}
+   if(D&&mode==='live')D.led(c,ex,sx,sy,sw,sh2);
    c.restore()}
   /* moving beams from the rig, brighter with the music */
   if(int>.05&&fx.lights!==false){c.save();c.globalCompositeOperation='lighter';
@@ -221,9 +230,11 @@ function makeStage(canvas,seed){
     c.fillStyle=gr;c.beginPath();c.moveTo(x0-4,y0);c.lineTo(x0+4,y0);c.lineTo(x1+px*half,y1+py*half);c.lineTo(x1-px*half,y1-py*half);c.closePath();c.fill();
     const g2=c.createRadialGradient(x0,y0,0,x0,y0,26);g2.addColorStop(0,`hsla(${hue2},100%,82%,${.7*int})`);g2.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g2;c.fillRect(x0-26,y0-26,52,52)});
    c.restore()}
+  if(D&&fx.lights!==false)D.beams(c,ex);
   /* lasers: unlocked by hearts, strongest on drops */
   const laserA=P.laser*clamp((st.energy-.22)*2.6,0,1);
   if(fx.lasers!==false&&fg.lasers&&mode==='live'&&laserA>.05){c.save();c.globalCompositeOperation='lighter';for(let i=0;i<12;i++){const a=-Math.PI/2+(i-5.5)*.17+Math.sin(T*.9+i)*.3,hue3=i%3===0?0:i%3===1?125:190,ox=W/2+(i-5.5)*34;c.strokeStyle=`hsla(${hue3},100%,60%,${.55*laserA})`;c.lineWidth=1.6;c.beginPath();c.moveTo(ox,540);c.lineTo(ox+Math.cos(a)*900,540+Math.sin(a)*900);c.stroke();c.strokeStyle=`hsla(${hue3},100%,60%,${.12*laserA})`;c.lineWidth=7;c.stroke()}c.restore()}
+  if(D&&mode==='live'){D.tunnel(c,ex);D.floor(c,ex)}
   /* smoke drifting along the stage */
   if(fx.fog!==false){c.save();c.globalCompositeOperation='lighter';st.fogP.forEach(f=>{f.x+=f.vx*dt;if(f.x<-f.r)f.x=W+f.r;if(f.x>W+f.r)f.x=-f.r;const a=f.a*P.fog*(.35+int*.7),gr=c.createRadialGradient(f.x,f.y,0,f.x,f.y,f.r);gr.addColorStop(0,`hsla(${hue+f.x*.04},80%,62%,${a})`);gr.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gr;c.fillRect(f.x-f.r,f.y-f.r,f.r*2,f.r*2)});c.restore()}
   /* the producer: body bounce, head nod, hands tapping the pads, pad lights (all on the beat) */
@@ -242,6 +253,7 @@ function makeStage(canvas,seed){
    c.fillStyle='#050309';c.fillRect(x-s*1.1,y-s*1.5,s*2.2,s*3);c.beginPath();c.arc(x,y-s*1.9,s*.78,0,6.3);c.fill();
    if(p.look===1)c.fillRect(x-s*.9,y-s*2.8,s*1.8,s*.5);else if(p.look===2)c.fillRect(x+s*.4,y-s*2.5,s*.7,s*1.2);
    if(p.arm<clamp(E*1.2+st.cheer*.6,0,1)){const w1=Math.sin(T*5*p.sp+p.ph)*s*.5,h2=s*(2.4+E*1.4+st.cheer*1.2);c.strokeStyle='#050309';c.lineWidth=s*.45;c.beginPath();c.moveTo(x-s*.9,y-s);c.lineTo(x-s*1.3+w1,y-s-h2);c.moveTo(x+s*.9,y-s);c.lineTo(x+s*1.3-w1,y-s-h2*.9);c.stroke()}});
+  if(D&&mode==='live'){D.silh(c,pl,ex);D.worldLate(c,ex)}
   /* strobe flash on drops */
   if(st.flash>.02&&fx.flash!==false){c.fillStyle=`rgba(255,255,255,${Math.min(.5,st.flash*.45)})`;c.fillRect(0,0,W,H)}
   /* fireworks and confetti (unlocked by hearts, plus the finale) */
@@ -250,6 +262,7 @@ function makeStage(canvas,seed){
   c.save();c.globalCompositeOperation='lighter';st.fireworks=st.fireworks.filter(p=>p.l>0);st.fireworks.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=90*dt;p.vx*=.985;p.l-=dt*.55;c.fillStyle=`hsla(${p.h},100%,65%,${Math.max(0,p.l)})`;c.fillRect(p.x,p.y,3,3)});c.restore();
   st.confetti=st.confetti.filter(p=>p.y<H+8);st.confetti.forEach(p=>{p.y+=p.vy*dt;p.x+=p.vx*dt+Math.sin(p.y*.05)*.4;c.fillStyle=`hsl(${p.c},90%,60%)`;c.fillRect(p.x,p.y,4,3)});
   c.restore();
+  if(D)D.post(c,canvas,ex,dr);
   /* post: bloom, vignette, grain */
   bctx.clearRect(0,0,W/4,H/4);bctx.drawImage(canvas,0,0,W/4,H/4);c.save();c.globalCompositeOperation='screen';c.globalAlpha=.34+int*.2;c.drawImage(bloom,0,0,W,H);c.restore();
   c.drawImage(vig,0,0);
@@ -258,10 +271,11 @@ function makeStage(canvas,seed){
   /* the banner at the end of the show */
   if(mode==='end'&&st.endT>=0){const e=st.endT,x=lerp(-W*1.2,0,1-Math.pow(1-clamp(e/1.1,0,1),3)),yb=H*.43;c.save();c.translate(x,0);c.fillStyle='rgba(8,6,16,.9)';c.fillRect(0,yb-48,W,96);c.fillStyle='#ffd34a';c.fillRect(0,yb-48,W,4);c.fillRect(0,yb+44,W,4);
    c.font='46px "Press Start 2P",monospace';c.textAlign='center';c.textBaseline='middle';c.fillStyle='#000';c.fillText('THANKS FOR WATCHING!',W/2+4,yb+4);const gr2=c.createLinearGradient(0,yb-26,0,yb+26);gr2.addColorStop(0,'#fff6c8');gr2.addColorStop(.5,'#ffd34a');gr2.addColorStop(1,'#d99a12');c.fillStyle=gr2;c.shadowColor='#ffb020';c.shadowBlur=18;c.fillText('THANKS FOR WATCHING!',W/2,yb);c.restore()}
+  if(D){D.film(c,ex);D.over(c,canvas,ex)}
  };
- st.setScript=(s,hits)=>{S.script=s;S.hits=hits||[];S.theme=VARIANT[s.theme]!==undefined?s.theme:'city';st.hitIdx=0;st.lastHit=-1;st.lastStartTrack=-2};
- st.setTheme=t=>{S.theme=VARIANT[t]!==undefined?t:'city'};st.setHits=h=>{S.hits=h;st.hitIdx=0;st.lastHit=-1};st.setPlate=i=>{S.plate=i;for(const k in plates)delete plates[k]};
- st.setHearts=n=>{st.hearts=n};st.reset=()=>{st.hitIdx=0;st.lastHit=-1;st.fireworks=[];st.confetti=[];st.endT=-1;st.lastStartTrack=-2;st.lastDrop=-1};
+ st.setScript=(s,hits)=>{S.script=s;S.hits=hits||[];S.theme=VARIANT[s.theme]!==undefined?s.theme:'city';st.hitIdx=0;st.lastHit=-1;st.lastStartTrack=-2;if(st.fx)st.fx.setScript(s,S.hits)};
+ st.setTheme=t=>{S.theme=VARIANT[t]!==undefined?t:'city'};st.setHits=h=>{S.hits=h;st.hitIdx=0;st.lastHit=-1;if(st.fx)st.fx.setScript(S.script,h)};st.setPlate=i=>{S.plate=i;for(const k in plates)delete plates[k]};
+ st.setHearts=n=>{st.hearts=n};st.reset=()=>{if(st.fx)st.fx.reset();st.hitIdx=0;st.lastHit=-1;st.fireworks=[];st.confetti=[];st.endT=-1;st.lastStartTrack=-2;st.lastDrop=-1};
  st.canvas=canvas;st.burst=burst;st.script=()=>S.script;st.themeThumb=name=>plateFor(name);
  return st;
 }

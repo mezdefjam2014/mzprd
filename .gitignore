@@ -5,3 +5,6 @@ dist/
 grid.png
 hero_prev.jpg
 node_modules/
+backup_show/
+_showtest.html
+_preview/
