@@ -53,6 +53,7 @@ function css(){
 #showmk .it b{flex:1;min-width:0}#showmk .it span{font:500 11px Montserrat;color:#8e8e94}
 #showmk .it button{background:transparent;border:1px solid #4a4a50;color:#fff;font:600 9px Montserrat;letter-spacing:.12em;padding:6px 8px;cursor:pointer}
 #showmk .tag{font:700 9px Montserrat;letter-spacing:.14em;padding:3px 7px;margin-left:6px}
+#showmk #smYTd summary::-webkit-details-marker{display:none}#showmk #smYTd .ytx{font-size:16px;color:#8e8e94}#showmk #smYTd[open] .ytp,#showmk #smYTd:not([open]) .ytm{display:none}
 #showmk .dr{display:grid;grid-template-columns:48px 44px 1fr 28px 28px;gap:6px;align-items:center;padding:5px 6px;border:1px solid #1d1d21;margin-bottom:4px;font:600 11px Montserrat;color:#d9d9dc}#showmk .dr b{color:var(--gold)}
 #showmk .tag.d{background:#3a3a44}#showmk .tag.p{background:#e0242f}#showmk .tag.a{background:#2b2748}`;
  document.head.appendChild(s);
@@ -66,7 +67,7 @@ function html(){return`<div class="mg"><div>
    <span class="msg" style="margin:0;flex:1;min-width:160px">Unlocks the milestone effects in the preview so you can see them.</span></div></div>
  <div class="pn" style="margin-top:16px"><h4 style="margin-top:0">YOUR SHOWS</h4><div id="smList"></div>
   <h4>VIDEO RENDERS (STAY IN THIS BROWSER 7 DAYS, THEN DELETE THEMSELVES)</h4><div id="smRend"></div></div>
- <div class="pn" id="smYTd" style="margin-top:16px"><h4 style="margin-top:0">YOUTUBE PACKAGE <span style="font:500 10px Montserrat;letter-spacing:.06em;color:#8e8e94">premiere, straight upload, or your site</span></h4><div id="smYT"></div></div>
+ <details class="pn" id="smYTd" open style="margin-top:16px"><summary style="cursor:pointer;font:700 11px Montserrat;letter-spacing:.26em;color:var(--gold);list-style:none;display:flex;justify-content:space-between;align-items:center">YOUTUBE PACKAGE <span style="font:500 10px Montserrat;letter-spacing:.06em;color:#8e8e94;flex:1;text-align:right;margin-right:8px">premiere, straight upload, or your site</span><span class="ytx ytm">&minus;</span><span class="ytx ytp">+</span></summary><div id="smYT" style="margin-top:10px"></div></details>
 </div>
 <div><div class="pn" style="max-height:none">
  <div class="row" style="grid-template-columns:1fr auto"><h3>SHOW MAKER</h3><button class="btn" id="smSave">SAVE DRAFT</button></div>
@@ -404,7 +405,7 @@ async function renderVideo(){
   const blob=new Blob([target.buffer],{type:'video/mp4'}),id='r'+Date.now();
   let kept=true;try{await lib.put({id,title:sc.title,created:Date.now(),expires:Date.now()+7*DAY,size:blob.size,blob})}catch(e){kept=false}
   $q('#smProg').style.width='100%';rm('Done: '+(blob.size/1048576).toFixed(0)+' MB, '+mmss(TOTAL)+' long. '+(kept?'Saved in this browser for 7 days (see Video Renders).':'Could not keep a copy here, so download it now.'));
-  dl(blob,(sc.title||'show').replace(/[^\w -]+/g,'')+'.mp4');await rRend();ytRender();{const d=$q('#smYTd');if(d)d.scrollIntoView({behavior:'smooth',block:'start'})}rm('Done: '+(blob.size/1048576).toFixed(0)+' MB. Your YouTube package (titles, tags, description with every beat link) is ready in section 8.');
+  dl(blob,(sc.title||'show').replace(/[^\w -]+/g,'')+'.mp4');await rRend();ytRender();{const d=$q('#smYTd');if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'})}}rm('Done: '+(blob.size/1048576).toFixed(0)+' MB. Your YouTube package (titles, tags, description with every beat link) is ready in section 8.');
  }catch(e){console.warn(e);rm('Render failed: '+((e&&e.message)||e))}
  finally{try{venc&&venc.close()}catch(e){}try{aenc&&aenc.close()}catch(e){}E.busy=false;btn.disabled=false;badge();removeEventListener('beforeunload',beforeUnload)}
 }
