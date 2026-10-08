@@ -31,8 +31,36 @@ const GROUPS=[['CAMERA MOVES','C',rng(1,17)],['EFFECTS','E',rng(1,22)],['HOOKS A
 /* default length (s) of items that live on the timeline as events */
 const DEFD={C2:.55,C3:1.2,C4:7,C6:3.4,C10:1.5,C12:2.2,C13:4.2,C14:3.4,C15:1.8,C16:.5,C17:.7,E2:2,E3:1,E4:1.4,E5:2.4,E6:.45,E11:8,E17:.5,E18:1.3,E19:.55,H2:3,H4:3.4,H6:3.6,H10:.9,S17:3,S18:1.1};
 const DEFAULT_HOOK='MZPRD BEATS LINK IN BIO',DEFAULT_CALLS=['NEW BEAT OUT NOW','LINK IN BIO','MZPRD.COM'],DEFAULT_BAIT='RATE THIS BEAT 1 TO 10 IN THE COMMENTS';
-/* shows saved before the director existed have no sc.dir and play exactly as they did */
-const enabled=(sc,c)=>{const d=sc.dir;if(!d||d.on===false)return false;return !(d.off&&d.off[c])};
+
+/* ---------- auto picks: with AUTO-BUILD on, the director chooses and rotates items by itself ----------
+   Items you tick in the Show Maker are always on. The rest are drawn by a seeded shuffle: a fresh mix for every
+   two sections (camera, effects, back screen) and one show-wide mix of hooks. Re-roll changes the seed.
+   The jittery camera moves (C7, C8, C9, C16) are never auto-picked. */
+const CAM_POOL=['C1','C2','C3','C4','C5','C6','C10','C11','C12','C13','C14','C15','C17'],EFF_POOL=rng(1,22).map(i=>'E'+i),
+ MOOD_POOL=rng(11,16).map(i=>'S'+i),SCR_POOL=[17,18,19,20,21,28,29,30].map(i=>'S'+i),HOOK_POOL=rng(1,13).map(i=>'H'+i);
+const picksCache=new WeakMap();
+function picks(sc,segIdx){
+ const d=sc.dir||{},seed=((d.seed!=null?d.seed:sc.seed||0)|0),sig=seed+'|'+sc.segments.length+'|'+sc.tracks.length;
+ let c=picksCache.get(sc);if(!c||c.sig!==sig){c={sig,m:{}};picksCache.set(sc,c)}
+ const g=segIdx<0?-1:Math.floor(segIdx/2);if(c.m[g])return c.m[g];
+ const R=M.mulberry(seed*7919+(g+2)*104729+11),take=(arr,n)=>{const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}return a.slice(0,n)};
+ return c.m[g]=new Set(g<0?take(HOOK_POOL,7):[].concat(take(CAM_POOL,5),take(EFF_POOL,8),take(MOOD_POOL,2),take(SCR_POOL,3)));
+}
+function enabledAt(sc,code,t){
+ const d=sc.dir;if(!d||d.on===false)return false;
+ if(!(d.off&&d.off[code]))return true;
+ if(sc.auto===false||d.pick===false)return false;
+ if(code[0]==='H')return picks(sc,-1).has(code);
+ return picks(sc,M.segAt(sc,Math.max(0,t||0)).i).has(code);
+}
+const enabled=(sc,c)=>enabledAt(sc,c,0);
+function describePicks(sc){
+ const d=sc.dir;if(!d||d.on===false||sc.auto===false||d.pick===false)return[];
+ const out=[],n=Math.ceil(sc.segments.length/2);
+ for(let g=0;g<n;g++){const a=sc.segments[g*2],b=sc.segments[Math.min(sc.segments.length-1,g*2+1)],codes=[...picks(sc,g*2)].sort((x,y)=>x[0]===y[0]?(+x.slice(1))-(+y.slice(1)):x<y?-1:1);out.push({from:a.start,to:b.end,codes})}
+ out.push({hooks:true,codes:[...picks(sc,-1)].sort((x,y)=>(+x.slice(1))-(+y.slice(1)))});return out;
+}
+
 const amount=sc=>{const a=sc.dir&&sc.dir.amount;return a==null?1:clamp(a,.2,1.6)};
 const bpmAt=(sc,T)=>{const i=M.trackAt(sc,T),t=i>=0?sc.tracks[i]:null;return(t&&t.bpm)||92};
 
@@ -48,9 +76,9 @@ const coldEnd=sc=>enabled(sc,'H1')?COLD:0;
 /* ---------- the planner: script -> timed events ---------- */
 function plan(sc){
  const d=sc.dir||{};
- if(d.auto===false&&Array.isArray(d.events))return d.events.filter(e=>e&&CODES[e.id]&&enabled(sc,e.id)).map(e=>Object.assign({},e)).sort((a,b)=>a.t-b.t);
+ if(d.auto===false&&Array.isArray(d.events))return d.events.filter(e=>e&&CODES[e.id]&&enabledAt(sc,e.id,e.t)).map(e=>Object.assign({},e)).sort((a,b)=>a.t-b.t);
  const R=M.mulberry(((d.seed!=null?d.seed:sc.seed||0)|0)*7919+13),ev=[],S=sc.segments,len=sc.len,cold=coldEnd(sc),fd=falseDrop(sc);
- const add=(id,t,du,x)=>{if(!enabled(sc,id))return;if(t<0)t=0;if(t>=len+8)return;ev.push(Object.assign({id,t:Math.round(t*100)/100,d:du||DEFD[id]||1},x||{}))};
+ const add=(id,t,du,x)=>{if(!enabledAt(sc,id,t))return;if(t<0)t=0;if(t>=len+8)return;ev.push(Object.assign({id,t:Math.round(t*100)/100,d:du||DEFD[id]||1},x||{}))};
  let dir=1,drops=0;
  S.forEach((g,i)=>{
   const a=g.start,b=g.end,pr=g.preset,bl=60/bpmAt(sc,a+1),bar=bl*4,dur=b-a,pre=i>0?S[i-1]:null;
@@ -105,7 +133,7 @@ function create(st){
  const tmp3=document.createElement('canvas');tmp3.width=W;tmp3.height=H;const tx3=tmp3.getContext('2d');
  const small=document.createElement('canvas');small.width=W/6|0;small.height=H/6|0;const sx=small.getContext('2d');
  const snap=document.createElement('canvas');snap.width=W/2;snap.height=H/2;const snx=snap.getContext('2d');
- const on=c=>D.sc?enabled(D.sc,c):false;let amt=1;
+ const on=c=>D.sc?enabledAt(D.sc,c,D.curT||0):false;let amt=1;
  const last=(arr,T)=>{let lo=0,hi=arr.length;while(lo<hi){const m=(lo+hi)>>1;if(arr[m].t<=T)lo=m+1;else hi=m}return lo-1};
  const cv={rd:(a,T,tau)=>{const i=last(a,T);if(i<0)return{e:0,i:-1};const h=a[i],d=T-h.t;return{e:d>=0&&d<tau*5?Math.exp(-d/tau)*(h.s||1):0,i,h}}};
 
@@ -217,6 +245,7 @@ function create(st){
 
  /* ---------- per-frame context ---------- */
  D.frame=(Treal,T,dt,q,P,mode,bpm,int,hue,au,E,PADS)=>{
+  D.curT=Treal;
   const ex={Treal,T,dt,q,P,mode,bpm,int,hue,au,E,PADS,pr:q.seg.preset,bl:60/bpm,bass:au.bass||0,loud:au.loud||0,cold:D.coldOn(Treal,mode)};
   ex.kick=cv.rd(D.kicks,Treal,.12).e;ex.snare=cv.rd(D.snares,Treal,.1).e;
   if(!D.firstHave&&mode==='live'&&Treal<.35){D.needSnap=true}
@@ -431,5 +460,5 @@ D.led=(c,ex,sx0,sy0,sw,sh)=>{
  return D;
 }
 const allOff=()=>{const o={};Object.keys(CODES).forEach(k=>o[k]=true);return o};
-window.MZShowFX={allOff,CODES,GROUPS,DEFD,plan,audioDips,coldEnd,enabled,create,falseDrop,DEFAULT_HOOK,DEFAULT_CALLS,DEFAULT_BAIT,COLD};
+window.MZShowFX={picks,enabledAt,describePicks,allOff,CODES,GROUPS,DEFD,plan,audioDips,coldEnd,enabled,create,falseDrop,DEFAULT_HOOK,DEFAULT_CALLS,DEFAULT_BAIT,COLD};
 })();

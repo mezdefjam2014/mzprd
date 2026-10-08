@@ -123,7 +123,7 @@ function autoBuild(){
  m[0].start=0;m[m.length-1].end=len;sc.segments=m;sc.auto=true;
 }
 function rebuild(){const sc=E.script;if(sc.auto!==false)autoBuild();else{spread();applyLooks()}fillStruct()}
-function fillStruct(){const sc=E.script;$q('#smLen').value=sc.len/60;$q('#smScrub').max=sc.len;rTracks();rSegs();segBar();refreshHits();syncAutoUi();setT();seek(E.T)}
+function fillStruct(){const sc=E.script;$q('#smLen').value=sc.len/60;$q('#smScrub').max=sc.len;rTracks();rSegs();segBar();refreshHits();syncAutoUi();rDirList();dirCount();rPicks();setT();seek(E.T)}
 function manual(){const sc=E.script;if(sc.auto!==false){sc.auto=false;syncAutoUi()}}
 function syncAutoUi(){
  const sc=E.script,auto=sc.auto!==false,looks=new Set(sc.tracks.map(t=>t.look).filter(Boolean)),nl=Math.max(1,looks.size);
@@ -177,7 +177,8 @@ function msg(t){$q('#smMsg').textContent=t}
 function fillAll(){syncAutoUi();rDir();$q('#smTitle').value=E.title;$q('#smLen').value=E.script.len/60;$q('#smScrub').max=E.script.len;rTracks();rTheme();rSegs();rFx();rMs();setWhen();segBar();setT();syncAutoUi()}
 /* ---------- director: the 52 camera moves, effects and hooks ---------- */
 const dd=()=>{const s=E.script;if(!s.dir)s.dir={on:false,amount:1,off:window.MZShowFX?MZShowFX.allOff():{}};if(!s.dir.off)s.dir.off={};return s.dir};
-function dirApply(){refreshHits();rDirList();dirCount()}
+function rPicks(){const FX=window.MZShowFX,el=$q('#dPicks');if(!FX||!el)return;const L=FX.describePicks(E.script);el.innerHTML=L.length?L.map(g=>g.hooks?'<b>HOOKS (whole show):</b> '+g.codes.join(' '):'<b>'+mmss(g.from)+' - '+mmss(g.to)+':</b> '+g.codes.join(' ')).join('<br>'):(E.script.auto===false?'Auto-build is off, so only the items you tick are used.':'Nothing is chosen automatically right now.')}
+function dirApply(){refreshHits();rDirList();dirCount();rPicks()}
 function dirManual(){const d=dd();if(d.auto===false)return;d.events=window.MZShowFX.plan(E.script);d.auto=false}
 function dirCount(){const FX=window.MZShowFX,d=dd();if(!FX)return;let on=0,tot=0;FX.GROUPS.forEach(([n,L,nums])=>{let k=0;nums.forEach(i=>{tot++;if(d.on!==false&&!d.off[L+i]){on++;k++}});const el=$q('#dc'+L);if(el)el.textContent=k+' of '+nums.length+' on'});const s=$q('#smS7');if(s)s.textContent=d.on===false?'off':on+' of '+tot+' on'}
 function rDirList(){
@@ -190,6 +191,8 @@ function rDir(){
  const FX=window.MZShowFX,box=$q('#smDir');if(!box)return;if(!FX){box.innerHTML='<div class="msg">The director did not load. Refresh the page.</div>';return}
  const d=dd();
  let h=`<label class="chk"><input type="checkbox" id="dOn"${d.on!==false?' checked':''}> DIRECTOR ON (camera moves, effects and hooks)</label>
+ <label class="chk"><input type="checkbox" id="dPick"${d.pick!==false?' checked':''}> LET AUTO-BUILD CHOOSE AND SWITCH THEM UP (items you tick below are always used)</label>
+ <div class="msg" id="dPicks"></div>
  <div class="two"><div><label>AMOUNT</label><input type="range" id="dAmt" min="20" max="160" step="5" value="${Math.round((d.amount==null?1:d.amount)*100)}" style="width:100%;accent-color:var(--red)"></div><div><label>&nbsp;</label><button class="btn" id="dRoll" style="width:100%">RE-ROLL THE DIRECTOR</button></div></div>
  <label>HOOK WORDS (pop on the beat in drops)</label><input type="text" id="dHook" value="${esc(d.hook||FX.DEFAULT_HOOK)}">
  <div class="two"><div><label>LOWER-THIRD TAG</label><input type="text" id="dTag" value="${esc(d.tag||'PROD. MZPRD')}"></div><div><label>CALLOUTS (COMMA SEPARATED)</label><input type="text" id="dCalls" value="${esc((d.callouts&&d.callouts.length?d.callouts:FX.DEFAULT_CALLS).join(', '))}"></div></div>
@@ -201,6 +204,7 @@ function rDir(){
  <button class="btn" id="dReset" style="width:100%;margin-top:6px">BACK TO AUTO</button>`;
  box.innerHTML=h;
  $q('#dOn').onchange=e=>{dd().on=e.target.checked;dirApply()};
+ $q('#dPick').onchange=e=>{dd().pick=e.target.checked;dirApply()};
  $q('#dAmt').oninput=e=>{dd().amount=+e.target.value/100;refreshHits()};
  $q('#dRoll').onclick=()=>{const d2=dd();d2.seed=Math.floor(Math.random()*9973);d2.auto=true;delete d2.events;dirApply();seek(E.T);msg('A new arrangement of camera moves, effects and hooks.')};
  const txt=(id,k)=>$q(id).onchange=e=>{const v=e.target.value.trim();if(k==='callouts')dd().callouts=v.split(',').map(x=>x.trim()).filter(Boolean);else dd()[k]=v;refreshHits()};
@@ -209,7 +213,7 @@ function rDir(){
  box.querySelectorAll('[data-all]').forEach(b=>b.onclick=()=>{const [L,v]=b.dataset.all.split(':'),o=dd().off,nums=FX.GROUPS.find(g=>g[1]===L)[2];nums.forEach(i=>{if(v==='1')delete o[L+i];else o[L+i]=true});rDir();dirApply()});
  $q('#dAddB').onclick=()=>{const id=$q('#dAddC').value,t=clamp(parseT($q('#dAddT').value),0,E.script.len);dirManual();dd().events.push({id,t,d:FX.DEFD[id]});dd().events.sort((a,b)=>a.t-b.t);dirApply();seek(Math.max(0,t-1))};
  $q('#dReset').onclick=()=>{const d2=dd();d2.auto=true;delete d2.events;dirApply()};
- rDirList();dirCount();
+ rDirList();dirCount();rPicks();
 }
 /* ---------- preview playback ---------- */
 function setT(){const el=$q('#smTime');if(el)el.textContent=mmss(E.T)+' / '+mmss(E.script.len);const sc=$q('#smScrub');if(sc&&document.activeElement!==sc)sc.value=E.T}
