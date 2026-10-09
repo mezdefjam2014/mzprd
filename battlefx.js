@@ -18,6 +18,10 @@ function loadFonts(){if(fontsP)return fontsP;fontsP=(async()=>{if(!document.quer
 async function loadProps(){if(!IM.crown)IM.crown=await loadImg('battle/crown.webp');if(!IM.trophy)IM.trophy=await loadImg('battle/trophy.webp');if(!IM.stage)IM.stage=await loadImg('show-stage.webp')}
 function loadChars(ids){return Promise.all(ids.map(async n=>{if(n>0&&!IM.c[n-1])IM.c[n-1]=await loadImg('battle/c'+String(n).padStart(2,'0')+'.webp')}))}
 const charImg=n=>n>0?IM.c[n-1]||null:null;
+/* attack art: fighters 1-10 have 3 attack images each (battle/aNN_K.webp); the alt costumes 11-20 reuse them, hue-shifted */
+IM.a={};
+function loadAtk(ids){return Promise.all([...new Set(ids.map(n=>n>0?((n-1)%10)+1:0))].filter(Boolean).map(async o=>{if(!IM.a[o]){IM.a[o]=[null,null,null];await Promise.all([0,1,2].map(async k=>{IM.a[o][k]=await loadImg('battle/a'+String(o).padStart(2,'0')+'_'+(k+1)+'.webp')}))}}))}
+const atkImg=(n,k)=>{const o=n>0?((n-1)%10)+1:0;return o&&IM.a[o]?IM.a[o][k]||null:null};
 
 /* ---------- text and shapes ---------- */
 function tx(c,s,x,y,px,font,fill,o){o=o||{};c.save();c.font=px+'px '+font;c.textAlign=o.al||'center';c.textBaseline=o.bl||'middle';c.lineJoin='round';if(o.a!=null)c.globalAlpha*=o.a;
@@ -148,5 +152,5 @@ function drawBracket(c,B,lt,o){
  if(o.cursor!=null){}}
 function matchIndexOf(B,side,r,slot){const N=B.fighters.length,per=N/Math.pow(2,r+1);const sideIndex=Math.floor(slot/2);return side==='L'?sideIndex:per/2+sideIndex}
 
-window.MZBattleFX={W,H,IM,FN,LC,RC,GOLD,TEMPLATES,loadFonts,loadProps,loadChars,charImg,arena,vignette,portrait,plate,hpbar,bubble,tx,rr,wrap,sparkle,shake,flashFx,rings,confetti,fireworks,crack,speedLines,godRays,slamText,drawBracket,bracketLayout,slotFighters,hs,eo,ei,eio,eb,clamp,lerp,G,RG,matchIndexOf};
+window.MZBattleFX={W,H,IM,FN,LC,RC,GOLD,TEMPLATES,loadFonts,loadProps,loadChars,charImg,loadAtk,atkImg,arena,vignette,portrait,plate,hpbar,bubble,tx,rr,wrap,sparkle,shake,flashFx,rings,confetti,fireworks,crack,speedLines,godRays,slamText,drawBracket,bracketLayout,slotFighters,hs,eo,ei,eio,eb,clamp,lerp,G,RG,matchIndexOf};
 })();

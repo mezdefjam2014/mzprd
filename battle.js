@@ -147,7 +147,7 @@ function fillBracket(){const el=$q('#btRes');if(!el)return;let h='';
 function ctxA(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC}
 async function decode(ab){return await ctxA().decodeAudioData(ab)}
 function bestStart(buf,clip){return 0;const d=buf.getChannelData(0),sr=buf.sampleRate,win=sr,n=Math.floor(d.length/win);if(buf.duration<=clip+1.5||n<3)return 0;const e=[];for(let k=0;k<n;k++){let s=0;for(let i=k*win;i<(k+1)*win;i+=9)s+=d[i]*d[i];e.push(s)}let best=0,bs=-1;const L=Math.max(1,Math.round(clip));for(let k=0;k+L<=n;k++){let s=0;for(let j=0;j<L;j++)s+=e[k+j];if(k>0&&s>bs){bs=s;best=k}}return Math.max(0,Math.min(best,buf.duration-clip-.2))}
-async function prepAudio(){const need=new Set();TL.segs.forEach(s=>{if(s.type==='play'){const M=B.rounds[s.r][s.m];need.add(s.side===0?M.a:M.b)}});
+async function prepAudio(){try{await FX().loadAtk(ST.fighters.map(f=>f.char).filter(n=>n>0))}catch(e){}const need=new Set();TL.segs.forEach(s=>{if(s.type==='play'){const M=B.rounds[s.r][s.m];need.add(s.side===0?M.a:M.b)}});
  for(const i of need){const f=ST.fighters[i],bt=f.beat;if(!bt||bt.buf||bt.src!=='site'||!bt.path)continue;try{const r=await fetch(typeof pub==='function'?pub(bt.path):bt.path);bt.buf=await decode(await r.arrayBuffer());bt.start=0}catch(e){}}
  const miss=[...need].filter(i=>!ST.fighters[i].beat||!ST.fighters[i].beat.buf).map(i=>ST.fighters[i].name);return miss}
 
@@ -254,12 +254,12 @@ function wire(){
 window.battleOpen=async function(){
  css();root=document.getElementById('battlemk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the battle engine...</div></div>';
-  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=4','battlescenes.js?v=7','battleaudio.js?v=10','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
+  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=5','battlescenes.js?v=9','battleaudio.js?v=10','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
   await FX().loadFonts();await FX().loadProps();
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,cover_path,slug,tags').order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
   ST=load();if(ST.fighters.length!==total()||!ST.rounds.length){const keep=ST.fighters.slice(0,total());ST.fighters=keep;deal()}
   ST.fighters.forEach(f=>{if(f.beat&&f.beat.src==='file'&&!f.beat.buf)f.beat=beatFor(ST.fighters.indexOf(f));if(f.char===0&&!(f.face&&f.face.canvas)){f.char=(ST.fighters.indexOf(f)%20)+1}});
-  await FX().loadChars(ST.fighters.map(f=>f.char).filter(n=>n>0));
+  await FX().loadChars(ST.fighters.map(f=>f.char).filter(n=>n>0));FX().loadAtk(ST.fighters.map(f=>f.char).filter(n=>n>0));
   root.innerHTML=html();wire();syncTop();tplBtns();fightersList();episodeSel();B=mkBattle();TL=SC().build(B);fillPart();{const bi=TL.segs.findIndex(g=>g.type==='bracket');if(bi>=0){$q('#btPart').value=String(bi);$q('#btScrub').value='0.7'}}drawNow();fillBracket();ytRender();thRender();
   cancelAnimationFrame(bRaf);bt0=performance.now();bRaf=requestAnimationFrame(bracketLoop)}
  else{cancelAnimationFrame(bRaf);bRaf=requestAnimationFrame(bracketLoop)}
