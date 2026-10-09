@@ -83,7 +83,7 @@ function sceneIntro(c,B,seg,lt,au){
  c.restore();FX.flashFx(c,lt,1.7,.3,'#fff',.55);FX.flashFx(c,lt,3.7,.4,'#ffe28a',.7);if(lt>1.7)FX.rings(c,W/2,H*.5,lt,1.7,GOLD,3,1.1);
  fadeEnds(c,lt,seg.dur,.12,.2);}
 function slamV(c,lt,t0){const k=lt-t0,sc=k<.2?lerp(3.4,1,eo(k/.2)):1+Math.sin(k*9)*.03;tx(c,'VS',W/2,H*.45,190,FN.A,'#fff',{sc,sw:16,st:'#000',gl:GOLD,gb:60,ex:7,exc:'#4a1a00'})}
-function hpPair(c,B,M,pa,pb,y0){y0=y0||52;const A=B.fighters[M.a],Bf=B.fighters[M.b];FX.hpbar(c,50,y0,470,pa,LC,'l');FX.hpbar(c,W-50-470,y0,470,pb,RC,'r');tx(c,A.name,50,y0-24,18,FN.P,'#fff',{al:'left',sw:5});tx(c,Bf.name,W-50,y0-24,18,FN.P,'#fff',{al:'right',sw:5})}
+function hpPair(c,B,M,pa,pb,y0){y0=y0||52;const A=B.fighters[M.a],Bf=B.fighters[M.b];FX.hpbar(c,50,y0,470,pa,LC,'l');FX.hpbar(c,W-50-470,y0,470,pb,RC,'r');tx(c,A.name.replace('THE ',''),62,y0+18,17,FN.P,'#fff',{al:'left',sw:6});tx(c,Bf.name.replace('THE ',''),W-62,y0+18,17,FN.P,'#fff',{al:'right',sw:6})}
 function scenePlay(c,B,seg,lt,au){
  const M=B.rounds[seg.r][seg.m],A=B.fighters[M.a],Bf=B.fighters[M.b],act=seg.side===0?A:Bf,oth=seg.side===0?Bf:A,col=seg.side===0?LC:RC,ocol=seg.side===0?RC:LC;
  FX.arena(c,B.tpl,lt,au,B);const bass=au.bass||0,loud=au.loud||0;
