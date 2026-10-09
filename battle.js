@@ -156,7 +156,8 @@ function cvx(){return $q('#btCv').getContext('2d')}
 function drawNow(){if(!TL||PV.playing)return;const s=+($q('#btPart').value||0),seg=TL.segs[s]||TL.segs[0],lt=parseFloat($q('#btScrub').value)*seg.dur;SC().drawFrame(cvx(),B,TL,seg.start+lt,{bass:.25,loud:.3,fd:null});$q('#btTime').textContent=mmss(lt)+' / '+mmss(seg.dur)}
 let PT=0,PC=null;
 function stopPlay(){PT++;PV.playing=false;cancelAnimationFrame(PV.raf);try{PV.src&&PV.src.stop()}catch(e){}PV.src=null;$q('#btPlay').textContent='PLAY PART';$q('#btAll').textContent='PLAY EPISODE'}
-async function playSeg(i,chain){
+async function playSeg(i,chain){try{await playSeg0(i,chain)}catch(e){PV.loading=false;stopPlay();msg('Playback problem: '+(e&&e.message||e)+'. Tell Claude this text.')}}
+async function playSeg0(i,chain){
  stopPlay();const my=PT;$q('#btPlay').textContent=chain?'PLAY PART':'STOP';$q('#btAll').textContent=chain?'STOP':'PLAY EPISODE';const lb=chain?'#btAll':'#btPlay';$q(lb).textContent='LOADING... (CLICK TO CANCEL)';PV.loading=true;
  const miss=await prepAudio();if(my!==PT)return;if(miss.length)msg('No audio yet for: '+miss.slice(0,4).join(', ')+'. Pick a beat for them or upload a file. Playing without it.');
  const seg=TL.segs[i];if(!seg)return;$q('#btPart').value=String(i);const end=chain?TL.total:seg.start+seg.dur,key=i+'|'+end,a=ctxA();let buf;if(PC&&PC.tl===TL&&PC.key===key&&!miss.length)buf=PC.buf;else{buf=await AU().renderRange(B,TL,seg.start,end);if(my!==PT)return;PC={tl:TL,key,buf}}await Promise.race([a.resume(),new Promise(r=>setTimeout(r,500))]);if(my!==PT)return;PV.loading=false;
@@ -247,7 +248,7 @@ function wire(){
 window.battleOpen=async function(){
  css();root=document.getElementById('battlemk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the battle engine...</div></div>';
-  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=4','battlescenes.js?v=7','battleaudio.js?v=7','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
+  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=4','battlescenes.js?v=7','battleaudio.js?v=8','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
   await FX().loadFonts();await FX().loadProps();
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,cover_path,slug,tags').order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
   ST=load();if(ST.fighters.length!==total()||!ST.rounds.length){const keep=ST.fighters.slice(0,total());ST.fighters=keep;deal()}
