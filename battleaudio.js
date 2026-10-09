@@ -29,6 +29,9 @@ const S={
  vs:(c,d,T)=>{S.boom(c,d,T);osc(c,d,T,'square',440,220,.35,.16);nz(c,d,T,.3,'highpass',1500,.8,.35)},
  bubble:(c,d,T)=>osc(c,d,T,'sine',600,900,.08,.12)
 };
+let fightP=null,fight=null;
+async function loadFight(){if(fightP)return fightP;const dc=new OfflineAudioContext(1,1,44100);fightP=Promise.all([fetch(new URL('sfx/fight.mp3',document.baseURI).href).then(r=>r.arrayBuffer()).then(b=>dc.decodeAudioData(b)),fetch(new URL('sfx/fight.json',document.baseURI).href).then(r=>r.json())]).then(([buf,map])=>fight={buf,map}).catch(()=>null);return fightP}
+function fightAt(ctx,d,T,clip,g,pan){if(!fight||!fight.map[clip])return;const [o,du]=fight.map[clip],s=ctx.createBufferSource();s.buffer=fight.buf;const gn=ctx.createGain();gn.gain.value=g==null?.6:g;s.connect(gn);let out=gn;if(ctx.createStereoPanner&&pan){const pn=ctx.createStereoPanner();pn.pan.value=pan;gn.connect(pn);out=pn}out.connect(d);s.start(T,o,du)}
 async function loadCrowd(){if(crowdP)return crowdP;const dc=new OfflineAudioContext(2,1,44100),ld=u=>fetch(new URL('sfx/'+u+'.mp3',document.baseURI).href).then(r=>r.arrayBuffer()).then(b=>dc.decodeAudioData(b)).catch(()=>null);
  crowdP=Promise.all(['crowd-cheer1','crowd-cheer2','crowd-roar','crowd-applause'].map(ld)).then(([c1,c2,roar,app])=>crowd={cheers:[c1,c2].filter(Boolean),roar,app});return crowdP}
 function crowdAt(ctx,d,T,kind,len,g){if(!crowd)return;let b=kind==='roar'?crowd.roar:kind==='app'?crowd.app:(crowd.cheers[Math.floor(Math.random()*crowd.cheers.length)]);if(!b)return;const s=ctx.createBufferSource();s.buffer=b;s.playbackRate.value=.95+Math.random()*.1;const gn=ctx.createGain(),dur=Math.min(len||3,b.duration);gn.gain.setValueAtTime(.0001,T);gn.gain.linearRampToValueAtTime(g||.6,T+.15);gn.gain.setValueAtTime(g||.6,T+Math.max(.2,dur-1.2));gn.gain.linearRampToValueAtTime(.0001,T+dur);s.connect(gn);gn.connect(d);s.start(T);s.stop(T+dur+.05)}
@@ -40,7 +43,13 @@ function events(B,seg){
   case 'title':add(0,'whoosh',{dur:.5});add(.2,'boom');add(.55,'boom');add(.55,'stinger');add(1.2,'crowd',{kind:'cheer',len:2.2,g:.35});break;
   case 'bracket':add(0,'riser',{dur:1.8});for(let i=0;i<10;i++)add(.3+i*.14,'pop');add(2.4,'whoosh',{dur:.6});add(4,'boom');add(4,'vs');break;
   case 'intro':add(.1,'whoosh',{dur:.5});add(.25,'whoosh',{dur:.5});if(talkOn){for(let i=0;i<6;i++){add(1+i*.14,'blip',{f:480+i*30});add(2.45+i*.14,'blip',{f:400+i*30})}}add(1.7,'vs');add(3.4,'riser',{dur:.3});add(3.7,'stinger');add(3.7,'crowd',{kind:'cheer',len:1.6,g:.4});break;
-  case 'play':{const SC=window.MZBattleScenes;if(SC&&SC.hitsOf&&seg.r!=null)break}
+  case 'play':{const SC=window.MZBattleScenes;if(SC&&SC.hitsOf&&seg.r!=null){const L=SC.hitsOf(B,seg),dp=seg.side===0?.5:-.5,ap=-dp,hh=(i,k)=>{const x=Math.sin((i+1)*12.9898+k*78.233+seg.m*3.7+seg.r*5.1+seg.side*1.3)*43758.5453;return x-Math.floor(x)},pk=(a,i,k)=>a[Math.floor(hh(i,k)*a.length)];let prev=-9;
+   L.forEach((h,i)=>{const first=h.t-prev>.6;prev=h.t;
+    if(h.heal){add(h.t,'fight',{clip:'eff_'+pk(['yeah','hah'],i,1)+pk(['0','1'],i,2),g:.4,pan:ap});add(h.t,'bell',{});return}
+    if(h.blk){add(h.t,'fight',{clip:'clang'+pk(['0','1'],i,3),g:.5,pan:dp});return}
+    if(first||h.big){add(h.t-.11,'fight',{clip:'swing'+pk(['0','1'],i,4),g:.4,pan:ap});add(h.t-.07,'fight',{clip:'eff_'+pk(['hah','hup','ha','hyah'],i,5)+pk(['0','1'],i,6),g:.4,pan:ap})}
+    if(h.big){add(h.t,'fight',{clip:'crit'+pk(['0','1'],i,7),g:.7,pan:dp});add(h.t+.03,'fight',{clip:'pain_'+pk(['ow','agh','ugh'],i,8)+pk(['0','1'],i,9),g:.6,pan:dp})}
+    else{add(h.t,'fight',{clip:pk(['punch','body','slap','kick'],i,10)+pk(['0','1'],i,11),g:.55,pan:dp});if(hh(i,12)<.6)add(h.t+.03,'fight',{clip:'pain_'+pk(['oof','ugh','hnn','agh','ow'],i,13)+pk(['0','1'],i,14),g:.5,pan:dp})}})}break}
   case 'vote':add(0,'whoosh',{dur:.4});for(let k=0;k<5;k++){add(.6+k,'tick',{f:900+k*40})}add(5.6,'bell');if(talkOn){add(.6,'blip');add(.9,'blip')}break;
   case 'recap':{const k=seg.rd/7,t=x=>x*k,fin=seg.fin||{};add(0,'whoosh',{dur:.4});add(t(.7),'drumroll',{dur:t(1.8)});for(let i=0;i<5;i++)add(t(.8+i*.3),'tick',{f:700+i*60});add(t(2.4),'riser',{dur:.15});
    add(t(2.5),fin.sfx||'boom');if(fin.sfx!=='boom')add(t(2.5),'boom',{g:.5});add(t(2.55),'crowd',{kind:fin.id==='photo'||fin.id==='decision'?'app':'cheer',len:3,g:.55});add(t(3.6),'bell');if(fin.id==='flawless'||fin.id==='upset')add(t(3.0),'fanfare');add(t(3.7),'crowd',{kind:'app',len:3.2,g:.35});
@@ -56,8 +65,8 @@ function schedule(ctx,dest,B,tl,from,until,t0){
   if(seg.start+seg.dur<=from||seg.start>=until)return;
   /* the beat of a playing scene */
   if(seg.type==='play'){const F=B.fighters[(seg.side===0?B.rounds[seg.r][seg.m].a:B.rounds[seg.r][seg.m].b)],bf=F.beat&&F.beat.buf;if(bf){const a=Math.max(seg.start,from),e=Math.min(seg.start+seg.dur,until),off=(F.beat.start||0)+(a-seg.start);if(off<bf.duration){const s=ctx.createBufferSource();s.buffer=bf;if(bf.duration<seg.dur+(F.beat.start||0))s.loop=true;const gn=ctx.createGain();const T0=C(a),T1=C(e);gn.gain.setValueAtTime(a>seg.start?1:.0001,T0);if(a<=seg.start)gn.gain.linearRampToValueAtTime(1,T0+.25);gn.gain.setValueAtTime(1,Math.max(T0,T1-1.3));gn.gain.linearRampToValueAtTime(.0001,T1);s.connect(gn);gn.connect(bus);s.start(T0,off,Math.max(.05,e-a));s.stop(T1+.05)}}}
-  events(B,seg).forEach(ev=>{const at=seg.start+ev.at;if(at<from||at>=until)return;const T=C(at);if(ev.name==='crowd')crowdAt(ctx,sfx,T,ev.kind,ev.len,ev.g);else if(S[ev.name])S[ev.name](ctx,sfx,T,ev)})});
+  events(B,seg).forEach(ev=>{const at=seg.start+ev.at;if(at<from||at>=until)return;const T=C(at);if(ev.name==='crowd')crowdAt(ctx,sfx,T,ev.kind,ev.len,ev.g);else if(ev.name==='fight')fightAt(ctx,bus,T,ev.clip,ev.g,ev.pan);else if(S[ev.name])S[ev.name](ctx,sfx,T,ev)})});
 }
-async function renderRange(B,tl,from,until,sr){sr=sr||44100;const len=Math.max(.1,until-from),ctx=new OfflineAudioContext(2,Math.ceil(len*sr),sr);await loadCrowd();schedule(ctx,ctx.destination,B,tl,from,until,0);return ctx.startRendering()}
-window.MZBattleAudio={S,schedule,renderRange,events,loadCrowd};
+async function renderRange(B,tl,from,until,sr){sr=sr||44100;const len=Math.max(.1,until-from),ctx=new OfflineAudioContext(2,Math.ceil(len*sr),sr);await loadCrowd();await loadFight();schedule(ctx,ctx.destination,B,tl,from,until,0);return ctx.startRendering()}
+window.MZBattleAudio={S,schedule,renderRange,events,loadCrowd,loadFight};
 })();
