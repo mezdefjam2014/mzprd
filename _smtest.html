@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>sm test</title>
+<style>:root{--gold:#e8b94a;--red:#e0242f}body{margin:0;background:#050506;color:#fff;font:13px Montserrat,sans-serif;padding:16px}</style>
+<div id="showmk"></div>
+<script>
+window.pub=p=>p;window.askConfirm=()=>Promise.resolve(true);
+const BEATS=[{id:'b1',title:'Midnight Run',bpm:92,musical_key:'Fm',preview_path:'x',cover_path:null,slug:'midnight-run',tags:'Hip Hop / Boom Bap'},{id:'b2',title:'Cold Crown',bpm:140,musical_key:'D#m',preview_path:'x',cover_path:null,slug:'',tags:'Trap / Hip Hop'},{id:'b3',title:'Velvet Rain',bpm:78,musical_key:'Am',preview_path:'x',cover_path:null,slug:'velvet-rain',tags:'R&B / Hip Hop'}];
+function mk(table){const o={data:table==='beats'?BEATS:[]};const p=Promise.resolve(o);const q={select(){return q},order(){return table==='beats'?p:q},eq(){return q},limit(){return Promise.resolve({data:[]})},update(){return q},insert(){return q},delete(){return q},maybeSingle(){return Promise.resolve({data:null})},then:(a,b)=>p.then(a,b)};return q}
+window.sb={from:mk};
+const v=Date.now();document.write('<script src="show.js?'+v+'"><\/script><script src="showfx.js?'+v+'"><\/script><script src="showmaker.js?'+v+'"><\/script>');
+</script>
+<script>setTimeout(()=>{showMakerOpen().then(()=>{window.ready=1})},300)</script>

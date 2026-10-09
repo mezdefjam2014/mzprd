@@ -40,7 +40,7 @@ function build(B){
 const segAt=(tl,T)=>{const S=tl.segs;for(let i=S.length-1;i>=0;i--)if(T>=S[i].start)return{seg:S[i],i,lt:T-S[i].start};return{seg:S[0],i:0,lt:0}};
 
 /* ---------- small pieces shared by scenes ---------- */
-const fadeEnds=(c,lt,dur,a0,a1)=>{const f=clamp(lt/(a0||.25),0,1)*clamp((dur-lt)/(a1||.25),0,1);if(f<1){c.fillStyle=`rgba(0,0,0,${1-f})`;c.fillRect(0,0,W,H)}};
+const fadeEnds=()=>{};
 function hud(c,B,lt,label){tx(c,'MZPRD BEAT BATTLE',22,H-24,15,FN.P,'rgba(255,255,255,.7)',{al:'left',sw:4});if(label)tx(c,label,W-22,H-24,15,FN.P,GOLD,{al:'right',sw:4})}
 const clipPct=(seg)=>seg.dur;
 function topBanner(c,s,lt,col){const u=eo(lt/.4),y=-70+u*120;c.save();c.fillStyle='rgba(6,4,16,.92)';c.fillRect(W/2-380,y-34,760,68);c.fillStyle=col||GOLD;c.fillRect(W/2-380,y+30,760,5);tx(c,s,W/2,y,30,FN.P,'#fff',{sw:7});c.restore()}
@@ -190,6 +190,9 @@ function sceneOutro(c,B,seg,lt,au){
  const u=eb((lt-.9)/.5);c.save();c.globalAlpha=clamp(u*2,0,1);c.translate(W/2,H-88);c.scale(u*(1+.03*Math.sin(lt*6)),u*(1+.03*Math.sin(lt*6)));c.fillStyle='#e0242f';rr(c,-260,-34,520,68,14);c.fill();c.strokeStyle='#fff';c.lineWidth=4;c.stroke();tx(c,'SUBSCRIBE + VOTE IN COMMENTS',0,-9,14,FN.P,'#fff',{sw:0});tx(c,'BEATS: MZPRD.COM',0,19,15,FN.P,'#ffe28a',{sw:0});c.restore();
  fadeEnds(c,lt,seg.dur,.2,.5)}
 const SCENES={title:sceneTitle,bracket:sceneBracket,intro:sceneIntro,play:scenePlay,vote:sceneVote,recap:sceneRecap,champ:sceneChamp,outro:sceneOutro};
-function drawFrame(c,B,tl,T,au){const {seg,lt}=segAt(tl,T);c.save();c.clearRect(0,0,W,H);(SCENES[seg.type]||sceneTitle)(c,B,seg,lt,au||{bass:0,loud:0,fd:null});FX.vignette(c,.55);c.restore();return seg}
+let XC=null;
+function one(c,B,seg,lt,au){c.save();c.clearRect(0,0,W,H);(SCENES[seg.type]||sceneTitle)(c,B,seg,lt,au);FX.vignette(c,.55);c.restore()}
+function drawFrame(c,B,tl,T,au){const {seg,i,lt}=segAt(tl,T);au=au||{bass:0,loud:0,fd:null};one(c,B,seg,lt,au);const X=.5,nx=tl.segs[i+1],left=seg.dur-lt;
+ if(nx&&left<X){if(!XC){XC=document.createElement('canvas');XC.width=W;XC.height=H}const k=eo(1-left/X);one(XC.getContext('2d'),B,nx,0,au);c.save();c.globalAlpha=k;c.drawImage(XC,0,0);c.restore()}return seg}
 window.MZBattleScenes={build,segAt,drawFrame,roundName,pctOf,winnerOf,SCENES};
 })();

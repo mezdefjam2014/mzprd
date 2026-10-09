@@ -147,7 +147,7 @@ function ctxA(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)()
 async function decode(ab){return await ctxA().decodeAudioData(ab)}
 function bestStart(buf,clip){const d=buf.getChannelData(0),sr=buf.sampleRate,win=sr,n=Math.floor(d.length/win);if(buf.duration<=clip+1.5||n<3)return 0;const e=[];for(let k=0;k<n;k++){let s=0;for(let i=k*win;i<(k+1)*win;i+=9)s+=d[i]*d[i];e.push(s)}let best=0,bs=-1;const L=Math.max(1,Math.round(clip));for(let k=0;k+L<=n;k++){let s=0;for(let j=0;j<L;j++)s+=e[k+j];if(k>0&&s>bs){bs=s;best=k}}return Math.max(0,Math.min(best,buf.duration-clip-.2))}
 async function prepAudio(){const need=new Set();TL.segs.forEach(s=>{if(s.type==='play'){const M=B.rounds[s.r][s.m];need.add(s.side===0?M.a:M.b)}});
- for(const i of need){const f=ST.fighters[i],bt=f.beat;if(!bt||bt.buf||bt.src!=='site'||!bt.path)continue;try{const r=await fetch(window.pub?pub(bt.path):bt.path);bt.buf=await decode(await r.arrayBuffer());bt.start=bestStart(bt.buf,ST.clip)}catch(e){}}
+ for(const i of need){const f=ST.fighters[i],bt=f.beat;if(!bt||bt.buf||bt.src!=='site'||!bt.path)continue;try{const r=await fetch(typeof pub==='function'?pub(bt.path):bt.path);bt.buf=await decode(await r.arrayBuffer());bt.start=bestStart(bt.buf,ST.clip)}catch(e){}}
  const miss=[...need].filter(i=>!ST.fighters[i].beat||!ST.fighters[i].beat.buf).map(i=>ST.fighters[i].name);return miss}
 
 /* ---------- drawing and preview ---------- */
@@ -156,11 +156,11 @@ function drawNow(){if(!TL||PV.playing)return;const s=+($q('#btPart').value||0),s
 function stopPlay(){PV.playing=false;cancelAnimationFrame(PV.raf);try{PV.src&&PV.src.stop()}catch(e){}PV.src=null;$q('#btPlay').textContent='PLAY PART';$q('#btAll').textContent='PLAY EPISODE'}
 async function playSeg(i,chain){
  stopPlay();const miss=await prepAudio();if(miss.length)msg('No audio yet for: '+miss.slice(0,4).join(', ')+'. Pick a beat for them or upload a file. Playing without it.');
- const seg=TL.segs[i];if(!seg)return;$q('#btPart').value=String(i);const buf=await AU().renderRange(B,TL,seg.start,seg.start+seg.dur);const a=ctxA();await Promise.race([a.resume(),new Promise(r=>setTimeout(r,500))]);
+ const seg=TL.segs[i];if(!seg)return;$q('#btPart').value=String(i);const end=chain?TL.total:seg.start+seg.dur,buf=await AU().renderRange(B,TL,seg.start,end);const a=ctxA();await Promise.race([a.resume(),new Promise(r=>setTimeout(r,500))]);
  const src=a.createBufferSource();src.buffer=buf;src.connect(a.destination);const t0=a.currentTime+.08,pm=performance.now()+80;src.start(t0);PV={playing:true,raf:0,src,t0,pm,seg,i,chain,L0:buf.getChannelData(0),sr:buf.sampleRate,prev:new Float32Array(512)};
  $q('#btPlay').textContent=chain?'PLAY PART':'STOP';$q('#btAll').textContent=chain?'STOP':'PLAY EPISODE';
- const loop=()=>{if(!PV.playing)return;const lt=a.state==='running'?a.currentTime-PV.t0:(performance.now()-PV.pm)/1000;if(lt>=seg.dur){const nxt=chain&&i+1<TL.segs.length?i+1:-1;PV.playing=false;if(nxt>=0)playSeg(nxt,true);else{stopPlay();drawNow()}return}
-  const au=lt<0?{bass:0,loud:0,fd:null}:MZShow.dataFromBuffer(PV.L0,PV.sr,lt,PV.prev);SC().drawFrame(cvx(),B,TL,seg.start+Math.max(0,lt),au);$q('#btTime').textContent=mmss(Math.max(0,lt))+' / '+mmss(seg.dur);$q('#btScrub').value=String(clamp(lt/seg.dur,0,1));PV.raf=requestAnimationFrame(loop)};PV.raf=requestAnimationFrame(loop)}
+ const loop=()=>{if(!PV.playing)return;const lt=a.state==='running'?a.currentTime-PV.t0:(performance.now()-PV.pm)/1000;if(lt>=end-seg.start){stopPlay();drawNow();return}
+  const T=seg.start+Math.max(0,lt),cs=SC().segAt(TL,T),au=lt<0?{bass:0,loud:0,fd:null}:MZShow.dataFromBuffer(PV.L0,PV.sr,lt,PV.prev);SC().drawFrame(cvx(),B,TL,T,au);if(chain&&cs.i!==+$q('#btPart').value)$q('#btPart').value=String(cs.i);$q('#btTime').textContent=mmss(cs.lt)+' / '+mmss(cs.seg.dur);$q('#btScrub').value=String(clamp(cs.lt/cs.seg.dur,0,1));PV.raf=requestAnimationFrame(loop)};PV.raf=requestAnimationFrame(loop)}
 let bt0=0,bRaf=0;
 function bracketLoop(ts){bRaf=requestAnimationFrame(bracketLoop);if(!root||!root.classList.contains('on')||document.hidden)return;const d=document.getElementById('btBrk');if(!d||!d.open||!B)return;const t=((ts-bt0)/1000)%9;const c=$q('#btBc').getContext('2d');c.clearRect(0,0,1280,720);FX().arena(c,ST.tpl,t,{bass:0},B);c.fillStyle='rgba(4,3,12,.42)';c.fillRect(0,0,1280,720);FX().drawBracket(c,B,Math.min(t,6)+(t>6?0:0),{curMatch:-1});FX().vignette(c,.5)}
 
@@ -244,7 +244,7 @@ function wire(){
 window.battleOpen=async function(){
  css();root=document.getElementById('battlemk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the battle engine...</div></div>';
-  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=1','battlescenes.js?v=1','battleaudio.js?v=1','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
+  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=1','battlescenes.js?v=2','battleaudio.js?v=1','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
   await FX().loadFonts();await FX().loadProps();
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,cover_path,slug,tags').order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
   ST=load();if(ST.fighters.length!==total()||!ST.rounds.length){const keep=ST.fighters.slice(0,total());ST.fighters=keep;deal()}
