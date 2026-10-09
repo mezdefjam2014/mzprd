@@ -30,7 +30,7 @@ const S={
  bubble:(c,d,T)=>osc(c,d,T,'sine',600,900,.08,.12)
 };
 let fightP=null,fight=null;
-async function loadFight(){if(fightP)return fightP;const dc=new OfflineAudioContext(1,1,44100);fightP=Promise.all([fetch(new URL('sfx/fight.mp3?v=2',document.baseURI).href).then(r=>r.arrayBuffer()).then(b=>dc.decodeAudioData(b)),fetch(new URL('sfx/fight.json?v=2',document.baseURI).href).then(r=>r.json())]).then(([buf,map])=>fight={buf,map}).catch(()=>null);return fightP}
+async function loadFight(){if(fightP)return fightP;const dc=new OfflineAudioContext(1,1,44100);fightP=Promise.all([fetch(new URL('sfx/fight.mp3?v=3',document.baseURI).href).then(r=>r.arrayBuffer()).then(b=>dc.decodeAudioData(b)),fetch(new URL('sfx/fight.json?v=3',document.baseURI).href).then(r=>r.json())]).then(([buf,map])=>fight={buf,map}).catch(()=>null);return fightP}
 function fightAt(ctx,d,T,clip,g,pan){if(!fight||!fight.map[clip])return;const [o,du]=fight.map[clip],s=ctx.createBufferSource();s.buffer=fight.buf;const gn=ctx.createGain();gn.gain.value=g==null?.6:g;s.connect(gn);let out=gn;if(ctx.createStereoPanner&&pan){const pn=ctx.createStereoPanner();pn.pan.value=pan;gn.connect(pn);out=pn}out.connect(d);s.start(T,o,du)}
 async function loadCrowd(){if(crowdP)return crowdP;const dc=new OfflineAudioContext(2,1,44100),ld=u=>fetch(new URL('sfx/'+u+'.mp3',document.baseURI).href).then(r=>r.arrayBuffer()).then(b=>dc.decodeAudioData(b)).catch(()=>null);
  crowdP=Promise.all(['crowd-cheer1','crowd-cheer2','crowd-roar','crowd-applause'].map(ld)).then(([c1,c2,roar,app])=>crowd={cheers:[c1,c2].filter(Boolean),roar,app});return crowdP}
