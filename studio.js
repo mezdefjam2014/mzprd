@@ -452,7 +452,7 @@ function loadCover(url){
 function buildTx(){
  const L={intro:'INTRO',tag:'PRODUCER TAG',title:'TITLE',info:'INFO'};
  $s('#sTx').innerHTML=Object.keys(L).map(k=>{const o=S.tx[k];return `<div class="trow"><input type="checkbox" data-k="${k}" data-f="on"${o.on?' checked':''}><span>${L[k]}</span><input type="text" data-k="${k}" data-f="text" value="${e2(o.text)}"><input type="number" data-k="${k}" data-f="start" min="0" step="0.5" value="${o.start}"></div>`}).join('');
- $s('#sTx').oninput=e=>{const t=e.target,k=t.dataset.k;if(!k)return;const f=t.dataset.f;S.tx[k][f]=f==='on'?t.checked:f==='start'?(parseFloat(t.value)||0):t.value;if(f==='text'&&k==='title')ytText();redraw()};
+ $s('#sTx').oninput=e=>{const t=e.target,k=t.dataset.k;if(!k)return;const f=t.dataset.f;S.tx[k][f]=f==='on'?t.checked:f==='start'?(parseFloat(t.value)||0):t.value;if(f==='text'&&k==='title'){ytText();thSync()}redraw()};
 }
 const YEAR=new Date().getFullYear(),yi={t:0,d:0,g:0};
 function ytCtx(){
@@ -546,44 +546,56 @@ function ytText(reset){
 function ytCount(){const t=$s('#yT').value.length,d=$s('#yD').value.length,g=$s('#yG').value.length;
  $s('#yTc').textContent=t+' / 100 characters'+(t>100?' (too long)':'');$s('#yDc').textContent=d+' / 5000 characters';$s('#yGc').textContent=g+' / 500 characters'+(g>500?' (too long)':'')}
 function ytNext(k){yi[k]++;ytText()}
-const TH={seed:0,pf:'16:9'},THMODAL=`<div id="thModal" aria-hidden="true"><div class="thbox" role="dialog" aria-label="Thumbnails">
+const TH={seed:0,pf:'16:9',ord:null,page:0,sel:[],rr:{}},TH_N=6,THMODAL=`<div id="thModal" aria-hidden="true"><div class="thbox" role="dialog" aria-label="Thumbnails">
  <button class="thx" id="thClose" aria-label="Close">&times;</button>
- <h4>THUMBNAILS</h4>
- <div class="two2"><button class="btn" id="thGo">MAKE 5 THUMBNAILS</button><button class="btn" id="thMore">NEW SET</button></div>
+ <h4>THUMBNAILS <span id="thCount" style="font:500 10px Montserrat;letter-spacing:.06em;color:#8e8e94"></span></h4>
+ <div class="two2"><button class="btn" id="thGo">MAKE 6 THUMBNAILS</button><button class="btn" id="thMore">NEW SET</button></div>
  <div class="seg" style="margin-top:8px"><button data-th="16:9" class="on">PREVIEW 16:9</button><button data-th="9:16">PREVIEW 9:16</button></div>
- <div id="thGrid"></div><div class="msg" id="thMsg">Made from the cover, title and BPM. 3 have the producer, 2 do not. Every card downloads in 16:9 (1280x720) and 9:16 (1080x1920).</div>
- <button class="btn" id="thAll" style="display:none;margin-top:8px">DOWNLOAD ALL (10 FILES)</button>
+ <div id="thGrid"></div><div class="msg" id="thMsg">25 looks, 6 at a time. The type line follows SOUNDS LIKE (artist). Every card downloads in 16:9 (1280x720) and 9:16 (1080x1920).</div>
+ <button class="btn" id="thAll" style="display:none;margin-top:8px">DOWNLOAD THIS SET (12 FILES)</button>
 </div></div>`;
-function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=6',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
-function thCtx(){const it=S.item||{};return{title:it.title||'',w:window.MZThumbs.words(S.tx.title.text||it.title),cover:S.cover,bpm:it.bpm,key:it.musical_key,kind:S.kind,seed:TH.seed}}
+function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=7',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
+/* the type line (ARTIST TYPE BEAT) comes from the same SOUNDS LIKE / MOOD boxes the YouTube text uses */
+function thCtx(i){const it=S.item||{},Y=S.item?ytCtx():{};return{title:it.title||'',w:window.MZThumbs.words(S.tx.title.text||it.title),cover:S.cover,bpm:it.bpm,key:it.musical_key,kind:S.kind,seed:TH.seed+(TH.rr[i]||0)*13,art:Y.art||'',mood:Y.mood||'',genre:Y.genre||''}}
 const thSize=f=>f==='16:9'?[1280,720]:[1080,1920];
-function thOpen(){const m=$s('#thModal');m.classList.add('on');m.setAttribute('aria-hidden','false');document.addEventListener('keydown',thKey);if(!$s('#thGrid').children.length)thMake(false)}
+function thOpen(){const m=$s('#thModal');m.classList.add('on');m.setAttribute('aria-hidden','false');document.addEventListener('keydown',thKey);thMake(false)}
 function thShut(){const m=$s('#thModal');if(m){m.classList.remove('on');m.setAttribute('aria-hidden','true')}document.removeEventListener('keydown',thKey)}
 function thKey(e){if(e.key!=='Escape')return;const lb=document.getElementById('thLb');if(lb){lb.remove();return}thShut()}
-async function thMake(bump){
+let thBusy=0,thDeb=null;
+function thSync(){const m=$s('#thModal');if(!m||!m.classList.contains('on')||!$s('#thGrid').children.length)return;clearTimeout(thDeb);thDeb=setTimeout(()=>thMake(false),250)}
+function thDrawCard(i,card){
+ const pv=TH.pf==='16:9'?[640,360]:[360,640],T=window.MZThumbs,old=card.querySelector('canvas'),cv=T.make(i,pv[0],pv[1],thCtx(i));cv.onclick=()=>thBig(i);if(old)old.replaceWith(cv);else card.prepend(cv)}
+async function thMake(next){
  const m=$s('#thMsg');if(!S.item){m.textContent='Pick a beat or pack first.';return}
- m.textContent='Making thumbnails...';
  try{await thLoad()}catch(e){m.textContent='Could not load the thumbnail maker.';return}
- if(bump)TH.seed+=7;
- const g=$s('#thGrid'),X=thCtx(),pv=TH.pf==='16:9'?[640,360]:[360,640];g.innerHTML='';
- for(let i=0;i<window.MZThumbs.count;i++){
+ const T=window.MZThumbs,id=++thBusy;
+ if(next===true||!TH.sel.length){
+  if(next===true){TH.seed+=7;TH.rr={}}
+  if(!TH.ord){TH.ord=T.order(TH.seed);TH.page=0}else if(next===true){TH.page++;if(TH.page*TH_N>=TH.ord.length){TH.ord=T.order(TH.seed);TH.page=0}}
+  TH.sel=TH.ord.slice(TH.page*TH_N,TH.page*TH_N+TH_N);if(TH.sel.length<TH_N)TH.sel=TH.sel.concat(TH.ord.filter(x=>!TH.sel.includes(x)).slice(0,TH_N-TH.sel.length))}
+ m.textContent='Making thumbnails...';const g=$s('#thGrid');g.innerHTML='';
+ for(const i of TH.sel){
+  if(id!==thBusy)return;
   const card=document.createElement('div');card.className='thc';
-  const cv=window.MZThumbs.make(i,pv[0],pv[1],X);cv.onclick=()=>thBig(i);
-  const lab=document.createElement('b');lab.textContent=(i+1)+'. '+window.MZThumbs.names[i]+(window.MZThumbs.withChar[i]?' (PRODUCER)':' (NO PRODUCER)');
+  const lab=document.createElement('b');lab.textContent=T.names[i]+(T.withChar[i]?' (PRODUCER)':' (TYPE ONLY)');
   const bt=document.createElement('div');bt.className='two2';bt.innerHTML='<button class="btn" data-d="16:9">16:9 JPG</button><button class="btn" data-d="9:16">9:16 JPG</button>';
-  bt.querySelectorAll('button').forEach(b=>b.onclick=()=>thDl(i,b.dataset.d));
-  card.append(cv,lab,bt);g.appendChild(card)}
- $s('#thAll').style.display='block';m.textContent='Click a thumbnail to see it big. Tap NEW SET for 5 more looks.';
+  const rr=document.createElement('button');rr.className='btn';rr.textContent='NEW LOOK OF THIS STYLE';rr.style.marginTop='6px';rr.style.width='100%';
+  bt.querySelectorAll('button').forEach(b=>b.onclick=()=>thDl(i,b.dataset.d));rr.onclick=()=>{TH.rr[i]=(TH.rr[i]||0)+1;thDrawCard(i,card)};
+  card.append(lab,bt,rr);g.appendChild(card);thDrawCard(i,card);
+  await new Promise(r=>setTimeout(r,0))}
+ if(id!==thBusy)return;
+ $s('#thAll').style.display='block';const Y=ytCtx();$s('#thCount').textContent='set '+(TH.page+1)+' of '+Math.ceil(TH.ord.length/TH_N);
+ m.textContent='Type line: '+T.typeLine({kind:S.kind,art:Y.art,mood:Y.mood,genre:Y.genre})+'. Change SOUNDS LIKE (artist) and it updates here. Click a thumbnail to see it big. NEW SET deals 6 more of the 25 looks.';
 }
 function thBig(i){
- const [w,h]=thSize(TH.pf),cv=window.MZThumbs.make(i,w,h,thCtx()),lb=document.createElement('div');lb.id='thLb';lb.appendChild(cv);lb.onclick=()=>lb.remove();document.body.appendChild(lb);
+ const [w,h]=thSize(TH.pf),cv=window.MZThumbs.make(i,w,h,thCtx(i)),lb=document.createElement('div');lb.id='thLb';lb.appendChild(cv);lb.onclick=()=>lb.remove();document.body.appendChild(lb);
 }
 function thDl(i,f){
- return new Promise(res=>{try{const [w,h]=thSize(f),cv=window.MZThumbs.make(i,w,h,thCtx());
+ return new Promise(res=>{try{const [w,h]=thSize(f),cv=window.MZThumbs.make(i,w,h,thCtx(i));
   cv.toBlob(b=>{if(!b){$s('#thMsg').textContent='Could not export (the cover blocks it). Re-add the cover image from your computer.';return res()}
-   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=((S.item&&S.item.slug)||'thumb')+'-thumb'+(i+1)+'-'+(f==='16:9'?'16x9':'9x16')+'.jpg';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);res()},'image/jpeg',.92)}catch(e){$s('#thMsg').textContent='Could not export: '+e.message;res()}});
+   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=((S.item&&S.item.slug)||'thumb')+'-'+String(window.MZThumbs.names[i]).toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+(f==='16:9'?'16x9':'9x16')+'.jpg';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);res()},'image/jpeg',.92)}catch(e){$s('#thMsg').textContent='Could not export: '+e.message;res()}});
 }
-async function thAll(){for(let i=0;i<window.MZThumbs.count;i++){await thDl(i,'16:9');await new Promise(r=>setTimeout(r,350));await thDl(i,'9:16');await new Promise(r=>setTimeout(r,350))}}
+async function thAll(){for(const i of TH.sel){await thDl(i,'16:9');await new Promise(r=>setTimeout(r,350));await thDl(i,'9:16');await new Promise(r=>setTimeout(r,350))}}
 function renderList(){
  const l=$s('#sl'),rows=S.items.filter(i=>i._k===S.kind);
  l.innerHTML=rows.length?rows.map(r=>`<div class="it" data-id="${e2(r.id)}">${r.cover_path?`<img src="${e2(pub(r.cover_path))}" alt="">`:(r._k==='beats'?`<img src="${e2(stockCover(r.title,96))}" alt="">`:'<i></i>')}<div><b>${e2(r.title)}</b><span>${[r.bpm&&r.bpm+' BPM',r.musical_key,r.preview_path?'':'NO PREVIEW'].filter(Boolean).join(' / ')||'&nbsp;'}</span></div></div>`).join(''):'<div class="msg" style="padding:12px">Nothing here yet.</div>';
@@ -616,11 +628,11 @@ function wire(){
  wv.onpointermove=e=>{if(drag)seek(e)};
  wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
  q('#thOpen').onclick=thOpen;q("#mixBtn").onclick=async()=>{try{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=3',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
- q('#thGo').onclick=()=>thMake(false);q('#thMore').onclick=()=>thMake(true);q('#thAll').onclick=thAll;
+ q('#thGo').onclick=()=>thMake(true);q('#thMore').onclick=()=>thMake(true);q('#thAll').onclick=thAll;
  document.querySelectorAll('#studio [data-th]').forEach(b=>b.onclick=()=>{TH.pf=b.dataset.th;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(window.MZThumbs&&q('#thGrid').children.length)thMake(false)});
  q('#yAll').onclick=()=>{yi.t++;yi.d++;yi.g++;ytText()};
  document.querySelectorAll('#studio [data-n]').forEach(b=>b.onclick=()=>ytNext(b.dataset.n));
- ['#yA','#yM'].forEach(id=>q(id).oninput=()=>ytText());
+ ['#yA','#yM'].forEach(id=>q(id).oninput=()=>{ytText();thSync()});
  ['#yT','#yD','#yG'].forEach(id=>q(id).oninput=ytCount);
  q('#sPlay').onclick=()=>{
   if(run&&run.rec)return;
