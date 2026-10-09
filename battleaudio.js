@@ -40,7 +40,7 @@ function events(B,seg){
   case 'title':add(0,'whoosh',{dur:.5});add(.2,'boom');add(.55,'boom');add(.55,'stinger');add(1.2,'crowd',{kind:'cheer',len:2.2,g:.35});break;
   case 'bracket':add(0,'riser',{dur:1.8});for(let i=0;i<10;i++)add(.3+i*.14,'pop');add(2.4,'whoosh',{dur:.6});add(4,'boom');add(4,'vs');break;
   case 'intro':add(.1,'whoosh',{dur:.5});add(.25,'whoosh',{dur:.5});if(talkOn){for(let i=0;i<6;i++){add(1+i*.14,'blip',{f:480+i*30});add(2.45+i*.14,'blip',{f:400+i*30})}}add(1.7,'vs');add(3.4,'riser',{dur:.3});add(3.7,'stinger');add(3.7,'crowd',{kind:'cheer',len:1.6,g:.4});break;
-  case 'play':{const SC=window.MZBattleScenes;if(SC&&SC.hitsOf&&seg.r!=null)SC.hitsOf(B,seg).forEach(h=>add(h.t,h.heal?'bell':h.blk?'tick':h.big?'snap':'pop',{f:1500}));break}
+  case 'play':{const SC=window.MZBattleScenes;if(SC&&SC.hitsOf&&seg.r!=null)break}
   case 'vote':add(0,'whoosh',{dur:.4});for(let k=0;k<5;k++){add(.6+k,'tick',{f:900+k*40})}add(5.6,'bell');if(talkOn){add(.6,'blip');add(.9,'blip')}break;
   case 'recap':{const k=seg.rd/7,t=x=>x*k,fin=seg.fin||{};add(0,'whoosh',{dur:.4});add(t(.7),'drumroll',{dur:t(1.8)});for(let i=0;i<5;i++)add(t(.8+i*.3),'tick',{f:700+i*60});add(t(2.4),'riser',{dur:.15});
    add(t(2.5),fin.sfx||'boom');if(fin.sfx!=='boom')add(t(2.5),'boom',{g:.5});add(t(2.55),'crowd',{kind:fin.id==='photo'||fin.id==='decision'?'app':'cheer',len:3,g:.55});add(t(3.6),'bell');if(fin.id==='flawless'||fin.id==='upset')add(t(3.0),'fanfare');add(t(3.7),'crowd',{kind:'app',len:3.2,g:.35});

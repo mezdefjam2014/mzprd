@@ -247,7 +247,7 @@ function wire(){
 window.battleOpen=async function(){
  css();root=document.getElementById('battlemk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the battle engine...</div></div>';
-  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=4','battlescenes.js?v=7','battleaudio.js?v=5','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
+  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=4','battlescenes.js?v=7','battleaudio.js?v=6','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
   await FX().loadFonts();await FX().loadProps();
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,cover_path,slug,tags').order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
   ST=load();if(ST.fighters.length!==total()||!ST.rounds.length){const keep=ST.fighters.slice(0,total());ST.fighters=keep;deal()}
