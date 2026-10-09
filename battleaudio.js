@@ -49,13 +49,13 @@ function events(B,seg){
  return E}
 /* lays everything between `from` and `until` (seconds of the episode) onto ctx; t0 = ctx time of `from` */
 function schedule(ctx,dest,B,tl,from,until,t0){
- const bus=ctx.createGain(),comp=ctx.createDynamicsCompressor();bus.gain.value=.9;comp.threshold.value=-12;comp.ratio.value=5;comp.attack.value=.004;comp.release.value=.18;bus.connect(comp);comp.connect(dest);
+ const bus=ctx.createGain(),comp=ctx.createDynamicsCompressor();bus.gain.value=.9;comp.threshold.value=-12;comp.ratio.value=5;comp.attack.value=.004;comp.release.value=.18;bus.connect(comp);comp.connect(dest);const sfx=ctx.createGain();sfx.gain.value=.38;sfx.connect(bus);
  const C=T=>t0+(T-from);
  tl.segs.forEach(seg=>{
   if(seg.start+seg.dur<=from||seg.start>=until)return;
   /* the beat of a playing scene */
-  if(seg.type==='play'){const F=B.fighters[(seg.side===0?B.rounds[seg.r][seg.m].a:B.rounds[seg.r][seg.m].b)],bf=F.beat&&F.beat.buf;if(bf){const a=Math.max(seg.start,from),e=Math.min(seg.start+seg.dur,until),off=(F.beat.start||0)+(a-seg.start);if(off<bf.duration){const s=ctx.createBufferSource();s.buffer=bf;const gn=ctx.createGain();const T0=C(a),T1=C(e);gn.gain.setValueAtTime(a>seg.start?1:.0001,T0);if(a<=seg.start)gn.gain.linearRampToValueAtTime(1,T0+.25);gn.gain.setValueAtTime(1,Math.max(T0,T1-.45));gn.gain.linearRampToValueAtTime(.0001,T1);s.connect(gn);gn.connect(bus);s.start(T0,off,Math.max(.05,e-a));s.stop(T1+.05)}}}
-  events(B,seg).forEach(ev=>{const at=seg.start+ev.at;if(at<from||at>=until)return;const T=C(at);if(ev.name==='crowd')crowdAt(ctx,bus,T,ev.kind,ev.len,ev.g);else if(S[ev.name])S[ev.name](ctx,bus,T,ev)})});
+  if(seg.type==='play'){const F=B.fighters[(seg.side===0?B.rounds[seg.r][seg.m].a:B.rounds[seg.r][seg.m].b)],bf=F.beat&&F.beat.buf;if(bf){const a=Math.max(seg.start,from),e=Math.min(seg.start+seg.dur,until),off=(F.beat.start||0)+(a-seg.start);if(off<bf.duration){const s=ctx.createBufferSource();s.buffer=bf;if(bf.duration<seg.dur+(F.beat.start||0))s.loop=true;const gn=ctx.createGain();const T0=C(a),T1=C(e);gn.gain.setValueAtTime(a>seg.start?1:.0001,T0);if(a<=seg.start)gn.gain.linearRampToValueAtTime(1,T0+.25);gn.gain.setValueAtTime(1,Math.max(T0,T1-1.3));gn.gain.linearRampToValueAtTime(.0001,T1);s.connect(gn);gn.connect(bus);s.start(T0,off,Math.max(.05,e-a));s.stop(T1+.05)}}}
+  events(B,seg).forEach(ev=>{const at=seg.start+ev.at;if(at<from||at>=until)return;const T=C(at);if(ev.name==='crowd')crowdAt(ctx,sfx,T,ev.kind,ev.len,ev.g);else if(S[ev.name])S[ev.name](ctx,sfx,T,ev)})});
 }
 async function renderRange(B,tl,from,until,sr){sr=sr||44100;const len=Math.max(.1,until-from),ctx=new OfflineAudioContext(2,Math.ceil(len*sr),sr);await loadCrowd();schedule(ctx,ctx.destination,B,tl,from,until,0);return ctx.startRendering()}
 window.MZBattleAudio={S,schedule,renderRange,events,loadCrowd};

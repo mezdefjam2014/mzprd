@@ -13,9 +13,9 @@ let ST=null,B=null,TL=null,beats=[],AC=null,PV={playing:false,raf:0,src:null},di
 const loadS=f=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=new URL(f,document.baseURI).href;s.onload=ok;s.onerror=()=>no(new Error(f));document.head.appendChild(s)});
 
 /* ---------- state ---------- */
-function defaults(){return{title:'BEAT BATTLE',format:'bracket',size:8,team:10,tpl:'arcade',clip:20,custom:false,fighters:[],rounds:[],cur:0,kind:'round',per:4,epLabel:'EPISODE 1',
+function defaults(){return{title:'BEAT BATTLE',format:'bracket',size:8,team:10,tpl:'arcade',clip:35,custom:false,fighters:[],rounds:[],cur:0,kind:'round',per:4,epLabel:'EPISODE 1',
  opts:{seed:7,talk:2,recap:'full',sfx:true,fx:{shake:1,confetti:1}},yt:{mode:'premiere',variant:0,prev:'',playlist:''},when:'',th:{tpl:'arcade',swap:false,sel:'auto'},fps:24}}
-function load(){try{const j=JSON.parse(localStorage.getItem(KEY)||'null');if(j&&j.fighters)return Object.assign(defaults(),j)}catch(e){}return defaults()}
+function load(){try{const j=JSON.parse(localStorage.getItem(KEY)||'null');if(j&&j.fighters){const o=Object.assign(defaults(),j);if(!o.c35){o.clip=35;o.c35=1}return o}}catch(e){}return defaults()}
 function save(){try{const c=JSON.parse(JSON.stringify(ST,(k,v)=>k==='buf'||k==='canvas'||k==='file'?undefined:v));localStorage.setItem(KEY,JSON.stringify(c))}catch(e){}}
 const total=()=>ST.format==='team'?ST.team*2:ST.size;
 const ch=n=>{const T=TX().FIGHTERS[(n-1)%20];return T};
@@ -83,7 +83,7 @@ function html(){const T=TX();return`<div class="mg"><div>
  <details class="sec" open><summary>1. FORMAT AND LOOK <small id="btS1"></small></summary><div class="in">
   <label>BATTLE TITLE</label><input type="text" id="btTitle">
   <div class="two" style="margin-top:8px"><button class="btn" id="btFb">BRACKET</button><button class="btn" id="btFt">TEAM WAR (10 V 10)</button></div>
-  <div class="two"><div><label id="btSzL">FIGHTERS</label><select id="btSize"></select></div><div><label>CLIP PER BEAT</label><select id="btClip"><option value="15">15 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option><option value="45">45 seconds</option></select></div></div>
+  <div class="two"><div><label id="btSzL">FIGHTERS</label><select id="btSize"></select></div><div><label>CLIP PER BEAT</label><select id="btClip"><option value="15">15 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option><option value="35">35 seconds</option><option value="45">45 seconds</option></select></div></div>
   <label>ARENA</label><div class="tpl" id="btTpl"></div></div></details>
  <details class="sec" open><summary>2. FIGHTERS <small id="btS2"></small></summary><div class="in">
   <label class="chk"><input type="checkbox" id="btCust"> CUSTOM BATTLE (OPTIONAL): UPLOAD YOUR OWN BEATS AND FACES</label>
@@ -146,9 +146,9 @@ function fillBracket(){const el=$q('#btRes');if(!el)return;let h='';
 /* ---------- audio ---------- */
 function ctxA(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC}
 async function decode(ab){return await ctxA().decodeAudioData(ab)}
-function bestStart(buf,clip){const d=buf.getChannelData(0),sr=buf.sampleRate,win=sr,n=Math.floor(d.length/win);if(buf.duration<=clip+1.5||n<3)return 0;const e=[];for(let k=0;k<n;k++){let s=0;for(let i=k*win;i<(k+1)*win;i+=9)s+=d[i]*d[i];e.push(s)}let best=0,bs=-1;const L=Math.max(1,Math.round(clip));for(let k=0;k+L<=n;k++){let s=0;for(let j=0;j<L;j++)s+=e[k+j];if(k>0&&s>bs){bs=s;best=k}}return Math.max(0,Math.min(best,buf.duration-clip-.2))}
+function bestStart(buf,clip){return 0;const d=buf.getChannelData(0),sr=buf.sampleRate,win=sr,n=Math.floor(d.length/win);if(buf.duration<=clip+1.5||n<3)return 0;const e=[];for(let k=0;k<n;k++){let s=0;for(let i=k*win;i<(k+1)*win;i+=9)s+=d[i]*d[i];e.push(s)}let best=0,bs=-1;const L=Math.max(1,Math.round(clip));for(let k=0;k+L<=n;k++){let s=0;for(let j=0;j<L;j++)s+=e[k+j];if(k>0&&s>bs){bs=s;best=k}}return Math.max(0,Math.min(best,buf.duration-clip-.2))}
 async function prepAudio(){const need=new Set();TL.segs.forEach(s=>{if(s.type==='play'){const M=B.rounds[s.r][s.m];need.add(s.side===0?M.a:M.b)}});
- for(const i of need){const f=ST.fighters[i],bt=f.beat;if(!bt||bt.buf||bt.src!=='site'||!bt.path)continue;try{const r=await fetch(typeof pub==='function'?pub(bt.path):bt.path);bt.buf=await decode(await r.arrayBuffer());bt.start=bestStart(bt.buf,ST.clip)}catch(e){}}
+ for(const i of need){const f=ST.fighters[i],bt=f.beat;if(!bt||bt.buf||bt.src!=='site'||!bt.path)continue;try{const r=await fetch(typeof pub==='function'?pub(bt.path):bt.path);bt.buf=await decode(await r.arrayBuffer());bt.start=0}catch(e){}}
  const miss=[...need].filter(i=>!ST.fighters[i].beat||!ST.fighters[i].beat.buf).map(i=>ST.fighters[i].name);return miss}
 
 /* ---------- drawing and preview ---------- */
@@ -245,7 +245,7 @@ function wire(){
 window.battleOpen=async function(){
  css();root=document.getElementById('battlemk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the battle engine...</div></div>';
-  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=1','battlescenes.js?v=3','battleaudio.js?v=1','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
+  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=1','battlescenes.js?v=4','battleaudio.js?v=3','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
   await FX().loadFonts();await FX().loadProps();
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,cover_path,slug,tags').order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
   ST=load();if(ST.fighters.length!==total()||!ST.rounds.length){const keep=ST.fighters.slice(0,total());ST.fighters=keep;deal()}

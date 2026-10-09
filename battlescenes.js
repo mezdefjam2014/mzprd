@@ -76,7 +76,7 @@ function sceneIntro(c,B,seg,lt,au){
  const ua=eb((lt-.1)/.7),ub=eb((lt-.25)/.7),bob=Math.sin(lt*3)*5;
  FX.portrait(c,A,lerp(-340,330,ua),420+bob,470,{glow:LC});FX.portrait(c,Bf,lerp(W+340,W-330,ub),420-bob,470,{glow:RC});
  if(lt>.8){const u=clamp((lt-.8)/.4,0,1);FX.plate(c,330,650,430,A,LC,{a:u});FX.plate(c,W-330,650,430,Bf,RC,{a:u})}
- hpPair(c,B,M,1,1,128);
+ {const f=eo((lt-.3)/1.1);hpPair(c,B,M,f,f,128)}
  if((B.opts.talk==null?2:B.opts.talk)>0){if(lt>1.0)FX.bubble(c,seg.talk.preA,150,250,{w:360,al:'l',p:(lt-1.0)/.9,pop:(lt-1.0)/.25,tx:240,ty:300,col:LC});if(lt>2.45)FX.bubble(c,seg.talk.preB,W-150,250,{w:360,al:'r',p:(lt-2.45)/.9,pop:(lt-2.45)/.25,tx:W-240,ty:300,col:RC})}
  if(lt>1.7&&lt<3.55)slamV(c,lt,1.7)
  if(lt>3.7){const k=lt-3.7;tx(c,seg.call,W/2,H*.5,150,FN.A,'#fff',{sc:lerp(2.4,1,eo(k/.2)),a:clamp((1.1-k)/.3,0,1),sw:18,st:'#000',gl:GOLD,gb:50,ex:8,exc:'#7a1000'});FX.speedLines(c,lt,clamp(1-k*1.1,0,1),'#fff')}
@@ -92,7 +92,7 @@ function scenePlay(c,B,seg,lt,au){
  FX.portrait(c,oth,ox,470,260,{gray:true,a:.75,dy:Math.sin(lt*2)*4});
  FX.portrait(c,act,ax,390+Math.sin(lt*6)*3*bass,500*pulse,{glow:col,ga:.8});
  c.save();c.strokeStyle=col;c.globalAlpha=.55+bass*.4;c.lineWidth=5+bass*8;c.shadowColor=col;c.shadowBlur=24;c.beginPath();c.ellipse(ax,640,200+bass*60,38+bass*10,0,0,6.283);c.stroke();c.restore();
- hpPair(c,B,M,1,1);
+ {const ch=eo(lt/5),pu=Math.min(1,(loud||0)*1.6+bass*.5),en=clamp((.45+.55*ch)*(.82+.18*pu),0,1),dim=seg.side===0?1:.55+.45*(.82+.18*pu);hpPair(c,B,M,seg.side===0?en:Math.min(1,dim),seg.side===1?en:1)}
  const sw=seg.side===0?'BEAT 1':'BEAT 2';tx(c,sw,W/2,106,28,FN.P,col,{sw:7,gl:col});
  const ttl=String(act.beat&&act.beat.title||act.name).toUpperCase();tx(c,ttl.slice(0,26),W/2,170,Math.min(70,1300/Math.max(8,ttl.length)*1.3),FN.A,'#fff',{sw:9,ex:4,gl:col,ls:1});
  tx(c,[act.beat&&act.beat.bpm?act.beat.bpm+' BPM':'',act.beat&&act.beat.key||'',act.name].filter(Boolean).join('    '),W/2,232,20,FN.O,GOLD,{sw:5,ls:3});
