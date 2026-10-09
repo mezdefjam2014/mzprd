@@ -155,16 +155,22 @@ async function prepAudio(){const need=new Set();TL.segs.forEach(s=>{if(s.type===
 function cvx(){return $q('#btCv').getContext('2d')}
 function drawNow(){if(!TL||PV.playing)return;const s=+($q('#btPart').value||0),seg=TL.segs[s]||TL.segs[0],lt=parseFloat($q('#btScrub').value)*seg.dur;SC().drawFrame(cvx(),B,TL,seg.start+lt,{bass:.25,loud:.3,fd:null});$q('#btTime').textContent=mmss(lt)+' / '+mmss(seg.dur)}
 let PT=0,PC=null;
-function stopPlay(){PT++;PV.playing=false;cancelAnimationFrame(PV.raf);try{PV.src&&PV.src.stop()}catch(e){}PV.src=null;$q('#btPlay').textContent='PLAY PART';$q('#btAll').textContent='PLAY EPISODE'}
+function stopPlay(){PT++;PV.playing=false;cancelAnimationFrame(PV.raf);try{(PV.srcs||[]).forEach(x=>{try{x.stop()}catch(e){}})}catch(e){}PV.srcs=null;$q('#btPlay').textContent='PLAY PART';$q('#btAll').textContent='PLAY EPISODE'}
 async function playSeg(i,chain){try{await playSeg0(i,chain)}catch(e){PV.loading=false;stopPlay();msg('Playback problem: '+(e&&e.message||e)+'. Tell Claude this text.')}}
 async function playSeg0(i,chain){
  stopPlay();const my=PT;$q('#btPlay').textContent=chain?'PLAY PART':'STOP';$q('#btAll').textContent=chain?'STOP':'PLAY EPISODE';const lb=chain?'#btAll':'#btPlay';$q(lb).textContent='LOADING... (CLICK TO CANCEL)';PV.loading=true;
  const miss=await prepAudio();if(my!==PT)return;if(miss.length)msg('No audio yet for: '+miss.slice(0,4).join(', ')+'. Pick a beat for them or upload a file. Playing without it.');
- const seg=TL.segs[i];if(!seg)return;$q('#btPart').value=String(i);const end=chain?TL.total:seg.start+seg.dur,key=i+'|'+end,a=ctxA();let buf;if(PC&&PC.tl===TL&&PC.key===key&&!miss.length)buf=PC.buf;else{buf=await AU().renderRange(B,TL,seg.start,end);if(my!==PT)return;PC={tl:TL,key,buf}}await Promise.race([a.resume(),new Promise(r=>setTimeout(r,500))]);if(my!==PT)return;PV.loading=false;
- const src=a.createBufferSource();src.buffer=buf;src.connect(a.destination);const t0=a.currentTime+.08,pm=performance.now()+80;src.start(t0);PV={playing:true,raf:0,src,t0,pm,seg,i,chain,L0:buf.getChannelData(0),sr:buf.sampleRate,prev:new Float32Array(512)};
+ const seg=TL.segs[i];if(!seg)return;$q('#btPart').value=String(i);const end=chain?TL.total:seg.start+seg.dur,a=ctxA(),CH=15,nCh=Math.ceil((end-seg.start)/CH);
+ if(!PC||PC.tl!==TL||miss.length)PC={tl:TL,m:new Map()};
+ const getCh=k=>{const from=seg.start+k*CH,to=Math.min(end,from+CH),key=from+'|'+to;if(!PC.m.has(key))PC.m.set(key,AU().renderRange(B,TL,from,to));return PC.m.get(key)};
+ const b0=await getCh(0);if(my!==PT)return;await Promise.race([a.resume(),new Promise(r=>setTimeout(r,500))]);if(my!==PT)return;PV.loading=false;
+ const t0=a.currentTime+.08,pm=performance.now()+80,chs=[],srcs=[];
+ const put=(k,buf)=>{if(my!==PT)return;chs[k]={L0:buf.getChannelData(0),sr:buf.sampleRate};const src=a.createBufferSource();src.buffer=buf;src.connect(a.destination);const when=t0+k*CH,off=Math.max(0,a.currentTime-when);if(off<buf.duration){src.start(Math.max(when,a.currentTime),off);srcs.push(src)}};
+ PV={playing:true,raf:0,srcs,t0,pm,seg,i,chain,prev:new Float32Array(512)};put(0,b0);
+ (async()=>{for(let k=1;k<nCh;k++){const bf=await getCh(k);if(my!==PT)return;put(k,bf)}})().catch(()=>{});
  $q('#btPlay').textContent=chain?'PLAY PART':'STOP';$q('#btAll').textContent=chain?'STOP':'PLAY EPISODE';
  const loop=()=>{if(!PV.playing)return;const lt=a.state==='running'?a.currentTime-PV.t0:(performance.now()-PV.pm)/1000;if(lt>=end-seg.start){stopPlay();drawNow();return}
-  const T=seg.start+Math.max(0,lt),cs=SC().segAt(TL,T),au=lt<0?{bass:0,loud:0,fd:null}:MZShow.dataFromBuffer(PV.L0,PV.sr,lt,PV.prev);SC().drawFrame(cvx(),B,TL,T,au);if(chain&&cs.i!==+$q('#btPart').value)$q('#btPart').value=String(cs.i);$q('#btTime').textContent=mmss(cs.lt)+' / '+mmss(cs.seg.dur);$q('#btScrub').value=String(clamp(cs.lt/cs.seg.dur,0,1));PV.raf=requestAnimationFrame(loop)};PV.raf=requestAnimationFrame(loop)}
+  const T=seg.start+Math.max(0,lt),cs=SC().segAt(TL,T),k=Math.min(nCh-1,Math.max(0,Math.floor(lt/CH))),ch=chs[k],au=lt<0||!ch?{bass:0,loud:0,fd:null}:MZShow.dataFromBuffer(ch.L0,ch.sr,lt-k*CH,PV.prev);SC().drawFrame(cvx(),B,TL,T,au);if(chain&&cs.i!==+$q('#btPart').value)$q('#btPart').value=String(cs.i);$q('#btTime').textContent=mmss(cs.lt)+' / '+mmss(cs.seg.dur);$q('#btScrub').value=String(clamp(cs.lt/cs.seg.dur,0,1));PV.raf=requestAnimationFrame(loop)};PV.raf=requestAnimationFrame(loop)}
 let bt0=0,bRaf=0;
 function bracketLoop(ts){bRaf=requestAnimationFrame(bracketLoop);if(!root||!root.classList.contains('on')||document.hidden)return;const d=document.getElementById('btBrk');if(!d||!d.open||!B)return;const t=((ts-bt0)/1000)%9;const c=$q('#btBc').getContext('2d');c.clearRect(0,0,1280,720);FX().arena(c,ST.tpl,t,{bass:0},B);c.fillStyle='rgba(4,3,12,.42)';c.fillRect(0,0,1280,720);FX().drawBracket(c,B,Math.min(t,6)+(t>6?0:0),{curMatch:-1});FX().vignette(c,.5)}
 
@@ -248,7 +254,7 @@ function wire(){
 window.battleOpen=async function(){
  css();root=document.getElementById('battlemk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the battle engine...</div></div>';
-  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=4','battlescenes.js?v=7','battleaudio.js?v=8','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
+  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=4','battlescenes.js?v=7','battleaudio.js?v=9','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
   await FX().loadFonts();await FX().loadProps();
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,cover_path,slug,tags').order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
   ST=load();if(ST.fighters.length!==total()||!ST.rounds.length){const keep=ST.fighters.slice(0,total());ST.fighters=keep;deal()}
