@@ -1442,7 +1442,7 @@ async function boRender(){
  document.getElementById('bo2b').style.display='none';document.getElementById('bo2c').style.display='none';
  if(window.emailClose)emailClose();if(window.showMakerClose)showMakerClose();if(window.battleClose)battleClose();
  if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=4');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
- if(tab==='battle'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.battleOpen)await loadScript('battle.js?v=7');await battleOpen()}catch(e){toast('BEAT BATTLE FAILED TO LOAD')}return}
+ if(tab==='battle'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.battleOpen)await loadScript('battle.js?v=8');await battleOpen()}catch(e){toast('BEAT BATTLE FAILED TO LOAD')}return}
  if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=15');if(!window.MZShowFX)await loadScript('showfx.js?v=3');if(!window.showMakerOpen)await loadScript('showmaker.js?v=16');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
  if(vid){try{await loadStudio();await studioOpen()}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
  if(window.studioClose)studioClose();

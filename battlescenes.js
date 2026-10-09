@@ -7,11 +7,15 @@ const ROUND_NAMES=n=>n<=1?'THE FINAL':n===2?'SEMIFINALS':n===3?'QUARTERFINALS':n
 function roundName(B,r){if(B.format==='team')return 'TEAM WAR';const total=Math.round(Math.log2(Math.max(2,B.fighters.length)));return ROUND_NAMES(total-r)}
 const pctOf=M=>{const t=(M.va||0)+(M.vb||0);return t>0?M.va/t:.5};
 function shareA(M){const w=winnerOf(M),t=(M.va||0)+(M.vb||0);let p=t>0?M.va/t:.5;if(w===M.a&&p<.5)p=t>0?1-p:.62;else if(w===M.b&&p>.5)p=t>0?1-p:.38;return p}
-function fightEnd(M){const pa=shareA(M),w=winnerOf(M),S=w==null?.7:.92/Math.max(pa,1-pa);return{dB:Math.min(.95,pa*S),dA:Math.min(.95,(1-pa)*S)}}
-function hitsOf(B,seg){if(seg._h)return seg._h;const M=B.rounds[seg.r][seg.m],F=B.fighters[seg.side===0?M.a:M.b],bpm=(F.beat&&F.beat.bpm)||92,bl=Math.max(.6,Math.min(1.5,120/bpm)),E=fightEnd(M),D=seg.side===0?E.dB:E.dA,sd=seg.r*31+seg.m*7+seg.side*3+5,L=[];let t=1.6,k=0,sum=0;
- while(t<seg.dur-2.4){const blk=hs(k,sd)<.14,big=!blk&&hs(k,sd+9)>.8,w=blk?0:big?1.9:.7+hs(k,sd+5)*.7;L.push({t:t+(hs(k,sd+3)-.5)*.1,blk,big,w});sum+=w;t+=bl;k++}
- L.forEach(h=>h.d=sum?D*h.w/sum:0);seg._h=L;return L}
-const lostAt=(L,lt,dl)=>L.reduce((a,h)=>a+h.d*eo(clamp((lt-h.t-dl)/.18,0,1)),0);
+function fightEnd(M){const pa=shareA(M),w=winnerOf(M),S=w==null?.7:.92/Math.max(pa,1-pa),aEnd=1-Math.min(.95,(1-pa)*S),bEnd=1-Math.min(.95,pa*S),heal=Math.max(0,Math.min(.4,(1-pa)-.4)),b1=Math.max(.04,Math.min(1,bEnd-heal));return{aEnd,bEnd,b1,heal:Math.max(0,bEnd-b1)}}
+/* the fight: random combos (not tied to the beat), damage only hits the fighter who is NOT playing, and a good beat heals its own fighter */
+function hitsOf(B,seg){if(seg._h)return seg._h;const M=B.rounds[seg.r][seg.m],E=fightEnd(M),side=seg.side,Dmg=side===0?1-E.b1:1-E.aEnd,sd=seg.r*31+seg.m*7+side*3+5,L=[],lim=seg.dur-2.2;let t=1.3+hs(1,sd)*.8,k=0,sum=0;
+ while(t<lim){const n=1+Math.floor(hs(k,sd+11)*4);for(let j=0;j<n&&t<lim;j++){const r=k*5+j,blk=hs(r,sd)<.12,big=!blk&&((j===n-1&&n>2)||hs(r,sd+9)>.86),w=blk?0:big?1.8:.7+hs(r,sd+5)*.6;L.push({t,blk,big,w});sum+=w;t+=.15+hs(r,sd+3)*.22}t+=.8+hs(k,sd+13)*2.4;k++}
+ L.forEach(h=>h.d=sum?Dmg*h.w/sum:0);
+ if(side===1&&E.heal>.004){const nH=3+Math.floor(hs(3,sd)*3);for(let q=0;q<nH;q++)L.push({t:3+q*((seg.dur-7)/nH)+hs(q,sd+2)*1.3,heal:true,d:E.heal/nH})}
+ L.sort((a,b)=>a.t-b.t);seg._h=L;return L}
+const lostAt=(L,lt,dl)=>L.reduce((a,h)=>a+(h.heal?0:h.d*eo(clamp((lt-h.t-dl)/.18,0,1))),0);
+const gainAt=(L,lt)=>L.reduce((a,h)=>a+(h.heal?h.d*eo(clamp((lt-h.t)/.6,0,1)):0),0);
 function winnerOf(M){if(M.w!=null)return M.w;if((M.va||0)+(M.vb||0)>0)return M.va>=M.vb?M.a:M.b;return null}
 /* ---------- the timeline ---------- */
 function build(B){
@@ -89,21 +93,22 @@ function sceneIntro(c,B,seg,lt,au){
  c.restore();FX.flashFx(c,lt,1.7,.3,'#fff',.55);FX.flashFx(c,lt,3.7,.4,'#ffe28a',.7);if(lt>1.7)FX.rings(c,W/2,H*.5,lt,1.7,GOLD,3,1.1);
  fadeEnds(c,lt,seg.dur,.12,.2);}
 function slamV(c,lt,t0){const k=lt-t0,sc=k<.2?lerp(3.4,1,eo(k/.2)):1+Math.sin(k*9)*.03;tx(c,'VS',W/2,H*.45,190,FN.A,'#fff',{sc,sw:16,st:'#000',gl:GOLD,gb:60,ex:7,exc:'#4a1a00'})}
-function hpPair(c,B,M,pa,pb,y0,o){y0=y0||52;o=o||{};const A=B.fighters[M.a],Bf=B.fighters[M.b];FX.hpbar(c,50,y0,470,pa,LC,'l',{chip:o.ca,fl:o.fa});FX.hpbar(c,W-50-470,y0,470,pb,RC,'r',{chip:o.cb,fl:o.fb});tx(c,A.name.replace('THE ',''),62,y0+18,17,FN.P,'#fff',{al:'left',sw:6});tx(c,Bf.name.replace('THE ',''),W-62,y0+18,17,FN.P,'#fff',{al:'right',sw:6})}
+function hpPair(c,B,M,pa,pb,y0,o){y0=y0||52;o=o||{};const A=B.fighters[M.a],Bf=B.fighters[M.b];FX.hpbar(c,50,y0,470,pa,LC,'l',{chip:o.ca,fl:o.fa,gr:o.ga});FX.hpbar(c,W-50-470,y0,470,pb,RC,'r',{chip:o.cb,fl:o.fb,gr:o.gb});tx(c,A.name.replace('THE ',''),62,y0+18,17,FN.P,'#fff',{al:'left',sw:6});tx(c,Bf.name.replace('THE ',''),W-62,y0+18,17,FN.P,'#fff',{al:'right',sw:6})}
 function scenePlay(c,B,seg,lt,au){
  const M=B.rounds[seg.r][seg.m],A=B.fighters[M.a],Bf=B.fighters[M.b],act=seg.side===0?A:Bf,oth=seg.side===0?Bf:A,col=seg.side===0?LC:RC,ocol=seg.side===0?RC:LC;
  FX.arena(c,B.tpl,lt,au,B);const bass=au.bass||0,loud=au.loud||0;
  const ax=seg.side===0?400:W-400,ox=seg.side===0?W-200:200,pulse=1+bass*.12,dir=seg.side===0?1:-1,E=fightEnd(M),HL=hitsOf(B,seg);
- let hit=null;for(const h of HL){if(lt>=h.t&&lt-h.t<.5)hit=h}const ha_=hit?lt-hit.t:9,rea=hit?Math.max(0,1-ha_/.45):0,lunge=hit&&ha_<.3?Math.sin(ha_/.3*PI):0;
- const lost=lostAt(HL,lt,0),lostC=lostAt(HL,lt,.55),hpAct=1,hpDef=1-(seg.side===0?lost:lost),defIdx=seg.side===0?1:0;
- const hpA=seg.side===0?1:1-lost,hpB=seg.side===0?1-lost:1-E.dB;const hpA0=seg.side===0?1:1-E.dA,hpB0=seg.side===0?1-E.dB:1;void hpA0;void hpB0;
+ let hit=null,hl=null;for(const h of HL){if(lt>=h.t&&lt-h.t<.5){if(h.heal)hl=h;else hit=h}}const ha_=hit?lt-hit.t:9,rea=hit?Math.max(0,1-ha_/.45):0,lunge=hit&&ha_<.3?Math.sin(ha_/.3*PI):0;
+ const lost=lostAt(HL,lt,0),lostC=lostAt(HL,lt,.55),gain=gainAt(HL,lt),hea=hl?Math.max(0,1-(lt-hl.t)/.6):0;
+ const hpA=seg.side===0?1:1-lost,hpB=seg.side===0?1-lost:E.b1+gain;
  c.save();c.globalCompositeOperation='lighter';const rg=FX.RG(c,ax,380,100,360+bass*140,[[0,col+'66'],[1,col+'00']]);c.fillStyle=rg;c.fillRect(0,0,W,H);c.restore();
  const dlow=1-(seg.side===0?hpB:hpA),kx=hit&&!hit.blk?(FX.shake(lt,hit.t,hit.big?16:8,.35)):[0,0],dfx=hit&&!hit.blk?rea*34*dir:0;
  FX.portrait(c,oth,ox+dfx+kx[0],455+kx[1]+dlow*22+Math.sin(lt*2)*3,340,{red:hit&&!hit.blk?rea:0,rot:dlow>.7?dir*.07:0,bright:dlow>.7?.8:1,a:.95});
  FX.portrait(c,act,ax+lunge*dir*70,390+Math.sin(lt*6)*3*bass,500*pulse*(1+lunge*.05),{glow:col,ga:.8});
  if(hit&&ha_<.5){const hx=ox+dfx,hy=430;if(hit.blk){tx(c,'BLOCKED',hx,hy-70-ha_*50,36,FN.A,'#9fd8ff',{sw:8,a:1-ha_*2})}else{FX.rings(c,hx,hy,lt,hit.t,hit.big?'#ffd34a':'#ff4a3a',2,.5);for(let q=0;q<7;q++)FX.sparkle(c,hx+(hs(q,hit.t*9)-.5)*180*ha_*3,hy+(hs(q,hit.t*7+2)-.5)*160*ha_*3,8+hs(q,3)*10,hit.big?'#fff2b0':'#ff9a8a');tx(c,(hit.big?'CRITICAL  -':'-')+Math.max(1,Math.round(hit.d*100)),hx,hy-90-ha_*70,hit.big?44:34,FN.A,hit.big?GOLD:'#ff5a4a',{sw:8,a:clamp(1-ha_*2,0,1),sc:1+.2*(1-ha_*3>0?1-ha_*3:0)})}
   c.save();c.globalCompositeOperation='lighter';const rg2=FX.RG(c,hx,hy,10,420,[[0,'rgba(255,50,40,'+(.35*rea)+')'],[1,'rgba(255,50,40,0)']]);c.fillStyle=rg2;c.fillRect(0,0,W,H);c.restore()}
- hpPair(c,B,M,hpA,hpB,52,{ca:seg.side===1?1-lostAt(HL,lt,.55):1,cb:seg.side===0?1-lostC:1-E.dB,fa:seg.side===1?rea*(hit&&!hit.blk?1:0):0,fb:seg.side===0?rea*(hit&&!hit.blk?1:0):0});
+ if(hl){const gx=ax,gy=360,u=lt-hl.t;c.save();c.globalCompositeOperation='lighter';const gg=FX.RG(c,gx,gy,20,380,[[0,'rgba(60,255,150,'+(.4*hea)+')'],[1,'rgba(60,255,150,0)']]);c.fillStyle=gg;c.fillRect(0,0,W,H);c.restore();FX.rings(c,gx,gy,lt,hl.t,'#3dff9a',2,.7);for(let q=0;q<9;q++)FX.sparkle(c,gx+(hs(q,hl.t*5)-.5)*260,gy+160-u*260*(.5+hs(q,4))+hs(q,8)*40,7+hs(q,2)*9,'#b6ffd8');tx(c,'+'+Math.max(1,Math.round(hl.d*100))+'  HEALTH UP',gx,gy-190-u*50,32,FN.A,'#3dff9a',{sw:8,a:clamp(1-u*1.4,0,1)})}
+ hpPair(c,B,M,hpA,hpB,52,{ca:seg.side===1?1-lostC:1,cb:seg.side===0?1-lostC:0,fa:seg.side===1?rea*(hit&&!hit.blk?1:0):(seg.side===0?0:0),fb:seg.side===0?rea*(hit&&!hit.blk?1:0):0,ga:seg.side===0?0:0,gb:seg.side===1?hea:0});
 
  c.save();c.strokeStyle=col;c.globalAlpha=.55+bass*.4;c.lineWidth=5+bass*8;c.shadowColor=col;c.shadowBlur=24;c.beginPath();c.ellipse(ax,640,200+bass*60,38+bass*10,0,0,6.283);c.stroke();c.restore();
  const sw=seg.side===0?'BEAT 1':'BEAT 2';tx(c,sw,W/2,106,28,FN.P,col,{sw:7,gl:col});
@@ -163,7 +168,7 @@ function sceneRecap(c,B,seg,lt,au){
  const drawF=(F,x,col,over,isW)=>{const o=Object.assign({glow:col,sc:1,dy:Math.sin(n*3)*4},isW&&n>impact?winnerXf:{},!isW&&n>impact?over:{});if(o.gray&&o.glow)o.glow=null;if(o.dx)x+=o.dx;FX.portrait(c,F,x,cy,430,o)};
  drawF(A,ax,LC,aOver,w===M.a);drawF(Bf,bx,RC,bOver,w===M.b);
  /* hp bars drain on the loser */
- const drain=n>impact?clamp(age/.9,0,1):0,keep=fin.id==='photo'||fin.id==='decision'?.18:0,FE=fightEnd(M),h0a=1-FE.dA,h0b=1-FE.dB,la=Math.min(h0a,keep),lb=Math.min(h0b,keep),ka=w===M.a?h0a:lerp(h0a,la,eo(drain)),kb=w===M.b?h0b:lerp(h0b,lb,eo(drain)),fl=n>impact&&drain<1?1-drain:0;
+ const drain=n>impact?clamp(age/.9,0,1):0,keep=fin.id==='photo'||fin.id==='decision'?.18:0,FE=fightEnd(M),h0a=FE.aEnd,h0b=FE.bEnd,la=Math.min(h0a,keep),lb=Math.min(h0b,keep),ka=w===M.a?h0a:lerp(h0a,la,eo(drain)),kb=w===M.b?h0b:lerp(h0b,lb,eo(drain)),fl=n>impact&&drain<1?1-drain:0;
  hpPair(c,B,M,ka,kb,52,{ca:w===M.a?1:h0a,cb:w===M.b?1:h0b,fa:w===M.a?0:fl,fb:w===M.b?0:fl});
  if(n>=impact)finishFx(c,fin,age,wx,cy,lx,cy,seg.m*7+seg.r);
  /* the vote bar */
