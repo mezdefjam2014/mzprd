@@ -131,7 +131,8 @@ function openPick(i){const p=$q('#btPick');p.classList.add('on');const g=$q('#bt
 function episodeSel(){const s=$q('#btEp');let o=[];
  if(ST.format==='team'){const k=ST.rounds[0].length,n=Math.ceil(k/ST.per);for(let e=0;e<n;e++)o.push([`t${e}`,`EPISODE ${e+1}: MATCHES ${e*ST.per+1} TO ${Math.min(k,(e+1)*ST.per)}`]);o.push(['champ','FINAL EPISODE: TEAM RESULT'+(done(0)?'':' (needs all votes)')])}
  else{ST.rounds.forEach((r,i)=>o.push([`r${i}`,`ROUND ${i+1}: ${SC().roundName({format:'bracket',fighters:ST.fighters,rounds:ST.rounds},i)}${ready(i)?'':' (not ready yet)'}`]));o.push(['champ','CHAMPION EPISODE'+(done(ST.rounds.length-1)?'':' (needs the final result)')])}
- s.innerHTML=o.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');s.value=ST.kind==='champion'?'champ':(ST.format==='team'?'t'+ST.cur:'r'+ST.cur);$q('#btS3').textContent=ST.kind==='champion'?'champion':(ST.format==='team'?'episode '+(ST.cur+1):'round '+(ST.cur+1))}
+ o.unshift(['full','THE WHOLE BATTLE IN ONE VIDEO'+(done(ST.format==='team'?0:ST.rounds.length-1)?'':' (needs all votes)')]);
+ s.innerHTML=o.map(([v,l])=>`<option value="${v}">${l}</option>`).join('');s.value=ST.kind==='full'?'full':ST.kind==='champion'?'champ':(ST.format==='team'?'t'+ST.cur:'r'+ST.cur);$q('#btS3').textContent=ST.kind==='full'?'full battle':ST.kind==='champion'?'champion':(ST.format==='team'?'episode '+(ST.cur+1):'round '+(ST.cur+1))}
 function fillPart(){const s=$q('#btPart'),keep=s.value;s.innerHTML=TL.segs.map((g,i)=>{let l=g.type.toUpperCase();if(g.type==='intro'||g.type==='vote')l+=' (MATCH '+(g.m+1)+')';if(g.type==='play')l='BEAT '+(g.side+1)+' (MATCH '+(g.m+1)+')';if(g.type==='recap')l='RESULT (MATCH '+(g.m+1)+')';return`<option value="${i}">${i+1}. ${l}  ${mmss(g.dur)}</option>`}).join('');if(keep&&+keep<TL.segs.length)s.value=keep;$q('#btBs').textContent=mmss(TL.total)+' episode'}
 function msg(t){const m=$q('#btMsg');if(m)m.textContent=t}
 function fillBracket(){const el=$q('#btRes');if(!el)return;let h='';
@@ -189,7 +190,7 @@ async function renderEpisode(){
     while(venc.encodeQueueSize>8){await Promise.race([new Promise(r=>venc.addEventListener('dequeue',r,{once:true})),new Promise(r=>setTimeout(r,40))]);if(err)throw err}
     if(f%6===0){const p=Math.round(f/N*100),el=(performance.now()-t0)/1000,eta=f?Math.round(el/f*(N-f)):0;$q('#btProg').style.width=p+'%';if(bar)bar.textContent='BATTLE '+p+'%';rm('Rendering '+p+'%  (about '+mmss(eta)+' left). You can switch tabs, it keeps going.');await yieldNow()}}}
   await venc.flush();await aenc.flush();if(err)throw err;muxer.finalize();const blob=new Blob([target.buffer],{type:'video/mp4'});
-  $q('#btProg').style.width='100%';rm('Done: '+(blob.size/1048576).toFixed(0)+' MB, '+mmss(total)+' long. Downloading. Your YouTube package for this episode is below.');dlf(blob,(ST.title||'beat-battle').replace(/[^\w -]+/g,'')+' - '+(ST.kind==='champion'?'champion':(ST.format==='team'?'ep'+(ST.cur+1):'round'+(ST.cur+1)))+'.mp4');
+  $q('#btProg').style.width='100%';rm('Done: '+(blob.size/1048576).toFixed(0)+' MB, '+mmss(total)+' long. Downloading. Your YouTube package for this episode is below.');dlf(blob,(ST.title||'beat-battle').replace(/[^\w -]+/g,'')+' - '+(ST.kind==='full'?'full battle':ST.kind==='champion'?'champion':(ST.format==='team'?'ep'+(ST.cur+1):'round'+(ST.cur+1)))+'.mp4');
   const d=$q('#btYTd');if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'})}
  }catch(e){console.warn(e);rm('Render failed: '+((e&&e.message)||e))}
  finally{try{venc&&venc.close()}catch(e){}try{aenc&&aenc.close()}catch(e){}window.__btBusy=false;btn.disabled=false;if(bar)bar.textContent='BATTLE'}}
@@ -229,7 +230,7 @@ function wire(){
  $q('#btAuto').onclick=()=>{ST.fighters.forEach((f,i)=>{if(!(f.beat&&f.beat.src==='file'))f.beat=beatFor(i)});fightersList();rebuild();msg('Filled the fighters with your site beats, newest first.')};
  $q('#btShuf').onclick=()=>{const a=ST.fighters,r=Math.random;for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}deal();fightersList();episodeSel();rebuild();msg('Shuffled. The bracket was dealt again.')};
  $q('#btNew').onclick=async()=>{if(!(await askConfirm('START A NEW BATTLE?','This clears the current bracket and votes.')))return;const keep={custom:ST.custom};ST=defaults();Object.assign(ST,keep);beats.length;deal();syncTop();tplBtns();fightersList();episodeSel();rebuild()};
- $q('#btEp').onchange=e=>{const v=e.target.value;if(v==='champ'){ST.kind='champion';ST.cur=ST.rounds.length-1}else{ST.kind='round';ST.cur=+v.slice(1)}ST.epLabel='EPISODE '+(ST.kind==='champion'?'FINAL':(ST.format==='team'?ST.cur+1:ST.cur+1));$q('#btLab').value=ST.epLabel;rebuild();episodeSel()};
+ $q('#btEp').onchange=e=>{const v=e.target.value;if(v==='full'){ST.kind='full';ST.cur=0}else if(v==='champ'){ST.kind='champion';ST.cur=ST.rounds.length-1}else{ST.kind='round';ST.cur=+v.slice(1)}ST.epLabel=ST.kind==='full'?'FULL BATTLE':'EPISODE '+(ST.kind==='champion'?'FINAL':(ST.format==='team'?ST.cur+1:ST.cur+1));$q('#btLab').value=ST.epLabel;rebuild();episodeSel()};
  $q('#btPer').onchange=e=>{ST.per=+e.target.value;ST.cur=0;rebuild();episodeSel()};$q('#btLab').onchange=e=>{ST.epLabel=e.target.value.toUpperCase();rebuild()};
  $q('#btTalk').onchange=e=>{ST.opts.talk=+e.target.value;syncTop();rebuild()};$q('#btRecap').onchange=e=>{ST.opts.recap=e.target.value;rebuild()};
  $q('#btSfx').onchange=e=>{ST.opts.sfx=e.target.checked;save()};$q('#btShk').onchange=e=>{ST.opts.fx.shake=e.target.checked?1:0;rebuild()};$q('#btCnf').onchange=e=>{ST.opts.fx.confetti=e.target.checked?1:0;rebuild()};
@@ -244,7 +245,7 @@ function wire(){
 window.battleOpen=async function(){
  css();root=document.getElementById('battlemk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the battle engine...</div></div>';
-  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=1','battlescenes.js?v=2','battleaudio.js?v=1','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
+  try{await loadS('show.js?v=15');for(const f of['battletext.js?v=1','battlefx.js?v=1','battlescenes.js?v=3','battleaudio.js?v=1','battleyt.js?v=1'])await loadS(f)}catch(e){root.innerHTML='<div class="pn"><div class="msg">The battle engine did not load. Refresh the page.</div></div>';return}
   await FX().loadFonts();await FX().loadProps();
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,cover_path,slug,tags').order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
   ST=load();if(ST.fighters.length!==total()||!ST.rounds.length){const keep=ST.fighters.slice(0,total());ST.fighters=keep;deal()}

@@ -22,11 +22,13 @@ function build(B){
  add('title',3.8,{});
  add('bracket',7.5,{});
  const cur=B.format==='team'?0:(B.cur||0),team=B.format==='team';
- if(B.kind==='champion'&&team){const R0=B.rounds[0]||[];let sa=0,sb=0,va=0,vb=0,best=null;R0.forEach(M=>{const w=winnerOf(M);if(w==null)return;if(w===M.a)sa++;else sb++;va+=M.va||0;vb+=M.vb||0});const tie=sa===sb,blue=sa>sb||(tie&&va>=vb);
+ const full=B.kind==='full',isCh=B.kind==='champion'||full;
+ if(full){const RR=team?[0]:B.rounds.map((_,i)=>i);RR.forEach(r=>{(B.rounds[r]||[]).forEach((M,mi)=>{if(M.a==null||M.b==null)return;if(r>0||mi>0||true){add('intro',4.8,{r,m:mi,talk:matchTalk(M),call:TX.FIGHT_CALL[(seed+mi+r)%TX.FIGHT_CALL.length]});add('play',clip,{r,m:mi,side:0});add('play',clip,{r,m:mi,side:1});add('vote',5.8,{r,m:mi,call:TX.VOTE_CALL[(seed+mi*3+r)%TX.VOTE_CALL.length]});recapSeg(r,mi)}})})}
+ if(isCh&&team){const R0=B.rounds[0]||[];let sa=0,sb=0,va=0,vb=0,best=null;R0.forEach(M=>{const w=winnerOf(M);if(w==null)return;if(w===M.a)sa++;else sb++;va+=M.va||0;vb+=M.vb||0});const tie=sa===sb,blue=sa>sb||(tie&&va>=vb);
   R0.forEach((M,mi)=>{const w=winnerOf(M);if(w==null||(blue?w!==M.a:w!==M.b))return;const wp=w===M.a?pctOf(M):1-pctOf(M);if(!best||wp>best.wp)best={mi,w,wp,l:w===M.a?M.b:M.a}});
-  if(best){recapSeg(0,best.mi);add('champ',11.5,{w:best.w,runner:best.l,team:(blue?'TEAM BLUE':'TEAM PINK')+' WINS '+(tie?sa+' - '+sb+' ON TOTAL VOTES':Math.max(sa,sb)+' - '+Math.min(sa,sb)),line:TX.fill(TX.bag(TX.CHAMP,seed+5)(),{beat:B.fighters[best.w].beat&&B.fighters[best.w].beat.title||'my beat'})})}
+  if(best){if(!full)recapSeg(0,best.mi);add('champ',11.5,{w:best.w,runner:best.l,team:(blue?'TEAM BLUE':'TEAM PINK')+' WINS '+(tie?sa+' - '+sb+' ON TOTAL VOTES':Math.max(sa,sb)+' - '+Math.min(sa,sb)),line:TX.fill(TX.bag(TX.CHAMP,seed+5)(),{beat:B.fighters[best.w].beat&&B.fighters[best.w].beat.title||'my beat'})})}
   add('outro',4.5,{champion:true})}
- else if(B.kind==='champion'){const fr=B.rounds.length-1;if(B.rounds[fr]&&B.rounds[fr][0])recapSeg(fr,0);
+ else if(isCh){const fr=B.rounds.length-1;if(!full&&B.rounds[fr]&&B.rounds[fr][0])recapSeg(fr,0);
   const FM=B.rounds[fr]&&B.rounds[fr][0],cw=FM?winnerOf(FM):null;add('champ',11.5,{w:cw,runner:FM&&cw!=null?(cw===FM.a?FM.b:FM.a):null,line:cw!=null?TX.fill(TX.bag(TX.CHAMP,seed+5)(),{beat:B.fighters[cw].beat&&B.fighters[cw].beat.title||'my beat'}):''});add('outro',4.5,{champion:true})}
  else{
   if(o.recap!=='off'){if(B.format==='team'){const r=B.range||[0,B.rounds[0].length];for(let mi=0;mi<r[0];mi++)if(winnerOf(B.rounds[0][mi])!=null&&r[0]-mi<=2)recapSeg(0,mi)}else if(cur>0&&B.rounds[cur-1])B.rounds[cur-1].forEach((M,mi)=>recapSeg(cur-1,mi))}
