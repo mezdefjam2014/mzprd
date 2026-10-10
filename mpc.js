@@ -33,7 +33,7 @@ const GEO={deskh:DK,deskv:DKV};
 const PAD_NAMES=['PERC 1','PERC 2','PERC 3','PERC 4','RIDE 1','RIDE 2','CRASH 1','CRASH 2','TOM 1','TOM 2','TOM 3','TOM 4','HIHAT','SNARE 1','SNARE 2','BASS'];
 
 let CUT=null,ST=null,S=null,beats=[],AC=null,IMG=null,PV={playing:false,raf:0,src:null,t0:0},busy=false;
-function defaults(){return{smoke:{on:true,amt:1},scene:'desk',eng:{hook:false,hookText:'',sub:true,loop:true,note:false,noteText:'Played live on the Akai MPC60 II',q:false,qText:'WHICH RAPPER GETS THIS BEAT?'},tape:{on:false,ids:[],title:'MZPRD BEAT TAPE VOL. 1',len:60,xf:1.2},th:{seed:1,pal:'',fmt:'h'},kits:{},beat:null,artist:'',fmt:'h',len:0,text:false,lcd:'',yt:{mode:'straight',when:'',v:0}}}
+function defaults(){return{hands:{on:true},smoke:{on:true,amt:1},scene:'desk',eng:{hook:false,hookText:'',sub:true,loop:true,note:false,noteText:'Played live on the Akai MPC60 II',q:false,qText:'WHICH RAPPER GETS THIS BEAT?'},tape:{on:false,ids:[],title:'MZPRD BEAT TAPE VOL. 1',len:60,xf:1.2},th:{seed:1,pal:'',fmt:'h'},kits:{},beat:null,artist:'',fmt:'h',len:0,text:false,lcd:'',yt:{mode:'straight',when:'',v:0}}}
 function load(){try{const j=JSON.parse(localStorage.getItem(KEY)||'null');if(j)return Object.assign(defaults(),j)}catch(e){}return defaults()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}}
 const ctxA=()=>{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC};
@@ -167,6 +167,34 @@ function smoke(c,T,SM,amt){const passes=[{dx:0,a:1,sd:0},{dx:5,a:.5,sd:7}],dt=.0
 function handwrite(c,L,l1,l2,prog){if(prog<=0)return;c.save();c.translate(L.cx,L.cy);c.rotate(L.ang);c.beginPath();c.rect(-L.w/2,-L.h/2,L.w*clamp(prog,0,1)*1.04,L.h);c.clip();c.globalCompositeOperation='multiply';c.textBaseline='alphabetic';c.textAlign='left';
  const draw=(txt,size,y,col,font)=>{let sz=size;c.font=font(sz);while(sz>10&&c.measureText(txt).width>L.w*.86){sz-=1;c.font=font(sz)}const tw=c.measureText(txt).width;let x=-tw/2;for(let i=0;i<txt.length;i++){const ch=txt[i],w=c.measureText(ch).width,jy=(hs(i,3+txt.length)-.5)*sz*.07,jr=(hs(i,5)-.5)*.07;c.save();c.translate(x+w/2,y+jy);c.rotate(jr);c.globalAlpha=.78+.2*hs(i,9);c.fillStyle=col;c.fillText(ch,-w/2,0);c.globalAlpha*=.5;c.fillText(ch,-w/2+.5,.35);c.restore();x+=w}};
  draw(l1,L.h*.4,L.h*.06,'#1d2340',s=>s+"px 'Caveat',cursive");if(l2)draw(l2,L.h*.24,L.h*.38,'#2a2f55',s=>s+"px 'Reenie Beanie',cursive");c.restore()}
+/* your hands: fingertip anchor, arm slant and finger width of the two cutouts (mpc/hand_r.webp, mpc/hand_l.webp) */
+const HM={r:{tip:[139.6,11.8],axis:.2519,fw:62},l:{tip:[585.1,12.4],axis:-.209,fw:62}};
+let HANDS=null;
+function prepHands(r,l){if(!r||!l)return;const mk=(img,warm)=>{const cv=document.createElement('canvas');cv.width=img.naturalWidth;cv.height=img.naturalHeight;const x=cv.getContext('2d');x.drawImage(img,0,0);if(warm){x.globalCompositeOperation='multiply';x.fillStyle='rgb(255,204,150)';x.fillRect(0,0,cv.width,cv.height);x.globalCompositeOperation='destination-in';x.drawImage(img,0,0)}return cv};
+ const sil=img=>{const w=Math.round(img.naturalWidth/4),h=Math.round(img.naturalHeight/4),cv=document.createElement('canvas');cv.width=w;cv.height=h;const x=cv.getContext('2d');x.drawImage(img,0,0,w,h);x.globalCompositeOperation='source-in';x.fillStyle='#000';x.fillRect(0,0,w,h);return cv};
+ HANDS={r:{norm:mk(r,false),warm:mk(r,true),sil:sil(r)},l:{norm:mk(l,false),warm:mk(l,true),sil:sil(l)}}}
+function handHits(Sx){if(Sx._hh)return Sx._hh;const o={l:[],r:[]},last={l:-9,r:-9};(Sx.hits||[]).forEach(h=>{const key=(h.pad%4)<2?'l':'r';if(h.t-last[key]<.115)return;last[key]=h.t;o[key].push(h)});return Sx._hh=o}
+const padC=(G,i)=>[G.pad.x0+(i%4)*G.pad.px+G.pad.w/2,G.pad.y0+Math.floor(i/4)*G.pad.py+G.pad.h*.58];
+function handAt(list,T,G){if(!list.length)return null;let i=0;while(i<list.length&&list[i].t<=T)i++;const prev=i>0?list[i-1]:null,next=i<list.length?list[i]:null,ref=next||prev,restY=G.pad.y0+G.pad.py*3+G.pad.h+G.pad.py*1.7;let A,B,tA,tB;
+ if(next){B=padC(G,next.pad);tB=next.t;if(prev){A=padC(G,prev.pad);tA=prev.t}else{A=[B[0],restY];tA=tB-1.3}}else{A=padC(G,prev.pad);tA=prev.t;B=[A[0],restY];tB=tA+1.1}
+ const u=clamp((T-tA-.02)/Math.max(.06,(tB-tA)-.1),0,1),e=ease(u),x=A[0]+(B[0]-A[0])*e,y=A[1]+(B[1]-A[1])*e;
+ let hover=(prev?ease((T-tA)/.13):1)*(.55+.45*(prev?prev.v:.7));
+ if(next){const d=clamp((T-(tB-.105))/.105,0,1);hover=Math.min(hover,1-d*d)}else hover=Math.max(hover,clamp((T-tA-.2)/.8,0,1)*.9);
+ return{x,y,hover:clamp(hover,0,1)}}
+/* a hard tap: the hand floats up, then drops fast and lands on the pad; its shadow is big and soft when lifted and tight and dark on contact */
+function drawHands(c,G,Sx,T,desk){if(!HANDS)return;const H=handHits(Sx),k=G.pad.w/72;
+ for(const key of ['l','r']){const st=handAt(H[key],T,G);if(!st)continue;const m=HM[key],hv=st.hover,s0=(G.pad.w*.5/m.fw),s=s0*(1+.17*hv),sx=G.W*(key==='r'?.66:.34),sy=G.H*1.55,ang=Math.atan2(sx-st.x,sy-st.y),rot=m.axis-ang+.014*Math.sin(T*41)*hv,push=(1-hv)*5*k,HI=HANDS[key];
+  c.save();c.translate(st.x-(9+24*hv)*k,st.y+(12+28*hv)*k+3*k);c.rotate(rot);c.scale(s*(1+.1*hv),s*(1+.1*hv));c.globalAlpha=desk?(.6-.3*hv):(.34-.16*hv);c.filter='blur('+((2.5+8*hv)*k).toFixed(1)+'px)';c.drawImage(HI.sil,-m.tip[0],-m.tip[1],HI.sil.width*4,HI.sil.height*4);c.restore();
+  c.save();c.translate(st.x,st.y+.12*G.pad.h+push);c.rotate(rot);c.translate(0,hv*26*k);c.scale(s,s);c.drawImage(desk?HI.warm:HI.norm,-m.tip[0],-m.tip[1]);c.restore()}}
+/* dust drifting through the lamp light */
+function dust(c,T,G){const lp=G.lamp;if(!lp)return;const N=96,A=[lp[0]+(G.W*.5-lp[0])*.42,lp[1]+(G.H*.5-lp[1])*.42],R=lp[2]*.95,sg=lp[2]*.62;c.save();c.globalCompositeOperation='lighter';
+ for(let i=0;i<N;i++){const r1=hs(i,21),r2=hs(i,22),r3=hs(i,23),r4=hs(i,24),a=r1*6.2832,d=R*Math.sqrt(r2),bx=A[0]+Math.cos(a)*d,by=A[1]+Math.sin(a)*d,sp=2.2+5*r3;
+  const yy=((by-T*sp-(A[1]-R))%(2*R)+2*R)%(2*R)+(A[1]-R),xx=bx+16*Math.sin(T*(.12+.2*r3)+r4*6.28)+5*Math.sin(T*.9+i),dd=Math.hypot(xx-lp[0],yy-lp[1]),w=Math.exp(-(dd*dd)/(2*sg*sg)),tw=.5+.5*Math.sin(T*(.8+r3*1.9)+r4*9);
+  const al=.62*w*(.35+.65*tw);if(al<.02)continue;const big=r1>.9,rad=big?5+6*r2:.8+2*Math.pow(r2,2.5);
+  if(big){c.fillStyle='rgba(255,214,160,'+(al*.18).toFixed(3)+')';c.beginPath();c.arc(xx,yy,rad,0,6.2832);c.fill()}
+  else{const g=c.createRadialGradient(xx,yy,0,xx,yy,rad*2.2);g.addColorStop(0,'rgba(255,226,180,'+al.toFixed(3)+')');g.addColorStop(1,'rgba(255,200,140,0)');c.fillStyle=g;c.fillRect(xx-rad*2.2,yy-rad*2.2,rad*4.4,rad*4.4)}}
+ c.restore()}
+const lampFl=T=>clamp(.62+.38*Math.sin(T*1.1)*Math.sin(T*.37+1)+.12*Math.sin(T*8.7)*Math.sin(T*.9),.18,1);
 const ease=t=>t<=0?0:t>=1?1:t*t*(3-2*t),pulse=(T,a,b)=>Math.min(ease((T-a)/.07),ease((b-T)/.09));
 const HOOKS=['WAIT FOR THE DROP','THIS ONE HITS DIFFERENT','LIVE ON THE MPC60','TURN IT UP','BOOM BAP ON A 1988 MPC','WATCH THE PADS','PURE BOOM BAP'];
 function wrapTwo(t){if(t.length<=15)return[t];const w=t.split(' ');let best=[t,''],bd=1e9;for(let i=1;i<w.length;i++){const a=w.slice(0,i).join(' '),b=w.slice(i).join(' '),d=Math.abs(a.length-b.length);if(d<bd){bd=d;best=[a,b]}}return best}
@@ -198,10 +226,15 @@ function frame(c,W,H,fmt,T,X){
  if(SC){sc=Math.max(W/SC.G.W,H/SC.G.H)*1.025;ox=(W-SC.G.W*sc)/2;oy=(H-SC.G.H*sc)/2}else ground(c,W+80,H+80,ox,oy,sc);
  const fx={vol:(.21*ease((T-.15)/2.4))+.012*Math.sin(T*.6),con:.05*Math.sin(T*.4),fader:Math.max(0,26*(.5+.5*Math.sin(T*.29-.6))),btn:{play:0,start:pulse(T,t0-.42,t0-.12),rec:pulse(T,t0-.42,t0-.12),over:0,stop:pulse(T,lastEnd-.08,lastEnd+.2)}};
  machine(c,ox,oy,sc,Sx,{img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,run:la>=-.02&&T<lastEnd,trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
-if(SC){c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC.G;
-  if(Gs.label){const pr=ease((T-tr.start+.25)/1.1);handwrite(c,Gs.label,Sx.title,'MZPRD'+(Sx.bpm?'  '+Sx.bpm+' BPM':'')+(Sx.key?'  '+Sx.key:''),X.kind==='tape'&&k===0&&T<t0?0:pr)}
-  if(Gs.smoke&&ST.smoke&&ST.smoke.on)smoke(c,T,Gs.smoke,ST.smoke.amt||1);c.restore()}
- if(SC){if(SC.G.lamp){const lp=SC.G.lamp,fl=.55+.45*Math.sin(T*1.7)*Math.sin(T*.43+1)+.12*Math.sin(T*9.1);c.save();c.globalCompositeOperation='lighter';const rg=c.createRadialGradient(ox+lp[0]*sc,oy+lp[1]*sc,10,ox+lp[0]*sc,oy+lp[1]*sc,lp[2]*sc);rg.addColorStop(0,'rgba(255,170,80,'+(.05*fl).toFixed(3)+')');rg.addColorStop(1,'rgba(255,170,80,0)');c.fillStyle=rg;c.fillRect(0,0,W,H);c.restore()}}else sheen(c,ox,oy,sc,T);
+{c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC?SC.G:PH;
+  if(ST.hands&&ST.hands.on)drawHands(c,Gs,Sx,la,!!SC);
+  if(SC){if(Gs.label){const pr=ease((T-tr.start+.25)/1.1);handwrite(c,Gs.label,Sx.title,'MZPRD'+(Sx.bpm?'  '+Sx.bpm+' BPM':'')+(Sx.key?'  '+Sx.key:''),X.kind==='tape'&&k===0&&T<t0?0:pr)}
+   if(Gs.smoke&&ST.smoke&&ST.smoke.on)smoke(c,T,Gs.smoke,ST.smoke.amt||1);dust(c,T,Gs)}
+  c.restore()}
+ if(SC){const lp=SC.G.lamp;if(lp){const fl=lampFl(T);
+   c.save();c.globalCompositeOperation='lighter';const lx=ox+lp[0]*sc,ly=oy+lp[1]*sc,rg=c.createRadialGradient(lx,ly,10,lx,ly,lp[2]*sc*1.25);rg.addColorStop(0,'rgba(255,170,80,'+(.1*fl).toFixed(3)+')');rg.addColorStop(1,'rgba(255,170,80,0)');c.fillStyle=rg;c.fillRect(0,0,W,H);c.restore();
+   /* the light breathes: the whole picture gets a little brighter and darker, and the soft shadows slide a few pixels */
+   c.save();c.globalCompositeOperation='multiply';const cx2=ox+(SC.G.W*.5+60*Math.sin(T*.43))*sc,cy2=oy+(SC.G.H*.5+45*Math.cos(T*.31))*sc,R=Math.max(W,H)*.85,ex=Math.round(255-16*(1-fl)),dg=c.createRadialGradient(cx2,cy2,R*.3,cx2,cy2,R);dg.addColorStop(0,'rgb('+ex+','+ex+','+ex+')');dg.addColorStop(1,'rgb('+Math.round(206-18*(1-fl))+','+Math.round(192-16*(1-fl))+','+Math.round(178-14*(1-fl))+')');c.fillStyle=dg;c.fillRect(0,0,W,H);c.restore()}}else sheen(c,ox,oy,sc,T);
  c.restore();
  /* optional words and the subscribe, drawn flat on top (no camera drift) */
  const topY=v?H*.17:H*.12,sz=v?Math.min(150,W*.12):Math.min(110,W*.058);
@@ -247,6 +280,7 @@ function html(){return`<div class="mg"><div>
  <label>SCREEN TEXT (LEAVE EMPTY TO USE THE BEAT NAME)</label><input type="text" id="mLcd" maxlength="40">
  <h3 style="margin-top:16px">2. LOOK</h3>
  <label>LOOK OF THE VIDEOS</label><select id="mScene"><option value="desk">Desk scene (the worn desk, lamp and floppy disks)</option><option value="white">White studio</option></select>
+ <label class="chk"><input type="checkbox" id="mHands"> HANDS TAPPING THE PADS (YOUR OWN HANDS, THEY STRIKE EVERY HIT)</label>
  <label class="chk"><input type="checkbox" id="mSmoke"> CIGARETTE SMOKE (9:16 DESK SCENE)</label>
  <select id="mSmokeAmt"><option value="0.6">Light smoke</option><option value="1">Normal smoke</option><option value="1.5">Heavy smoke</option></select>
  <label class="chk"><input type="checkbox" id="mTxt"> ALSO SHOW THE TITLE AS TEXT ON THE WHITE (OFF = CLEAN, ONLY THE MPC SCREEN)</label>
@@ -391,7 +425,7 @@ function thRender(){const el=$q('#mTH');if(!el||!YT())return;const b=ST.tape.on?
 function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();ytRender();thRender()};
- $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mSmoke').checked=!!ST.smoke.on;$q('#mSmokeAmt').value=String(ST.smoke.amt||1);$q('#mSmoke').onchange=e=>{ST.smoke.on=e.target.checked;save();drawNow()};$q('#mSmokeAmt').onchange=e=>{ST.smoke.amt=+e.target.value;save();drawNow()};$q('#mScene').value=ST.scene||'desk';$q('#mScene').onchange=e=>{ST.scene=e.target.value;save();drawNow()};$q('#mTxt').onchange=e=>{ST.text=e.target.checked;save();drawNow()};
+ $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mHands').checked=!!ST.hands.on;$q('#mHands').onchange=e=>{ST.hands.on=e.target.checked;save();drawNow()};$q('#mSmoke').checked=!!ST.smoke.on;$q('#mSmokeAmt').value=String(ST.smoke.amt||1);$q('#mSmoke').onchange=e=>{ST.smoke.on=e.target.checked;save();drawNow()};$q('#mSmokeAmt').onchange=e=>{ST.smoke.amt=+e.target.value;save();drawNow()};$q('#mScene').value=ST.scene||'desk';$q('#mScene').onchange=e=>{ST.scene=e.target.value;save();drawNow()};$q('#mTxt').onchange=e=>{ST.text=e.target.checked;save();drawNow()};
  $q('#mKit').onchange=e=>{if(!ST.beat)return;ST.kits=ST.kits||{};if(e.target.value==='')delete ST.kits[ST.beat];else ST.kits[ST.beat]=+e.target.value;save();if(S&&S.raw){applyKit();if(TP)TP=null;drawNow()}};
  $q('#mLen').onchange=e=>{ST.len=+e.target.value;save();if(ST.beat)pick(ST.beat)};
  $q('#mFh').onclick=()=>{ST.fmt='h';save();size();drawNow()};$q('#mFv').onclick=()=>{ST.fmt='v';save();size();drawNow()};
@@ -408,10 +442,10 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
 window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the MPC...</div></div>';
   try{await loadS('mpcyt.js?v=6');if(!document.querySelector('link[data-mpc]')){await new Promise(res=>{const l=document.createElement('link');l.rel='stylesheet';l.href=FONT_LINK;l.dataset.mpc='1';l.onload=res;l.onerror=res;document.head.appendChild(l);setTimeout(res,5000)})}
-   await Promise.all(["40px Anton","600 40px Oswald","30px VT323","700 40px Caveat","40px Reenie Beanie"].map(f=>document.fonts.load(f).catch(()=>{})));IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');if(!IMG||!CUT)throw new Error('photo');DESKS.h=await loadImg('mpc/desk.webp');DESKS.v=await loadImg('mpc/desk_v.webp');sampleColors()}
+   await Promise.all(["40px Anton","600 40px Oswald","30px VT323","700 40px Caveat","40px Reenie Beanie"].map(f=>document.fonts.load(f).catch(()=>{})));IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');if(!IMG||!CUT)throw new Error('photo');DESKS.h=await loadImg('mpc/desk.webp');DESKS.v=await loadImg('mpc/desk_v.webp');prepHands(await loadImg('mpc/hand_r.webp'),await loadImg('mpc/hand_l.webp'));sampleColors()}
   catch(e){root.innerHTML='<div class="pn"><div class="msg">The MPC did not load. Refresh the page.</div></div>';return}
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,slug,tags').order('sort_order',{ascending:true}).order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
-  ST=load();if(!ST.th)ST.th={seed:1,pal:'',fmt:'h'};if(!ST.yt.v)ST.yt.v=0;if(!ST.tape)ST.tape=defaults().tape;if(!ST.eng)ST.eng=defaults().eng;if(!ST.smoke)ST.smoke=defaults().smoke;S=null;root.innerHTML=html();wire();size();ytRender();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
+  ST=load();if(!ST.th)ST.th={seed:1,pal:'',fmt:'h'};if(!ST.yt.v)ST.yt.v=0;if(!ST.tape)ST.tape=defaults().tape;if(!ST.eng)ST.eng=defaults().eng;if(!ST.smoke)ST.smoke=defaults().smoke;if(!ST.hands)ST.hands=defaults().hands;S=null;root.innerHTML=html();wire();size();ytRender();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
 };
 window.mpcClose=function(){if(root)root.classList.remove('on');stopPlay()};
 window.__mpc={xf:XF,st:()=>ST,s:()=>S,tp:()=>TP,x:X,frame,analyze,PH,pv:()=>PV,buildTape};window.MZMpc={machine,PH,fitFont,mmss,clamp,img:()=>IMG,cut:()=>CUT};
