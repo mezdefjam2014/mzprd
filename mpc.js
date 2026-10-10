@@ -14,7 +14,9 @@ const FONT_LINK='https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wg
 
 /* where things are on the photo (1024 x 922) */
 const PH={W:1024,H:922,cx:512,cy:455,pad:{x0:252,y0:443,w:54.5,h:54.5,px:64.7,py:63.8},lcd:{x:603,y:230,w:196,h:54},
- leds:{rec:[690,675],over:[722,675],play:[798,675]},plate:'#939aa0'};
+ leds:{rec:[694,674.5],over:[729,674.5],play:[798,674.5]},plate:'#939aa0',btnPlate:'#c9c9cc',faderPlate:'#c6c6c9'};
+/* moving parts of the real machine (photo pixels) */
+const BTN={rec:[676,683,35,23],over:[712,683,34,23],stop:[747,683,34,23],play:[782,683,34,23],start:[817,683,34,23]};
 /* pad order on the MPC60 II, top row first */
 const PAD_NAMES=['PERC 1','PERC 2','PERC 3','PERC 4','RIDE 1','RIDE 2','CRASH 1','CRASH 2','TOM 1','TOM 2','TOM 3','TOM 4','HIHAT','SNARE 1','SNARE 2','BASS'];
 
@@ -64,11 +66,17 @@ function pressAt(S,pad,T){const a=S.per[pad];if(!a||!a.length)return 0;let lo=0,
 
 /* ---------- drawing (a pure function of time, so preview and export match) ---------- */
 function fitFont(c,txt,font,max,w){let s=max;c.font=font(s);while(s>8&&c.measureText(txt).width>w){s-=1;c.font=font(s)}return s}
+function sampleColors(){try{const cv=document.createElement('canvas');cv.width=1;cv.height=1;const x=cv.getContext('2d'),px=(sx,sy)=>{x.drawImage(IMG,sx,sy,1,1,0,0,1,1);const d=x.getImageData(0,0,1,1).data;return 'rgb('+d[0]+','+d[1]+','+d[2]+')'};PH.btnPlate=px(700,712);PH.faderPlate=px(197,700)}catch(e){}}
+function knob(c,cx,cy,r,ang){if(!ang)return;c.save();c.beginPath();c.arc(cx,cy,r,0,6.2832);c.clip();c.translate(cx,cy);c.rotate(ang);c.drawImage(IMG,cx-r,cy-r,2*r,2*r,-r,-r,2*r,2*r);c.restore();c.strokeStyle='rgba(0,0,0,.25)';c.lineWidth=.8;c.beginPath();c.arc(cx,cy,r,0,6.2832);c.stroke()}
+function fader(c,off){if(off<.3)return;c.fillStyle=PH.faderPlate;c.fillRect(173,676,22,34);c.fillStyle='#0b0b0d';c.fillRect(178,676,11,31);c.drawImage(IMG,175,678,19,30,175,678-off,19,30)}
+function button(c,r,p){if(!(p>0))return;const x=r[0],y=r[1],w=r[2],h=r[3];c.fillStyle='#202023';c.fillRect(x+1,y+1,w-2,h-2);const k=1-.07*p,bw=(w-2)*k,bh=(h-2)*k,bx=x+1+(w-2-bw)/2,by=y+1+(h-2-bh)/2+1.6*p;
+ c.save();c.beginPath();c.rect(bx,by,bw,bh);c.clip();c.drawImage(IMG,x+1,y+1,w-2,h-2,bx,by,bw,bh);c.fillStyle='rgba(0,0,0,'+(.3*p).toFixed(3)+')';c.fillRect(bx,by,bw,bh);c.fillStyle='rgba(0,0,0,'+(.25*p).toFixed(3)+')';c.fillRect(bx,by,bw,1.6);c.restore()}
 /* the machine itself: used by the videos and by the thumbnails. o = {img, press(pad)->0..1, T, run} */
 function machine(c,ox,oy,sc,S,o){
  c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.drawImage(o.img,ox,oy,PH.W*sc,PH.H*sc);
  c.save();c.translate(ox,oy);c.scale(sc,sc);
  const P=PH.pad;
+ if(o.fx){knob(c,235,277,20,o.fx.vol);knob(c,493,277,8,o.fx.con);fader(c,o.fx.fader);for(const k in BTN)button(c,BTN[k],o.fx.btn[k]||0)}
  for(let i=0;i<16;i++){const col=i%4,row=Math.floor(i/4),x=P.x0+col*P.px,y=P.y0+row*P.py,p=o.press(i);
   c.fillStyle=PH.plate;c.fillRect(x-3,y-3,P.w+6,P.h+6);
   const k=1-.12*p,w=P.w*k,h=P.h*k,px=x+(P.w-w)/2,py=y+(P.h-h)/2+1.6*p;
@@ -101,13 +109,36 @@ function machine(c,ox,oy,sc,S,o){
  c.restore()}
 const tlOne=Sx=>({kind:'one',tracks:[{S:Sx,start:LEAD,dur:Sx.dur}],total:LEAD+Sx.dur+TAIL,lead:LEAD,title:Sx.title});
 const trackAt=(X,T)=>{let k=0;for(let i=0;i<X.tracks.length;i++)if(T>=X.tracks[i].start)k=i;return k};
+let GR=null,OC=null;
+function grain(){if(GR)return GR;const t=document.createElement('canvas');t.width=t.height=160;const x=t.getContext('2d'),d=x.createImageData(160,160);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=Math.random()*14}x.putImageData(d,0,0);return GR=t}
+function ground(c,W,H,ox,oy,sc){
+ const g=c.createRadialGradient(W/2,H*.48,H*.08,W/2,H*.5,Math.max(W,H)*.78);g.addColorStop(0,'#ffffff');g.addColorStop(1,'#f4f4f6');c.fillStyle=g;c.fillRect(0,0,W,H);
+ c.save();c.globalAlpha=.5;c.fillStyle=c.createPattern(grain(),'repeat');c.fillRect(0,0,W,H);c.restore();
+ c.save();c.shadowColor='rgba(36,36,48,.3)';c.shadowBlur=64*sc;c.shadowOffsetY=28*sc;c.drawImage(CUT,ox,oy,PH.W*sc,PH.H*sc);c.restore();
+ c.save();c.shadowColor='rgba(16,16,26,.46)';c.shadowBlur=9*sc;c.shadowOffsetY=5*sc;c.drawImage(CUT,ox,oy,PH.W*sc,PH.H*sc);c.restore()}
+/* a soft light that slowly crosses the plastic, plus a gentle key light and shading so it has volume */
+function sheen(c,ox,oy,sc,T){const w=Math.round(PH.W*sc),h=Math.round(PH.H*sc);if(!OC||OC.width!==w||OC.height!==h){OC=document.createElement('canvas');OC.width=w;OC.height=h}
+ const x=OC.getContext('2d');x.globalCompositeOperation='source-over';x.clearRect(0,0,w,h);
+ const k=.5+.5*Math.sin(T*.34+.6),cx=w*(-.1+1.2*k);x.save();x.translate(cx,h*.5);x.rotate(.38);const g=x.createLinearGradient(-w*.22,0,w*.22,0);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,.55)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(-w*.22,-h,w*.44,h*2);x.restore();
+ const key=x.createRadialGradient(w*.22,h*.1,10,w*.22,h*.1,w*.8);key.addColorStop(0,'rgba(255,255,255,.35)');key.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=key;x.fillRect(0,0,w,h);
+ x.globalCompositeOperation='destination-in';x.drawImage(CUT,0,0,w,h);
+ c.save();c.globalCompositeOperation='screen';c.globalAlpha=.34;c.drawImage(OC,ox,oy);c.restore();
+ /* shade the lower right a little */
+ x.globalCompositeOperation='source-over';x.clearRect(0,0,w,h);const sh=x.createLinearGradient(w*.3,h*.2,w,h);sh.addColorStop(0,'rgba(0,0,20,0)');sh.addColorStop(1,'rgba(0,0,20,.5)');x.fillStyle=sh;x.fillRect(0,0,w,h);x.globalCompositeOperation='destination-in';x.drawImage(CUT,0,0,w,h);
+ c.save();c.globalCompositeOperation='multiply';c.globalAlpha=.16;c.drawImage(OC,ox,oy);c.restore()}
+const ease=t=>t<=0?0:t>=1?1:t*t*(3-2*t),pulse=(T,a,b)=>Math.min(ease((T-a)/.07),ease((b-T)/.09));
 function frame(c,W,H,fmt,T,X){
- const v=fmt==='v',sc=v?.87*W/848:.6*W/848,cx=W/2,cy=v?H*.5:H*.495,ox=cx-PH.cx*sc,oy=cy-PH.cy*sc,k=trackAt(X,T),tr=X.tracks[k],Sx=tr.S,lt=T-tr.start,tape=X.kind==='tape',lastEnd=X.tracks[X.tracks.length-1].start+X.tracks[X.tracks.length-1].dur;
- c.save();c.fillStyle='#fff';c.fillRect(0,0,W,H);
- const intro=tape&&T<X.tracks[0].start;
- machine(c,ox,oy,sc,Sx,{img:IMG,lt,run:lt>=-.02&&T<lastEnd,trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>lt>=-.02?pressAt(Sx,i,lt):0});
- if(ST.text)text(c,W,H,v,{title:tape?X.title:Sx.title,bpm:Sx.bpm,key:Sx.key,sub:tape&&!intro?(k+1)+'. '+Sx.title:''});
- c.restore()}
+ const v=fmt==='v',sc0=v?.87*W/848:.6*W/848,k=trackAt(X,T),tr=X.tracks[k],Sx=tr.S,lt=T-tr.start,tape=X.kind==='tape',last=X.tracks[X.tracks.length-1],lastEnd=last.start+last.dur,t0=X.tracks[0].start;
+ /* tiny camera drift: a slow float of about a pixel or two, and a hair of breathing */
+ const dx=(1.3*Math.sin(T*.31)+.7*Math.sin(T*.77+1.3))*W/1920,dy=(1.1*Math.sin(T*.27+.8)+.6*Math.sin(T*.69+2.1))*W/1920,zs=1+.0028*Math.sin(T*.21+.4);
+ c.save();c.fillStyle='#fff';c.fillRect(0,0,W,H);c.translate(W/2+dx,H/2+dy);c.scale(zs,zs);c.translate(-W/2,-H/2);
+ const sc=sc0,cx=W/2,cy=v?H*.5:H*.495,ox=cx-PH.cx*sc,oy=cy-PH.cy*sc,intro=tape&&T<t0;
+ ground(c,W+80,H+80,ox,oy,sc);
+ const fx={vol:(.21*ease((T-.15)/2.4))+.012*Math.sin(T*.6),con:.05*Math.sin(T*.4),fader:Math.max(0,26*(.5+.5*Math.sin(T*.29-.6))),btn:{play:0,start:pulse(T,t0-.42,t0-.12),rec:pulse(T,t0-.42,t0-.12),over:0,stop:pulse(T,lastEnd-.08,lastEnd+.2)}};
+ machine(c,ox,oy,sc,Sx,{img:CUT,fx,lt,run:lt>=-.02&&T<lastEnd,trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>lt>=-.02?pressAt(Sx,i,lt):0});
+ sheen(c,ox,oy,sc,T);
+ c.restore();
+ if(ST.text)text(c,W,H,v,{title:tape?X.title:Sx.title,bpm:Sx.bpm,key:Sx.key,sub:tape&&!intro?(k+1)+'. '+Sx.title:''})}
 function text(c,W,H,v,S){const ink='#111';c.save();c.fillStyle=ink;c.textBaseline='alphabetic';
  if(v){c.textAlign='center';const t=(S.title||'').toUpperCase(),f=s=>'700 '+s+'px Anton, Oswald, sans-serif',s=fitFont(c,t,f,150,W*.86);c.font=f(s);c.fillText(t,W/2,H*.2);c.font='600 44px Oswald, sans-serif';c.fillStyle='#666';c.fillText(S.sub?S.sub.toUpperCase():([S.bpm?S.bpm+' BPM':'',S.key||'','PROD. MZPRD'].filter(Boolean)).join('   /   '),W/2,H*.2+70);
   c.font='600 40px Oswald, sans-serif';c.fillStyle=ink;c.fillText('MZPRD.COM',W/2,H*.9)}
@@ -289,7 +320,7 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
 window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the MPC...</div></div>';
   try{await loadS('mpcyt.js?v=6');if(!document.querySelector('link[data-mpc]')){await new Promise(res=>{const l=document.createElement('link');l.rel='stylesheet';l.href=FONT_LINK;l.dataset.mpc='1';l.onload=res;l.onerror=res;document.head.appendChild(l);setTimeout(res,5000)})}
-   await Promise.all(["40px Anton","600 40px Oswald","30px VT323"].map(f=>document.fonts.load(f).catch(()=>{})));IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');if(!IMG||!CUT)throw new Error('photo')}
+   await Promise.all(["40px Anton","600 40px Oswald","30px VT323"].map(f=>document.fonts.load(f).catch(()=>{})));IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');if(!IMG||!CUT)throw new Error('photo');sampleColors()}
   catch(e){root.innerHTML='<div class="pn"><div class="msg">The MPC did not load. Refresh the page.</div></div>';return}
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,slug,tags').order('sort_order',{ascending:true}).order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
   ST=load();if(!ST.th)ST.th={seed:1,pal:'',fmt:'h'};if(!ST.yt.v)ST.yt.v=0;if(!ST.tape)ST.tape=defaults().tape;S=null;root.innerHTML=html();wire();size();ytRender();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
