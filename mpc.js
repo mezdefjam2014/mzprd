@@ -134,7 +134,8 @@ function derive(X){const E=ST.eng,sub=E.sub,loop=E.loop&&X.kind==='one';if(!sub&
 const XF=fmt=>{const b=X();if(!b)return null;if(fmt!=='v')return b;if(!b._v)b._v=derive(b);return b._v};
 function dropV(){if(S&&S.tl)S.tl._v=null;if(TP)TP._v=null}
 const trackAt=(X,T)=>{let k=0;for(let i=0;i<X.tracks.length;i++)if(T>=X.tracks[i].start)k=i;return k};
-let GR=null,OC=null,DESKS={h:null,v:null};
+let GR=null,OC=null,DESKS={h:null,v:null},DESKBG={h:null,v:null},WARM=null;
+function warmVer(img){const cv=document.createElement('canvas');cv.width=img.naturalWidth;cv.height=img.naturalHeight;const x=cv.getContext('2d');x.drawImage(img,0,0);x.globalCompositeOperation='multiply';x.fillStyle='rgb(255,212,168)';x.fillRect(0,0,cv.width,cv.height);x.globalCompositeOperation='destination-in';x.drawImage(img,0,0);return cv}
 const sceneOf=fmt=>(ST.scene!=='white'&&DESKS[fmt]&&GEO['desk'+fmt])?{G:GEO['desk'+fmt],img:DESKS[fmt]}:null;
 function grain(){if(GR)return GR;const t=document.createElement('canvas');t.width=t.height=160;const x=t.getContext('2d'),d=x.createImageData(160,160);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=Math.random()*14}x.putImageData(d,0,0);return GR=t}
 function ground(c,W,H,ox,oy,sc){
@@ -175,33 +176,57 @@ function prepHands(r,l){if(!r||!l)return;const mk=(img,warm)=>{const cv=document
  HANDS={r:{norm:mk(r,false),warm:mk(r,true),sil:sil(r)},l:{norm:mk(l,false),warm:mk(l,true),sil:sil(l)}}}
 function handHits(Sx){if(Sx._hh)return Sx._hh;const o={l:[],r:[]},last={l:-9,r:-9};(Sx.hits||[]).forEach(h=>{const key=(h.pad%4)<2?'l':'r';if(h.t-last[key]<.115)return;last[key]=h.t;o[key].push(h)});return Sx._hh=o}
 const padC=(G,i)=>[G.pad.x0+(i%4)*G.pad.px+G.pad.w/2,G.pad.y0+Math.floor(i/4)*G.pad.py+G.pad.h*.58];
-function handAt(list,T,G){if(!list.length)return null;let i=0;while(i<list.length&&list[i].t<=T)i++;const prev=i>0?list[i-1]:null,next=i<list.length?list[i]:null,ref=next||prev,restY=G.pad.y0+G.pad.py*3+G.pad.h+G.pad.py*1.7;let A,B,tA,tB;
- if(next){B=padC(G,next.pad);tB=next.t;if(prev){A=padC(G,prev.pad);tA=prev.t}else{A=[B[0],restY];tA=tB-1.3}}else{A=padC(G,prev.pad);tA=prev.t;B=[A[0],restY];tB=tA+1.1}
- const u=clamp((T-tA-.02)/Math.max(.06,(tB-tA)-.1),0,1),e=ease(u),x=A[0]+(B[0]-A[0])*e,y=A[1]+(B[1]-A[1])*e;
- let hover=(prev?ease((T-tA)/.13):1)*(.55+.45*(prev?prev.v:.7));
- if(next){const d=clamp((T-(tB-.105))/.105,0,1);hover=Math.min(hover,1-d*d)}else hover=Math.max(hover,clamp((T-tA-.2)/.8,0,1)*.9);
- return{x,y,hover:clamp(hover,0,1)}}
-/* a hard tap: the hand floats up, then drops fast and lands on the pad; its shadow is big and soft when lifted and tight and dark on contact */
-function drawHands(c,G,Sx,T,desk){if(!HANDS)return;const H=handHits(Sx),k=G.pad.w/72,lp=G.lamp||[G.W*.2,-G.H*.35,0];
- for(const key of ['l','r']){const st=handAt(H[key],T,G);if(!st)continue;
-  const m=HM[key],hv=st.hover,s0=G.pad.w*.5/m.fw,s=s0*(1+.17*hv),sx=G.W*(key==='r'?.66:.34),sy=G.H*1.55,ang=Math.atan2(sx-st.x,sy-st.y),rot=m.axis-ang+.014*Math.sin(T*41)*hv,push=(1-hv)*5*k,HI=HANDS[key];
-  /* which way the lamp is, in the picture and in the hand's own space */
+/* Hand motion model. Everything is a smooth physical curve of time (no random shake):
+   - travel between pads is a lightly under-damped spring, so the hand arrives with a hair of overshoot, like a real arm
+   - after each hit the hand springs up (higher when there is more time before the next hit, lower in a fast flurry)
+   - the drop onto the next pad accelerates like a fall and lands exactly on the hit
+   - the finger squashes for a moment on contact and the arm leans into the direction it is moving
+   - at the end of the beat the hand just rests, floating with a slow breathing sway */
+const spring=u=>{if(u<=0)return 0;if(u>=1)return 1;const z=.8,w=9.5,wd=w*Math.sqrt(1-z*z);return 1-Math.exp(-z*w*u)*(Math.cos(wd*u)+(z*w/wd)*Math.sin(wd*u))};
+function handPose(list,T,G,key){let i=0;while(i<list.length&&list[i].t<=T)i++;const prev=i>0?list[i-1]:null,next=i<list.length?list[i]:null,restY=G.pad.y0+G.pad.py*3+G.pad.h+G.pad.py*1.7;let A,B,tA,tB;
+ if(next){B=padC(G,next.pad);tB=next.t;if(prev){A=padC(G,prev.pad);tA=prev.t}else{A=[B[0]+(key==='r'?30:-30),restY];tA=tB-1.5}}else{A=padC(G,prev.pad);tA=prev.t;B=A;tB=tA+9}
+ const gap=tB-tA,v=(prev?prev.v:.7);
+ /* where the hand is */
+ const travel=Math.max(.07,gap-.12),e=spring((T-tA-.015)/travel),x=A[0]+(B[0]-A[0])*e,y=A[1]+(B[1]-A[1])*e;
+ /* how high it is: springs up after the hit, falls onto the next one */
+ const Hmax=clamp((.22+.62*Math.min(1,gap/.5))*(.62+.38*v),.12,.95),dt=T-tA,tau=.05;
+ let h=prev?Hmax*(1-(1+dt/tau)*Math.exp(-dt/tau))+Hmax*.1*Math.exp(-dt/.03)*Math.abs(Math.sin(dt*52)):Hmax;
+ if(next){const dd=clamp(.06+.1*Hmax,.07,.16),ts=tB-dd;if(T>ts){const q=clamp((T-ts)/dd,0,1);h=Math.min(h,(prev?Hmax:Hmax)*(1-Math.pow(q,2.3)))}}
+ else{h=Math.min(h,.5)+clamp((T-tA-.35)/1.6,0,1)*.12}
+ h=clamp(h,0,1);
+ /* a tiny slow sway, stronger while it is in the air */
+ const sw=.5+.5*h,sx=1.1*Math.sin(T*.8+(key==='r'?1:3))*sw,sy=1.3*Math.sin(T*.63+(key==='r'?2:.5))*sw;
+ /* squash on contact */
+ const c=prev&&dt>=0?Math.exp(-dt/.045)*(1-clamp(h*3,0,1)):0;
+ return{x:x+sx*G.pad.w/72,y:y+sy*G.pad.w/72,hover:h,contact:c}}
+function handAt(list,T,G,key){if(!list.length)return null;const a=handPose(list,T,G,key),b=handPose(list,T-.022,G,key);a.vx=(a.x-b.x)/.022;a.vy=(a.y-b.y)/.022;a.vh=(a.hover-b.hover)/.022;return a}
+/* a hard tap: the hand floats up, drops fast and lands on the pad; its shadow is big and soft when lifted and tight and dark on contact */
+function drawHands(c,G,Sx,T,desk){if(!HANDS)return;const H=handHits(Sx);for(const key of ['l','r']){const st=handAt(H[key],T,G,key);if(st)drawOneHand(c,G,key,st,desk,T)}}
+function drawOneHand(c,G,key,st,desk,T,lampOver){const k=G.pad.w/72,lp=lampOver||G.lamp||[G.W*.2,-G.H*.35,0];st.vx=st.vx||0;st.vy=st.vy||0;st.vh=st.vh||0;st.contact=st.contact||0;
+ {const m=HM[key],hv=st.hover,sq=1-.03*st.contact,s0=G.pad.w*.5/m.fw,s=s0*(1+.17*hv)*sq,sx=G.W*(key==='r'?.66:.34),sy=G.H*1.55,ang=Math.atan2(sx-st.x,sy-st.y),lean=clamp(st.vx/k*.00055,-.07,.07),rot=m.axis-ang+lean,push=(1-hv)*5*k+st.contact*5*k,HI=HANDS[key];
   let dx=lp[0]-st.x,dy=lp[1]-st.y;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;const cr=Math.cos(rot),sr=Math.sin(rot),lx=dx*cr+dy*sr,ly=-dx*sr+dy*cr,tipX=st.x,tipY=st.y+.12*G.pad.h;
-  /* 1. the machine goes a little darker right under the fingertip, more the closer the finger is */
   const ao=Math.pow(1-hv,1.6);if(ao>.02){c.save();const rg=c.createRadialGradient(tipX,tipY+4*k,1,tipX,tipY+4*k,26*k);rg.addColorStop(0,'rgba(0,0,0,'+(.45*ao).toFixed(3)+')');rg.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=rg;c.fillRect(tipX-30*k,tipY-26*k,60*k,64*k);c.restore()}
-  /* 2. two shadows thrown away from the lamp: a wide soft one that grows as the hand lifts, and a tight dark one that shows when it lands */
   for(const L of [{o:(10+30*hv)*k,b:(3+10*hv)*k,a:(desk?.3:.18)*(1-.45*hv),g:1.08+.1*hv},{o:(3+8*hv)*k,b:(1.2+3*hv)*k,a:(desk?.5:.3)*(1-hv*.85),g:1.01+.03*hv}]){c.save();c.translate(st.x-dx*L.o,st.y-dy*L.o);c.rotate(rot);c.scale(s*L.g,s*L.g);c.globalAlpha=L.a;c.filter='blur('+L.b.toFixed(1)+'px)';c.drawImage(HI.sil,-m.tip[0],-m.tip[1],HI.sil.width*4,HI.sil.height*4);c.restore()}
-  /* 3. the hand itself, lit like the scene: warm and bright on the side facing the lamp, darker on the far side, the arm falling into shadow */
-  const sh=shadeHand(HI,m,desk,lx,ly,hv);
+  const lit=desk?clamp(1.08-Math.hypot(lp[0]-st.x,lp[1]-st.y)/(Math.max(G.W,G.H)*1.3),.55,1):.9,sh=shadeHand(HI,m,desk,lx,ly,hv,lit,T||0);
+  const spd=Math.hypot(st.vx,st.vy)/k+Math.abs(st.vh)*60;
+  if(spd>520){const n=spd>1100?2:1;for(let q=n;q>=1;q--){const tb=q*.011,bx=st.x-st.vx*tb,by=st.y-st.vy*tb,bh=clamp(hv-st.vh*tb,0,1);c.save();c.globalAlpha=(.2/q)*clamp((spd-520)/700,0,1);c.translate(bx,by+.12*G.pad.h+push);c.rotate(rot);c.translate(0,bh*26*k);c.scale(s0*(1+.17*bh),s0*(1+.17*bh));c.drawImage(sh,-m.tip[0],-m.tip[1]);c.restore()}}
   c.save();c.translate(tipX,tipY+push);c.rotate(rot);c.translate(0,hv*26*k);c.scale(s,s);c.drawImage(sh,-m.tip[0],-m.tip[1]);c.restore()}}
-function shadeHand(HI,m,desk,lx,ly,hv){const w=HI.norm.width,h=HI.norm.height,cv=HI.shade||(HI.shade=document.createElement('canvas'));if(cv.width!==w){cv.width=w;cv.height=h}const x=cv.getContext('2d');x.globalCompositeOperation='copy';x.globalAlpha=1;x.drawImage(desk?HI.warm:HI.norm,0,0);x.globalCompositeOperation='multiply';
- const R=340,cxx=m.tip[0]+120,cyy=m.tip[1]+260,g=x.createLinearGradient(cxx-lx*R,cyy-ly*R,cxx+lx*R,cyy+ly*R);
- if(desk){g.addColorStop(0,'rgb(136,106,90)');g.addColorStop(.5,'rgb(212,188,168)');g.addColorStop(1,'rgb(255,238,214)')}else{g.addColorStop(0,'rgb(192,188,186)');g.addColorStop(.5,'rgb(232,230,228)');g.addColorStop(1,'rgb(255,255,255)')}
+function shadeHand(HI,m,desk,lx,ly,hv,lit,T){const w=HI.norm.width,h=HI.norm.height,cv=HI.shade||(HI.shade=document.createElement('canvas'));if(cv.width!==w){cv.width=w;cv.height=h}const x=cv.getContext('2d');x.globalCompositeOperation='copy';x.globalAlpha=1;x.drawImage(desk?HI.warm:HI.norm,0,0);x.globalCompositeOperation='multiply';
+ const R=360,cxx=m.tip[0]+120,cyy=m.tip[1]+300;
+ /* overall exposure: the desk is dim and orange, so the skin is too, and it gets darker the farther the hand is from the lamp */
+ const E=desk?clamp(.4+.5*lit,.5,.92):.93;x.fillStyle='rgb('+Math.round(255*E)+','+Math.round(255*E*.95)+','+Math.round(255*E*.88)+')';x.fillRect(0,0,w,h);
+ /* the side facing the lamp is lit, the far side falls off hard */
+ const g=x.createLinearGradient(cxx-lx*R,cyy-ly*R,cxx+lx*R,cyy+ly*R);
+ if(desk){g.addColorStop(0,'rgb(98,74,62)');g.addColorStop(.5,'rgb(180,150,126)');g.addColorStop(1,'rgb(255,234,204)')}else{g.addColorStop(0,'rgb(176,172,170)');g.addColorStop(.5,'rgb(226,224,222)');g.addColorStop(1,'rgb(255,255,255)')}
  x.fillStyle=g;x.fillRect(0,0,w,h);
- const g2=x.createLinearGradient(0,m.tip[1]+180,0,h*.78);if(desk){g2.addColorStop(0,'rgb(255,255,255)');g2.addColorStop(.5,'rgb(198,176,160)');g2.addColorStop(1,'rgb(108,88,78)')}else{g2.addColorStop(0,'rgb(255,255,255)');g2.addColorStop(1,'rgb(192,188,186)')}
+ /* the arm falls into the dark toward the bottom edge */
+ const g2=x.createLinearGradient(0,m.tip[1]+160,0,h*.72);if(desk){g2.addColorStop(0,'rgb(255,255,255)');g2.addColorStop(.45,'rgb(184,160,144)');g2.addColorStop(1,'rgb(112,90,80)')}else{g2.addColorStop(0,'rgb(255,255,255)');g2.addColorStop(1,'rgb(186,182,180)')}
  x.fillStyle=g2;x.fillRect(0,0,w,h);
+ /* shadows thrown onto the hand from above (lamp arm and shade): a soft band across it that slides slowly with the light */
+ if(desk){const ph=Math.sin(T*.4)*.1+Math.sin(T*.93+1)*.03,gb=x.createLinearGradient(cxx-lx*R,cyy-ly*R,cxx+lx*R,cyy+ly*R);gb.addColorStop(0,'rgb(255,255,255)');gb.addColorStop(clamp(.36+ph,0,.9),'rgb(255,255,255)');gb.addColorStop(clamp(.5+ph,0,.95),'rgb(104,84,74)');gb.addColorStop(clamp(.64+ph,0,.98),'rgb(170,146,130)');gb.addColorStop(clamp(.8+ph,0,1),'rgb(255,255,255)');gb.addColorStop(1,'rgb(255,255,255)');x.fillStyle=gb;x.fillRect(0,0,w,h)}
  x.globalCompositeOperation='destination-in';x.drawImage(HI.norm,0,0);
- if(hv>.05&&desk){x.globalCompositeOperation='lighter';x.globalAlpha=.1*hv;x.drawImage(HI.norm,0,0);x.globalAlpha=1}
+ /* a warm rim of lamp light on the lamp side, and the lifted hand (closer to the lamp) catches a bit more */
+ if(desk){x.globalCompositeOperation='lighter';x.globalAlpha=.05+.09*hv*lit;x.drawImage(HI.norm,0,0);x.globalAlpha=1}
  x.globalCompositeOperation='source-over';return cv}
 /* dust drifting through the lamp light */
 function dust(c,T,G){const lp=G.lamp;if(!lp)return;const N=96,A=[lp[0]+(G.W*.5-lp[0])*.42,lp[1]+(G.H*.5-lp[1])*.42],R=lp[2]*.95,sg=lp[2]*.62;c.save();c.globalCompositeOperation='lighter';
@@ -427,17 +452,17 @@ function ytRender(){const el=$q('#mYT');if(!el)return;const b=beats.find(x=>Stri
 let thTok=0;
 function thRender(){const el=$q('#mTH');if(!el||!YT())return;const b=ST.tape.on?{title:ST.tape.title}:beats.find(x=>String(x.id)===String(ST.beat));if(!b){el.innerHTML='<div class="msg">Pick a beat first.</div>';return}
  const T=ST.th,v=T.fmt==='v',W=v?1080:1280,H=v?1920:720,PALS=YT().PAL;
- el.innerHTML=`<div class="two"><div><label>FORMAT</label><select id="mThF"><option value="h"${v?'':' selected'}>16:9 THUMBNAILS (1280x720)</option><option value="v"${v?' selected':''}>9:16 SHORTS COVERS (1080x1920)</option></select></div><div><label>COLOR</label><select id="mThP"><option value="">Mixed</option>${PALS.map((p,i)=>`<option value="${i}"${String(T.pal)===String(i)?' selected':''}>${p.n}</option>`).join('')}</select></div></div>
+ el.innerHTML=`<div class="two"><div><label>FORMAT</label><select id="mThF"><option value="h"${v?'':' selected'}>16:9 THUMBNAILS (1280x720)</option><option value="v"${v?' selected':''}>9:16 SHORTS COVERS (1080x1920)</option></select></div><div><label>BACKGROUND</label><select id="mThD"><option value=""${T.bgm===''||T.bgm==null?' selected':''}>Mostly the desk</option><option value="desk"${T.bgm==='desk'?' selected':''}>Only the desk</option><option value="color"${T.bgm==='color'?' selected':''}>Only color backgrounds</option></select></div><div><label>COLOR (COLOR BACKGROUNDS)</label><select id="mThP"><option value="">Mixed</option>${PALS.map((p,i)=>`<option value="${i}"${String(T.pal)===String(i)?' selected':''}>${p.n}</option>`).join('')}</select></div></div>
  <div class="two" style="margin-top:8px"><button class="btn" id="mThN">NEW SET OF 12</button><button class="btn" id="mThA">DOWNLOAD ALL 12</button></div>
  <div class="msg">Text on the picture stays at 5 words or fewer so it reads on a phone: the artist, TYPE BEAT and the beat name. Click a thumbnail to download it.</div>
  <div id="mThG" style="display:grid;grid-template-columns:repeat(${v?4:2},1fr);gap:8px"></div>`;
  const g=el.querySelector('#mThG'),X=ST.tape.on?{title:ST.tape.title,big:'BEAT TAPE',extra:(TP?TP.tracks.length:ST.tape.ids.length)+' BEATS',bpm:0,key:'',artist:ST.artist}:{title:b.title,bpm:Number(b.bpm)||0,key:b.musical_key||'',artist:ST.artist},tok=++thTok;
  const fonts=document.fonts?Promise.all(["40px Anton","600 30px Oswald","30px VT323"].map(f=>document.fonts.load(f).catch(()=>{}))):Promise.resolve();
- fonts.then(()=>{if(tok!==thTok)return;const items=[];for(let i=0;i<12;i++){const seed=T.seed*100+i+1,cv=document.createElement('canvas');cv.width=W;cv.height=H;cv.style.cssText='width:100%;display:block;cursor:pointer;border:1px solid #2a2a2e';const info=YT().make(cv.getContext('2d'),W,H,seed,X,{pal:T.pal===''?null:+T.pal});
+ fonts.then(()=>{if(tok!==thTok)return;const items=[];for(let i=0;i<12;i++){const seed=T.seed*100+i+1,cv=document.createElement('canvas');cv.width=W;cv.height=H;cv.style.cssText='width:100%;display:block;cursor:pointer;border:1px solid #2a2a2e';const info=YT().make(cv.getContext('2d'),W,H,seed,X,{pal:T.pal===''?null:+T.pal,desk:T.bgm==='desk'?true:T.bgm==='color'?false:null});
    const wrap=document.createElement('div');wrap.appendChild(cv);const cap=document.createElement('div');cap.className='msg';cap.style.margin='2px 0 0';cap.textContent=info.pal+' / '+info.bg+' / '+info.text;wrap.appendChild(cap);g.appendChild(wrap);
    const dl=()=>cv.toBlob(bl=>dlf(bl,(b.title||'beat').replace(/[^\w -]+/g,'')+' - MPC thumb '+(i+1)+(v?' 9x16':'')+'.jpg'),'image/jpeg',.92);cv.onclick=dl;items.push(dl)}
   el.querySelector('#mThA').onclick=async()=>{for(const d of items){d();await new Promise(r=>setTimeout(r,500))}}});
- el.querySelector('#mThF').onchange=e=>{T.fmt=e.target.value;save();thRender()};el.querySelector('#mThP').onchange=e=>{T.pal=e.target.value;save();thRender()};el.querySelector('#mThN').onclick=()=>{T.seed++;save();thRender()}}
+ el.querySelector('#mThF').onchange=e=>{T.fmt=e.target.value;save();thRender()};el.querySelector('#mThD').onchange=e=>{T.bgm=e.target.value;save();thRender()};el.querySelector('#mThP').onchange=e=>{T.pal=e.target.value;save();thRender()};el.querySelector('#mThN').onclick=()=>{T.seed++;save();thRender()}}
 
 function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
@@ -458,12 +483,12 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  $q('#mRh').onclick=()=>render(['h']);$q('#mRv').onclick=()=>render(['v']);$q('#mRb').onclick=()=>render(['h','v'])}
 window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the MPC...</div></div>';
-  try{await loadS('mpcyt.js?v=6');if(!document.querySelector('link[data-mpc]')){await new Promise(res=>{const l=document.createElement('link');l.rel='stylesheet';l.href=FONT_LINK;l.dataset.mpc='1';l.onload=res;l.onerror=res;document.head.appendChild(l);setTimeout(res,5000)})}
-   await Promise.all(["40px Anton","600 40px Oswald","30px VT323","700 40px Caveat","40px Reenie Beanie"].map(f=>document.fonts.load(f).catch(()=>{})));IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');if(!IMG||!CUT)throw new Error('photo');DESKS.h=await loadImg('mpc/desk.webp');DESKS.v=await loadImg('mpc/desk_v.webp');prepHands(await loadImg('mpc/hand_r.webp'),await loadImg('mpc/hand_l.webp'));sampleColors()}
+  try{await loadS('mpcyt.js?v=7');if(!document.querySelector('link[data-mpc]')){await new Promise(res=>{const l=document.createElement('link');l.rel='stylesheet';l.href=FONT_LINK;l.dataset.mpc='1';l.onload=res;l.onerror=res;document.head.appendChild(l);setTimeout(res,5000)})}
+   await Promise.all(["40px Anton","600 40px Oswald","30px VT323","700 40px Caveat","40px Reenie Beanie"].map(f=>document.fonts.load(f).catch(()=>{})));IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');if(!IMG||!CUT)throw new Error('photo');DESKS.h=await loadImg('mpc/desk.webp');DESKS.v=await loadImg('mpc/desk_v.webp');prepHands(await loadImg('mpc/hand_r.webp'),await loadImg('mpc/hand_l.webp'));DESKBG.h=await loadImg('mpc/bg_h.webp');DESKBG.v=await loadImg('mpc/bg_v.webp');WARM={cut:warmVer(CUT),photo:warmVer(IMG)};sampleColors()}
   catch(e){root.innerHTML='<div class="pn"><div class="msg">The MPC did not load. Refresh the page.</div></div>';return}
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,slug,tags').order('sort_order',{ascending:true}).order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
   ST=load();if(!ST.th)ST.th={seed:1,pal:'',fmt:'h'};if(!ST.yt.v)ST.yt.v=0;if(!ST.tape)ST.tape=defaults().tape;if(!ST.eng)ST.eng=defaults().eng;if(!ST.smoke)ST.smoke=defaults().smoke;if(!ST.hands)ST.hands=defaults().hands;S=null;root.innerHTML=html();wire();size();ytRender();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
 };
 window.mpcClose=function(){if(root)root.classList.remove('on');stopPlay()};
-window.__mpc={xf:XF,st:()=>ST,s:()=>S,tp:()=>TP,x:X,frame,analyze,PH,pv:()=>PV,buildTape};window.MZMpc={machine,PH,fitFont,mmss,clamp,img:()=>IMG,cut:()=>CUT};
+window.__mpc={hand:(Sx,key,T)=>handAt(handHits(Sx)[key],T,DK,key),xf:XF,st:()=>ST,s:()=>S,tp:()=>TP,x:X,frame,analyze,PH,pv:()=>PV,buildTape};window.MZMpc={machine,PH,fitFont,mmss,clamp,img:()=>IMG,cut:()=>CUT,bg:k=>DESKBG[k],warm:()=>WARM,handsReady:()=>!!HANDS,hand:(c,key,padIdx,hover,lampPos)=>{if(!HANDS)return;const p=padC(PH,padIdx);drawOneHand(c,PH,key,{x:p[0],y:p[1],hover},true,0,lampPos)}};
 })();

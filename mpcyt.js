@@ -85,16 +85,32 @@ function layoutOf(i,W,H){const v=H>W;
  return[{w:.44,cx:.5,cy:.72,rot:0,t:'top'},{w:.56,cx:.3,cy:.54,rot:-.06,t:'right'},{w:.56,cx:.7,cy:.54,rot:.06,t:'left'},{w:1.16,cx:.5,cy:1.24,rot:0,t:'top',crop:1},
   {w:.58,cx:.67,cy:.55,rot:-.1,t:'left'},{w:.58,cx:.33,cy:.55,rot:.1,t:'right'},{w:.34,cx:.5,cy:.84,rot:0,t:'huge'},{w:2.0,cx:.28,cy:.58,rot:0,t:'right',zoom:1,panel:1},
   {w:.42,cx:.5,cy:.74,rot:-.04,t:'top',two:1},{w:.78,cx:.15,cy:.92,rot:.1,t:'right',crop:1,panel:1},{w:.6,cx:.75,cy:.6,rot:.08,t:'left'},{w:.48,cx:.5,cy:.42,rot:0,t:'bar',card:1}][i%12]}
-function make(c,W,H,seed,X,o){o=o||{};const r=n=>hs(n,seed),P=o.pal!=null?PAL[o.pal%PAL.length]:PAL[Math.floor(r(1)*PAL.length)],B=o.bg!=null?BGS[o.bg%BGS.length]:BGS[Math.floor(r(2)*BGS.length)],
+/* a crop of the empty desk picture (random zoom, side, flip and grade) for a thumbnail background */
+function deskBg(c,W,H,r,key){const img=M().bg(key);if(!img)return null;const iw=img.naturalWidth,ih=img.naturalHeight,ar=W/H;let zf=1+.9*Math.pow(r(31),1.4),w=iw/zf,h=w/ar;if(h>ih){h=ih/zf;w=h*ar}
+ const x0=(iw-w)*r(33),y0=(ih-h)*r(34),flip=r(32)<.4;c.save();if(flip){c.translate(W,0);c.scale(-1,1)}c.drawImage(img,x0,y0,w,h,0,0,W,H);c.restore();
+ const g=Math.floor(r(35)*4);c.save();
+ if(g===1){c.globalCompositeOperation='multiply';c.fillStyle='rgb(190,210,225)';c.fillRect(0,0,W,H)}
+ else if(g===2){c.globalCompositeOperation='overlay';c.fillStyle='rgba(255,150,50,.28)';c.fillRect(0,0,W,H)}
+ else if(g===3){c.globalCompositeOperation='multiply';c.fillStyle='rgb(228,214,200)';c.fillRect(0,0,W,H)}
+ c.restore();c.save();const vg=c.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.max(W,H)*.78);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.55)');c.fillStyle=vg;c.fillRect(0,0,W,H);c.restore();
+ return{flip,lamp:flip?[W*.85,H*.12]:[W*.2,H*.1]}}
+const DESKP=[{n:'DESK',bg:'#000',bg2:'#222',acc:'#ffd23f',ink:'#ffffff',dark:'#0b0b0d'},{n:'DESK',bg:'#000',bg2:'#222',acc:'#ff5a3a',ink:'#ffffff',dark:'#0b0b0d'},{n:'DESK',bg:'#000',bg2:'#222',acc:'#ffb347',ink:'#ffffff',dark:'#0b0b0d'}];
+function make(c,W,H,seed,X,o){o=o||{};const r=n=>hs(n,seed),bgk=H>W?'v':'h',wantDesk=o.desk===true||(o.desk==null&&r(30)<.7),deskOk=wantDesk&&!!M().bg(bgk),P=deskOk?DESKP[Math.floor(r(36)*3)]:(o.pal!=null?PAL[o.pal%PAL.length]:PAL[Math.floor(r(1)*PAL.length)]),B=deskOk?'desk':(o.bg!=null?BGS[o.bg%BGS.length]:BGS[Math.floor(r(2)*BGS.length)]),
   li=o.layout!=null?o.layout:Math.floor(r(3)*LAYOUTS),tx=o.tx!=null?TXS[o.tx%TXS.length]:TXS[Math.floor(r(4)*TXS.length)],Ly=layoutOf(li,W,H),v=H>W,Z=M(),S0={title:X.title,bpm:X.bpm,key:X.key,dur:30,lcd:X.title};
- c.save();c.clearRect(0,0,W,H);bg(c,W,H,B,P,r(5));
+ c.save();c.clearRect(0,0,W,H);let DB=null;if(deskOk)DB=deskBg(c,W,H,r,bgk);else bg(c,W,H,B,P,r(5));
  /* the MPC */
  const sc=Ly.w*W/850,pressed=new Set();const np=4+Math.floor(r(6)*4);for(let i=0;i<np;i++)pressed.add(Math.floor(r(10+i)*16));
  c.save();c.beginPath();c.rect(0,0,W,H);c.clip();
  const place=(cx,cy,rot,alpha,blur)=>{c.save();c.translate(cx,cy);c.rotate(rot);if(alpha!=null)c.globalAlpha=alpha;const ox=-512*sc,oy=-460*sc;
   if(Ly.card){c.fillStyle=P.light?P.dark:'#fff';const pw=850*sc+40,ph=734*sc+40;c.fillRect(-pw/2,-ph/2,pw,ph);}
-  c.save();c.shadowColor='rgba(0,0,0,'+(P.light?.35:.6)+')';c.shadowBlur=40*sc*1.2;c.shadowOffsetY=18*sc;c.drawImage(Z.cut(),ox,oy,1024*sc,922*sc);c.restore();
-  Z.machine(c,ox,oy,sc,S0,{img:Z.cut(),lt:4,run:true,press:i=>pressed.has(i)?.7+.3*hs(i,seed):0});c.restore()};
+  const WM=deskOk&&Z.warm(),cutI=WM?WM.cut:Z.cut();
+  c.save();if(deskOk){c.shadowColor='rgba(0,0,0,.78)';c.shadowBlur=62*sc*1.3;c.shadowOffsetX=(DB.flip?-1:1)*-30*sc;c.shadowOffsetY=34*sc}else{c.shadowColor='rgba(0,0,0,'+(P.light?.35:.6)+')';c.shadowBlur=40*sc*1.2;c.shadowOffsetY=18*sc}c.drawImage(cutI,ox,oy,1024*sc,922*sc);c.restore();
+  Z.machine(c,ox,oy,sc,S0,{img:cutI,src:WM?WM.photo:null,lt:4,run:true,press:i=>pressed.has(i)?.7+.3*hs(i,seed):0});
+  if(deskOk){/* light from the lamp side: a soft gradient over the machine, bright toward the lamp, darker away from it */
+   const sd=document.createElement('canvas');sd.width=Math.ceil(1024*sc);sd.height=Math.ceil(922*sc);const sx=sd.getContext('2d'),gx=DB.flip?1:0,gr=sx.createLinearGradient(sd.width*(gx?1:0),sd.height*.1,sd.width*(gx?0:1),sd.height*.9);gr.addColorStop(0,'rgb(255,244,226)');gr.addColorStop(.55,'rgb(205,186,168)');gr.addColorStop(1,'rgb(120,104,94)');sx.fillStyle=gr;sx.fillRect(0,0,sd.width,sd.height);sx.globalCompositeOperation='destination-in';sx.drawImage(Z.cut(),0,0,sd.width,sd.height);
+   c.save();c.globalCompositeOperation='multiply';c.drawImage(sd,ox,oy);c.restore();
+   if(Z.handsReady()&&r(40)<.55&&pressed.size){const pads=[...pressed],pi=pads[Math.floor(r(41)*pads.length)],key=(pi%4)<2?'l':'r';c.save();c.translate(ox,oy);c.scale(sc,sc);Z.hand(c,key,pi,.22+.3*r(42),DB.flip?[1500,-300]:[-250,-250]);c.restore()}}
+  c.restore()};
  let cx=Ly.cx*W,cy=Ly.cy*H;if(Ly.zoom){cx=W*.33;cy=H*.64}
  if(Ly.two)place(cx+W*.12,cy-H*.05,.18,.5);
  place(cx,cy,Ly.rot,1);c.restore();
@@ -119,7 +135,7 @@ function make(c,W,H,seed,X,o){o=o||{};const r=n=>hs(n,seed),P=o.pal!=null?PAL[o.
  /* badges */
  const bd=[];if(X.extra)bd.push(X.extra);if(X.bpm)bd.push(X.bpm+' BPM');if(X.key)bd.push(X.key);bd.push('MPC60');
  if(tx!=='bar'){c.save();c.font='700 '+(v?44:30)+'px Oswald, sans-serif';c.textBaseline='middle';let x=v?W*.06:W*.03;const y=v?H*.96:H*.94;bd.forEach((b,i)=>{const w=c.measureText(b).width+30,h=v?64:44;c.fillStyle=i===bd.length-1?acc:dk;c.fillRect(x,y-h/2,w,h);c.fillStyle=i===bd.length-1?(acc===dk?'#fff':dk):'#fff';c.textAlign='left';c.fillText(b,x+15,y+2);x+=w+10});c.restore()}
- c.restore();return{pal:P.n,bg:B,layout:li,text:tx}}
+ c.restore();return{pal:P.n,bg:B,layout:li,text:tx,hand:false}}
 
 function buildTape(ST,TP){
  const tr=TP.tracks,N=tr.length,year=new Date().getFullYear(),AR=artistsOf(ST.artist),A=AR.join(' x '),pre=ST.yt.mode==='premiere',v=ST.yt.v||0,seed=N*31+TP.title.length*7+v*13,mood=cap(MOODS[Math.floor(hs(1,seed)*MOODS.length)]),mins=Math.max(1,Math.round(TP.total/60)),mw=mins===1?'Minute':'Minutes';
