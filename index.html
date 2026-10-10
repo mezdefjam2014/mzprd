@@ -343,6 +343,10 @@ footer.f a:hover{color:#fff}
 .bi .acts .del{border-color:var(--red);color:var(--red)}
 .bi .acts .del:hover{background:var(--red);color:#fff}
 .bi .draft{color:var(--gold)}
+.bi.bx{grid-template-columns:26px 56px 1fr auto}.bi .dh{width:26px;height:44px;display:grid;place-items:center;color:#777;font-size:18px;cursor:grab;touch-action:none;user-select:none;border:1px dashed #333}.bi .dh:hover{color:#fff;border-color:#777}
+.bi.drag{outline:2px solid var(--gold);background:#16140c;opacity:.92}.bi .acts .pv{border-color:var(--gold);color:var(--gold)}.bi .acts .pv.on{background:var(--gold);color:#000}
+.bi.gp{grid-template-columns:1fr auto;border-color:var(--gold)}.bi.gp input{width:96px;background:#000;border:1px solid #4a4a50;color:#fff;padding:9px;font:600 13px Montserrat}.bi.gp .acts{align-items:center}
+@media(max-width:640px){.bi.bx{grid-template-columns:26px 48px 1fr}.bi.bx .acts{grid-column:1/-1;flex-wrap:wrap}.bi.gp{grid-template-columns:1fr}}
 #bmsg,#bmsg2{font:600 12px Montserrat;color:var(--gold);margin-top:12px;min-height:16px;letter-spacing:.08em}
 @media(max-width:1000px){
  .row{grid-template-columns:56px minmax(0,1fr) 38px 112px;gap:10px}
@@ -1471,7 +1475,7 @@ async function boRender(){
  if(tab==='beats'&&$('#f_usestk')){const u=$('#f_usestk'),fi=document.querySelector('#bf input[data-k="cover_path"]');u.onchange=()=>{if(u.checked)fi.value=''};fi.addEventListener('change',()=>{if(fi.files[0])u.checked=false})}
  if(tab==='beats'&&$('#f_stk')){const up=()=>{$('#f_stk').src=stockCover($('#f_title').value||'BEAT NAME',420)};$('#f_title').addEventListener('input',up);up();document.fonts&&document.fonts.load('800 100px Inter').then(up).catch(()=>{})}
  if(editing)$('#f_cancel').onclick=()=>{editing=null;boRender()};
- const {data:rows,error}=await sb.from(F.table).select('*').order('created_at',{ascending:false});
+ demoStop();const {data:rows,error}=await sb.from(F.table).select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false});
  const bl=$('#bl');
  if(error){bl.innerHTML='<div class="bi"><span>'+esc(error.message)+'</span></div>';return}
  bl.innerHTML=rows.length?'':'<div class="bi"><span>Nothing here yet. Add your first one on the left.</span></div>';
@@ -1479,13 +1483,37 @@ async function boRender(){
  rows.forEach(r=>{
   const d=document.createElement('div');d.className='bi';
   const u=coverUrl(r,160);
-  d.innerHTML=`${u?`<img src="${esc(u)}" alt="">`:'<div class="nc"></div>'}<div><b>${esc(r.title)}</b><span>${money(r.price)}${r.published?'':' <i class="draft">/ HIDDEN</i>'}${r.free_download?' / FREE DL':''}</span></div><div class="acts">${r.slug?'<button class="vw">PAGE</button>':''}<button class="ed">EDIT</button><button class="del">DELETE</button></div>`;
+  d.className='bi bx';d.dataset.id=r.id;
+  d.innerHTML=`<div class="dh" title="Drag to change the order" aria-label="Drag to reorder">&#9776;</div>${u?`<img src="${esc(u)}" alt="">`:'<div class="nc"></div>'}<div><b>${esc(r.title)}</b><span>${money(r.price)}${r.published?'':' <i class="draft">/ HIDDEN</i>'}${r.free_download?' / FREE DL':''}</span></div><div class="acts">${r.preview_path?'<button class="pv">&#9654; DEMO</button>':''}${r.slug?'<button class="vw">PAGE</button>':''}<button class="ed">EDIT</button><button class="del">DELETE</button></div>`;
+  const pv=d.querySelector('.pv');if(pv)pv.onclick=()=>demoToggle(r,pv);
   const vw=d.querySelector('.vw');if(vw)vw.onclick=()=>{$('#bo').classList.remove('on');goItem(tab==='packs'?'pack':'beat',r.slug);scrollTo(0,0)};
   d.querySelector('.ed').onclick=()=>{editing=r;boRender();scrollTo(0,0)};
   d.querySelector('.del').onclick=()=>boDelete(r);
   bl.appendChild(d);
  });
+ if(rows.length){
+  dragSort(bl,async()=>{const ids=[...bl.querySelectorAll('.bi[data-id]')].map(x=>x.dataset.id),byId=Object.fromEntries(rows.map(r=>[String(r.id),r]));let n=0,bad=0;
+   for(let i=0;i<ids.length;i++){const r=byId[ids[i]];if(r&&Number(r.sort_order)!==i+1){const {error:e}=await sb.from(F.table).update({sort_order:i+1}).eq('id',r.id);if(e)bad++;else{r.sort_order=i+1;n++}}}
+   toast(bad?'Could not save the whole order':n?'Order saved. The front page uses it now.':'Order unchanged')});
+  if(tab==='beats'){const g=document.createElement('div');g.className='bi gp';g.innerHTML='<div><b>PRICE FOR ALL BEATS</b><span>Sets every beat to one price and updates the slide-out promo on the front page.</span></div><div class="acts"><input type="number" step="0.01" min="0" id="gp_v" value="'+esc(Number(promo.promo_price)||10)+'"><button id="gp_go">APPLY TO ALL</button></div>';bl.insertBefore(g,bl.firstChild);
+   g.querySelector('#gp_go').onclick=async()=>{const v=parseFloat($('#gp_v').value);if(!(v>=0)){toast('Enter a price');return}
+    if(!(await askConfirm('SET EVERY BEAT TO '+money(v)+'?','This changes the price on all '+rows.length+' beats and the slide-out promo on the front page.')))return;
+    const a=await sb.from('beats').update({price:v}).not('id','is',null),b=await sb.from('site_settings').update({promo_price:v}).eq('id',1);
+    if(a.error||b.error){toast('Could not save: '+((a.error||b.error).message||'error'));return}
+    promo.promo_price=v;toast('Every beat is now '+money(v));boRender()}}
+ }
 }
+/* back office: short demo play + drag to reorder */
+let demoA=null,demoB=null;
+function demoStop(){if(demoA){try{demoA.pause()}catch(e){}}if(demoB){demoB.classList.remove('on');demoB.innerHTML='&#9654; DEMO'}demoA=null;demoB=null}
+function demoToggle(r,btn){const same=demoB===btn;demoStop();if(same)return;
+ const a=new Audio(pub(r.preview_path));demoA=a;demoB=btn;btn.classList.add('on');btn.innerHTML='&#9632; STOP';
+ a.play().catch(()=>{toast('Could not play this preview');demoStop()});
+ a.ontimeupdate=()=>{if(demoA===a){if(a.currentTime>=20)demoStop();else if(a.currentTime>17)a.volume=Math.max(0,(20-a.currentTime)/3)}};a.onended=()=>{if(demoA===a)demoStop()}}
+function dragSort(list,onDone){list.querySelectorAll('.bi[data-id] .dh').forEach(h=>{h.onpointerdown=e=>{e.preventDefault();const row=h.closest('.bi');row.classList.add('drag');try{h.setPointerCapture(e.pointerId)}catch(x){}let done=false;
+ const mv=ev=>{const t=document.elementFromPoint(ev.clientX,ev.clientY),o=t&&t.closest&&t.closest('.bi[data-id]');if(o&&o!==row&&o.parentNode===list){const r=o.getBoundingClientRect();list.insertBefore(row,ev.clientY<r.top+r.height/2?o:o.nextSibling)}};
+ const up=()=>{if(done)return;done=true;['pointermove'].forEach(k=>{h.removeEventListener(k,mv);window.removeEventListener(k,mv)});['pointerup','pointercancel','mouseup','touchend','blur'].forEach(k=>{h.removeEventListener(k,up);window.removeEventListener(k,up)});row.classList.remove('drag');onDone()};
+ h.addEventListener('pointermove',mv);window.addEventListener('pointermove',mv);['pointerup','pointercancel','mouseup','touchend','blur'].forEach(k=>{h.addEventListener(k,up);window.addEventListener(k,up)})}})}
 async function bundlesRender(){
  const [bl,pk,bn]=await Promise.all([
   sb.from('beats').select('id,title').order('created_at',{ascending:false}),
