@@ -1,0 +1,230 @@
+/* MZPRD MPC Beat Video Maker (back office tab). Pick a beat from the library, the tool listens to it and "plays" an Akai MPC60 II:
+   the pads push in and get darker on every kick, snare, hat and chop, the screen shows the beat name on a green LCD, the REC and PLAY lights come on.
+   White background. Exports 16:9 (1920x1080) and 9:16 (1080x1920) MP4s in the browser, plus a YouTube package. */
+(function(){
+'use strict';
+const $q=s=>root.querySelector(s);let root=null,mounted=false;
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mmss=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const KEY='mzprd_mpc_v1',LEAD=.5,TAIL=1.4;
+const loadS=f=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=new URL(f,document.baseURI).href;s.onload=ok;s.onerror=()=>no(new Error(f));document.head.appendChild(s)});
+const loadImg=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=new URL(src,document.baseURI).href});
+const FONT_LINK='https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;600;700&family=VT323&display=swap';
+
+/* where things are on the photo (1024 x 922) */
+const PH={W:1024,H:922,cx:512,cy:455,pad:{x0:252,y0:443,w:54.5,h:54.5,px:64.7,py:63.8},lcd:{x:603,y:230,w:196,h:54},
+ leds:{rec:[690,675],over:[722,675],play:[798,675]},plate:'#939aa0'};
+/* pad order on the MPC60 II, top row first */
+const PAD_NAMES=['PERC 1','PERC 2','PERC 3','PERC 4','RIDE 1','RIDE 2','CRASH 1','CRASH 2','TOM 1','TOM 2','TOM 3','TOM 4','HIHAT','SNARE 1','SNARE 2','BASS'];
+
+let ST=null,S=null,beats=[],AC=null,IMG=null,PV={playing:false,raf:0,src:null,t0:0},busy=false;
+function defaults(){return{kits:{},beat:null,artist:'',fmt:'h',len:0,text:false,lcd:'',yt:{mode:'straight',when:''}}}
+function load(){try{const j=JSON.parse(localStorage.getItem(KEY)||'null');if(j)return Object.assign(defaults(),j)}catch(e){}return defaults()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}}
+const ctxA=()=>{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC};
+const pubU=p=>typeof pub==='function'?pub(p):p;
+
+/* ---------- listen to the beat: kicks, snares, hats and chops become pad hits ---------- */
+async function band(mono,sr,lo,hi){const ctx=new OfflineAudioContext(1,mono.length,sr),b=ctx.createBuffer(1,mono.length,sr);b.copyToChannel(mono,0);const s=ctx.createBufferSource();s.buffer=b;let n=s;
+ if(lo){const f=ctx.createBiquadFilter();f.type='highpass';f.frequency.value=lo;f.Q.value=.7;n.connect(f);n=f}
+ if(hi){const f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=hi;f.Q.value=.7;n.connect(f);n=f}
+ n.connect(ctx.destination);s.start();return (await ctx.startRendering()).getChannelData(0)}
+function envOf(x,hop){const n=Math.floor(x.length/hop),e=new Float32Array(n);for(let k=0;k<n;k++){let s=0;for(let i=k*hop;i<k*hop+hop*2&&i<x.length;i+=2)s+=x[i]*x[i];e[k]=Math.sqrt(s/hop)}return e}
+function onsets(x,sr,o){const hop=256,e=envOf(x,hop),n=e.length,sorted=[...e].sort((a,b)=>a-b),p95=sorted[Math.floor(n*.95)]||1e-6,fl=o.floor*p95,lg=new Float32Array(n);
+ for(let k=0;k<n;k++)lg[k]=Math.log(e[k]+p95*.02);
+ const d=new Float32Array(n);for(let k=3;k<n;k++)d[k]=Math.max(0,lg[k]-Math.min(lg[k-2],lg[k-3]));
+ const W=Math.round(1.6*sr/hop),out=[];let last=-9;
+ for(let k=3;k<n-2;k++){if(d[k]<d[k-1]||d[k]<d[k+1]||e[k+1]<fl)continue;let s=0,s2=0,c=0;for(let j=Math.max(3,k-W);j<Math.min(n,k+W);j+=2){s+=d[j];s2+=d[j]*d[j];c++}
+  const m=s/c,sd=Math.sqrt(Math.max(0,s2/c-m*m));if(d[k]<m+o.c*sd+o.min)continue;const t=(k+1)*hop/sr;if(t-last<o.gap)continue;last=t;out.push({t,v:clamp(e[k+1]/(p95*1.15),.35,1),k:k+1})}
+ return out}
+function zcr(x,sr,t){const a=Math.floor(t*sr),b=Math.min(x.length,a+Math.floor(.04*sr));let z=0;for(let i=a+1;i<b;i++)if((x[i]>=0)!==(x[i-1]>=0))z++;return z/Math.max(1,b-a)*sr}
+async function analyze(buf){const sr=buf.sampleRate,mono=new Float32Array(buf.length),L=buf.getChannelData(0),R=buf.numberOfChannels>1?buf.getChannelData(1):L;for(let i=0;i<mono.length;i++)mono[i]=(L[i]+R[i])*.5;
+ const [kk,sn,ht,md,hi]=await Promise.all([band(mono,sr,0,150),band(mono,sr,1400,5200),band(mono,sr,7500,0),band(mono,sr,280,1200),band(mono,sr,2400,7200)]);
+ const raw={kick:onsets(kk,sr,{floor:.22,c:.9,min:.15,gap:.15}),snare:onsets(sn,sr,{floor:.3,c:.9,min:.15,gap:.22}),hat:onsets(ht,sr,{floor:.28,c:1,min:.12,gap:.07})};
+ if(raw.hat.length>buf.duration*7)raw.hat=raw.hat.filter(h=>h.v>.5);
+ const mids=onsets(md,sr,{floor:.4,c:1.7,min:.2,gap:.14}).filter(h=>!raw.kick.some(q=>Math.abs(q.t-h.t)<.03)),his=onsets(hi,sr,{floor:.45,c:1.9,min:.2,gap:.16}).filter(h=>!raw.snare.some(q=>Math.abs(q.t-h.t)<.04));
+ const q=(arr,i)=>{const s=[...arr].sort((a,b)=>a-b);return s[Math.floor(i*(s.length-1))]||0};
+ const zm=mids.map(h=>zcr(md,sr,h.t)),zh=his.map(h=>zcr(hi,sr,h.t));const bin=(z,arr)=>{const a=q(arr,.25),b=q(arr,.5),c=q(arr,.75);return z<a?0:z<b?1:z<c?2:3};
+ raw.mid=mids.map((h,i)=>({t:h.t,v:h.v,bin:bin(zm[i],zm),weak:h.v<.42,i}));raw.hi=his.map((h,i)=>({t:h.t,v:h.v*.9,bin:bin(zh[i],zh)}));return raw}
+/* each beat gets its own pad layout (a "kit"), picked from the beat id so it is the same every time you play or render it */
+const KITS=[
+ {n:'CLASSIC',kick:15,sn:[13,14],hat:12,mid:[11,10,9,8],hi:[4,5,6,7],weak:[0,1,2,3]},
+ {n:'SNARE 2 LEAD',kick:15,sn:[14,13],hat:12,mid:[8,9,10,11],hi:[7,6,5,4],weak:[3,2,1,0]},
+ {n:'TOM KICK',kick:11,sn:[13,14],hat:12,mid:[10,9,8,3],hi:[5,6,7,15],weak:[0,1,2,4]},
+ {n:'RIDE HATS',kick:15,sn:[13,14],hat:4,mid:[11,10,9,8],hi:[5,6,7,12],weak:[0,1,2,3]},
+ {n:'TOM SNARES',kick:15,sn:[9,10],hat:12,mid:[11,8,13,14],hi:[4,5,6,7],weak:[0,1,2,3]},
+ {n:'PERC GROOVE',kick:8,sn:[14,13],hat:5,mid:[3,2,1,0],hi:[7,6,4,12],weak:[9,10,11,15]}];
+const hashStr=s=>{let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+const kitFor=id=>hashStr('mpc'+id)%KITS.length;
+function layout(raw,kit){const K=KITS[kit],hits=[];raw.kick.forEach(h=>hits.push({t:h.t,pad:K.kick,v:h.v}));let sc=0;raw.snare.forEach(h=>hits.push({t:h.t,pad:h.v>.62?K.sn[0]:K.sn[(sc++%2)?1:0],v:h.v}));raw.hat.forEach(h=>hits.push({t:h.t,pad:K.hat,v:h.v*.9}));
+ raw.mid.forEach(h=>hits.push({t:h.t,pad:h.weak?K.weak[h.i%4]:K.mid[h.bin],v:h.v}));raw.hi.forEach(h=>hits.push({t:h.t,pad:K.hi[h.bin],v:h.v}));
+ hits.sort((a,b)=>a.t-b.t);const per=PAD_NAMES.map(()=>[]);hits.forEach(h=>per[h.pad].push(h));return{hits,per}}
+function pressAt(S,pad,T){const a=S.per[pad];if(!a||!a.length)return 0;let lo=0,hi=a.length-1,r=-1;const tt=T+.012;while(lo<=hi){const m=(lo+hi)>>1;if(a[m].t<=tt){r=m;lo=m+1}else hi=m-1}if(r<0)return 0;const dt=tt-a[r].t;if(dt>.5)return 0;const k=.6+.4*a[r].v;return k*(dt<.03?dt/.03:Math.exp(-(dt-.03)/.085))}
+
+/* ---------- drawing (a pure function of time, so preview and export match) ---------- */
+function fitFont(c,txt,font,max,w){let s=max;c.font=font(s);while(s>8&&c.measureText(txt).width>w){s-=1;c.font=font(s)}return s}
+function frame(c,W,H,fmt,T,S){
+ const v=fmt==='v',sc=v?.87*W/848:.6*W/848,cx=W/2,cy=v?H*.5:H*.495,ox=cx-PH.cx*sc,oy=cy-PH.cy*sc;
+ c.save();c.fillStyle='#fff';c.fillRect(0,0,W,H);c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+ c.drawImage(IMG,ox,oy,PH.W*sc,PH.H*sc);
+ c.save();c.translate(ox,oy);c.scale(sc,sc);
+ const P=PH.pad,lt=T-LEAD;
+ for(let i=0;i<16;i++){const col=i%4,row=Math.floor(i/4),x=P.x0+col*P.px,y=P.y0+row*P.py,p=lt>=-.02?pressAt(S,i,lt):0;
+  c.fillStyle=PH.plate;c.fillRect(x-3,y-3,P.w+6,P.h+6);
+  const k=1-.12*p,w=P.w*k,h=P.h*k,px=x+(P.w-w)/2,py=y+(P.h-h)/2+1.6*p;
+  c.save();c.beginPath();c.rect(px,py,w,h);c.clip();c.drawImage(IMG,x,y,P.w,P.h,px,py,w,h);
+  c.fillStyle='rgba(0,0,0,'+(.58*p).toFixed(3)+')';c.fillRect(px,py,w,h);
+  if(p>0){c.fillStyle='rgba(0,0,0,'+(.3*p).toFixed(3)+')';c.fillRect(px,py,w,2.2);c.fillRect(px,py,2.2,h)}c.restore();
+  if(p>0){c.strokeStyle='rgba(20,20,22,'+(.45*p).toFixed(3)+')';c.lineWidth=1.2;c.strokeRect(px+.6,py+.6,w-1.2,h-1.2)}}
+ /* the screen: green and on */
+ const L=PH.lcd;c.save();c.beginPath();c.rect(L.x,L.y,L.w,L.h);c.clip();
+ const g=c.createLinearGradient(0,L.y,0,L.y+L.h);g.addColorStop(0,'#c4ee93');g.addColorStop(1,'#93cf6c');c.fillStyle=g;c.fillRect(L.x,L.y,L.w,L.h);
+ const gl=c.createRadialGradient(L.x+L.w/2,L.y+L.h/2,6,L.x+L.w/2,L.y+L.h/2,L.w*.62);gl.addColorStop(0,'rgba(255,255,220,.35)');gl.addColorStop(1,'rgba(255,255,220,0)');c.fillStyle=gl;c.fillRect(L.x,L.y,L.w,L.h);
+ c.fillStyle='#1c3a12';c.textBaseline='middle';c.textAlign='left';
+ const title=(S.lcd||S.title||'BEAT').toUpperCase(),f1=s=>s+"px VT323,monospace",sz=fitFont(c,title,f1,26,L.w-16);c.font=f1(sz);c.fillText(title,L.x+8,L.y+16);
+ const run=T>=LEAD&&T<S.total-TAIL,tl=clamp(T-LEAD,0,S.dur);c.font=f1(18);c.fillText(('BPM '+(S.bpm||'--')+'   KEY '+(S.key||'--')).toUpperCase(),L.x+8,L.y+33);
+ c.textAlign='right';c.fillText((run?'PLAY ':'READY ')+mmss(tl),L.x+L.w-8,L.y+33);
+ c.fillStyle='rgba(28,58,18,.25)';c.fillRect(L.x+8,L.y+44,L.w-16,3);c.fillStyle='#1c3a12';c.fillRect(L.x+8,L.y+44,(L.w-16)*clamp(tl/Math.max(1,S.dur),0,1),3);
+ c.fillStyle='rgba(20,60,10,.07)';for(let y=L.y;y<L.y+L.h;y+=2)c.fillRect(L.x,y,L.w,1);for(let x=L.x;x<L.x+L.w;x+=2)c.fillRect(x,L.y,1,L.h);
+ c.restore();c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=1;c.strokeRect(L.x+.5,L.y+.5,L.w-1,L.h-1);
+ /* lights */
+ const led=(x,y,on,col)=>{c.fillStyle=on?col:'rgba(40,10,10,.9)';c.fillRect(x-4,y-2,8,3.4);if(on){const r=c.createRadialGradient(x,y,1,x,y,14);r.addColorStop(0,'rgba(255,60,40,.75)');r.addColorStop(1,'rgba(255,60,40,0)');c.fillStyle=r;c.fillRect(x-16,y-16,32,32)}};
+ const beat=S.bpm?60/S.bpm:.65,ph=((lt%(beat*2))+beat*2)%(beat*2);
+ led(PH.leds.play[0],PH.leds.play[1],run,'#ff3a24');led(PH.leds.rec[0],PH.leds.rec[1],run,'#ff3a24');led(PH.leds.over[0],PH.leds.over[1],run&&ph<beat*.5,'#ff3a24');
+ c.restore();
+ if(S.text)text(c,W,H,v,S);
+ c.restore()}
+function text(c,W,H,v,S){const ink='#111';c.save();c.fillStyle=ink;c.textBaseline='alphabetic';
+ if(v){c.textAlign='center';const t=(S.title||'').toUpperCase(),f=s=>'700 '+s+'px Anton, Oswald, sans-serif',s=fitFont(c,t,f,150,W*.86);c.font=f(s);c.fillText(t,W/2,H*.2);c.font='600 44px Oswald, sans-serif';c.fillStyle='#666';c.fillText(([S.bpm?S.bpm+' BPM':'',S.key||'','PROD. MZPRD'].filter(Boolean)).join('   /   '),W/2,H*.2+70);
+  c.font='600 40px Oswald, sans-serif';c.fillStyle=ink;c.fillText('MZPRD.COM',W/2,H*.9)}
+ else{c.textAlign='left';const t=(S.title||'').toUpperCase(),w=W*.17,f=s=>'700 '+s+'px Anton, Oswald, sans-serif';let s=fitFont(c,t,f,110,w);c.font=f(s);c.fillText(t,W*.03,H*.5);c.font='600 28px Oswald, sans-serif';c.fillStyle='#666';c.fillText(([S.bpm?S.bpm+' BPM':'',S.key||''].filter(Boolean)).join('  /  '),W*.03,H*.5+44);c.textAlign='right';c.font='600 26px Oswald, sans-serif';c.fillStyle=ink;c.fillText('MZPRD.COM',W*.97,H*.94)}
+ c.restore()}
+
+/* ---------- UI ---------- */
+function css(){if(document.getElementById('mpcCss'))return;const s=document.createElement('style');s.id='mpcCss';s.textContent=`#mpcmk{display:none}#mpcmk.on{display:block}
+#mpcmk .mg{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,400px);gap:16px;align-items:start}@media(max-width:1000px){#mpcmk .mg{grid-template-columns:1fr}}
+#mpcmk .pn{background:#0c0c0f;border:1px solid #2a2a2e;padding:14px;margin-bottom:16px}#mpcmk h3{font:700 16px Montserrat;letter-spacing:.14em;color:#fff;margin:0}
+#mpcmk h4{font:700 11px Montserrat;letter-spacing:.26em;color:var(--gold);margin:16px 0 8px}
+#mpcmk label{display:block;font:600 10px Montserrat;letter-spacing:.2em;color:#8e8e94;margin:8px 0 4px}
+#mpcmk input[type=text],#mpcmk select,#mpcmk textarea{width:100%;background:#050506;border:1.5px solid #34343a;color:#fff;padding:8px;font:500 13px Montserrat}
+#mpcmk .btn{background:transparent;border:1.5px solid #4a4a50;color:#fff;font:600 10px Montserrat;letter-spacing:.16em;padding:10px 8px;cursor:pointer}#mpcmk .btn:hover{border-color:#fff}#mpcmk .btn.on{border-color:var(--red);background:rgba(224,36,47,.15)}
+#mpcmk .btn.big{background:var(--red);border-color:var(--red);font:700 13px Montserrat;letter-spacing:.24em;padding:15px;width:100%}#mpcmk .btn:disabled{opacity:.5}
+#mpcmk .two{display:grid;grid-template-columns:1fr 1fr;gap:6px}#mpcmk .chk{display:flex;gap:8px;align-items:center;letter-spacing:.1em;margin:6px 0}#mpcmk .chk input{width:auto}
+#mpcmk .box{width:100%;background:#fff;border:1px solid #2a2a2e;display:block;margin:0 auto}#mpcmk .ctl{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+#mpcmk .ctl input[type=range]{flex:1;min-width:140px;accent-color:var(--red)}#mpcmk .time{font:600 12px Montserrat;color:#c9c9ce;min-width:92px;text-align:right}
+#mpcmk .msg{font:500 12px/1.5 Montserrat;color:#a9a9ae;margin-top:8px;min-height:16px}#mpcmk .bar{height:6px;background:#1b1b20;margin-top:8px}#mpcmk .bar b{display:block;height:100%;width:0;background:var(--red)}
+#mpcmk .it{display:flex;gap:10px;align-items:center;padding:9px;border-bottom:1px solid #1d1d21;font:600 12px Montserrat;color:#d9d9dc}#mpcmk .it b{flex:1;min-width:0;font-weight:600;white-space:normal}#mpcmk .it button{background:transparent;border:1px solid #4a4a50;color:#fff;font:600 9px Montserrat;letter-spacing:.12em;padding:6px 8px;cursor:pointer}
+#mpcmk .sec{border:1px solid #2a2a2e;margin:10px 0;background:#08080a}#mpcmk .sec>summary{cursor:pointer;padding:12px;font:700 11px Montserrat;letter-spacing:.22em;color:var(--gold);list-style:none}#mpcmk .sec .in{padding:0 12px 12px}`;document.head.appendChild(s)}
+function html(){return`<div class="mg"><div>
+ <div class="pn"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3>MPC BEAT VIDEO</h3><div style="display:flex;gap:6px"><button class="btn" id="mFh">16:9</button><button class="btn" id="mFv">9:16</button></div></div>
+  <div style="background:#fff;padding:0;margin-top:10px;display:flex;justify-content:center"><canvas class="box" id="mCv" width="1920" height="1080"></canvas></div>
+  <div class="ctl"><button class="btn" id="mPlay">PLAY</button><input type="range" id="mScrub" min="0" max="1000" value="0"><span class="time" id="mTime">0:00 / 0:00</span></div>
+  <div class="msg" id="mMsg">Pick a beat on the right. The tool listens to it and plays the MPC for you.</div>
+  <div class="two" style="margin-top:8px"><button class="btn big" id="mRh">RENDER 16:9</button><button class="btn big" id="mRv">RENDER 9:16</button></div>
+  <button class="btn" id="mRb" style="width:100%;margin-top:6px">RENDER BOTH (ONE AFTER THE OTHER)</button><div class="bar"><b id="mProg"></b></div><div class="msg" id="mRMsg"></div></div>
+ <details class="pn sec" id="mYTd" style="padding:0"><summary>YOUTUBE PACKAGE <small style="color:#8e8e94;font-weight:500;letter-spacing:.06em">titles, description with the beat link, tags</small></summary><div class="in" id="mYT"></div></details>
+</div><div><div class="pn">
+ <h3>1. PICK THE BEAT</h3><label>BEAT</label><select id="mBeat"></select>
+ <div id="mInfo" class="msg"></div>
+ <label>SOUNDS LIKE (ARTIST, OPTIONAL: USED IN THE TITLES)</label><input type="text" id="mArt" placeholder="e.g. Lil Baby">
+ <label>SCREEN TEXT (LEAVE EMPTY TO USE THE BEAT NAME)</label><input type="text" id="mLcd" maxlength="40">
+ <h3 style="margin-top:16px">2. LOOK</h3>
+ <label class="chk"><input type="checkbox" id="mTxt"> ALSO SHOW THE TITLE AS TEXT ON THE WHITE (OFF = CLEAN, ONLY THE MPC SCREEN)</label>
+ <label>PAD LAYOUT (EACH BEAT GETS ITS OWN BY DEFAULT, THE SAME EVERY TIME)</label><select id="mKit"><option value="">Automatic for this beat</option>${KITS.map((k,i)=>`<option value="${i}">${k.n}</option>`).join('')}</select>
+ <label>HOW MUCH OF THE BEAT</label><select id="mLen"><option value="0">The whole preview</option><option value="15">First 15 seconds</option><option value="30">First 30 seconds</option><option value="45">First 45 seconds</option><option value="60">First 60 seconds</option></select>
+ <div class="msg">The pads push in and get darker on every hit. The kick is the bottom right pad (BASS), snares are SNARE 1 and 2, hats are HIHAT, and chops and melody hits land on the toms, rides, crashes and percs.</div>
+ <details class="sec" style="margin-top:10px"><summary>PAD MAP: WHAT THE TOOL HEARD</summary><div class="in msg" id="mMap"></div></details>
+</div></div></div>`}
+
+function applyKit(){const id=ST.beat,k=ST.kits&&ST.kits[id]!=null&&ST.kits[id]!==''?+ST.kits[id]:kitFor(id);S.kit=k;const L=layout(S.raw,k);S.hits=L.hits;S.per=L.per;
+ const tot=S.per.map((x,i)=>x.length?PAD_NAMES[i]+' '+x.length:'').filter(Boolean);const m=root&&$q('#mMap');if(m)m.textContent='Kit: '+KITS[k].n+'. '+(tot.join(' / ')||'Nothing was found.');const ks=root&&$q('#mKit');if(ks)ks.value=(ST.kits&&ST.kits[id]!=null&&ST.kits[id]!=='')?String(ST.kits[id]):''}
+function setSong(){const i=beats.find(b=>String(b.id)===String(ST.beat));S.title=i?i.title:'';S.bpm=i?Number(i.bpm)||0:0;S.key=i?(i.musical_key||''):'';S.lcd=ST.lcd.trim();S.text=!!ST.text}
+async function pick(id){ST.beat=id;save();stopPlay();const b=beats.find(x=>String(x.id)===String(id));if(!b)return;
+ S={title:b.title,bpm:Number(b.bpm)||0,key:b.musical_key||'',lcd:ST.lcd.trim(),text:!!ST.text,buf:null,hits:[],per:PAD_NAMES.map(()=>[]),dur:0,total:LEAD+TAIL+1};drawNow();
+ $q('#mMsg').textContent='Loading "'+b.title+'" and listening for the hits...';$q('#mInfo').textContent='';
+ try{const r=await fetch(pubU(b.preview_path));if(!r.ok)throw new Error('The preview file did not load ('+r.status+').');const buf=await ctxA().decodeAudioData(await r.arrayBuffer());
+  if(String(ST.beat)!==String(id))return;S.raw=await analyze(buf);S.buf=buf;applyKit();const a={hits:S.hits};S.dur=ST.len?Math.min(buf.duration,ST.len):buf.duration;S.total=LEAD+S.dur+TAIL;
+  $q('#mInfo').textContent=mmss(buf.duration)+' preview / '+a.hits.length+' pad hits found';
+    $q('#mMsg').textContent='Ready. Press PLAY to watch it, or render the video.';ytRender();drawNow()}
+ catch(e){$q('#mMsg').textContent='Could not load this beat: '+(e&&e.message||e)}}
+function size(){const v=ST.fmt==='v',cv=$q('#mCv');cv.width=v?1080:1920;cv.height=v?1920:1080;cv.style.maxWidth=v?'360px':'100%';$q('#mFh').classList.toggle('on',!v);$q('#mFv').classList.toggle('on',v)}
+function drawNow(){if(!S||!IMG)return;const cv=$q('#mCv'),T=PV.playing?(AC.currentTime-PV.t0):parseFloat($q('#mScrub').value)/1000*S.total;frame(cv.getContext('2d'),cv.width,cv.height,ST.fmt,T,S);$q('#mTime').textContent=mmss(clamp(T,0,S.total))+' / '+mmss(S.total)}
+function stopPlay(){PV.playing=false;cancelAnimationFrame(PV.raf);try{PV.src&&PV.src.stop()}catch(e){}PV.src=null;if(root)$q('#mPlay').textContent='PLAY'}
+async function play(){if(PV.playing){stopPlay();drawNow();return}if(!S||!S.buf){$q('#mMsg').textContent='Pick a beat first.';return}
+ const a=ctxA();await Promise.race([a.resume(),new Promise(r=>setTimeout(r,500))]);const src=a.createBufferSource();src.buffer=S.buf;const g=a.createGain();src.connect(g);g.connect(a.destination);
+ let from=parseFloat($q('#mScrub').value)/1000*S.total;if(from>=S.total-.3)from=0;const start=a.currentTime+.06;PV.t0=start-from;const off=from-LEAD,when=off<0?start-off:start;
+ g.gain.setValueAtTime(1,start);g.gain.setValueAtTime(1,start+Math.max(0,S.dur-(off<0?0:off)-1.2));g.gain.linearRampToValueAtTime(.0001,start+Math.max(.1,S.dur-(off<0?0:off)));
+ src.start(when,Math.max(0,off),Math.max(.1,S.dur-Math.max(0,off)));PV.src=src;PV.playing=true;$q('#mPlay').textContent='STOP';
+ const loop=()=>{if(!PV.playing)return;const T=a.currentTime-PV.t0;if(T>=S.total){stopPlay();return}const cv=$q('#mCv');frame(cv.getContext('2d'),cv.width,cv.height,ST.fmt,Math.max(0,T),S);$q('#mScrub').value=String(Math.round(T/S.total*1000));$q('#mTime').textContent=mmss(T)+' / '+mmss(S.total);PV.raf=requestAnimationFrame(loop)};PV.raf=requestAnimationFrame(loop)}
+
+/* ---------- MP4 export ---------- */
+const mcx=new MessageChannel(),ysq=[];mcx.port1.onmessage=()=>{const f=ysq.shift();if(f)f()};const yieldNow=()=>new Promise(r=>{ysq.push(r);mcx.port2.postMessage(0)});
+const dlf=(blob,name)=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),8000)};
+async function renderOne(fmt){
+ const rm=t=>{$q('#mRMsg').textContent=t};
+ if(!(window.VideoEncoder&&window.AudioEncoder&&window.VideoFrame&&window.AudioData&&window.OfflineAudioContext)){rm('This browser cannot render video. Use Chrome or Edge.');return false}
+ if(!S||!S.buf){rm('Pick a beat first.');return false}
+ let venc,aenc,err=null;
+ try{await loadS('mp4-muxer.js').catch(()=>{});
+  const OW=fmt==='v'?1080:1920,OH=fmt==='v'?1920:1080,FPS=30,total=S.total,N=Math.ceil(total*FPS),out=document.createElement('canvas');out.width=OW;out.height=OH;const oc=out.getContext('2d');
+  const pickV=async()=>{for(const c of [{codec:'avc1.640028',mux:'avc'},{codec:'avc1.4d0028',mux:'avc'},{codec:'avc1.42E028',mux:'avc'},{codec:'vp09.00.40.08',mux:'vp9'}]){const cfg={codec:c.codec,width:OW,height:OH,bitrate:9e6,framerate:FPS};try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return{...c,cfg}}catch(e){}}return null};
+  const pickA=async()=>{for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){try{const r=await AudioEncoder.isConfigSupported({codec:c.codec,sampleRate:48000,numberOfChannels:2,bitrate:192000});if(r&&r.supported)return c}catch(e){}}return null};
+  const vc=await pickV(),ac=await pickA();if(!vc||!ac)throw new Error('no video codec available');
+  /* the audio: lead-in, the beat, a fade out */
+  rm('Building the audio...');const oa=new OfflineAudioContext(2,Math.ceil(total*48000),48000),src=oa.createBufferSource();src.buffer=S.buf;const g=oa.createGain();src.connect(g);g.connect(oa.destination);
+  g.gain.setValueAtTime(1,LEAD);g.gain.setValueAtTime(1,LEAD+Math.max(0,S.dur-1.3));g.gain.linearRampToValueAtTime(.0001,LEAD+S.dur);src.start(LEAD,0,S.dur);const ab=await oa.startRendering(),L0=ab.getChannelData(0),R0=ab.getChannelData(1);
+  const target=new Mp4Muxer.ArrayBufferTarget(),muxer=new Mp4Muxer.Muxer({target,video:{codec:vc.mux,width:OW,height:OH},audio:{codec:ac.mux,numberOfChannels:2,sampleRate:48000},fastStart:'in-memory'});
+  venc=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>{err=e}});venc.configure(vc.cfg);aenc=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>{err=e}});aenc.configure({codec:ac.codec,sampleRate:48000,numberOfChannels:2,bitrate:192000});
+  for(let o=0;o<L0.length;o+=4800){const m=Math.min(4800,L0.length-o),b=new Float32Array(m*2);b.set(L0.subarray(o,o+m),0);b.set(R0.subarray(o,o+m),m);const ad=new AudioData({format:'f32-planar',sampleRate:48000,numberOfFrames:m,numberOfChannels:2,timestamp:Math.round(o/48000*1e6),data:b});aenc.encode(ad);ad.close()}
+  const t0=performance.now();
+  for(let f=0;f<N;f++){if(err)throw err;frame(oc,OW,OH,fmt,Math.min(total-.001,f/FPS),S);const vf=new VideoFrame(out,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});venc.encode(vf,{keyFrame:f%90===0});vf.close();
+   while(venc.encodeQueueSize>6){await Promise.race([new Promise(r=>venc.addEventListener('dequeue',r,{once:true})),new Promise(r=>setTimeout(r,40))]);if(err)throw err}
+   if(f%8===0){const p=Math.round(f/N*100),el=(performance.now()-t0)/1000,eta=f?Math.round(el/f*(N-f)):0;$q('#mProg').style.width=p+'%';rm('Rendering '+(fmt==='v'?'9:16':'16:9')+' '+p+'%  (about '+mmss(eta)+' left). You can switch tabs, it keeps going.');await yieldNow()}}
+  await venc.flush();await aenc.flush();if(err)throw err;muxer.finalize();const blob=new Blob([target.buffer],{type:'video/mp4'});
+  $q('#mProg').style.width='100%';rm('Done: '+(blob.size/1048576).toFixed(0)+' MB, '+mmss(total)+' long. Downloading.');dlf(blob,(S.title||'beat').replace(/[^\w -]+/g,'')+' - MPC '+(fmt==='v'?'9x16':'16x9')+'.mp4');return true
+ }catch(e){console.warn(e);rm('Render failed: '+((e&&e.message)||e));return false}
+ finally{try{venc&&venc.close()}catch(e){}try{aenc&&aenc.close()}catch(e){}}}
+async function render(list){if(busy)return;busy=true;stopPlay();const bar=document.querySelector('.bh [data-t=mpc]');['#mRh','#mRv','#mRb'].forEach(k=>$q(k).disabled=true);
+ try{for(const f of list){if(!(await renderOne(f)))break}}finally{busy=false;['#mRh','#mRv','#mRb'].forEach(k=>$q(k).disabled=false);if(bar)bar.textContent='MPC';drawNow();ytOpen()}}
+function ytOpen(){const d=$q('#mYTd');if(d&&S&&S.buf){d.open=true}}
+
+/* ---------- YouTube package ---------- */
+const slugify=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+function ytBuild(){const b=beats.find(x=>String(x.id)===String(ST.beat));if(!b)return null;const T=b.title,art=ST.artist.trim(),bpm=Number(b.bpm)||0,key=b.musical_key||'',link='https://mzprd.com/beat/'+(b.slug||slugify(T))+'/',pre=ST.yt.mode==='premiere';
+ const tn=art?art+' Type Beat':'Type Beat';
+ const titles=[`${tn} - "${T}" (MPC60 Live Pad Performance)`,`${art?art+' x ':''}Hard Boom Bap Type Beat "${T}" | Prod. MZPRD`,`I made this beat on the MPC60: "${T}" (${bpm?bpm+' BPM ':''}${key})`,`"${T}" - ${tn} 2026 | MPC60 II Beat Making`,`Watch the pads: "${T}" ${tn} (Prod. MZPRD)`,`[FREE FOR PROFIT?] No: "${T}" ${tn} - Buy it at mzprd.com`.replace('[FREE FOR PROFIT?] No: ','')].map(t=>t.slice(0,100));
+ const tags=[art?art.toLowerCase()+' type beat':'',art?art.toLowerCase()+' instrumental':'','mpc60','akai mpc60','mpc beat making','mpc live pad performance','boom bap type beat','hip hop instrumental','rap beat','type beat','beat for sale','buy beats','mzprd','meztheprod',T.toLowerCase(),bpm?bpm+' bpm':'',key?key.toLowerCase()+' beat':''].filter(Boolean);let tg='';tags.forEach(t=>{if((tg+t).length<480)tg+=(tg?', ':'')+t});
+ const desc=[`${pre?'Premiering: ':''}"${T}" ${art?'('+art+' type beat) ':''}played live on the Akai MPC60 II.${bpm||key?' '+[bpm?bpm+' BPM':'',key].filter(Boolean).join(' / '):''}`,'',`Buy / lease this beat: ${link}`,'More beats and sample packs: https://mzprd.com','','Watch the pads: every hit you see is a kick, snare, hat or chop from the beat.','','All beats are original productions by MZPRD (Meztheprod).','',['#typebeat','#mpc60','#hiphop','#beatmaking','#boombap'].join(' ')].join('\n');
+ return{titles,desc,tags:tg,pinned:`Which pad hit hardest? Tell me below. Buy "${T}": ${link}`}}
+function ytRender(){const el=$q('#mYT');if(!el)return;const O=ytBuild();if(!O){el.innerHTML='<div class="msg">Pick a beat first.</div>';return}
+ const cc=(n,max)=>`<span style="font:600 10px Montserrat;color:${n>max?'#ff5c5c':'#7ad47a'}">${n}/${max}</span>`;
+ el.innerHTML=`<div class="two"><label class="chk"><input type="radio" name="mym" value="premiere"${ST.yt.mode==='premiere'?' checked':''}> PREMIERE</label><label class="chk"><input type="radio" name="mym" value="straight"${ST.yt.mode==='straight'?' checked':''}> STRAIGHT UPLOAD</label></div>
+ <h4>TITLES</h4>${O.titles.map((t,i)=>`<div class="it"><b>${esc(t)}</b>${cc(t.length,100)}<button data-c="t${i}">COPY</button></div>`).join('')}
+ <h4>DESCRIPTION ${cc(O.desc.length,5000)}</h4><textarea id="myD" rows="12" style="font:500 12px/1.5 monospace">${esc(O.desc)}</textarea><button class="btn" data-c="desc" style="width:100%;margin-top:6px">COPY DESCRIPTION</button>
+ <h4>TAGS ${cc(O.tags.length,500)}</h4><textarea id="myT" rows="3" style="font:500 12px/1.5 monospace">${esc(O.tags)}</textarea><button class="btn" data-c="tags" style="width:100%;margin-top:6px">COPY TAGS</button>
+ <h4>PINNED COMMENT</h4><div class="msg" style="color:#d9d9dc">${esc(O.pinned)}</div><button class="btn" data-c="pin" style="width:100%">COPY PINNED COMMENT</button><div class="msg" id="myMsg"></div>`;
+ el.querySelectorAll('[name=mym]').forEach(r=>r.onchange=()=>{ST.yt.mode=r.value;save();ytRender()});
+ const cp=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}a.remove();return ok}};
+ el.querySelectorAll('[data-c]').forEach(b=>b.onclick=async()=>{const k=b.dataset.c,v=/^t\d+$/.test(k)?O.titles[+k.slice(1)]:k==='desc'?el.querySelector('#myD').value:k==='tags'?el.querySelector('#myT').value:O.pinned;el.querySelector('#myMsg').textContent=(await cp(v))?'Copied.':'Copy failed. Select the text and copy it by hand.'})}
+
+function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);
+ $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
+ sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();ytRender()};
+ $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mTxt').onchange=e=>{ST.text=e.target.checked;if(S)S.text=ST.text;save();drawNow()};
+ $q('#mKit').onchange=e=>{if(!ST.beat)return;ST.kits=ST.kits||{};if(e.target.value==='')delete ST.kits[ST.beat];else ST.kits[ST.beat]=+e.target.value;save();if(S&&S.raw){applyKit();drawNow()}};
+ $q('#mLen').onchange=e=>{ST.len=+e.target.value;save();if(ST.beat)pick(ST.beat)};
+ $q('#mFh').onclick=()=>{ST.fmt='h';save();size();drawNow()};$q('#mFv').onclick=()=>{ST.fmt='v';save();size();drawNow()};
+ $q('#mPlay').onclick=play;$q('#mScrub').oninput=()=>{if(PV.playing)stopPlay();drawNow()};
+ $q('#mRh').onclick=()=>render(['h']);$q('#mRv').onclick=()=>render(['v']);$q('#mRb').onclick=()=>render(['h','v'])}
+window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root.classList.add('on');
+ if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the MPC...</div></div>';
+  try{if(!document.querySelector('link[data-mpc]')){await new Promise(res=>{const l=document.createElement('link');l.rel='stylesheet';l.href=FONT_LINK;l.dataset.mpc='1';l.onload=res;l.onerror=res;document.head.appendChild(l);setTimeout(res,5000)})}
+   await Promise.all(["40px Anton","600 40px Oswald","30px VT323"].map(f=>document.fonts.load(f).catch(()=>{})));IMG=await loadImg('mpc/mpc60.webp');if(!IMG)throw new Error('photo')}
+  catch(e){root.innerHTML='<div class="pn"><div class="msg">The MPC did not load. Refresh the page.</div></div>';return}
+  try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,slug,tags').order('sort_order',{ascending:true}).order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
+  ST=load();S={title:'',bpm:0,key:'',lcd:'',text:!!ST.text,buf:null,hits:[],per:PAD_NAMES.map(()=>[]),dur:0,total:LEAD+TAIL+1};root.innerHTML=html();wire();size();ytRender();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
+};
+window.mpcClose=function(){if(root)root.classList.remove('on');stopPlay()};
+window.__mpc={st:()=>ST,s:()=>S,frame,analyze,PH,pv:()=>PV};
+})();
