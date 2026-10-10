@@ -10,7 +10,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const KEY='mzprd_mpc_v1',LEAD=.5,TAIL=1.4;
 const loadS=f=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=new URL(f,document.baseURI).href;s.onload=ok;s.onerror=()=>no(new Error(f));document.head.appendChild(s)});
 const loadImg=src=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=new URL(src,document.baseURI).href});
-const FONT_LINK='https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;600;700&family=VT323&display=swap';
+const FONT_LINK='https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;600;700&family=VT323&family=Reenie+Beanie&family=Caveat:wght@600;700&display=swap';
 
 /* where things are on the photo (1024 x 922) */
 const PH={W:1024,H:922,cx:512,cy:455,pad:{x0:252,y0:443,w:54.5,h:54.5,px:64.7,py:63.8},lcd:{x:603,y:230,w:196,h:54},
@@ -22,12 +22,18 @@ Object.assign(PH,{id:'photo',u:1,btn:BTN,vol:[235,277,20],con:[493,277,8],fader:
 const DK={id:'deskh',W:2000,H:1131,u:1.32,sampled:true,glow:true,lamp:[330,110,900],pad:{x0:712,y0:570,w:72,h:68,px:83.7,py:82.3},lcd:{x:1167,y:307,w:270,h:67},
  leds:{rec:[1291,870],over:[1340,870],play:[1434,871]},btn:{rec:[1270,880,46,31],over:[1319,880,45,31],stop:[1367,880,45,31],play:[1414,880,45,31],start:[1462,880,44,31]},
  vol:[688,362,26],con:[1027,362,11],fader:{x:606,y:866,w:30,h:46,slot:[615,866,13,40],hx:608,hy:868,hw:26,hh:42},faderPt:[644,892]};
-const GEO={deskh:DK};
+DK.label={cx:326,cy:971,ang:-.35,w:195,h:118};
+/* the desk scene for 9:16 (1131 x 2000) */
+const DKV={id:'deskv',W:1131,H:2000,u:1.2,sampled:true,glow:true,lamp:[800,140,1100],pad:{x0:258,y0:935.5,w:65,h:63.5,px:75.3,py:76.8},lcd:{x:667,y:685,w:235,h:64},
+ leds:{rec:[782,1214.5],over:[823,1214.5],play:[908,1214.5]},btn:{rec:[760,1222,43,31],over:[804,1222,43,31],stop:[848,1222,42,31],play:[890,1222,43,31],start:[934,1222,42,31]},
+ vol:[238,742,22],con:[541,737,10],fader:{x:158,y:1214,w:28,h:44,slot:[167,1214,12,38],hx:161,hy:1216,hw:21,hh:39},faderPt:[200,1242],
+ smoke:{x:908,y:1564},label:{cx:699,cy:1887,ang:.33,w:205,h:117}};
+const GEO={deskh:DK,deskv:DKV};
 /* pad order on the MPC60 II, top row first */
 const PAD_NAMES=['PERC 1','PERC 2','PERC 3','PERC 4','RIDE 1','RIDE 2','CRASH 1','CRASH 2','TOM 1','TOM 2','TOM 3','TOM 4','HIHAT','SNARE 1','SNARE 2','BASS'];
 
 let CUT=null,ST=null,S=null,beats=[],AC=null,IMG=null,PV={playing:false,raf:0,src:null,t0:0},busy=false;
-function defaults(){return{scene:'desk',eng:{hook:false,hookText:'',sub:true,loop:true,note:false,noteText:'Played live on the Akai MPC60 II',q:false,qText:'WHICH RAPPER GETS THIS BEAT?'},tape:{on:false,ids:[],title:'MZPRD BEAT TAPE VOL. 1',len:60,xf:1.2},th:{seed:1,pal:'',fmt:'h'},kits:{},beat:null,artist:'',fmt:'h',len:0,text:false,lcd:'',yt:{mode:'straight',when:'',v:0}}}
+function defaults(){return{smoke:{on:true,amt:1},scene:'desk',eng:{hook:false,hookText:'',sub:true,loop:true,note:false,noteText:'Played live on the Akai MPC60 II',q:false,qText:'WHICH RAPPER GETS THIS BEAT?'},tape:{on:false,ids:[],title:'MZPRD BEAT TAPE VOL. 1',len:60,xf:1.2},th:{seed:1,pal:'',fmt:'h'},kits:{},beat:null,artist:'',fmt:'h',len:0,text:false,lcd:'',yt:{mode:'straight',when:'',v:0}}}
 function load(){try{const j=JSON.parse(localStorage.getItem(KEY)||'null');if(j)return Object.assign(defaults(),j)}catch(e){}return defaults()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}}
 const ctxA=()=>{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC};
@@ -73,7 +79,7 @@ function pressAt(S,pad,T){const a=S.per[pad];if(!a||!a.length)return 0;let lo=0,
 /* ---------- drawing (a pure function of time, so preview and export match) ---------- */
 function fitFont(c,txt,font,max,w){let s=max;c.font=font(s);while(s>8&&c.measureText(txt).width>w){s-=1;c.font=font(s)}return s}
 function px1(img,x,y){const cv=px1.cv||(px1.cv=document.createElement('canvas'));cv.width=cv.height=1;const q=cv.getContext('2d');q.drawImage(img,Math.round(x)-1,Math.round(y)-1,3,3,0,0,1,1);const d=q.getImageData(0,0,1,1).data;return 'rgb('+d[0]+','+d[1]+','+d[2]+')'}
-function sampleColors(){try{PH.btnPlate=px1(IMG,700,712);PH.faderPlate=px1(IMG,197,700);if(DESKS.h)DK.faderPlate=px1(DESKS.h,DK.faderPt[0],DK.faderPt[1])}catch(e){}}
+function sampleColors(){try{PH.btnPlate=px1(IMG,700,712);PH.faderPlate=px1(IMG,197,700);if(DESKS.h)DK.faderPlate=px1(DESKS.h,DK.faderPt[0],DK.faderPt[1]);if(DESKS.v)DKV.faderPlate=px1(DESKS.v,DKV.faderPt[0],DKV.faderPt[1])}catch(e){}}
 const PCOL=new Map();
 function plateCol(G,src,i){if(!G.sampled)return G.plate||PH.plate;const key=G.id+i;if(PCOL.has(key))return PCOL.get(key);const P=G.pad,col=i%4,row=Math.floor(i/4);let c;try{c=px1(src,P.x0+col*P.px-(P.px-P.w)/2,P.y0+row*P.py+P.h/2)}catch(e){c='#777'}PCOL.set(key,c);return c}
 function knob(c,src,cx,cy,r,ang){if(!ang)return;c.save();c.beginPath();c.arc(cx,cy,r,0,6.2832);c.clip();c.translate(cx,cy);c.rotate(ang);c.drawImage(src,cx-r,cy-r,2*r,2*r,-r,-r,2*r,2*r);c.restore();c.strokeStyle='rgba(0,0,0,.25)';c.lineWidth=.8;c.beginPath();c.arc(cx,cy,r,0,6.2832);c.stroke()}
@@ -146,6 +152,21 @@ function sheen(c,ox,oy,sc,T){const w=Math.round(PH.W*sc),h=Math.round(PH.H*sc);i
  /* shade the lower right a little */
  x.globalCompositeOperation='source-over';x.clearRect(0,0,w,h);const sh=x.createLinearGradient(w*.3,h*.2,w,h);sh.addColorStop(0,'rgba(0,0,20,0)');sh.addColorStop(1,'rgba(0,0,20,.5)');x.fillStyle=sh;x.fillRect(0,0,w,h);x.globalCompositeOperation='destination-in';x.drawImage(CUT,0,0,w,h);
  c.save();c.globalCompositeOperation='multiply';c.globalAlpha=.16;c.drawImage(OC,ox,oy);c.restore()}
+const hs=(n,sd)=>{const x=Math.sin((n+1)*127.1+(sd||0)*311.7)*43758.5453;return x-Math.floor(x)};
+/* cigarette smoke: every puff is a pure function of time, so preview, scrub and export all match */
+function smoke(c,T,SM,amt){const passes=[{dx:0,a:1,sd:0},{dx:5,a:.5,sd:7}],dt=.055,life=6.4;c.save();
+ for(const ps of passes){const N=Math.round(130*amt),base=Math.floor(T/dt);
+  for(let j=N-1;j>=0;j--){const k=base-j,tb=k*dt,age=T-tb;if(age<=0||age>life)continue;const u=age/life,r1=hs(k,11+ps.sd),r2=hs(k,12+ps.sd);
+   const dens=Math.max(.15,.62+.34*Math.sin(tb*.9)+.3*Math.max(0,Math.sin(tb*.77+1.2)));
+   const sw=Math.sin(tb*.8+age*1.35)+.55*Math.sin(tb*1.7+age*2.3+r1*6),x=SM.x+ps.dx+sw*(4+17*Math.pow(u,.8))-6.5*age+(r2-.5)*20*u,y=SM.y-(46*age-3.4*age*age);
+   const r=2.2+34*Math.pow(u,.75),a=dens*ps.a*.108*ease(u/.08)*(1-ease((u-.3)/.7))*(1+(1-u)*1.1);if(a<.004)continue;
+   const m=ease(u*1.3),cr=Math.round(188+42*m),cg=Math.round(194+28*m),cb=Math.round(206+2*m);
+   const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba('+cr+','+cg+','+cb+','+a.toFixed(3)+')');g.addColorStop(.55,'rgba('+cr+','+cg+','+cb+','+(a*.5).toFixed(3)+')');g.addColorStop(1,'rgba('+cr+','+cg+','+cb+',0)');c.fillStyle=g;c.fillRect(x-r,y-r,2*r,2*r)}}
+ const br=Math.pow(.5+.5*Math.sin(T*.95),3);c.globalCompositeOperation='lighter';const eg=c.createRadialGradient(SM.x,SM.y,0,SM.x,SM.y,10+4*br);eg.addColorStop(0,'rgba(255,140,50,'+(.3+.35*br).toFixed(3)+')');eg.addColorStop(1,'rgba(255,90,20,0)');c.fillStyle=eg;c.fillRect(SM.x-16,SM.y-16,32,32);c.restore()}
+/* the beat name, handwritten on the floppy's label; the pen writes it out as each track starts */
+function handwrite(c,L,l1,l2,prog){if(prog<=0)return;c.save();c.translate(L.cx,L.cy);c.rotate(L.ang);c.beginPath();c.rect(-L.w/2,-L.h/2,L.w*clamp(prog,0,1)*1.04,L.h);c.clip();c.globalCompositeOperation='multiply';c.textBaseline='alphabetic';c.textAlign='left';
+ const draw=(txt,size,y,col,font)=>{let sz=size;c.font=font(sz);while(sz>10&&c.measureText(txt).width>L.w*.86){sz-=1;c.font=font(sz)}const tw=c.measureText(txt).width;let x=-tw/2;for(let i=0;i<txt.length;i++){const ch=txt[i],w=c.measureText(ch).width,jy=(hs(i,3+txt.length)-.5)*sz*.07,jr=(hs(i,5)-.5)*.07;c.save();c.translate(x+w/2,y+jy);c.rotate(jr);c.globalAlpha=.78+.2*hs(i,9);c.fillStyle=col;c.fillText(ch,-w/2,0);c.globalAlpha*=.5;c.fillText(ch,-w/2+.5,.35);c.restore();x+=w}};
+ draw(l1,L.h*.4,L.h*.06,'#1d2340',s=>s+"px 'Caveat',cursive");if(l2)draw(l2,L.h*.24,L.h*.38,'#2a2f55',s=>s+"px 'Reenie Beanie',cursive");c.restore()}
 const ease=t=>t<=0?0:t>=1?1:t*t*(3-2*t),pulse=(T,a,b)=>Math.min(ease((T-a)/.07),ease((b-T)/.09));
 const HOOKS=['WAIT FOR THE DROP','THIS ONE HITS DIFFERENT','LIVE ON THE MPC60','TURN IT UP','BOOM BAP ON A 1988 MPC','WATCH THE PADS','PURE BOOM BAP'];
 function wrapTwo(t){if(t.length<=15)return[t];const w=t.split(' ');let best=[t,''],bd=1e9;for(let i=1;i<w.length;i++){const a=w.slice(0,i).join(' '),b=w.slice(i).join(' '),d=Math.abs(a.length-b.length);if(d<bd){bd=d;best=[a,b]}}return best}
@@ -154,7 +175,7 @@ function sticker(c,lines,x,y,size,T0,T,o){o=o||{};const u=T-T0;if(u<0)return;con
  lines.forEach((t,i)=>{const yy=(i-(lines.length-1)/2)*size*1.02;c.lineWidth=size*.16;c.strokeStyle='#fff';c.strokeText(t,0,yy);c.fillStyle='rgba(0,0,0,.18)';c.fillText(t,size*.04,yy+size*.05);c.fillStyle=o.fill||'#0b0b0d';c.fillText(t,0,yy)});c.restore()}
 function pill(c,txt,x,y,size,a,o){o=o||{};c.save();c.globalAlpha=a;c.font='600 '+size+'px Oswald, sans-serif';const w=c.measureText(txt).width+size*1.6,h=size*1.9;c.shadowColor='rgba(0,0,0,.25)';c.shadowBlur=size*.6;c.shadowOffsetY=size*.2;c.fillStyle='#fff';const r=h/2;c.beginPath();c.moveTo(x-w/2+r,y-h/2);c.arcTo(x+w/2,y-h/2,x+w/2,y+h/2,r);c.arcTo(x+w/2,y+h/2,x-w/2,y+h/2,r);c.arcTo(x-w/2,y+h/2,x-w/2,y-h/2,r);c.arcTo(x-w/2,y-h/2,x+w/2,y-h/2,r);c.fill();c.shadowColor='transparent';c.fillStyle=o.fill||'#222';c.textAlign='center';c.textBaseline='middle';c.fillText(txt,x,y+size*.05);c.restore()}
 /* the animated subscribe: slides up, the cursor clicks it, it turns to SUBSCRIBED and the bell rings */
-function subscribe(c,W,H,te){if(te<0)return;const w=W*.5,h=w*.2,cx=W/2,cy=H*.865,s1=clamp(te/.5,0,1),slide=(1-ease(s1))*h*3,over=1+.06*Math.sin(clamp((te-.3)/.4,0,1)*Math.PI),clickT=1.55,done=te>=clickT+.1,sq=te>clickT&&te<clickT+.16?.93:1;
+function subscribe(c,W,H,te,cyF){if(te<0)return;const w=W*.5,h=w*.2,cx=W/2,cy=H*(cyF||.865),s1=clamp(te/.5,0,1),slide=(1-ease(s1))*h*3,over=1+.06*Math.sin(clamp((te-.3)/.4,0,1)*Math.PI),clickT=1.55,done=te>=clickT+.1,sq=te>clickT&&te<clickT+.16?.93:1;
  c.save();c.globalAlpha=ease(s1*1.4);c.translate(cx,cy+slide);c.scale(over*sq,over*sq);
  const r=h/2;c.shadowColor='rgba(0,0,0,.28)';c.shadowBlur=h*.3;c.shadowOffsetY=h*.1;c.fillStyle=done?'#8a8a90':'#e0242f';c.beginPath();c.moveTo(-w/2+r,-h/2);c.arcTo(w/2,-h/2,w/2,h/2,r);c.arcTo(w/2,h/2,-w/2,h/2,r);c.arcTo(-w/2,h/2,-w/2,-h/2,r);c.arcTo(-w/2,-h/2,w/2,-h/2,r);c.fill();c.shadowColor='transparent';
  c.fillStyle='#fff';c.font='700 '+h*.46+'px Oswald, sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(done?'SUBSCRIBED':'SUBSCRIBE',done?h*.1:0,h*.03);if(done){c.strokeStyle='#fff';c.lineWidth=h*.07;c.lineCap='round';c.lineJoin='round';c.beginPath();c.moveTo(-w*.36,0);c.lineTo(-w*.33,h*.1);c.lineTo(-w*.28,-h*.12);c.stroke()}
@@ -177,14 +198,17 @@ function frame(c,W,H,fmt,T,X){
  if(SC){sc=Math.max(W/SC.G.W,H/SC.G.H)*1.025;ox=(W-SC.G.W*sc)/2;oy=(H-SC.G.H*sc)/2}else ground(c,W+80,H+80,ox,oy,sc);
  const fx={vol:(.21*ease((T-.15)/2.4))+.012*Math.sin(T*.6),con:.05*Math.sin(T*.4),fader:Math.max(0,26*(.5+.5*Math.sin(T*.29-.6))),btn:{play:0,start:pulse(T,t0-.42,t0-.12),rec:pulse(T,t0-.42,t0-.12),over:0,stop:pulse(T,lastEnd-.08,lastEnd+.2)}};
  machine(c,ox,oy,sc,Sx,{img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,run:la>=-.02&&T<lastEnd,trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
+if(SC){c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC.G;
+  if(Gs.label){const pr=ease((T-tr.start+.25)/1.1);handwrite(c,Gs.label,Sx.title,'MZPRD'+(Sx.bpm?'  '+Sx.bpm+' BPM':'')+(Sx.key?'  '+Sx.key:''),X.kind==='tape'&&k===0&&T<t0?0:pr)}
+  if(Gs.smoke&&ST.smoke&&ST.smoke.on)smoke(c,T,Gs.smoke,ST.smoke.amt||1);c.restore()}
  if(SC){if(SC.G.lamp){const lp=SC.G.lamp,fl=.55+.45*Math.sin(T*1.7)*Math.sin(T*.43+1)+.12*Math.sin(T*9.1);c.save();c.globalCompositeOperation='lighter';const rg=c.createRadialGradient(ox+lp[0]*sc,oy+lp[1]*sc,10,ox+lp[0]*sc,oy+lp[1]*sc,lp[2]*sc);rg.addColorStop(0,'rgba(255,170,80,'+(.05*fl).toFixed(3)+')');rg.addColorStop(1,'rgba(255,170,80,0)');c.fillStyle=rg;c.fillRect(0,0,W,H);c.restore()}}else sheen(c,ox,oy,sc,T);
  c.restore();
  /* optional words and the subscribe, drawn flat on top (no camera drift) */
  const topY=v?H*.17:H*.12,sz=v?Math.min(150,W*.12):Math.min(110,W*.058);
  if(E.hook&&T<2.9){const txt=(E.hookText||'').trim().toUpperCase()||HOOKS[(String(X.title||'').length*7+3)%HOOKS.length],lines=wrapTwo(txt),size=Math.min(sz,W*.9/Math.max(5,Math.max(...lines.map(l=>l.length)))*1.9);sticker(c,lines,W/2,topY,size,.04,T,{out:(2.9-T)/.3})}
- if(E.note&&(E.noteText||'').trim()&&T>2.4&&T<7.4)pill(c,E.noteText.trim(),W/2,v?H*.775:H*.95,v?40:28,Math.min(ease((T-2.4)/.4),ease((7.4-T)/.4)));
+ if(E.note&&(E.noteText||'').trim()&&T>2.4&&T<7.4)pill(c,E.noteText.trim(),W/2,v?(SC?H*.722:H*.775):H*.95,v?40:28,Math.min(ease((T-2.4)/.4),ease((7.4-T)/.4)));
  if(E.q&&(E.qText||'').trim()&&X.total>14&&T>X.total-10.5&&T<X.total-.15){const txt=E.qText.trim().toUpperCase(),lines=wrapTwo(txt),size=Math.min(v?100:72,W*.9/Math.max(5,Math.max(...lines.map(l=>l.length)))*1.9),pu=1+.025*Math.sin(T*5);sticker(c,lines,W/2,topY,size*pu,X.total-10.5,T,{fill:'#e0242f',out:Math.min(1,(X.total-.15-T)/.3)})}
- if(v&&X.sub)subscribe(c,W,H,T-X.subT0);
+ if(v&&X.sub)subscribe(c,W,H,T-X.subT0,SC?.905:0);
  if(ST.text&&!SC)text(c,W,H,v,{title:tape?X.title:Sx.title,bpm:Sx.bpm,key:Sx.key,sub:tape&&!intro?(k+1)+'. '+Sx.title:''})}
 function text(c,W,H,v,S){const ink='#111';c.save();c.fillStyle=ink;c.textBaseline='alphabetic';
  if(v){c.textAlign='center';const t=(S.title||'').toUpperCase(),f=s=>'700 '+s+'px Anton, Oswald, sans-serif',s=fitFont(c,t,f,150,W*.86);c.font=f(s);c.fillText(t,W/2,H*.2);c.font='600 44px Oswald, sans-serif';c.fillStyle='#666';c.fillText(S.sub?S.sub.toUpperCase():([S.bpm?S.bpm+' BPM':'',S.key||'','PROD. MZPRD'].filter(Boolean)).join('   /   '),W/2,H*.2+70);
@@ -202,14 +226,14 @@ function css(){if(document.getElementById('mpcCss'))return;const s=document.crea
 #mpcmk .btn{background:transparent;border:1.5px solid #4a4a50;color:#fff;font:600 10px Montserrat;letter-spacing:.16em;padding:10px 8px;cursor:pointer}#mpcmk .btn:hover{border-color:#fff}#mpcmk .btn.on{border-color:var(--red);background:rgba(224,36,47,.15)}
 #mpcmk .btn.big{background:var(--red);border-color:var(--red);font:700 13px Montserrat;letter-spacing:.24em;padding:15px;width:100%}#mpcmk .btn:disabled{opacity:.5}
 #mpcmk .two{display:grid;grid-template-columns:1fr 1fr;gap:6px}#mpcmk .chk{display:flex;gap:8px;align-items:center;letter-spacing:.1em;margin:6px 0}#mpcmk .chk input{width:auto}
-#mpcmk .box{width:100%;background:#fff;border:1px solid #2a2a2e;display:block;margin:0 auto}#mpcmk .ctl{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+#mpcmk .box{width:100%;background:#000;border:0;display:block;margin:0 auto}#mpcmk .ctl{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
 #mpcmk .ctl input[type=range]{flex:1;min-width:140px;accent-color:var(--red)}#mpcmk .time{font:600 12px Montserrat;color:#c9c9ce;min-width:92px;text-align:right}
 #mpcmk .msg{font:500 12px/1.5 Montserrat;color:#a9a9ae;margin-top:8px;min-height:16px}#mpcmk .bar{height:6px;background:#1b1b20;margin-top:8px}#mpcmk .bar b{display:block;height:100%;width:0;background:var(--red)}
 #mpcmk .it{display:flex;gap:10px;align-items:center;padding:9px;border-bottom:1px solid #1d1d21;font:600 12px Montserrat;color:#d9d9dc}#mpcmk .it b{flex:1;min-width:0;font-weight:600;white-space:normal}#mpcmk .it button{background:transparent;border:1px solid #4a4a50;color:#fff;font:600 9px Montserrat;letter-spacing:.12em;padding:6px 8px;cursor:pointer}
 #mpcmk .sec{border:1px solid #2a2a2e;margin:10px 0;background:#08080a}#mpcmk .sec>summary{cursor:pointer;padding:12px;font:700 11px Montserrat;letter-spacing:.22em;color:var(--gold);list-style:none}#mpcmk .sec .in{padding:0 12px 12px}`;document.head.appendChild(s)}
 function html(){return`<div class="mg"><div>
  <div class="pn"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3>MPC BEAT VIDEO</h3><div style="display:flex;gap:6px"><button class="btn" id="mFh">16:9</button><button class="btn" id="mFv">9:16</button></div></div>
-  <div style="background:#fff;padding:0;margin-top:10px;display:flex;justify-content:center"><canvas class="box" id="mCv" width="1920" height="1080"></canvas></div>
+  <div style="margin-top:10px;display:flex;justify-content:center;background:#000"><canvas class="box" id="mCv" width="1920" height="1080"></canvas></div>
   <div class="ctl"><button class="btn" id="mPlay">PLAY</button><input type="range" id="mScrub" min="0" max="1000" value="0"><span class="time" id="mTime">0:00 / 0:00</span></div>
   <div class="msg" id="mMsg">Pick a beat on the right. The tool listens to it and plays the MPC for you.</div>
   <div class="two" style="margin-top:8px"><button class="btn big" id="mRh">RENDER 16:9</button><button class="btn big" id="mRv">RENDER 9:16</button></div>
@@ -223,6 +247,8 @@ function html(){return`<div class="mg"><div>
  <label>SCREEN TEXT (LEAVE EMPTY TO USE THE BEAT NAME)</label><input type="text" id="mLcd" maxlength="40">
  <h3 style="margin-top:16px">2. LOOK</h3>
  <label>LOOK OF THE VIDEOS</label><select id="mScene"><option value="desk">Desk scene (the worn desk, lamp and floppy disks)</option><option value="white">White studio</option></select>
+ <label class="chk"><input type="checkbox" id="mSmoke"> CIGARETTE SMOKE (9:16 DESK SCENE)</label>
+ <select id="mSmokeAmt"><option value="0.6">Light smoke</option><option value="1">Normal smoke</option><option value="1.5">Heavy smoke</option></select>
  <label class="chk"><input type="checkbox" id="mTxt"> ALSO SHOW THE TITLE AS TEXT ON THE WHITE (OFF = CLEAN, ONLY THE MPC SCREEN)</label>
  <label>PAD LAYOUT (EACH BEAT GETS ITS OWN BY DEFAULT, THE SAME EVERY TIME)</label><select id="mKit"><option value="">Automatic for this beat</option>${KITS.map((k,i)=>`<option value="${i}">${k.n}</option>`).join('')}</select>
  <label>HOW MUCH OF THE BEAT</label><select id="mLen"><option value="0">The whole preview</option><option value="15">First 15 seconds</option><option value="30">First 30 seconds</option><option value="45">First 45 seconds</option><option value="60">First 60 seconds</option></select>
@@ -365,7 +391,7 @@ function thRender(){const el=$q('#mTH');if(!el||!YT())return;const b=ST.tape.on?
 function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();ytRender();thRender()};
- $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mScene').value=ST.scene||'desk';$q('#mScene').onchange=e=>{ST.scene=e.target.value;save();drawNow()};$q('#mTxt').onchange=e=>{ST.text=e.target.checked;save();drawNow()};
+ $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mSmoke').checked=!!ST.smoke.on;$q('#mSmokeAmt').value=String(ST.smoke.amt||1);$q('#mSmoke').onchange=e=>{ST.smoke.on=e.target.checked;save();drawNow()};$q('#mSmokeAmt').onchange=e=>{ST.smoke.amt=+e.target.value;save();drawNow()};$q('#mScene').value=ST.scene||'desk';$q('#mScene').onchange=e=>{ST.scene=e.target.value;save();drawNow()};$q('#mTxt').onchange=e=>{ST.text=e.target.checked;save();drawNow()};
  $q('#mKit').onchange=e=>{if(!ST.beat)return;ST.kits=ST.kits||{};if(e.target.value==='')delete ST.kits[ST.beat];else ST.kits[ST.beat]=+e.target.value;save();if(S&&S.raw){applyKit();if(TP)TP=null;drawNow()}};
  $q('#mLen').onchange=e=>{ST.len=+e.target.value;save();if(ST.beat)pick(ST.beat)};
  $q('#mFh').onclick=()=>{ST.fmt='h';save();size();drawNow()};$q('#mFv').onclick=()=>{ST.fmt='v';save();size();drawNow()};
@@ -382,10 +408,10 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
 window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the MPC...</div></div>';
   try{await loadS('mpcyt.js?v=6');if(!document.querySelector('link[data-mpc]')){await new Promise(res=>{const l=document.createElement('link');l.rel='stylesheet';l.href=FONT_LINK;l.dataset.mpc='1';l.onload=res;l.onerror=res;document.head.appendChild(l);setTimeout(res,5000)})}
-   await Promise.all(["40px Anton","600 40px Oswald","30px VT323"].map(f=>document.fonts.load(f).catch(()=>{})));IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');if(!IMG||!CUT)throw new Error('photo');DESKS.h=await loadImg('mpc/desk.webp');sampleColors()}
+   await Promise.all(["40px Anton","600 40px Oswald","30px VT323","700 40px Caveat","40px Reenie Beanie"].map(f=>document.fonts.load(f).catch(()=>{})));IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');if(!IMG||!CUT)throw new Error('photo');DESKS.h=await loadImg('mpc/desk.webp');DESKS.v=await loadImg('mpc/desk_v.webp');sampleColors()}
   catch(e){root.innerHTML='<div class="pn"><div class="msg">The MPC did not load. Refresh the page.</div></div>';return}
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,slug,tags').order('sort_order',{ascending:true}).order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
-  ST=load();if(!ST.th)ST.th={seed:1,pal:'',fmt:'h'};if(!ST.yt.v)ST.yt.v=0;if(!ST.tape)ST.tape=defaults().tape;if(!ST.eng)ST.eng=defaults().eng;S=null;root.innerHTML=html();wire();size();ytRender();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
+  ST=load();if(!ST.th)ST.th={seed:1,pal:'',fmt:'h'};if(!ST.yt.v)ST.yt.v=0;if(!ST.tape)ST.tape=defaults().tape;if(!ST.eng)ST.eng=defaults().eng;if(!ST.smoke)ST.smoke=defaults().smoke;S=null;root.innerHTML=html();wire();size();ytRender();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
 };
 window.mpcClose=function(){if(root)root.classList.remove('on');stopPlay()};
 window.__mpc={xf:XF,st:()=>ST,s:()=>S,tp:()=>TP,x:X,frame,analyze,PH,pv:()=>PV,buildTape};window.MZMpc={machine,PH,fitFont,mmss,clamp,img:()=>IMG,cut:()=>CUT};
