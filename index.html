@@ -285,7 +285,7 @@ footer.f a:hover{color:#fff}
 .sign{position:absolute;left:50.5%;top:35.5%;width:44.5%;height:34%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#0b0b0d;transform:scale(.6);opacity:0;transition:transform .5s .55s cubic-bezier(.3,1.8,.6,1),opacity .3s .55s}
 #girl.in .sign{transform:none;opacity:1}
 .sign b{font:400 3.3cqw/1.3 'Press Start 2P';letter-spacing:.04em;text-transform:uppercase}
-.sign strong{font:400 9.5cqw/1.15 'Press Start 2P';color:#e0242f;text-shadow:.45cqw .45cqw 0 #0b0b0d}
+.sign strong{white-space:nowrap;font:400 9.5cqw/1.15 'Press Start 2P';color:#e0242f;text-shadow:.45cqw .45cqw 0 #0b0b0d}
 .sign span{font:700 1.5cqw/1 Montserrat;letter-spacing:.3em;margin-top:1.1cqw;color:#444}
 .sign .shop{margin-top:1.5cqw;background:#0b0b0d;color:#fff;border:0;font:700 1.6cqw/1 Montserrat;letter-spacing:.28em;padding:1.2cqw 2cqw;cursor:pointer}
 .sign .shop:hover{background:#e0242f}
@@ -1241,11 +1241,12 @@ addEventListener('resize',()=>{wvs.forEach(w=>w.d=0);if(pwv)pwv.d=0;vinSize();fx
 
 /* ---------- promo girl ---------- */
 let girlTimer=null,girlGone=false;
+function fitSign(){const m=$('#girlMsg'),p=$('#girlPrice');p.style.fontSize=Math.min(9.5,40/Math.max(3,p.textContent.length)).toFixed(2)+'cqw';const n=m.textContent.length;m.style.fontSize=Math.min(3.3,(n>12?80:40)/Math.max(8,n)).toFixed(2)+'cqw'}
 function promoLabel(){const p=Number(promo.promo_price);return (promo.promo_text||'ALL BEATS')+' '+money(p).replace(/\.00$/,'')}
 function setupPromo(){
  const g=$('#girl'),img=$('#girlImg');clearTimeout(girlTimer);g.classList.remove('in');
  if(!promo.promo_enabled||girlGone||location.hash==='#nopromo')return;
- $('#girlMsg').textContent=promo.promo_text||'ALL BEATS';$('#girlPrice').textContent=money(Number(promo.promo_price)).replace(/\.00$/,'');
+ $('#girlMsg').textContent=promo.promo_text||'ALL BEATS';$('#girlPrice').textContent=money(Number(promo.promo_price)).replace(/\.00$/,'');fitSign();
  const src=promo.promo_image_path?pub(promo.promo_image_path):'girl.webp';
  img.hidden=true;img.onload=()=>{img.hidden=false};img.onerror=()=>{img.hidden=true};img.src=src;
  const cycle=()=>{if(girlGone||!promo.promo_enabled)return;g.classList.add('in');girlTimer=setTimeout(()=>{g.classList.remove('in');girlTimer=setTimeout(cycle,45000)},11000)};
@@ -1258,7 +1259,7 @@ function closeCartModal(){$('#modal').classList.remove('on');if(thanksPending){t
 function thanksMoment(){
  say(rp(['Pleasure doing business.',"It's yours. Go make something crazy.",'Respect. Enjoy.']),4800);nod=Math.max(nod,2.2);
  const g=$('#girl'),img=$('#girlImg'),sp=document.querySelector('.sign span');clearTimeout(girlTimer);
- $('#girlMsg').textContent='THANK YOU';$('#girlPrice').textContent='YOURS!';if(sp)sp.textContent='ENJOY THE FILES';$('#girlShop').style.display='none';
+ $('#girlMsg').textContent='THANK YOU';$('#girlPrice').textContent='YOURS!';fitSign();if(sp)sp.textContent='ENJOY THE FILES';$('#girlShop').style.display='none';
  if(!img.getAttribute('src')){img.onload=()=>{img.hidden=false};img.onerror=()=>{img.hidden=true};img.src=promo.promo_image_path?pub(promo.promo_image_path):'girl.webp'}
  g.classList.add('in');
  girlTimer=setTimeout(()=>{g.classList.remove('in');setTimeout(()=>{if(sp)sp.textContent='LIMITED TIME';$('#girlShop').style.display='';setupPromo()},900)},6800);
