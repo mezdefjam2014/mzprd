@@ -94,12 +94,12 @@ function make(c,W,H,seed,X,o){o=o||{};const r=n=>hs(n,seed),P=o.pal!=null?PAL[o.
  const place=(cx,cy,rot,alpha,blur)=>{c.save();c.translate(cx,cy);c.rotate(rot);if(alpha!=null)c.globalAlpha=alpha;const ox=-512*sc,oy=-460*sc;
   if(Ly.card){c.fillStyle=P.light?P.dark:'#fff';const pw=850*sc+40,ph=734*sc+40;c.fillRect(-pw/2,-ph/2,pw,ph);}
   c.save();c.shadowColor='rgba(0,0,0,'+(P.light?.35:.6)+')';c.shadowBlur=40*sc*1.2;c.shadowOffsetY=18*sc;c.drawImage(Z.cut(),ox,oy,1024*sc,922*sc);c.restore();
-  Z.machine(c,ox,oy,sc,S0,{img:Z.cut(),T:4,run:true,press:i=>pressed.has(i)?.7+.3*hs(i,seed):0});c.restore()};
+  Z.machine(c,ox,oy,sc,S0,{img:Z.cut(),lt:4,run:true,press:i=>pressed.has(i)?.7+.3*hs(i,seed):0});c.restore()};
  let cx=Ly.cx*W,cy=Ly.cy*H;if(Ly.zoom){cx=W*.33;cy=H*.64}
  if(Ly.two)place(cx+W*.12,cy-H*.05,.18,.5);
  place(cx,cy,Ly.rot,1);c.restore();
  /* the words: at most 5 on the picture (artist line + TYPE BEAT + the beat name) */
- const AR=artistsOf(X.artist),line1=AR.length?AR.join(' X ').toUpperCase():'',title=String(X.title||'').toUpperCase(),big='TYPE BEAT';
+ const AR=artistsOf(X.artist),line1=AR.length?AR.join(' X ').toUpperCase():'',title=String(X.title||'').toUpperCase(),big=X.big||'TYPE BEAT';
  let bx,by,bw,al='center';const t=Ly.t;
  if(v){bx=W/2;by=H*.1;bw=W*.9}else if(t==='top'){bx=W/2;by=H*.12;bw=W*.92}else if(t==='right'){bx=W*.8;by=H*.36;bw=W*.36}else if(t==='left'){bx=W*.2;by=H*.36;bw=W*.36}else if(t==='topleft'){bx=W*.28;by=H*.2;bw=W*.5}else if(t==='huge'){bx=W/2;by=H*.24;bw=W*.94}else{bx=W/2;by=H*.9;bw=W*.8}
  const ink=P.ink,acc=P.acc,dk=P.dark;
@@ -117,9 +117,31 @@ function make(c,W,H,seed,X,o){o=o||{};const r=n=>hs(n,seed),P=o.pal!=null?PAL[o.
    const s1=fitW(c,big,v?190:150,W*.9);heavy(c,big,W/2,by2+bh*.36,s1,P,{fill:acc});const line=(line1?line1+'  /  ':'')+title,s3=fitW(c,line,v?84:62,W*.92);heavy(c,line,W/2,by2+bh*.78,s3,P,{fill:'#fff'})}};
  (draw[tx]||draw.stack)();
  /* badges */
- const bd=[];if(X.bpm)bd.push(X.bpm+' BPM');if(X.key)bd.push(X.key);bd.push('MPC60');
+ const bd=[];if(X.extra)bd.push(X.extra);if(X.bpm)bd.push(X.bpm+' BPM');if(X.key)bd.push(X.key);bd.push('MPC60');
  if(tx!=='bar'){c.save();c.font='700 '+(v?44:30)+'px Oswald, sans-serif';c.textBaseline='middle';let x=v?W*.06:W*.03;const y=v?H*.96:H*.94;bd.forEach((b,i)=>{const w=c.measureText(b).width+30,h=v?64:44;c.fillStyle=i===bd.length-1?acc:dk;c.fillRect(x,y-h/2,w,h);c.fillStyle=i===bd.length-1?(acc===dk?'#fff':dk):'#fff';c.textAlign='left';c.fillText(b,x+15,y+2);x+=w+10});c.restore()}
  c.restore();return{pal:P.n,bg:B,layout:li,text:tx}}
 
-window.MZMpcYT={build,make,PAL,BGS,TXS,LAYOUTS,artistsOf};
+function buildTape(ST,TP){
+ const tr=TP.tracks,N=tr.length,year=new Date().getFullYear(),AR=artistsOf(ST.artist),A=AR.join(' x '),pre=ST.yt.mode==='premiere',v=ST.yt.v||0,seed=N*31+TP.title.length*7+v*13,mood=cap(MOODS[Math.floor(hs(1,seed)*MOODS.length)]),mins=Math.max(1,Math.round(TP.total/60)),mw=mins===1?'Minute':'Minutes';
+ const ts=t=>{t=Math.max(0,Math.floor(t));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
+ const tpl=[['SEARCH',`${N} ${mood} Boom Bap Beats on the MPC60 | ${TP.title}`],['SEARCH',`${A?A+' Type Beats ':'Boom Bap Type Beats '}${year} - ${N}-Beat MPC Tape (${mins} Min)`],['SEARCH',`${TP.title}: ${N} ${A?A+' Style ':''}Instrumentals (All Played on MPC60)`],
+  ['SEARCH',`Boom Bap Beat Tape ${year} | ${N} Beats on the Akai MPC60 II`],['MPC',`I Played ${N} Beats on the MPC60 and Put Them in One Tape`],['MPC',`Watch the Pads: ${N} Boom Bap Beats Live on the MPC60 (Beat Tape)`],
+  ['MPC',`${mins} ${mw} of ${mood} MPC60 Boom Bap Beats (${TP.title})`],['CLICK',`${mood} Boom Bap Beat Tape - Every Beat on a 1988 MPC`],['HYBRID',`${A?A+' Type Beat Tape ':'Type Beat Tape '}${year} | ${N} MPC60 Beats`],['HYBRID',`${TP.title} | Full Boom Bap Instrumental Album (MPC60)`]];
+ const score=(k,t)=>{let s=52;const L=t.length;if(/beat tape|tape/i.test(t))s+=10;if(/type beat/i.test(t)&&A)s+=10;if(L<=60)s+=12;else if(L<=70)s+=6;else if(L>100)s-=30;else s-=6;if(t.indexOf(String(year))>=0)s+=6;if(/mpc/i.test(t))s+=6;if(/\d+/.test(t))s+=4;return clamp(s,0,100)};
+ const order=tpl.map((x,i)=>({k:x[0],t:x[1].replace(/\s+/g,' ').trim(),r:hs(i,seed)})).sort((a,b)=>a.r-b.r);const titles=order.slice(0,9).map(o=>({k:o.k,t:o.t.slice(0,100),s:score(o.k,o.t)}));let best=0;titles.forEach((t,i)=>{if(t.s>titles[best].s)best=i});titles[best].best=true;
+ const link=t=>'https://mzprd.com/beat/'+(t.b.slug||slug(t.b.title))+'/';
+ const chapters=(tr.map((t,i)=>(i===0?'0:00':ts(t.start))+' '+(i+1)+'. '+t.S.title+(t.S.bpm?' ('+t.S.bpm+' BPM'+(t.S.key?' / '+t.S.key:'')+')':'')));
+ const desc=[`${pre&&ST.yt.when?'Premieres '+ST.yt.when+': ':''}${TP.title}: ${N} ${A?A+' type ':'boom bap '}beats played live on the Akai MPC60 II. Lease any beat: https://mzprd.com`,'','> ALL BEATS AND SAMPLE PACKS: https://mzprd.com','','CHAPTERS',...chapters,'','BUY / LEASE EACH BEAT',...tr.map((t,i)=>(i+1)+'. '+t.S.title+': '+link(t)),'','Played on: Akai MPC60 II. Every pad you see pushing in is a hit from the beat.','All beats are original productions by MZPRD (Meztheprod).','','#typebeat #mpc60 #beattape'].join('\n');
+ const tagList=[A?A.toLowerCase()+' type beat':'',A?A.toLowerCase()+' type beat '+year:'','beat tape','boom bap beat tape','mpc60 beat tape','mpc60','akai mpc60 ii','mpc beat making','mpc live pad performance','boom bap instrumentals','hip hop instrumental album','mzprd','meztheprod',...tr.slice(0,4).map(t=>t.S.title.toLowerCase()+' beat')].filter(Boolean);
+ const seen=new Set();let tags='';tagList.forEach(t=>{if(!seen.has(t)&&(tags+t).length<430){seen.add(t);tags+=(tags?', ':'')+t}});
+ const pinned=[`Which track is your favorite? Type the number. Every beat is linked in the description.`,`Which beat should I turn into a full video next? Tell me the number below.`,`Drop your favorite rapper and I will make a beat for them. All ${N} beats: https://mzprd.com`];
+ const checks=[],ck=(ok,msg)=>checks.push({ok,msg});
+ ck(N>=5,N>=5?N+' beats in the tape: long videos with chapters hold viewers and give every beat a chance.':'Only '+N+' beats. Tapes with 6 to 10 beats tend to hold watch time better.');
+ ck(TP.total>=480,'The tape is '+ts(TP.total)+' long. '+(TP.total>=480?'YouTube can show mid-roll ads over 8 minutes.':'Past 8 minutes lets YouTube place mid-roll ads, if monetized.'));
+ ck(true,'Chapter timestamps are in the description (the first is 0:00, as YouTube requires, and each beat is over 10 seconds). They show as sections on the progress bar.');
+ ck(true,'Every beat has its own buy link in the description.');
+ ck(!!A,A?'Artist in the titles: yes.':'No artist added. Add a "sounds like" artist so the tape can show up for "[artist] type beat" searches.');
+ const tips=['Put the strongest beat first or second. Most viewers decide in the first minute.','Test 2 or 3 thumbnails with "Test & Compare" in YouTube Studio.','Pin a comment asking which track people like best, and reply to the first ones quickly.','Add the tape to an "MPC Beats" playlist so the next video autoplays.','Do not paste your tags into the description. Keep tags in the tag box.'];
+ return{titles,desc,tags,pinned,shorts:null,checks,tips}}
+window.MZMpcYT={build,buildTape,make,PAL,BGS,TXS,LAYOUTS,artistsOf};
 })();
