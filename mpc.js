@@ -252,7 +252,7 @@ function subscribe(c,W,H,te,cyF,wide){if(te<0)return;const w=W*(wide?.3:.5),h=w*
  c.fillStyle='#fff';c.font='700 '+h*.46+'px Oswald, sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(done?'SUBSCRIBED':'SUBSCRIBE',done?h*.1:0,h*.03);if(done){c.strokeStyle='#fff';c.lineWidth=h*.07;c.lineCap='round';c.lineJoin='round';c.beginPath();c.moveTo(-w*.36,0);c.lineTo(-w*.33,h*.1);c.lineTo(-w*.28,-h*.12);c.stroke()}
  c.restore();
  /* tag line */
- c.save();c.globalAlpha=ease((te-.3)/.4);c.font='600 '+h*.3+'px Oswald, sans-serif';c.textAlign='center';c.fillStyle='#555';c.fillText('NEW MPC BEAT EVERY WEEK  /  MZPRD',cx,wide?cy-h*.95+slide:cy+h*1.1+slide);c.restore();
+ c.save();c.globalAlpha=ease((te-.3)/.4);c.font='600 '+h*.3+'px Oswald, sans-serif';c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';c.lineWidth=h*.1;c.strokeStyle='rgba(0,0,0,.85)';c.fillStyle='#fff';c.strokeText('NEW MPC BEAT EVERY WEEK  /  MZPRD',cx,wide?cy-h*.95+slide:cy+h*1.1+slide);c.fillText('NEW MPC BEAT EVERY WEEK  /  MZPRD',cx,wide?cy-h*.95+slide:cy+h*1.1+slide);c.restore();
  /* the bell */
  if(done){const bt=te-clickT-.1,pop=ease(bt/.3)*(1+.18*Math.sin(clamp(bt/.4,0,1)*Math.PI)),ring=bt>.25&&bt<1.8?Math.sin(bt*26)*.35*Math.exp(-(bt-.25)*2.2):0,bx=cx+w/2+h*.85,by=cy;c.save();c.translate(bx,by-h*.35);c.rotate(ring);c.scale(pop,pop);c.translate(0,h*.35);
   c.fillStyle='#2a2a2e';c.beginPath();c.moveTo(-h*.34,h*.22);c.bezierCurveTo(-h*.3,h*.1,-h*.3,-h*.1,-h*.2,-h*.3);c.bezierCurveTo(-h*.12,-h*.45,h*.12,-h*.45,h*.2,-h*.3);c.bezierCurveTo(h*.3,-h*.1,h*.3,h*.1,h*.34,h*.22);c.closePath();c.fill();c.beginPath();c.arc(0,h*.3,h*.1,0,6.2832);c.fill();c.beginPath();c.arc(0,-h*.46,h*.05,0,6.2832);c.fill();
