@@ -168,7 +168,7 @@ function handwrite(c,L,l1,l2,prog){if(prog<=0)return;c.save();c.translate(L.cx,L
  const draw=(txt,size,y,col,font)=>{let sz=size;c.font=font(sz);while(sz>10&&c.measureText(txt).width>L.w*.86){sz-=1;c.font=font(sz)}const tw=c.measureText(txt).width;let x=-tw/2;for(let i=0;i<txt.length;i++){const ch=txt[i],w=c.measureText(ch).width,jy=(hs(i,3+txt.length)-.5)*sz*.07,jr=(hs(i,5)-.5)*.07;c.save();c.translate(x+w/2,y+jy);c.rotate(jr);c.globalAlpha=.78+.2*hs(i,9);c.fillStyle=col;c.fillText(ch,-w/2,0);c.globalAlpha*=.5;c.fillText(ch,-w/2+.5,.35);c.restore();x+=w}};
  draw(l1,L.h*.4,L.h*.06,'#1d2340',s=>s+"px 'Caveat',cursive");if(l2)draw(l2,L.h*.24,L.h*.38,'#2a2f55',s=>s+"px 'Reenie Beanie',cursive");c.restore()}
 /* your hands: fingertip anchor, arm slant and finger width of the two cutouts (mpc/hand_r.webp, mpc/hand_l.webp) */
-const HM={r:{tip:[139.6,11.8],axis:.2519,fw:62},l:{tip:[585.1,12.4],axis:-.209,fw:62}};
+const HM={r:{tip:[137.8,6.8],axis:.2477,fw:62},l:{tip:[594.7,6.8],axis:-.2208,fw:62}};
 let HANDS=null;
 function prepHands(r,l){if(!r||!l)return;const mk=(img,warm)=>{const cv=document.createElement('canvas');cv.width=img.naturalWidth;cv.height=img.naturalHeight;const x=cv.getContext('2d');x.drawImage(img,0,0);if(warm){x.globalCompositeOperation='multiply';x.fillStyle='rgb(255,204,150)';x.fillRect(0,0,cv.width,cv.height);x.globalCompositeOperation='destination-in';x.drawImage(img,0,0)}return cv};
  const sil=img=>{const w=Math.round(img.naturalWidth/4),h=Math.round(img.naturalHeight/4),cv=document.createElement('canvas');cv.width=w;cv.height=h;const x=cv.getContext('2d');x.drawImage(img,0,0,w,h);x.globalCompositeOperation='source-in';x.fillStyle='#000';x.fillRect(0,0,w,h);return cv};
@@ -182,10 +182,27 @@ function handAt(list,T,G){if(!list.length)return null;let i=0;while(i<list.lengt
  if(next){const d=clamp((T-(tB-.105))/.105,0,1);hover=Math.min(hover,1-d*d)}else hover=Math.max(hover,clamp((T-tA-.2)/.8,0,1)*.9);
  return{x,y,hover:clamp(hover,0,1)}}
 /* a hard tap: the hand floats up, then drops fast and lands on the pad; its shadow is big and soft when lifted and tight and dark on contact */
-function drawHands(c,G,Sx,T,desk){if(!HANDS)return;const H=handHits(Sx),k=G.pad.w/72;
- for(const key of ['l','r']){const st=handAt(H[key],T,G);if(!st)continue;const m=HM[key],hv=st.hover,s0=(G.pad.w*.5/m.fw),s=s0*(1+.17*hv),sx=G.W*(key==='r'?.66:.34),sy=G.H*1.55,ang=Math.atan2(sx-st.x,sy-st.y),rot=m.axis-ang+.014*Math.sin(T*41)*hv,push=(1-hv)*5*k,HI=HANDS[key];
-  c.save();c.translate(st.x-(9+24*hv)*k,st.y+(12+28*hv)*k+3*k);c.rotate(rot);c.scale(s*(1+.1*hv),s*(1+.1*hv));c.globalAlpha=desk?(.6-.3*hv):(.34-.16*hv);c.filter='blur('+((2.5+8*hv)*k).toFixed(1)+'px)';c.drawImage(HI.sil,-m.tip[0],-m.tip[1],HI.sil.width*4,HI.sil.height*4);c.restore();
-  c.save();c.translate(st.x,st.y+.12*G.pad.h+push);c.rotate(rot);c.translate(0,hv*26*k);c.scale(s,s);c.drawImage(desk?HI.warm:HI.norm,-m.tip[0],-m.tip[1]);c.restore()}}
+function drawHands(c,G,Sx,T,desk){if(!HANDS)return;const H=handHits(Sx),k=G.pad.w/72,lp=G.lamp||[G.W*.2,-G.H*.35,0];
+ for(const key of ['l','r']){const st=handAt(H[key],T,G);if(!st)continue;
+  const m=HM[key],hv=st.hover,s0=G.pad.w*.5/m.fw,s=s0*(1+.17*hv),sx=G.W*(key==='r'?.66:.34),sy=G.H*1.55,ang=Math.atan2(sx-st.x,sy-st.y),rot=m.axis-ang+.014*Math.sin(T*41)*hv,push=(1-hv)*5*k,HI=HANDS[key];
+  /* which way the lamp is, in the picture and in the hand's own space */
+  let dx=lp[0]-st.x,dy=lp[1]-st.y;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;const cr=Math.cos(rot),sr=Math.sin(rot),lx=dx*cr+dy*sr,ly=-dx*sr+dy*cr,tipX=st.x,tipY=st.y+.12*G.pad.h;
+  /* 1. the machine goes a little darker right under the fingertip, more the closer the finger is */
+  const ao=Math.pow(1-hv,1.6);if(ao>.02){c.save();const rg=c.createRadialGradient(tipX,tipY+4*k,1,tipX,tipY+4*k,26*k);rg.addColorStop(0,'rgba(0,0,0,'+(.45*ao).toFixed(3)+')');rg.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=rg;c.fillRect(tipX-30*k,tipY-26*k,60*k,64*k);c.restore()}
+  /* 2. two shadows thrown away from the lamp: a wide soft one that grows as the hand lifts, and a tight dark one that shows when it lands */
+  for(const L of [{o:(10+30*hv)*k,b:(3+10*hv)*k,a:(desk?.3:.18)*(1-.45*hv),g:1.08+.1*hv},{o:(3+8*hv)*k,b:(1.2+3*hv)*k,a:(desk?.5:.3)*(1-hv*.85),g:1.01+.03*hv}]){c.save();c.translate(st.x-dx*L.o,st.y-dy*L.o);c.rotate(rot);c.scale(s*L.g,s*L.g);c.globalAlpha=L.a;c.filter='blur('+L.b.toFixed(1)+'px)';c.drawImage(HI.sil,-m.tip[0],-m.tip[1],HI.sil.width*4,HI.sil.height*4);c.restore()}
+  /* 3. the hand itself, lit like the scene: warm and bright on the side facing the lamp, darker on the far side, the arm falling into shadow */
+  const sh=shadeHand(HI,m,desk,lx,ly,hv);
+  c.save();c.translate(tipX,tipY+push);c.rotate(rot);c.translate(0,hv*26*k);c.scale(s,s);c.drawImage(sh,-m.tip[0],-m.tip[1]);c.restore()}}
+function shadeHand(HI,m,desk,lx,ly,hv){const w=HI.norm.width,h=HI.norm.height,cv=HI.shade||(HI.shade=document.createElement('canvas'));if(cv.width!==w){cv.width=w;cv.height=h}const x=cv.getContext('2d');x.globalCompositeOperation='copy';x.globalAlpha=1;x.drawImage(desk?HI.warm:HI.norm,0,0);x.globalCompositeOperation='multiply';
+ const R=340,cxx=m.tip[0]+120,cyy=m.tip[1]+260,g=x.createLinearGradient(cxx-lx*R,cyy-ly*R,cxx+lx*R,cyy+ly*R);
+ if(desk){g.addColorStop(0,'rgb(136,106,90)');g.addColorStop(.5,'rgb(212,188,168)');g.addColorStop(1,'rgb(255,238,214)')}else{g.addColorStop(0,'rgb(192,188,186)');g.addColorStop(.5,'rgb(232,230,228)');g.addColorStop(1,'rgb(255,255,255)')}
+ x.fillStyle=g;x.fillRect(0,0,w,h);
+ const g2=x.createLinearGradient(0,m.tip[1]+180,0,h*.78);if(desk){g2.addColorStop(0,'rgb(255,255,255)');g2.addColorStop(.5,'rgb(198,176,160)');g2.addColorStop(1,'rgb(108,88,78)')}else{g2.addColorStop(0,'rgb(255,255,255)');g2.addColorStop(1,'rgb(192,188,186)')}
+ x.fillStyle=g2;x.fillRect(0,0,w,h);
+ x.globalCompositeOperation='destination-in';x.drawImage(HI.norm,0,0);
+ if(hv>.05&&desk){x.globalCompositeOperation='lighter';x.globalAlpha=.1*hv;x.drawImage(HI.norm,0,0);x.globalAlpha=1}
+ x.globalCompositeOperation='source-over';return cv}
 /* dust drifting through the lamp light */
 function dust(c,T,G){const lp=G.lamp;if(!lp)return;const N=96,A=[lp[0]+(G.W*.5-lp[0])*.42,lp[1]+(G.H*.5-lp[1])*.42],R=lp[2]*.95,sg=lp[2]*.62;c.save();c.globalCompositeOperation='lighter';
  for(let i=0;i<N;i++){const r1=hs(i,21),r2=hs(i,22),r3=hs(i,23),r4=hs(i,24),a=r1*6.2832,d=R*Math.sqrt(r2),bx=A[0]+Math.cos(a)*d,by=A[1]+Math.sin(a)*d,sp=2.2+5*r3;
