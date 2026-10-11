@@ -240,7 +240,7 @@ function dust(c,T,G){const lp=G.lamp;if(!lp)return;const N=96,A=[lp[0]+(G.W*.5-l
  c.restore()}
 let LAMPFL=1;
 const lampAmt=()=>[0,.55,1,1.7][ST.lamp==null?2:ST.lamp];
-function lampLevel(T){const a=lampAmt();if(!a)return 1;const w=.5+.5*Math.sin(T*.9)*Math.sin(T*.33+1),ph=((T+4)%15)-8,brown=Math.exp(-Math.pow((ph-1)/.7,2)),sag=Math.exp(-Math.pow((((T+9.5)%23)-8)/.5,2)),tt=(T%7)-5.1,burst=tt>0&&tt<.7?Math.sin(tt*70)*Math.exp(-tt*5)*.22:0,mic=.035*Math.sin(T*9.3)*Math.sin(T*1.7);return clamp(1-.14*a*(1-w)-.5*a*brown-.35*a*sag-a*burst-a*mic,.2,1.04)}
+function lampLevel(T){const a=lampAmt();if(!a)return 1;const w=.5+.5*Math.sin(T*.9)*Math.sin(T*.33+1),ph=((T+4)%15)-8,brown=Math.exp(-Math.pow((ph-1)/.7,2)),sag=Math.exp(-Math.pow((((T+9.5)%23)-8)/.5,2)),tt=(T%7)-5.1,burst=tt>0&&tt<.7?Math.sin(tt*70)*Math.exp(-tt*5)*.22:0,mic=.035*Math.sin(T*9.3)*Math.sin(T*1.7);return clamp(1-.09*a*(1-w)-.2*a*brown-.14*a*sag-.5*a*burst-.5*a*mic,.62,1)}
 const lampFl=T=>clamp(.62+.38*Math.sin(T*1.1)*Math.sin(T*.37+1)+.12*Math.sin(T*8.7)*Math.sin(T*.9),.18,1);
 const ease=t=>t<=0?0:t>=1?1:t*t*(3-2*t),pulse=(T,a,b)=>Math.min(ease((T-a)/.07),ease((b-T)/.09));
 const HOOKS=['WAIT FOR THE DROP','THIS ONE HITS DIFFERENT','LIVE ON THE MPC60','TURN IT UP','BOOM BAP ON A 1988 MPC','WATCH THE PADS','PURE BOOM BAP'];
@@ -283,14 +283,14 @@ function lampFx(c,W,H,ox,oy,sc,G,T){const a=lampAmt(),fl=LAMPFL,bx=ox+G.bulb[0]*
  if(!LDK||LDK.width!==W||LDK.height!==H){LDK=document.createElement('canvas');LDK.width=W;LDK.height=H}
  const x=LDK.getContext('2d');x.globalCompositeOperation='source-over';x.clearRect(0,0,W,H);
  /* 1. outside the pool the desk is dark and a little cool; when the lamp sags the dark creeps in over the pool too */
- const da=clamp(.34+.2*a+.5*dim,0,.9);x.fillStyle='rgba(14,9,8,'+da.toFixed(3)+')';x.fillRect(0,0,W,H);
+ const da=clamp(.3+.12*a+.35*dim,0,.7);x.fillStyle='rgba(14,9,8,'+da.toFixed(3)+')';x.fillRect(0,0,W,H);
  x.globalCompositeOperation='destination-out';x.globalAlpha=clamp(1-.45*dim,0,1);x.drawImage(M.shape,ox,oy,G.W*sc,G.H*sc);x.globalAlpha=1;x.globalCompositeOperation='source-over';
  c.save();c.drawImage(LDK,0,0);
  /* 2. warm light inside the pool, brightest near the bulb */
- c.globalCompositeOperation='lighter';c.globalAlpha=clamp(.34*Math.pow(fl,1.7)*Math.min(1.5,.55+a*.45),0,.7);c.drawImage(M.warm,ox,oy,G.W*sc,G.H*sc);c.globalAlpha=1;
+ c.globalCompositeOperation='lighter';c.globalAlpha=clamp(.17*Math.pow(fl,1.7)*Math.min(1.4,.55+a*.4),0,.4);c.drawImage(M.warm,ox,oy,G.W*sc,G.H*sc);c.globalAlpha=1;
  /* 3. a bloom around the bulb and the hot bulb itself */
- {const g=c.createRadialGradient(bx,by,5,bx,by,R*.9),k=.2*Math.pow(fl,1.6);g.addColorStop(0,'rgba(255,190,110,'+k.toFixed(3)+')');g.addColorStop(1,'rgba(255,150,70,0)');c.fillStyle=g;c.fillRect(0,0,W,H)}
- {const hot=Math.pow(fl,2.2),r1=R*.2,g=c.createRadialGradient(bx,by,0,bx,by,r1);g.addColorStop(0,'rgba(255,240,200,'+(.9*hot).toFixed(3)+')');g.addColorStop(.3,'rgba(255,200,120,'+(.5*hot).toFixed(3)+')');g.addColorStop(1,'rgba(255,150,70,0)');c.fillStyle=g;c.fillRect(bx-r1,by-r1,2*r1,2*r1)}
+ {const g=c.createRadialGradient(bx,by,5,bx,by,R*.9),k=.09*Math.pow(fl,1.6);g.addColorStop(0,'rgba(255,190,110,'+k.toFixed(3)+')');g.addColorStop(1,'rgba(255,150,70,0)');c.fillStyle=g;c.fillRect(0,0,W,H)}
+ {const hot=Math.pow(fl,2.2),r1=R*.2,g=c.createRadialGradient(bx,by,0,bx,by,r1);g.addColorStop(0,'rgba(255,240,200,'+(.6*hot).toFixed(3)+')');g.addColorStop(.3,'rgba(255,200,120,'+(.3*hot).toFixed(3)+')');g.addColorStop(1,'rgba(255,150,70,0)');c.fillStyle=g;c.fillRect(bx-r1,by-r1,2*r1,2*r1)}
  c.restore();
  /* 4. a faint cold cast when it sags */
  if(dim>.1){c.save();c.globalCompositeOperation='multiply';c.fillStyle='rgba(120,130,170,'+(.16*dim).toFixed(3)+')';c.fillRect(0,0,W,H);c.restore()}}
