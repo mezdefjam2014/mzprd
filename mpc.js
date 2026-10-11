@@ -28,7 +28,7 @@ const DKV={id:'deskv',W:1131,H:2000,u:1.2,sampled:true,glow:true,lamp:[800,140,1
  leds:{rec:[782,1214.5],over:[823,1214.5],play:[908,1214.5]},btn:{rec:[760,1222,43,31],over:[804,1222,43,31],stop:[848,1222,42,31],play:[890,1222,43,31],start:[934,1222,42,31]},
  vol:[238,742,22],con:[541,737,10],fader:{x:158,y:1214,w:28,h:44,slot:[167,1214,12,38],hx:161,hy:1216,hw:21,hh:39},faderPt:[200,1242],
  smoke:{x:908,y:1564},label:{cx:699,cy:1887,ang:.33,w:205,h:117}};
-DK.bulb=[190,120];DKV.bulb=[772,150];
+DK.bulb=[190,120];DKV.bulb=[772,150];DK.cone={apex:[-163,13],a0:.024,a1:1.017,len:2700};DKV.cone={apex:[772,150],a0:1.34,a1:2.42,len:2300};
 const GEO={deskh:DK,deskv:DKV};
 /* pad order on the MPC60 II, top row first */
 const PAD_NAMES=['PERC 1','PERC 2','PERC 3','PERC 4','RIDE 1','RIDE 2','CRASH 1','CRASH 2','TOM 1','TOM 2','TOM 3','TOM 4','HIHAT','SNARE 1','SNARE 2','BASS'];
@@ -266,20 +266,34 @@ function subscribe(c,W,H,te,cyF,wide){if(te<0)return;const w=W*(wide?.3:.5),h=w*
   if(te>clickT&&te<clickT+.55){c.save();c.strokeStyle='rgba(224,36,47,'+(.6*(1-(te-clickT)/.55))+')';c.lineWidth=h*.06;c.beginPath();c.arc(ex,ey,h*.15+(te-clickT)*h*1.6,0,6.2832);c.stroke();c.restore()}
   c.save();c.globalAlpha=ga;c.translate(px,py);c.scale(h/46,h/46);c.fillStyle='#111';c.strokeStyle='#fff';c.lineWidth=3;c.beginPath();c.moveTo(0,0);c.lineTo(0,32);c.lineTo(8,25);c.lineTo(14,38);c.lineTo(20,35);c.lineTo(14,23);c.lineTo(24,23);c.closePath();c.stroke();c.fill();c.restore()}}
 /* the lamp as a real light: the room darkens and warms when it sags, the bulb and the shade slats glow, a soft cone and bloom fall onto the desk */
-function lampFx(c,W,H,ox,oy,sc,G,T){const a=lampAmt(),fl=LAMPFL,lp=G.lamp,bx=ox+G.bulb[0]*sc,by=oy+G.bulb[1]*sc,lx=ox+lp[0]*sc,ly=oy+lp[1]*sc,R=lp[2]*sc;if(!a){return}
- const dim=1-fl;
- /* 1. everything that the lamp lights gets darker and more orange as it sags (stronger near the lamp, none at the far edges which are already dark) */
- c.save();c.globalCompositeOperation='multiply';{const f=1-.62*dim,g=c.createRadialGradient(lx,ly,R*.08,lx,ly,R*2.1),col=k=>'rgb('+Math.round(255*(1-(1-f)*k))+','+Math.round(255*(1-(1-f)*k*1.12))+','+Math.round(255*(1-(1-f)*k*1.35))+')';g.addColorStop(0,col(1));g.addColorStop(.45,col(.62));g.addColorStop(1,col(.18));c.fillStyle=g;c.fillRect(0,0,W,H)}c.restore();
- /* 2. a broad warm bloom from the lamp onto the desk, stronger when it is bright */
- c.save();c.globalCompositeOperation='lighter';{const g=c.createRadialGradient(lx,ly,5,lx,ly,R*1.35),k=.2*Math.pow(fl,1.6)*Math.min(1.4,.6+a*.4);g.addColorStop(0,'rgba(255,176,86,'+(k).toFixed(3)+')');g.addColorStop(.35,'rgba(255,140,60,'+(k*.45).toFixed(3)+')');g.addColorStop(1,'rgba(255,120,40,0)');c.fillStyle=g;c.fillRect(0,0,W,H)}
- /* 3. the cone of light under the shade: a soft wedge from the bulb across the desk, a little animated so it looks like light in dusty air */
- {const ang=Math.atan2(H*.55-by,W*.5-bx),spread=.62,L=Math.max(W,H)*1.3,g=c.createRadialGradient(bx,by,0,bx,by,L*.8);g.addColorStop(0,'rgba(255,196,120,'+(.12*fl*fl).toFixed(3)+')');g.addColorStop(.6,'rgba(255,170,90,'+(.04*fl*fl).toFixed(3)+')');g.addColorStop(1,'rgba(255,150,70,0)');c.fillStyle=g;c.beginPath();c.moveTo(bx,by);c.lineTo(bx+Math.cos(ang-spread)*L,by+Math.sin(ang-spread)*L);c.lineTo(bx+Math.cos(ang+spread)*L,by+Math.sin(ang+spread)*L);c.closePath();c.fill()
-  c.globalAlpha=.5*fl*fl;for(let r=0;r<5;r++){const aa=ang+(-.42+r*.21)+Math.sin(T*.25+r)*.03,g2=c.createLinearGradient(bx,by,bx+Math.cos(aa)*L,by+Math.sin(aa)*L);g2.addColorStop(0,'rgba(255,200,130,.06)');g2.addColorStop(1,'rgba(255,200,130,0)');c.strokeStyle=g2;c.lineWidth=Math.max(6,R*.05);c.beginPath();c.moveTo(bx,by);c.lineTo(bx+Math.cos(aa)*L,by+Math.sin(aa)*L);c.stroke()}c.globalAlpha=1}
- /* 4. the hot bulb and the glowing slats */
+const CONEC={};
+/* the light pool is drawn once per scene (at half size) as two soft masks: one that is just the shape, one that is the shape with warm light fading out from the bulb */
+function coneMasks(G){if(CONEC[G.id])return CONEC[G.id];const w=Math.round(G.W/2),h=Math.round(G.H/2),k=.5,C=G.cone,ax=C.apex[0]*k,ay=C.apex[1]*k,L=C.len*k;
+ const path=x=>{x.beginPath();x.moveTo(ax,ay);x.lineTo(ax+Math.cos(C.a0)*L*1.25,ay+Math.sin(C.a0)*L*1.25);x.arc(ax,ay,L*1.25,C.a0,C.a1);x.closePath()};
+ const shape=document.createElement('canvas');shape.width=w;shape.height=h;let x=shape.getContext('2d');
+ const rg=x.createRadialGradient(ax,ay,0,ax,ay,L);rg.addColorStop(0,'rgba(0,0,0,1)');rg.addColorStop(.38,'rgba(0,0,0,1)');rg.addColorStop(.7,'rgba(0,0,0,.82)');rg.addColorStop(1,'rgba(0,0,0,.5)');
+ x.filter='blur('+Math.round(w*.022)+'px)';x.fillStyle=rg;path(x);x.fill();x.filter='none';
+ const warm=document.createElement('canvas');warm.width=w;warm.height=h;const y=warm.getContext('2d');
+ const wg=y.createRadialGradient(ax,ay,0,ax,ay,L*.8);wg.addColorStop(0,'rgba(255,200,120,1)');wg.addColorStop(.3,'rgba(255,170,90,.7)');wg.addColorStop(.7,'rgba(255,140,60,.25)');wg.addColorStop(1,'rgba(255,120,40,0)');
+ y.filter='blur('+Math.round(w*.03)+'px)';y.fillStyle=wg;path(y);y.fill();y.filter='none';
+ return CONEC[G.id]={shape,warm}}
+let LDK=null;
+/* the lamp as a real light: a pool of warm light under the shade with an edge, shadow outside it, a hot bulb and glowing slats; all of it sags and flickers with the lamp */
+function lampFx(c,W,H,ox,oy,sc,G,T){const a=lampAmt(),fl=LAMPFL,bx=ox+G.bulb[0]*sc,by=oy+G.bulb[1]*sc,R=G.lamp[2]*sc;if(!a||!G.cone)return;const dim=1-fl,M=coneMasks(G);
+ if(!LDK||LDK.width!==W||LDK.height!==H){LDK=document.createElement('canvas');LDK.width=W;LDK.height=H}
+ const x=LDK.getContext('2d');x.globalCompositeOperation='source-over';x.clearRect(0,0,W,H);
+ /* 1. outside the pool the desk is dark and a little cool; when the lamp sags the dark creeps in over the pool too */
+ const da=clamp(.34+.2*a+.5*dim,0,.9);x.fillStyle='rgba(14,9,8,'+da.toFixed(3)+')';x.fillRect(0,0,W,H);
+ x.globalCompositeOperation='destination-out';x.globalAlpha=clamp(1-.45*dim,0,1);x.drawImage(M.shape,ox,oy,G.W*sc,G.H*sc);x.globalAlpha=1;x.globalCompositeOperation='source-over';
+ c.save();c.drawImage(LDK,0,0);
+ /* 2. warm light inside the pool, brightest near the bulb */
+ c.globalCompositeOperation='lighter';c.globalAlpha=clamp(.34*Math.pow(fl,1.7)*Math.min(1.5,.55+a*.45),0,.7);c.drawImage(M.warm,ox,oy,G.W*sc,G.H*sc);c.globalAlpha=1;
+ /* 3. a bloom around the bulb and the hot bulb itself */
+ {const g=c.createRadialGradient(bx,by,5,bx,by,R*.9),k=.2*Math.pow(fl,1.6);g.addColorStop(0,'rgba(255,190,110,'+k.toFixed(3)+')');g.addColorStop(1,'rgba(255,150,70,0)');c.fillStyle=g;c.fillRect(0,0,W,H)}
  {const hot=Math.pow(fl,2.2),r1=R*.2,g=c.createRadialGradient(bx,by,0,bx,by,r1);g.addColorStop(0,'rgba(255,240,200,'+(.9*hot).toFixed(3)+')');g.addColorStop(.3,'rgba(255,200,120,'+(.5*hot).toFixed(3)+')');g.addColorStop(1,'rgba(255,150,70,0)');c.fillStyle=g;c.fillRect(bx-r1,by-r1,2*r1,2*r1)}
  c.restore();
- /* 5. when it sags, the glass of the room is a little blue-grey (the light goes cold and dim) */
- if(dim>.1){c.save();c.globalCompositeOperation='multiply';c.fillStyle='rgba(120,130,170,'+(.18*dim).toFixed(3)+')';c.fillRect(0,0,W,H);c.restore()}}
+ /* 4. a faint cold cast when it sags */
+ if(dim>.1){c.save();c.globalCompositeOperation='multiply';c.fillStyle='rgba(120,130,170,'+(.16*dim).toFixed(3)+')';c.fillRect(0,0,W,H);c.restore()}}
 function frame(c,W,H,fmt,T,X){
  LAMPFL=lampLevel(T);const cu=fmt==='c';if(cu)fmt='v';const OV=!cu&&!X.long;
  const v=fmt==='v',E=ST.eng,sc0=v?.87*W/848:.6*W/848,k=trackAt(X,T),tr=X.tracks[k],Sx=tr.S,lt=T-tr.start,la=lt+(tr.off||0),tape=X.kind==='tape',last=X.tracks[X.tracks.length-1],lastEnd=last.start+last.dur,t0=X.tracks[0].start;
