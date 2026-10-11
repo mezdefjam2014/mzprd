@@ -109,7 +109,7 @@ function make(c,W,H,seed,X,o){o=o||{};const r=n=>hs(n,seed),bgk=H>W?'v':'h',want
   if(deskOk){/* light from the lamp side: a soft gradient over the machine, bright toward the lamp, darker away from it */
    const sd=document.createElement('canvas');sd.width=Math.ceil(1024*sc);sd.height=Math.ceil(922*sc);const sx=sd.getContext('2d'),gx=DB.flip?1:0,gr=sx.createLinearGradient(sd.width*(gx?1:0),sd.height*.1,sd.width*(gx?0:1),sd.height*.9);gr.addColorStop(0,'rgb(255,244,226)');gr.addColorStop(.55,'rgb(205,186,168)');gr.addColorStop(1,'rgb(120,104,94)');sx.fillStyle=gr;sx.fillRect(0,0,sd.width,sd.height);sx.globalCompositeOperation='destination-in';sx.drawImage(Z.cut(),0,0,sd.width,sd.height);
    c.save();c.globalCompositeOperation='multiply';c.drawImage(sd,ox,oy);c.restore();
-   if(Z.handsReady()&&r(40)<.55&&pressed.size){const pads=[...pressed],pi=pads[Math.floor(r(41)*pads.length)],key=(pi%4)<2?'l':'r';c.save();c.translate(ox,oy);c.scale(sc,sc);Z.hand(c,key,pi,.22+.3*r(42),DB.flip?[1500,-300]:[-250,-250]);c.restore()}}
+   if(Z.handsReady()&&(o.hands===true?true:o.hands===false?false:r(40)<.5)&&pressed.size){const pads=[...pressed],pi=pads[Math.floor(r(41)*pads.length)],key=(pi%4)<2?'l':'r';c.save();c.translate(ox,oy);c.scale(sc,sc);Z.hand(c,key,pi,.22+.3*r(42),DB.flip?[1500,-300]:[-250,-250]);c.restore()}}
   c.restore()};
  let cx=Ly.cx*W,cy=Ly.cy*H;if(Ly.zoom){cx=W*.33;cy=H*.64}
  if(Ly.two)place(cx+W*.12,cy-H*.05,.18,.5);
