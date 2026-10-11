@@ -127,13 +127,13 @@ function machine(c,ox,oy,sc,S,o){
  led(G.leds.play[0],G.leds.play[1],run,'#ff3a24');led(G.leds.rec[0],G.leds.rec[1],run,'#ff3a24');led(G.leds.over[0],G.leds.over[1],run&&ph<bl*.5,'#ff3a24');
  c.restore()}
 const tlOne=Sx=>({kind:'one',tracks:[{S:Sx,start:LEAD,dur:Sx.dur}],total:LEAD+Sx.dur+TAIL,lead:LEAD,title:Sx.title});
-function derive(X,fmt){const E=ST.eng,sub=E.sub,loop=E.loop&&X.kind==='one'&&fmt==='v';if(!sub&&!loop)return X;let tracks,total;
+function derive(X,fmt,cu){const E=ST.eng,sub=E.sub&&!cu,loop=E.loop&&X.kind==='one'&&fmt==='v';if(!sub&&!loop)return X;let tracks,total;
  if(loop){const Sx=X.tracks[0].S,xf=Math.min(3.8,Sx.dur*.3),lead=.12;
   const A={S:Sx,start:lead,off:xf,dur:Sx.dur-xf,fi:.04,fo:xf},B={S:Sx,start:lead+Sx.dur-2*xf,off:0,dur:xf,fi:xf,fo:0};tracks=[A,B];total=A.start+A.dur}
  else{tracks=X.tracks.map(t=>Object.assign({},t));const l=tracks[tracks.length-1];total=l.start+l.dur+3.6}
  return{kind:X.kind,tracks,total,lead:X.lead,title:X.title,sub:!!sub,subT0:sub?total-4.2:0,loop}}
-const XF=fmt=>{const b=X();if(!b)return null;const k=fmt==='v'?'_v':'_h';if(!b[k])b[k]=derive(b,fmt);return b[k]};
-function dropV(){if(S&&S.tl){S.tl._v=null;S.tl._h=null}if(TP){TP._v=null;TP._h=null}}
+const XF=fmt=>{const b=X();if(!b)return null;const k=fmt==='v'?'_v':fmt==='c'?'_c':'_h';if(!b[k])b[k]=derive(b,fmt==='c'?'v':fmt,fmt==='c');return b[k]};
+function dropV(){if(S&&S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}if(TP){TP._v=null;TP._h=null;TP._c=null}}
 const trackAt=(X,T)=>{let k=0;for(let i=0;i<X.tracks.length;i++)if(T>=X.tracks[i].start)k=i;return k};
 let GR=null,OC=null,DESKS={h:null,v:null},DESKBG={h:null,v:null},WARM=null;
 function warmVer(img){const cv=document.createElement('canvas');cv.width=img.naturalWidth;cv.height=img.naturalHeight;const x=cv.getContext('2d');x.drawImage(img,0,0);x.globalCompositeOperation='multiply';x.fillStyle='rgb(255,212,168)';x.fillRect(0,0,cv.width,cv.height);x.globalCompositeOperation='destination-in';x.drawImage(img,0,0);return cv}
@@ -262,16 +262,18 @@ function subscribe(c,W,H,te,cyF,wide){if(te<0)return;const w=W*(wide?.3:.5),h=w*
   if(te>clickT&&te<clickT+.55){c.save();c.strokeStyle='rgba(224,36,47,'+(.6*(1-(te-clickT)/.55))+')';c.lineWidth=h*.06;c.beginPath();c.arc(ex,ey,h*.15+(te-clickT)*h*1.6,0,6.2832);c.stroke();c.restore()}
   c.save();c.globalAlpha=ga;c.translate(px,py);c.scale(h/46,h/46);c.fillStyle='#111';c.strokeStyle='#fff';c.lineWidth=3;c.beginPath();c.moveTo(0,0);c.lineTo(0,32);c.lineTo(8,25);c.lineTo(14,38);c.lineTo(20,35);c.lineTo(14,23);c.lineTo(24,23);c.closePath();c.stroke();c.fill();c.restore()}}
 function frame(c,W,H,fmt,T,X){
+ const cu=fmt==='c';if(cu)fmt='v';const OV=!cu&&!X.long;
  const v=fmt==='v',E=ST.eng,sc0=v?.87*W/848:.6*W/848,k=trackAt(X,T),tr=X.tracks[k],Sx=tr.S,lt=T-tr.start,la=lt+(tr.off||0),tape=X.kind==='tape',last=X.tracks[X.tracks.length-1],lastEnd=last.start+last.dur,t0=X.tracks[0].start;
  const dx=(1.3*Math.sin(T*.31)+.7*Math.sin(T*.77+1.3))*W/1920,dy=(1.1*Math.sin(T*.27+.8)+.6*Math.sin(T*.69+2.1))*W/1920,zs=(1+.0028*Math.sin(T*.21+.4))*(E.hook?1+.2*(1-ease(T/.8)):1);
  c.save();c.fillStyle='#fff';c.fillRect(0,0,W,H);c.translate(W/2+dx,H/2+dy);c.scale(zs,zs);c.translate(-W/2,-H/2);
  const SC=sceneOf(fmt),intro=tape&&T<t0;let sc=sc0,cx=W/2,cy=v?H*.5:H*.495,ox=cx-PH.cx*sc,oy=cy-PH.cy*sc;
  if(SC){sc=Math.max(W/SC.G.W,H/SC.G.H)*1.025;ox=(W-SC.G.W*sc)/2;oy=(H-SC.G.H*sc)/2}else ground(c,W+80,H+80,ox,oy,sc);
+ if(cu){const G0=SC?SC.G:PH,pcx=G0.pad.x0+1.5*G0.pad.px+G0.pad.w/2,pcy=G0.pad.y0+1.5*G0.pad.py+G0.pad.h/2,zoom=(SC?1.78:1.55)*(1+.04*Math.sin(T*.23)),sc2=(SC?sc:sc0)*zoom;sc=sc2;ox=W/2-pcx*sc+Math.sin(T*.19)*6;oy=H*.47-pcy*sc+Math.cos(T*.16)*5}
  const fx={vol:(.21*ease((T-.15)/2.4))+.012*Math.sin(T*.6),con:.05*Math.sin(T*.4),fader:Math.max(0,26*(.5+.5*Math.sin(T*.29-.6))),btn:{play:0,start:pulse(T,t0-.42,t0-.12),rec:pulse(T,t0-.42,t0-.12),over:0,stop:pulse(T,lastEnd-.08,lastEnd+.2)}};
  machine(c,ox,oy,sc,Sx,{img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,run:la>=-.02&&T<lastEnd,trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
 {c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC?SC.G:PH;
   if(ST.hands&&ST.hands.on)drawHands(c,Gs,Sx,la,!!SC);
-  if(SC){if(Gs.label){const pr=ease((T-tr.start+.25)/1.1);handwrite(c,Gs.label,Sx.title,'MZPRD'+(Sx.bpm?'  '+Sx.bpm+' BPM':'')+(Sx.key?'  '+Sx.key:''),X.kind==='tape'&&k===0&&T<t0?0:pr)}
+  if(SC){if(Gs.label){const pr=X.long?1:ease((T-tr.start+.25)/1.1);handwrite(c,Gs.label,Sx.title,'MZPRD'+(Sx.bpm?'  '+Sx.bpm+' BPM':'')+(Sx.key?'  '+Sx.key:''),X.kind==='tape'&&k===0&&T<t0?0:pr)}
    if(Gs.smoke&&ST.smoke&&ST.smoke.on)smoke(c,T,Gs.smoke,ST.smoke.amt||1);dust(c,T,Gs)}
   c.restore()}
  if(SC){const lp=SC.G.lamp;if(lp){const fl=lampFl(T);
@@ -281,11 +283,11 @@ function frame(c,W,H,fmt,T,X){
  c.restore();
  /* optional words and the subscribe, drawn flat on top (no camera drift) */
  const topY=v?H*.17:H*.12,sz=v?Math.min(150,W*.12):Math.min(110,W*.058);
- if(E.hook&&T<2.9){const txt=(E.hookText||'').trim().toUpperCase()||HOOKS[(String(X.title||'').length*7+3)%HOOKS.length],lines=wrapTwo(txt),size=Math.min(sz,W*.9/Math.max(5,Math.max(...lines.map(l=>l.length)))*1.9);sticker(c,lines,W/2,topY,size,.04,T,{out:(2.9-T)/.3})}
- if(E.note&&(E.noteText||'').trim()&&T>2.4&&T<7.4)pill(c,E.noteText.trim(),W/2,v?(SC?H*.722:H*.775):H*.95,v?40:28,Math.min(ease((T-2.4)/.4),ease((7.4-T)/.4)));
- if(E.q&&(E.qText||'').trim()&&X.total>14&&T>X.total-10.5&&T<X.total-.15){const txt=E.qText.trim().toUpperCase(),lines=wrapTwo(txt),size=Math.min(v?100:72,W*.9/Math.max(5,Math.max(...lines.map(l=>l.length)))*1.9),pu=1+.025*Math.sin(T*5);sticker(c,lines,W/2,topY,size*pu,X.total-10.5,T,{fill:'#e0242f',out:Math.min(1,(X.total-.15-T)/.3)})}
- if(X.sub)subscribe(c,W,H,T-X.subT0,v?(SC?.905:0):.9,!v);
- if(ST.text&&!SC)text(c,W,H,v,{title:tape?X.title:Sx.title,bpm:Sx.bpm,key:Sx.key,sub:tape&&!intro?(k+1)+'. '+Sx.title:''})}
+ if(OV&&E.hook&&T<2.9){const txt=(E.hookText||'').trim().toUpperCase()||HOOKS[(String(X.title||'').length*7+3)%HOOKS.length],lines=wrapTwo(txt),size=Math.min(sz,W*.9/Math.max(5,Math.max(...lines.map(l=>l.length)))*1.9);sticker(c,lines,W/2,topY,size,.04,T,{out:(2.9-T)/.3})}
+ if(OV&&E.note&&(E.noteText||'').trim()&&T>2.4&&T<7.4)pill(c,E.noteText.trim(),W/2,v?(SC?H*.722:H*.775):H*.95,v?40:28,Math.min(ease((T-2.4)/.4),ease((7.4-T)/.4)));
+ if(OV&&E.q&&(E.qText||'').trim()&&X.total>14&&T>X.total-10.5&&T<X.total-.15){const txt=E.qText.trim().toUpperCase(),lines=wrapTwo(txt),size=Math.min(v?100:72,W*.9/Math.max(5,Math.max(...lines.map(l=>l.length)))*1.9),pu=1+.025*Math.sin(T*5);sticker(c,lines,W/2,topY,size*pu,X.total-10.5,T,{fill:'#e0242f',out:Math.min(1,(X.total-.15-T)/.3)})}
+ if(OV&&X.sub)subscribe(c,W,H,T-X.subT0,v?(SC?.905:0):.9,!v);
+ if(OV&&ST.text&&!SC)text(c,W,H,v,{title:tape?X.title:Sx.title,bpm:Sx.bpm,key:Sx.key,sub:tape&&!intro?(k+1)+'. '+Sx.title:''})}
 function text(c,W,H,v,S){const ink='#111';c.save();c.fillStyle=ink;c.textBaseline='alphabetic';
  if(v){c.textAlign='center';const t=(S.title||'').toUpperCase(),f=s=>'700 '+s+'px Anton, Oswald, sans-serif',s=fitFont(c,t,f,150,W*.86);c.font=f(s);c.fillText(t,W/2,H*.2);c.font='600 44px Oswald, sans-serif';c.fillStyle='#666';c.fillText(S.sub?S.sub.toUpperCase():([S.bpm?S.bpm+' BPM':'',S.key||'','PROD. MZPRD'].filter(Boolean)).join('   /   '),W/2,H*.2+70);
   c.font='600 40px Oswald, sans-serif';c.fillStyle=ink;c.fillText('MZPRD.COM',W/2,H*.9)}
@@ -353,6 +355,13 @@ function html(){return`<div class="mg"><div>
  <input type="text" id="mEnoteT" maxlength="60">
  <label class="chk"><input type="checkbox" id="mEq"> QUESTION ON SCREEN AT THE END</label>
  <input type="text" id="mEqT" maxlength="40">
+<h3 style="margin-top:18px">5. EXTRA VIDEOS (OPTIONAL)</h3>
+ <div class="msg">Same beat, different uploads. Each one is a separate video for a different audience.</div>
+ <button class="btn" id="mRcu" style="width:100%;margin-top:6px">RENDER PAD CLOSE-UP SHORT (9:16, NO TEXT)</button>
+ <label>FREESTYLE LOOP (NO LYRICS): LENGTH AND SHAPE</label><div class="two"><select id="mLpM"><option value="10">10 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option></select><select id="mLpF"><option value="h">16:9 (720p)</option><option value="v">9:16 (720p)</option></select></div>
+ <button class="btn" id="mRlp" style="width:100%;margin-top:6px">RENDER FREESTYLE LOOP VIDEO</button>
+ <div class="msg">The loop is made at 720p and 15 frames a second so a 30 minute file stays a few hundred MB. It repeats the beat with a smooth blend. A 30 minute loop can take 10 to 20 minutes to render, so leave the tab open.</div>
+ <div id="mLpOut"></div>
 </div></div></div>`}
 
 function applyKit(){const id=ST.beat,k=ST.kits&&ST.kits[id]!=null&&ST.kits[id]!==''?+ST.kits[id]:kitFor(id);S.kit=k;const L=layout(S.raw,k);S.hits=L.hits;S.per=L.per;
@@ -368,7 +377,7 @@ function applyKit(){const id=ST.beat,k=kitOf(id),L=layout(S.raw,k);S.kit=k;S.hit
 async function pick(id){ST.beat=id;save();stopPlay();const b=beats.find(x=>String(x.id)===String(id));if(!b)return;
  S=null;drawNow();$q('#mMsg').textContent='Loading "'+b.title+'" and listening for the hits...';$q('#mInfo').textContent='';
  try{await loadBeat(b);if(String(ST.beat)!==String(id))return;S=mkS(b,ST.len,kitOf(id));S.lcd=ST.lcd.trim();S.tl=tlOne(S);applyKit();
-  $q('#mInfo').textContent=mmss(CACHE[b.id].buf.duration)+' preview / '+S.hits.length+' pad hits found';$q('#mMsg').textContent='Ready. Press PLAY to watch it, or render the video.';ytRender();thRender();genRender();drawNow()}
+  $q('#mInfo').textContent=mmss(CACHE[b.id].buf.duration)+' preview / '+S.hits.length+' pad hits found';$q('#mMsg').textContent='Ready. Press PLAY to watch it, or render the video.';ytRender();thRender();genRender();if(window.__lpShow)__lpShow();drawNow()}
  catch(e){$q('#mMsg').textContent='Could not load this beat: '+(e&&e.message||e)}}
 function size(){const v=ST.fmt==='v',cv=$q('#mCv');cv.width=v?1080:1920;cv.height=v?1920:1080;cv.style.maxWidth=v?'360px':'100%';$q('#mFh').classList.toggle('on',!v);$q('#mFv').classList.toggle('on',v)}
 function drawNow(){const cv=$q('#mCv'),Xt=XF(ST.fmt);if(!IMG||!cv)return;if(!Xt){const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);$q('#mTime').textContent='0:00 / 0:00';return}
@@ -396,7 +405,7 @@ async function renderOne(fmt){
  if(!Xt){rm(ST.tape.on?'Build the tape first (right side, section 3).':'Pick a beat first.');return false}
  let venc,aenc,err=null;
  try{await loadS('mp4-muxer.js').catch(()=>{});
-  const OW=fmt==='v'?1080:1920,OH=fmt==='v'?1920:1080,FPS=30,total=Xt.total,N=Math.ceil(total*FPS),out=document.createElement('canvas');out.width=OW;out.height=OH;const oc=out.getContext('2d');
+  const tall=fmt==='v'||fmt==='c',OW=tall?1080:1920,OH=tall?1920:1080,FPS=30,total=Xt.total,N=Math.ceil(total*FPS),out=document.createElement('canvas');out.width=OW;out.height=OH;const oc=out.getContext('2d');
   const pickV=async()=>{for(const c of [{codec:'avc1.640028',mux:'avc'},{codec:'avc1.4d0028',mux:'avc'},{codec:'avc1.42E028',mux:'avc'},{codec:'vp09.00.40.08',mux:'vp9'}]){const cfg={codec:c.codec,width:OW,height:OH,bitrate:9e6,framerate:FPS};try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return{...c,cfg}}catch(e){}}return null};
   const pickA=async()=>{for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){try{const r=await AudioEncoder.isConfigSupported({codec:c.codec,sampleRate:48000,numberOfChannels:2,bitrate:192000});if(r&&r.supported)return c}catch(e){}}return null};
   const vc=await pickV(),ac=await pickA();if(!vc||!ac)throw new Error('no video codec available');
@@ -407,13 +416,46 @@ async function renderOne(fmt){
   const t0=performance.now();
   for(let f=0;f<N;f++){if(err)throw err;frame(oc,OW,OH,fmt,Math.min(total-.001,f/FPS),Xt);const vf=new VideoFrame(out,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});venc.encode(vf,{keyFrame:f%90===0});vf.close();
    while(venc.encodeQueueSize>6){await Promise.race([new Promise(r=>venc.addEventListener('dequeue',r,{once:true})),new Promise(r=>setTimeout(r,40))]);if(err)throw err}
-   if(f%8===0){const p=Math.round(f/N*100),el=(performance.now()-t0)/1000,eta=f?Math.round(el/f*(N-f)):0;$q('#mProg').style.width=p+'%';rm('Rendering '+(fmt==='v'?'9:16':'16:9')+' '+p+'%  (about '+mmss(eta)+' left). You can switch tabs, it keeps going.');await yieldNow()}}
+   if(f%8===0){const p=Math.round(f/N*100),el=(performance.now()-t0)/1000,eta=f?Math.round(el/f*(N-f)):0;$q('#mProg').style.width=p+'%';rm('Rendering '+(fmt==='c'?'close-up 9:16':fmt==='v'?'9:16':'16:9')+' '+p+'%  (about '+mmss(eta)+' left). You can switch tabs, it keeps going.');await yieldNow()}}
   await venc.flush();await aenc.flush();if(err)throw err;muxer.finalize();const blob=new Blob([target.buffer],{type:'video/mp4'});
-  $q('#mProg').style.width='100%';rm('Done: '+(blob.size/1048576).toFixed(0)+' MB, '+mmss(total)+' long. Downloading.');dlf(blob,((Xt.kind==='tape'?Xt.title:Xt.tracks[0].S.title)||'beat').replace(/[^\w -]+/g,'')+' - MPC '+(fmt==='v'?'9x16':'16x9')+'.mp4');return true
+  $q('#mProg').style.width='100%';rm('Done: '+(blob.size/1048576).toFixed(0)+' MB, '+mmss(total)+' long. Downloading.');dlf(blob,((Xt.kind==='tape'?Xt.title:Xt.tracks[0].S.title)||'beat').replace(/[^\w -]+/g,'')+' - MPC '+({v:'9x16',h:'16x9',c:'pad closeup 9x16'}[fmt])+'.mp4');return true
  }catch(e){console.warn(e);rm('Render failed: '+((e&&e.message)||e));return false}
  finally{try{venc&&venc.close()}catch(e){}try{aenc&&aenc.close()}catch(e){}}}
-async function render(list){if(busy)return;busy=true;stopPlay();const bar=document.querySelector('.bh [data-t=mpc]');['#mRh','#mRv','#mRb'].forEach(k=>$q(k).disabled=true);
- try{for(const f of list){if(!(await renderOne(f)))break}}finally{busy=false;['#mRh','#mRv','#mRb'].forEach(k=>$q(k).disabled=false);if(bar)bar.textContent='MPC';drawNow();ytOpen()}}
+async function render(list){if(busy)return;busy=true;stopPlay();const bar=document.querySelector('.bh [data-t=mpc]');['#mRh','#mRv','#mRb','#mRcu','#mRlp'].forEach(k=>$q(k).disabled=true);
+ try{for(const f of list){if(!(await renderOne(f)))break}}finally{busy=false;['#mRh','#mRv','#mRb','#mRcu','#mRlp'].forEach(k=>$q(k).disabled=false);if(bar)bar.textContent='MPC';drawNow();ytOpen()}}
+/* ---------- long freestyle loop (no lyrics): the beat repeats with a smooth blend, 15 fps and 720p to keep the file small ---------- */
+function loopTL(Sx,mins){const xf=Math.min(2.5,Sx.dur*.2),step=Math.max(2,Sx.dur-xf),lead=.4,total=lead+mins*60,tracks=[];for(let t=lead,i=0;t<total-.01;t+=step,i++)tracks.push({S:Sx,start:t,dur:Sx.dur,off:0,fi:i===0?.05:xf,fo:xf});const X={kind:'one',tracks,total,lead,title:Sx.title,long:true,xf};const l=tracks[tracks.length-1];l.fo=Math.min(3,Math.max(.5,total-(l.start)));return X}
+async function mixChunk(Xt,from,to,sr){const n=Math.ceil((to-from)*sr),oa=new OfflineAudioContext(2,n,sr);
+ Xt.tracks.forEach(tr=>{const s0=tr.start,e0=tr.start+tr.dur;if(e0<=from||s0>=to)return;const fin=tr.fi!=null?tr.fi:.05,fo=tr.fo!=null?tr.fo:1,src=oa.createBufferSource();src.buffer=tr.S.buf;const g=oa.createGain();src.connect(g);g.connect(oa.destination);
+  const gAt=t=>t<=s0?.0001:t<s0+fin?.0001+(1-.0001)*((t-s0)/fin):t<e0-fo?1:t<e0?1-(1-.0001)*((t-(e0-fo))/fo):.0001,w=Math.max(0,s0-from),a=Math.max(s0,from),b=Math.min(e0,to);
+  g.gain.setValueAtTime(gAt(a),w);[s0+fin,e0-fo,e0].forEach(bp=>{if(bp>a&&bp<b)g.gain.linearRampToValueAtTime(gAt(bp),bp-from)});g.gain.linearRampToValueAtTime(gAt(b),b-from);
+  src.start(w,(tr.off||0)+Math.max(0,from-s0),Math.max(.05,b-a))});
+ return oa.startRendering()}
+async function renderLoop(){if(busy)return;const rm=t=>{$q('#mRMsg').textContent=t};
+ if(!(window.VideoEncoder&&window.AudioEncoder&&window.VideoFrame&&window.AudioData&&window.OfflineAudioContext)){rm('This browser cannot render video. Use Chrome or Edge.');return}
+ if(ST.tape.on||!S||!S.buf){rm(ST.tape.on?'The loop video is for a single beat. Turn the beat tape off first.':'Pick a beat first.');return}
+ busy=true;stopPlay();['#mRh','#mRv','#mRb','#mRcu','#mRlp'].forEach(k=>$q(k).disabled=true);let venc,aenc,err=null;
+ try{await loadS('mp4-muxer.js').catch(()=>{});const mins=+$q('#mLpM').value,tall=$q('#mLpF').value==='v',OW=tall?720:1280,OH=tall?1280:720,FPS=15,Xt=loopTL(S,mins),total=Xt.total,N=Math.ceil(total*FPS),out=document.createElement('canvas');out.width=OW;out.height=OH;const oc=out.getContext('2d');
+  const pickV=async()=>{for(const c of [{codec:'avc1.4d001f',mux:'avc'},{codec:'avc1.42E01f',mux:'avc'},{codec:'vp09.00.31.08',mux:'vp9'}]){const cfg={codec:c.codec,width:OW,height:OH,bitrate:1.6e6,framerate:FPS};try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return{...c,cfg}}catch(e){}}return null};
+  const pickA=async()=>{for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){try{const r=await AudioEncoder.isConfigSupported({codec:c.codec,sampleRate:48000,numberOfChannels:2,bitrate:160000});if(r&&r.supported)return c}catch(e){}}return null};
+  const vc=await pickV(),ac=await pickA();if(!vc||!ac)throw new Error('no video codec available');
+  const target=new Mp4Muxer.ArrayBufferTarget(),muxer=new Mp4Muxer.Muxer({target,video:{codec:vc.mux,width:OW,height:OH},audio:{codec:ac.mux,numberOfChannels:2,sampleRate:48000},fastStart:'in-memory'});
+  venc=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>{err=e}});venc.configure(vc.cfg);aenc=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>{err=e}});aenc.configure({codec:ac.codec,sampleRate:48000,numberOfChannels:2,bitrate:160000});
+  const CH=60,t0=performance.now();let f=0;
+  for(let from=0;from<total;from+=CH){const to=Math.min(total,from+CH),ab=await mixChunk(Xt,from,to,48000),L0=ab.getChannelData(0),R0=ab.getChannelData(1);
+   for(let o=0;o<L0.length;o+=4800){const m=Math.min(4800,L0.length-o),b=new Float32Array(m*2);b.set(L0.subarray(o,o+m),0);b.set(R0.subarray(o,o+m),m);const ad=new AudioData({format:'f32-planar',sampleRate:48000,numberOfFrames:m,numberOfChannels:2,timestamp:Math.round((from+o/48000)*1e6),data:b});aenc.encode(ad);ad.close()}
+   const f1=Math.min(N,Math.round(to*FPS));
+   for(;f<f1;f++){if(err)throw err;frame(oc,OW,OH,tall?'v':'h',Math.min(total-.001,f/FPS),Xt);const vf=new VideoFrame(out,{timestamp:Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});venc.encode(vf,{keyFrame:f%150===0});vf.close();
+    while(venc.encodeQueueSize>6){await Promise.race([new Promise(r=>venc.addEventListener('dequeue',r,{once:true})),new Promise(r=>setTimeout(r,40))]);if(err)throw err}
+    if(f%15===0){const p=Math.round(f/N*100),el=(performance.now()-t0)/1000,eta=f?Math.round(el/f*(N-f)):0;$q('#mProg').style.width=p+'%';rm('Rendering the '+mins+' minute loop '+p+'%  (about '+mmss(eta)+' left). Keep this tab open, it can take a while.');await yieldNow()}}}
+  await venc.flush();await aenc.flush();if(err)throw err;muxer.finalize();const blob=new Blob([target.buffer],{type:'video/mp4'});
+  $q('#mProg').style.width='100%';rm('Done: '+(blob.size/1048576).toFixed(0)+' MB, '+mmss(total)+' long. Downloading.');dlf(blob,(S.title||'beat').replace(/[^\w -]+/g,'')+' - '+mins+' min freestyle loop '+(tall?'9x16':'16x9')+'.mp4')
+ }catch(e){console.warn(e);rm('Render failed: '+((e&&e.message)||e))}
+ finally{try{venc&&venc.close()}catch(e){}try{aenc&&aenc.close()}catch(e){}busy=false;['#mRh','#mRv','#mRb','#mRcu','#mRlp'].forEach(k=>$q(k).disabled=false);drawNow()}}
+function loopPack(){const b=beats.find(x=>String(x.id)===String(ST.beat));if(!b)return'';const mins=+$q('#mLpM').value,AR=(window.MZMpcGen?MZMpcGen.artistsOf(ST.artist):[]),A=AR.slice(0,2).join(' x '),T=b.title,link='https://mzprd.com/beat/'+(b.slug||T.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''))+'/',bpm=Number(b.bpm)||0,key=b.musical_key||'';
+ const titles=[`${mins} Minutes of ${A?A+' ':''}Boom Bap Freestyle Beat (No Lyrics) | "${T}"`,`${A?A+' Type Beat ':'Boom Bap Type Beat '}Loop - ${mins} Min Freestyle Instrumental`,`Freestyle Beat to Rap Over (${mins} Min Loop) - "${T}"${bpm?' '+bpm+' BPM':''}`,`${mins} Min Rap Instrumental to Write To - ${A?A+' Type Beat':'Boom Bap'} "${T}"`,`Hard Boom Bap Beat Loop for Freestyles | ${mins} Minutes | MPC60`];
+ const desc=`${mins} minute loop of "${T}", played live on the Akai MPC60 II. No lyrics, made for freestyles and writing. Lease the beat: ${link}\n\n> BUY / LEASE THIS BEAT: ${link}\n> ALL BEATS AND SAMPLE PACKS: https://mzprd.com\n\nBEAT DETAILS\nTitle: ${T}\n${bpm?'BPM: '+bpm+'\n':''}${key?'Key: '+key+'\n':''}Loops every ${mmss(S&&S.dur||0)} with a smooth blend.\n\nWant a verse on it? Post what you wrote in the comments.\n\n#typebeat #freestylebeat #boombap`;
+ return{titles,desc}}
 function ytOpen(){const d=$q('#mYTd');if(d&&X()){d.open=true}}
 
 /* ---------- beat tape ---------- */
@@ -430,7 +472,7 @@ async function buildTape(){const T=ST.tape,ids=T.ids.filter(beatById),msg=t=>{$q
  try{const bs=ids.map(beatById);for(let i=0;i<bs.length;i++){msg('Listening to beat '+(i+1)+' of '+bs.length+': '+bs[i].title+'...');await loadBeat(bs[i])}
   const lead=1.6,xf=+T.xf||1.2,tracks=[];let t=lead;bs.forEach(b=>{const Sx=mkS(b,+T.len||0,kitOf(b.id));tracks.push({S:Sx,start:t,dur:Sx.dur,b});t=t+Sx.dur-xf});
   const last=tracks[tracks.length-1];TP={kind:'tape',tracks,lead,xf,title:T.title,total:last.start+last.dur+TAIL};
-  msg('The tape is ready: '+tracks.length+' beats, '+mmss(TP.total)+' long. Press PLAY on the left, or render it.');$q('#mMsg').textContent='Tape ready ('+mmss(TP.total)+').';ytRender();thRender();genRender();drawNow()}
+  msg('The tape is ready: '+tracks.length+' beats, '+mmss(TP.total)+' long. Press PLAY on the left, or render it.');$q('#mMsg').textContent='Tape ready ('+mmss(TP.total)+').';ytRender();thRender();genRender();if(window.__lpShow)__lpShow();drawNow()}
  catch(e){msg('Could not build the tape: '+(e&&e.message||e))}finally{btn.disabled=false}}
 
 /* ---------- YouTube package + thumbnails (the brains are in mpcyt.js) ---------- */
@@ -504,7 +546,7 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  $q('#mLen').onchange=e=>{ST.len=+e.target.value;save();if(ST.beat)pick(ST.beat)};
  $q('#mFh').onclick=()=>{ST.fmt='h';save();size();drawNow()};$q('#mFv').onclick=()=>{ST.fmt='v';save();size();drawNow()};
  $q('#mPlay').onclick=play;$q('#mScrub').oninput=()=>{if(PV.playing)stopPlay();drawNow()};
- const T=ST.tape;$q('#mSens').value=String(ST.sens==null?1:ST.sens);$q('#mNudge').value=String(ST.nudge||0);$q('#mNudgeV').textContent=String(ST.nudge||0);const relay=()=>{save();for(const id in CACHE){}if(S&&S.raw){applyKit();S._hh=null;if(S.tl){S.tl._v=null;S.tl._h=null}}if(TP){TP.tracks.forEach(t=>{const L=layout(t.S.raw,t.S.kit);t.S.hits=L.hits;t.S.per=L.per;t.S._hh=null});TP._v=null;TP._h=null}drawNow()};$q('#mSens').onchange=e=>{ST.sens=+e.target.value;relay()};$q('#mNudge').oninput=e=>{ST.nudge=+e.target.value;$q('#mNudgeV').textContent=String(ST.nudge);relay()};$q('#mTpOn').checked=!!T.on;$q('#mTpT').value=T.title;$q('#mTpL').value=String(T.len);$q('#mTpX').value=String(T.xf);$q('#mTpBox').style.display=T.on?'block':'none';tpList();
+ const T=ST.tape;$q('#mSens').value=String(ST.sens==null?1:ST.sens);$q('#mNudge').value=String(ST.nudge||0);$q('#mNudgeV').textContent=String(ST.nudge||0);const relay=()=>{save();for(const id in CACHE){}if(S&&S.raw){applyKit();S._hh=null;if(S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}}if(TP){TP.tracks.forEach(t=>{const L=layout(t.S.raw,t.S.kit);t.S.hits=L.hits;t.S.per=L.per;t.S._hh=null});TP._v=null;TP._h=null;TP._c=null}drawNow()};$q('#mSens').onchange=e=>{ST.sens=+e.target.value;relay()};$q('#mNudge').oninput=e=>{ST.nudge=+e.target.value;$q('#mNudgeV').textContent=String(ST.nudge);relay()};$q('#mTpOn').checked=!!T.on;$q('#mTpT').value=T.title;$q('#mTpL').value=String(T.len);$q('#mTpX').value=String(T.xf);$q('#mTpBox').style.display=T.on?'block':'none';tpList();
  $q('#mTpOn').onchange=e=>{T.on=e.target.checked;save();$q('#mTpBox').style.display=T.on?'block':'none';stopPlay();ytRender();thRender();drawNow()};
  $q('#mTpT').onchange=e=>{T.title=e.target.value.trim()||'MZPRD BEAT TAPE';if(TP){TP.title=T.title;TP.mix=null}save();ytRender();thRender();drawNow()};
  $q('#mTpL').onchange=e=>{T.len=+e.target.value;tpDirty()};$q('#mTpX').onchange=e=>{T.xf=+e.target.value;tpDirty()};
@@ -512,6 +554,9 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  const En=ST.eng;$q('#mEhk').checked=!!En.hook;$q('#mEhkT').value=En.hookText;$q('#mEsub').checked=!!En.sub;$q('#mEloop').checked=!!En.loop;$q('#mEnote').checked=!!En.note;$q('#mEnoteT').value=En.noteText;$q('#mEq').checked=!!En.q;$q('#mEqT').value=En.qText;
  const eng=(id,k,box)=>{$q(id).onchange=e=>{En[k]=box?e.target.checked:e.target.value;if(k==='sub'||k==='loop'){dropV();stopPlay()}save();drawNow()};if(!box)$q(id).oninput=e=>{En[k]=e.target.value;drawNow()}};
  eng('#mEhk','hook',1);eng('#mEhkT','hookText');eng('#mEsub','sub',1);eng('#mEloop','loop',1);eng('#mEnote','note',1);eng('#mEnoteT','noteText');eng('#mEq','q',1);eng('#mEqT','qText');
+ $q('#mRcu').onclick=()=>render(['c']);$q('#mRlp').onclick=renderLoop;
+ const lpShow=()=>{const o=$q('#mLpOut'),P=loopPack();if(!P||!ST.beat){o.innerHTML='';return}o.innerHTML='<h4>LOOP VIDEO TITLES AND DESCRIPTION</h4>'+P.titles.map((t,i)=>'<div class="it"><b>'+esc(t)+'</b><button data-lt="'+i+'">COPY</button></div>').join('')+'<button class="btn" id="mLpD" style="width:100%;margin-top:6px">COPY DESCRIPTION</button>';o.querySelectorAll('[data-lt]').forEach(b=>b.onclick=async()=>{b.textContent=(await cpy(P.titles[+b.dataset.lt]))?'COPIED':'FAILED'});$q('#mLpD').onclick=async e=>{e.target.textContent=(await cpy(P.desc))?'COPIED':'FAILED'}};
+ $q('#mLpM').onchange=lpShow;window.__lpShow=lpShow;
  $q('#mRh').onclick=()=>render(['h']);$q('#mRv').onclick=()=>render(['v']);$q('#mRb').onclick=()=>render(['h','v'])}
 window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the MPC...</div></div>';
