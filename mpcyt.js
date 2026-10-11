@@ -16,7 +16,7 @@ const MOODS=['hard','dark','dusty','gritty','smooth','soulful','emotional','melo
 function artistsOf(str){return String(str||'').split(/\s*(?:,|\bx\b|&|\/|\+)\s*/i).map(s=>s.trim()).filter(Boolean).slice(0,3)}
 function build(ST,beat,S){
  if(!beat)return null;const T=beat.title,bpm=Number(beat.bpm)||0,key=beat.musical_key||'',year=new Date().getFullYear(),AR=artistsOf(ST.artist),A=AR.join(' x '),A1=AR[0]||'',link='https://mzprd.com/beat/'+(beat.slug||slug(T))+'/',pre=ST.yt.mode==='premiere';
- const v=ST.yt.v||0,seed=(String(beat.id).length*31+T.length*7+v*13),mood=cap(MOODS[Math.floor(hs(1,seed)*MOODS.length)]),mood2=cap(MOODS[(Math.floor(hs(2,seed)*MOODS.length)+3)%MOODS.length]);
+ const v=ST.yt.v||0,seed=(String(beat.id).length*31+T.length*7+v*13),mood=cap(MOODS[Math.floor(hs(1,seed)*MOODS.length)]),mood2=cap(MOODS[(MOODS.indexOf(mood.toLowerCase())+3+Math.floor(hs(2,seed)*4))%MOODS.length]);
  const tb=A?`${A} Type Beat`:`Boom Bap Type Beat`,sub=bpm?`${bpm} BPM`:'';
  const tpl=[
   ['SEARCH',`${tb} - "${T}" | ${year}`],['SEARCH',`${tb} "${T}" (${mood} Boom Bap ${year})`],['SEARCH',`${A?A+' ':''}${mood} Boom Bap Type Beat - "${T}" (Prod. MZPRD)`],
