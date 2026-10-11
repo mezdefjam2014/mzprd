@@ -34,7 +34,7 @@ const GEO={deskh:DK,deskv:DKV};
 const PAD_NAMES=['PERC 1','PERC 2','PERC 3','PERC 4','RIDE 1','RIDE 2','CRASH 1','CRASH 2','TOM 1','TOM 2','TOM 3','TOM 4','HIHAT','SNARE 1','SNARE 2','BASS'];
 
 let CUT=null,ST=null,S=null,beats=[],AC=null,IMG=null,PV={playing:false,raf:0,src:null,t0:0},busy=false;
-function defaults(){return{can:{id:'orig',size:100,rot:0,x:0,y:0},gen:{n:25,angle:'',seed:1,fav:[],sort:'score',show:'all'},hands:{on:true},smoke:{on:true,amt:1},scene:'desk',eng:{hook:false,hookText:'',sub:true,loop:true,note:false,noteText:'Played live on the Akai MPC60 II',q:false,qText:'WHICH RAPPER GETS THIS BEAT?'},tape:{on:false,ids:[],title:'MZPRD BEAT TAPE VOL. 1',len:60,xf:1.2},th:{seed:1,pal:'',fmt:'h'},kits:{},beat:null,artist:'',fmt:'h',len:0,text:false,lcd:'',yt:{mode:'straight',when:'',v:0}}}
+function defaults(){return{skin:'orig',res:'1080',can:{id:'orig',size:100,rot:0,x:0,y:0},gen:{n:25,angle:'',seed:1,fav:[],sort:'score',show:'all'},hands:{on:true},smoke:{on:true,amt:1},scene:'desk',eng:{hook:false,hookText:'',sub:true,loop:true,note:false,noteText:'Played live on the Akai MPC60 II',q:false,qText:'WHICH RAPPER GETS THIS BEAT?'},tape:{on:false,ids:[],title:'MZPRD BEAT TAPE VOL. 1',len:60,xf:1.2},th:{seed:1,pal:'',fmt:'h'},kits:{},beat:null,artist:'',fmt:'h',len:0,text:false,lcd:'',yt:{mode:'straight',when:'',v:0}}}
 function load(){try{const j=JSON.parse(localStorage.getItem(KEY)||'null');if(j)return Object.assign(defaults(),j)}catch(e){}return defaults()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}}
 const ctxA=()=>{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC};
@@ -136,9 +136,12 @@ function derive(X,fmt,cu){const E=ST.eng,sub=E.sub&&!cu,loop=E.loop&&X.kind==='o
 const XF=fmt=>{const b=X();if(!b)return null;const k=fmt==='v'?'_v':fmt==='c'?'_c':'_h';if(!b[k])b[k]=derive(b,fmt==='c'?'v':fmt,fmt==='c');return b[k]};
 function dropV(){if(S&&S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}if(TP){TP._v=null;TP._h=null;TP._c=null}}
 const trackAt=(X,T)=>{let k=0;for(let i=0;i<X.tracks.length;i++)if(T>=X.tracks[i].start)k=i;return k};
+const SKINS=[['orig','The original (aged cream)'],['2','Black with red slashes'],['3','Synthwave sunset'],['4','Rosewood']];
+const SKINIMG={};
+async function loadSkin(id){if(id==='orig'||SKINIMG[id])return;SKINIMG[id]={h:await loadImg('mpc/desk_h_s'+id+'.webp?v=2'),v:await loadImg('mpc/desk_v_s'+id+'.webp?v=2')}}
 let GR=null,OC=null,DESKS={h:null,v:null,h0:null},DESKBG={h:null,v:null},WARM=null;
 function warmVer(img){const cv=document.createElement('canvas');cv.width=img.naturalWidth;cv.height=img.naturalHeight;const x=cv.getContext('2d');x.drawImage(img,0,0);x.globalCompositeOperation='multiply';x.fillStyle='rgb(255,212,168)';x.fillRect(0,0,cv.width,cv.height);x.globalCompositeOperation='destination-in';x.drawImage(img,0,0);return cv}
-const sceneOf=fmt=>(ST.scene!=='white'&&DESKS[fmt]&&GEO['desk'+fmt])?{G:GEO['desk'+fmt],img:(fmt==='h'&&(ST.can||{}).id==='orig'&&DESKS.h0)?DESKS.h0:DESKS[fmt]}:null;
+const sceneOf=fmt=>(ST.scene!=='white'&&DESKS[fmt]&&GEO['desk'+fmt])?{G:GEO['desk'+fmt],img:(ST.skin&&ST.skin!=='orig'&&SKINIMG[ST.skin]&&SKINIMG[ST.skin][fmt])||((fmt==='h'&&(ST.can||{}).id==='orig'&&DESKS.h0)?DESKS.h0:DESKS[fmt])}:null;
 function grain(){if(GR)return GR;const t=document.createElement('canvas');t.width=t.height=160;const x=t.getContext('2d'),d=x.createImageData(160,160);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=Math.random()*14}x.putImageData(d,0,0);return GR=t}
 function ground(c,W,H,ox,oy,sc){
  const g=c.createRadialGradient(W/2,H*.48,H*.08,W/2,H*.5,Math.max(W,H)*.78);g.addColorStop(0,'#ffffff');g.addColorStop(1,'#f4f4f6');c.fillStyle=g;c.fillRect(0,0,W,H);
@@ -178,7 +181,7 @@ async function loadCans(){CANS=await Promise.all(CAN_NAMES.map((n,i)=>loadImg('m
 /* a can lit from the lamp side (left): bright and warm on the left, falling off to the right */
 function shadedCan(i){if(CANSH[i])return CANSH[i];const im=CANS[i];if(!im)return null;const cv=document.createElement('canvas');cv.width=im.naturalWidth;cv.height=im.naturalHeight;const x=cv.getContext('2d');x.drawImage(im,0,0);x.globalCompositeOperation='multiply';const g=x.createLinearGradient(0,0,cv.width,cv.height*.4);g.addColorStop(0,'rgb(255,238,214)');g.addColorStop(.55,'rgb(205,184,166)');g.addColorStop(1,'rgb(118,100,92)');x.fillStyle=g;x.fillRect(0,0,cv.width,cv.height);x.globalCompositeOperation='destination-in';x.drawImage(im,0,0);
  const sil=document.createElement('canvas');sil.width=cv.width;sil.height=cv.height;const y=sil.getContext('2d');y.drawImage(im,0,0);y.globalCompositeOperation='source-in';y.fillStyle='#000';y.fillRect(0,0,sil.width,sil.height);return CANSH[i]={cv,sil}}
-function canIndex(Sx){const c=ST.can||{};if(c.id==='none'||c.id==='orig')return -1;if(c.id==='auto'){let h=0;for(const ch of String(Sx.title))h=(h*31+ch.charCodeAt(0))>>>0;return h%12}return Math.max(0,Math.min(11,(+c.id||1)-1))}
+function canIndex(Sx){const c=ST.can||{};if(c.id==='none')return -1;if(c.id==='orig'){if(!ST.skin||ST.skin==='orig')return -1;return 0}if(c.id==='auto'){let h=0;for(const ch of String(Sx.title))h=(h*31+ch.charCodeAt(0))>>>0;return h%12}return Math.max(0,Math.min(11,(+c.id||1)-1))}
 function drawCan(c,G,Sx){const i=canIndex(Sx);if(i<0)return;const sh=shadedCan(i);if(!sh)return;const k=ST.can,h=360*(k.size||100)/100,w=h*sh.cv.width/sh.cv.height,cx=1815+(k.x||0),cy=322+(k.y||0),rot=.26+(k.rot||0)*Math.PI/180;
  c.save();c.translate(cx,cy);c.rotate(rot);
  /* two shadows thrown away from the lamp (down and to the right), one wide and soft, one tight */
@@ -369,11 +372,13 @@ function html(){return`<div class="mg"><div>
  <label>SCREEN TEXT (LEAVE EMPTY TO USE THE BEAT NAME)</label><input type="text" id="mLcd" maxlength="40">
  <h3 style="margin-top:16px">2. LOOK</h3>
  <label>LOOK OF THE VIDEOS</label><select id="mScene"><option value="desk">Desk scene (the worn desk, lamp and floppy disks)</option><option value="white">White studio</option></select>
+ <label>MACHINE SKIN (DESK SCENES)</label><select id="mSkin">${SKINS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
  <label>CAN ON THE DESK (16:9)</label><select id="mCan"><option value="orig">The original Pepsi can (as in the picture)</option><option value="auto">A different can for each beat (automatic)</option>${CAN_NAMES.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('')}<option value="none">No can</option></select>
  <div id="mCanSet"><label>CAN SIZE: <span id="mCanSv">100</span>%</label><input type="range" id="mCanS" min="50" max="170" step="1" style="width:100%;accent-color:var(--red)">
  <label>CAN TILT: <span id="mCanRv">0</span> DEGREES</label><input type="range" id="mCanR" min="-60" max="60" step="1" style="width:100%;accent-color:var(--red)">
  <label>CAN LEFT / RIGHT</label><input type="range" id="mCanX" min="-330" max="120" step="1" style="width:100%;accent-color:var(--red)">
  <label>CAN UP / DOWN</label><input type="range" id="mCanY" min="-160" max="260" step="1" style="width:100%;accent-color:var(--red)"><button class="btn" id="mCanReset" style="width:100%;margin-top:6px">PUT THE CAN BACK</button></div>
+ <label>VIDEO SIZE</label><select id="mRes"><option value="1080">Full HD (1920x1080 / 1080x1920)</option><option value="4k">4K (3840x2160 / 2160x3840): slower, much bigger file</option></select>
  <label>LAMP LIGHT (DESK SCENES)</label><select id="mLamp"><option value="0">Steady (no change)</option><option value="1">Gentle</option><option value="2">Real (it sags and flickers now and then)</option><option value="3">Dramatic</option></select>
  <label class="chk"><input type="checkbox" id="mHands"> HANDS TAPPING THE PADS (YOUR OWN HANDS, THEY STRIKE EVERY HIT)</label>
  <label class="chk"><input type="checkbox" id="mSmoke"> CIGARETTE SMOKE (9:16 DESK SCENE)</label>
@@ -454,8 +459,8 @@ async function renderOne(fmt){
  if(!Xt){rm(ST.tape.on?'Build the tape first (right side, section 3).':'Pick a beat first.');return false}
  let venc,aenc,err=null;
  try{await loadS('mp4-muxer.js').catch(()=>{});
-  const tall=fmt==='v'||fmt==='c',OW=tall?1080:1920,OH=tall?1920:1080,FPS=30,total=Xt.total,N=Math.ceil(total*FPS),out=document.createElement('canvas');out.width=OW;out.height=OH;const oc=out.getContext('2d');
-  const pickV=async()=>{for(const c of [{codec:'avc1.640028',mux:'avc'},{codec:'avc1.4d0028',mux:'avc'},{codec:'avc1.42E028',mux:'avc'},{codec:'vp09.00.40.08',mux:'vp9'}]){const cfg={codec:c.codec,width:OW,height:OH,bitrate:9e6,framerate:FPS};try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return{...c,cfg}}catch(e){}}return null};
+  const tall=fmt==='v'||fmt==='c',K4=ST.res==='4k'?2:1,OW=(tall?1080:1920)*K4,OH=(tall?1920:1080)*K4,FPS=30,total=Xt.total,N=Math.ceil(total*FPS),out=document.createElement('canvas');out.width=OW;out.height=OH;const oc=out.getContext('2d');
+  const pickV=async()=>{for(const c of (K4===2?[{codec:'avc1.640033',mux:'avc'},{codec:'avc1.640032',mux:'avc'},{codec:'avc1.4d0033',mux:'avc'},{codec:'vp09.00.50.08',mux:'vp9'}]:[{codec:'avc1.640028',mux:'avc'},{codec:'avc1.4d0028',mux:'avc'},{codec:'avc1.42E028',mux:'avc'},{codec:'vp09.00.40.08',mux:'vp9'}])){const cfg={codec:c.codec,width:OW,height:OH,bitrate:K4===2?32e6:9e6,framerate:FPS};try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return{...c,cfg}}catch(e){}}return null};
   const pickA=async()=>{for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){try{const r=await AudioEncoder.isConfigSupported({codec:c.codec,sampleRate:48000,numberOfChannels:2,bitrate:192000});if(r&&r.supported)return c}catch(e){}}return null};
   const vc=await pickV(),ac=await pickA();if(!vc||!ac)throw new Error('no video codec available');
   rm('Building the audio...');const ab=await mixAudio(Xt,48000),L0=ab.getChannelData(0),R0=ab.getChannelData(1);
@@ -590,7 +595,8 @@ function thRender(){const el=$q('#mTH');if(!el||!YT())return;const b=ST.tape.on?
 function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();ytRender();thRender()};
- $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};const CN=ST.can;$q('#mCan').value=String(CN.id);const canUi=()=>{$q('#mCanSet').style.display=(CN.id==='orig'||CN.id==='none')?'none':'block';$q('#mCanSv').textContent=CN.size;$q('#mCanRv').textContent=CN.rot};
+ $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await loadSkin(ST.skin);save();drawNow()};loadSkin(ST.skin||'orig').then(drawNow);
+ const CN=ST.can;$q('#mCan').value=String(CN.id);const canUi=()=>{$q('#mCanSet').style.display=(CN.id==='orig'||CN.id==='none')?'none':'block';$q('#mCanSv').textContent=CN.size;$q('#mCanRv').textContent=CN.rot};
  $q('#mCanS').value=String(CN.size);$q('#mCanR').value=String(CN.rot);$q('#mCanX').value=String(CN.x);$q('#mCanY').value=String(CN.y);canUi();
  $q('#mCan').onchange=e=>{CN.id=e.target.value;canUi();save();drawNow()};
  [['#mCanS','size'],['#mCanR','rot'],['#mCanX','x'],['#mCanY','y']].forEach(([id,k])=>$q(id).oninput=e=>{CN[k]=+e.target.value;canUi();save();drawNow()});
