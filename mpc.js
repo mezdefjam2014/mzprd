@@ -28,6 +28,7 @@ const DKV={id:'deskv',W:1131,H:2000,u:1.2,sampled:true,glow:true,lamp:[800,140,1
  leds:{rec:[782,1214.5],over:[823,1214.5],play:[908,1214.5]},btn:{rec:[760,1222,43,31],over:[804,1222,43,31],stop:[848,1222,42,31],play:[890,1222,43,31],start:[934,1222,42,31]},
  vol:[238,742,22],con:[541,737,10],fader:{x:158,y:1214,w:28,h:44,slot:[167,1214,12,38],hx:161,hy:1216,hw:21,hh:39},faderPt:[200,1242],
  smoke:{x:908,y:1564},label:{cx:699,cy:1887,ang:.33,w:205,h:117}};
+DK.bulb=[190,120];DKV.bulb=[772,150];
 const GEO={deskh:DK,deskv:DKV};
 /* pad order on the MPC60 II, top row first */
 const PAD_NAMES=['PERC 1','PERC 2','PERC 3','PERC 4','RIDE 1','RIDE 2','CRASH 1','CRASH 2','TOM 1','TOM 2','TOM 3','TOM 4','HIHAT','SNARE 1','SNARE 2','BASS'];
@@ -208,7 +209,7 @@ function drawOneHand(c,G,key,st,desk,T,lampOver){const k=G.pad.w/72,lp=lampOver|
   let dx=lp[0]-st.x,dy=lp[1]-st.y;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;const cr=Math.cos(rot),sr=Math.sin(rot),lx=dx*cr+dy*sr,ly=-dx*sr+dy*cr,tipX=st.x,tipY=st.y+.12*G.pad.h;
   const ao=Math.pow(1-hv,1.6);if(ao>.02){c.save();const rg=c.createRadialGradient(tipX,tipY+4*k,1,tipX,tipY+4*k,26*k);rg.addColorStop(0,'rgba(0,0,0,'+(.45*ao).toFixed(3)+')');rg.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=rg;c.fillRect(tipX-30*k,tipY-26*k,60*k,64*k);c.restore()}
   for(const L of [{o:(10+30*hv)*k,b:(3+10*hv)*k,a:(desk?.3:.18)*(1-.45*hv),g:1.08+.1*hv},{o:(3+8*hv)*k,b:(1.2+3*hv)*k,a:(desk?.5:.3)*(1-hv*.85),g:1.01+.03*hv}]){c.save();c.translate(st.x-dx*L.o,st.y-dy*L.o);c.rotate(rot);c.scale(s*L.g,s*L.g);c.globalAlpha=L.a;c.filter='blur('+L.b.toFixed(1)+'px)';c.drawImage(HI.sil,-m.tip[0],-m.tip[1],HI.sil.width*4,HI.sil.height*4);c.restore()}
-  const lit=desk?clamp(1.08-Math.hypot(lp[0]-st.x,lp[1]-st.y)/(Math.max(G.W,G.H)*1.3),.55,1):.9,sh=shadeHand(HI,m,desk,lx,ly,hv,lit,T||0);
+  const lit=desk?clamp(1.08-Math.hypot(lp[0]-st.x,lp[1]-st.y)/(Math.max(G.W,G.H)*1.3),.55,1)*(.45+.55*LAMPFL):.9,sh=shadeHand(HI,m,desk,lx,ly,hv,lit,T||0);
   const spd=Math.hypot(st.vx,st.vy)/k+Math.abs(st.vh)*60;
   if(spd>520){const n=spd>1100?2:1;for(let q=n;q>=1;q--){const tb=q*.011,bx=st.x-st.vx*tb,by=st.y-st.vy*tb,bh=clamp(hv-st.vh*tb,0,1);c.save();c.globalAlpha=(.2/q)*clamp((spd-520)/700,0,1);c.translate(bx,by+.12*G.pad.h+push);c.rotate(rot);c.translate(0,bh*26*k);c.scale(s0*(1+.17*bh),s0*(1+.17*bh));c.drawImage(sh,-m.tip[0],-m.tip[1]);c.restore()}}
   c.save();c.translate(tipX,tipY+push);c.rotate(rot);c.translate(0,hv*26*k);c.scale(s,s);c.drawImage(sh,-m.tip[0],-m.tip[1]);c.restore()}}
@@ -237,6 +238,9 @@ function dust(c,T,G){const lp=G.lamp;if(!lp)return;const N=96,A=[lp[0]+(G.W*.5-l
   if(big){c.fillStyle='rgba(255,214,160,'+(al*.18).toFixed(3)+')';c.beginPath();c.arc(xx,yy,rad,0,6.2832);c.fill()}
   else{const g=c.createRadialGradient(xx,yy,0,xx,yy,rad*2.2);g.addColorStop(0,'rgba(255,226,180,'+al.toFixed(3)+')');g.addColorStop(1,'rgba(255,200,140,0)');c.fillStyle=g;c.fillRect(xx-rad*2.2,yy-rad*2.2,rad*4.4,rad*4.4)}}
  c.restore()}
+let LAMPFL=1;
+const lampAmt=()=>[0,.55,1,1.7][ST.lamp==null?2:ST.lamp];
+function lampLevel(T){const a=lampAmt();if(!a)return 1;const w=.5+.5*Math.sin(T*.9)*Math.sin(T*.33+1),ph=((T+4)%15)-8,brown=Math.exp(-Math.pow((ph-1)/.7,2)),sag=Math.exp(-Math.pow((((T+9.5)%23)-8)/.5,2)),tt=(T%7)-5.1,burst=tt>0&&tt<.7?Math.sin(tt*70)*Math.exp(-tt*5)*.22:0,mic=.035*Math.sin(T*9.3)*Math.sin(T*1.7);return clamp(1-.14*a*(1-w)-.5*a*brown-.35*a*sag-a*burst-a*mic,.2,1.04)}
 const lampFl=T=>clamp(.62+.38*Math.sin(T*1.1)*Math.sin(T*.37+1)+.12*Math.sin(T*8.7)*Math.sin(T*.9),.18,1);
 const ease=t=>t<=0?0:t>=1?1:t*t*(3-2*t),pulse=(T,a,b)=>Math.min(ease((T-a)/.07),ease((b-T)/.09));
 const HOOKS=['WAIT FOR THE DROP','THIS ONE HITS DIFFERENT','LIVE ON THE MPC60','TURN IT UP','BOOM BAP ON A 1988 MPC','WATCH THE PADS','PURE BOOM BAP'];
@@ -261,8 +265,23 @@ function subscribe(c,W,H,te,cyF,wide){if(te<0)return;const w=W*(wide?.3:.5),h=w*
  if(te>.5&&te<clickT+.9){const k=ease(clamp((te-.55)/.95,0,1)),sx=cx+w*.55,sy=cy+h*2.4,ex=cx+w*.12,ey=cy+h*.1,px=sx+(ex-sx)*k+Math.sin(k*3.1416)*h*.5,py=sy+(ey-sy)*k,ga=te>clickT+.5?1-clamp((te-clickT-.5)/.4,0,1):1;
   if(te>clickT&&te<clickT+.55){c.save();c.strokeStyle='rgba(224,36,47,'+(.6*(1-(te-clickT)/.55))+')';c.lineWidth=h*.06;c.beginPath();c.arc(ex,ey,h*.15+(te-clickT)*h*1.6,0,6.2832);c.stroke();c.restore()}
   c.save();c.globalAlpha=ga;c.translate(px,py);c.scale(h/46,h/46);c.fillStyle='#111';c.strokeStyle='#fff';c.lineWidth=3;c.beginPath();c.moveTo(0,0);c.lineTo(0,32);c.lineTo(8,25);c.lineTo(14,38);c.lineTo(20,35);c.lineTo(14,23);c.lineTo(24,23);c.closePath();c.stroke();c.fill();c.restore()}}
+/* the lamp as a real light: the room darkens and warms when it sags, the bulb and the shade slats glow, a soft cone and bloom fall onto the desk */
+function lampFx(c,W,H,ox,oy,sc,G,T){const a=lampAmt(),fl=LAMPFL,lp=G.lamp,bx=ox+G.bulb[0]*sc,by=oy+G.bulb[1]*sc,lx=ox+lp[0]*sc,ly=oy+lp[1]*sc,R=lp[2]*sc;if(!a){return}
+ const dim=1-fl;
+ /* 1. everything that the lamp lights gets darker and more orange as it sags (stronger near the lamp, none at the far edges which are already dark) */
+ c.save();c.globalCompositeOperation='multiply';{const f=1-.62*dim,g=c.createRadialGradient(lx,ly,R*.08,lx,ly,R*2.1),col=k=>'rgb('+Math.round(255*(1-(1-f)*k))+','+Math.round(255*(1-(1-f)*k*1.12))+','+Math.round(255*(1-(1-f)*k*1.35))+')';g.addColorStop(0,col(1));g.addColorStop(.45,col(.62));g.addColorStop(1,col(.18));c.fillStyle=g;c.fillRect(0,0,W,H)}c.restore();
+ /* 2. a broad warm bloom from the lamp onto the desk, stronger when it is bright */
+ c.save();c.globalCompositeOperation='lighter';{const g=c.createRadialGradient(lx,ly,5,lx,ly,R*1.35),k=.2*Math.pow(fl,1.6)*Math.min(1.4,.6+a*.4);g.addColorStop(0,'rgba(255,176,86,'+(k).toFixed(3)+')');g.addColorStop(.35,'rgba(255,140,60,'+(k*.45).toFixed(3)+')');g.addColorStop(1,'rgba(255,120,40,0)');c.fillStyle=g;c.fillRect(0,0,W,H)}
+ /* 3. the cone of light under the shade: a soft wedge from the bulb across the desk, a little animated so it looks like light in dusty air */
+ {const ang=Math.atan2(H*.55-by,W*.5-bx),spread=.62,L=Math.max(W,H)*1.3,g=c.createRadialGradient(bx,by,0,bx,by,L*.8);g.addColorStop(0,'rgba(255,196,120,'+(.12*fl*fl).toFixed(3)+')');g.addColorStop(.6,'rgba(255,170,90,'+(.04*fl*fl).toFixed(3)+')');g.addColorStop(1,'rgba(255,150,70,0)');c.fillStyle=g;c.beginPath();c.moveTo(bx,by);c.lineTo(bx+Math.cos(ang-spread)*L,by+Math.sin(ang-spread)*L);c.lineTo(bx+Math.cos(ang+spread)*L,by+Math.sin(ang+spread)*L);c.closePath();c.fill()
+  c.globalAlpha=.5*fl*fl;for(let r=0;r<5;r++){const aa=ang+(-.42+r*.21)+Math.sin(T*.25+r)*.03,g2=c.createLinearGradient(bx,by,bx+Math.cos(aa)*L,by+Math.sin(aa)*L);g2.addColorStop(0,'rgba(255,200,130,.06)');g2.addColorStop(1,'rgba(255,200,130,0)');c.strokeStyle=g2;c.lineWidth=Math.max(6,R*.05);c.beginPath();c.moveTo(bx,by);c.lineTo(bx+Math.cos(aa)*L,by+Math.sin(aa)*L);c.stroke()}c.globalAlpha=1}
+ /* 4. the hot bulb and the glowing slats */
+ {const hot=Math.pow(fl,2.2),r1=R*.2,g=c.createRadialGradient(bx,by,0,bx,by,r1);g.addColorStop(0,'rgba(255,240,200,'+(.9*hot).toFixed(3)+')');g.addColorStop(.3,'rgba(255,200,120,'+(.5*hot).toFixed(3)+')');g.addColorStop(1,'rgba(255,150,70,0)');c.fillStyle=g;c.fillRect(bx-r1,by-r1,2*r1,2*r1)}
+ c.restore();
+ /* 5. when it sags, the glass of the room is a little blue-grey (the light goes cold and dim) */
+ if(dim>.1){c.save();c.globalCompositeOperation='multiply';c.fillStyle='rgba(120,130,170,'+(.18*dim).toFixed(3)+')';c.fillRect(0,0,W,H);c.restore()}}
 function frame(c,W,H,fmt,T,X){
- const cu=fmt==='c';if(cu)fmt='v';const OV=!cu&&!X.long;
+ LAMPFL=lampLevel(T);const cu=fmt==='c';if(cu)fmt='v';const OV=!cu&&!X.long;
  const v=fmt==='v',E=ST.eng,sc0=v?.87*W/848:.6*W/848,k=trackAt(X,T),tr=X.tracks[k],Sx=tr.S,lt=T-tr.start,la=lt+(tr.off||0),tape=X.kind==='tape',last=X.tracks[X.tracks.length-1],lastEnd=last.start+last.dur,t0=X.tracks[0].start;
  const dx=(1.3*Math.sin(T*.31)+.7*Math.sin(T*.77+1.3))*W/1920,dy=(1.1*Math.sin(T*.27+.8)+.6*Math.sin(T*.69+2.1))*W/1920,zs=(1+.0028*Math.sin(T*.21+.4))*(E.hook?1+.2*(1-ease(T/.8)):1);
  c.save();c.fillStyle='#fff';c.fillRect(0,0,W,H);c.translate(W/2+dx,H/2+dy);c.scale(zs,zs);c.translate(-W/2,-H/2);
@@ -276,10 +295,7 @@ function frame(c,W,H,fmt,T,X){
   if(SC){if(Gs.label){const pr=X.long?1:ease((T-tr.start+.25)/1.1);handwrite(c,Gs.label,Sx.title,'MZPRD'+(Sx.bpm?'  '+Sx.bpm+' BPM':'')+(Sx.key?'  '+Sx.key:''),X.kind==='tape'&&k===0&&T<t0?0:pr)}
    if(Gs.smoke&&ST.smoke&&ST.smoke.on)smoke(c,T,Gs.smoke,ST.smoke.amt||1);dust(c,T,Gs)}
   c.restore()}
- if(SC){const lp=SC.G.lamp;if(lp){const fl=lampFl(T);
-   c.save();c.globalCompositeOperation='lighter';const lx=ox+lp[0]*sc,ly=oy+lp[1]*sc,rg=c.createRadialGradient(lx,ly,10,lx,ly,lp[2]*sc*1.25);rg.addColorStop(0,'rgba(255,170,80,'+(.1*fl).toFixed(3)+')');rg.addColorStop(1,'rgba(255,170,80,0)');c.fillStyle=rg;c.fillRect(0,0,W,H);c.restore();
-   /* the light breathes: the whole picture gets a little brighter and darker, and the soft shadows slide a few pixels */
-   c.save();c.globalCompositeOperation='multiply';const cx2=ox+(SC.G.W*.5+60*Math.sin(T*.43))*sc,cy2=oy+(SC.G.H*.5+45*Math.cos(T*.31))*sc,R=Math.max(W,H)*.85,ex=Math.round(255-16*(1-fl)),dg=c.createRadialGradient(cx2,cy2,R*.3,cx2,cy2,R);dg.addColorStop(0,'rgb('+ex+','+ex+','+ex+')');dg.addColorStop(1,'rgb('+Math.round(206-18*(1-fl))+','+Math.round(192-16*(1-fl))+','+Math.round(178-14*(1-fl))+')');c.fillStyle=dg;c.fillRect(0,0,W,H);c.restore()}}else sheen(c,ox,oy,sc,T);
+ if(SC&&SC.G.lamp){lampFx(c,W,H,ox,oy,sc,SC.G,T)}else if(!SC)sheen(c,ox,oy,sc,T);
  c.restore();
  /* optional words and the subscribe, drawn flat on top (no camera drift) */
  const topY=v?H*.17:H*.12,sz=v?Math.min(150,W*.12):Math.min(110,W*.058);
@@ -326,6 +342,7 @@ function html(){return`<div class="mg"><div>
  <label>SCREEN TEXT (LEAVE EMPTY TO USE THE BEAT NAME)</label><input type="text" id="mLcd" maxlength="40">
  <h3 style="margin-top:16px">2. LOOK</h3>
  <label>LOOK OF THE VIDEOS</label><select id="mScene"><option value="desk">Desk scene (the worn desk, lamp and floppy disks)</option><option value="white">White studio</option></select>
+ <label>LAMP LIGHT (DESK SCENES)</label><select id="mLamp"><option value="0">Steady (no change)</option><option value="1">Gentle</option><option value="2">Real (it sags and flickers now and then)</option><option value="3">Dramatic</option></select>
  <label class="chk"><input type="checkbox" id="mHands"> HANDS TAPPING THE PADS (YOUR OWN HANDS, THEY STRIKE EVERY HIT)</label>
  <label class="chk"><input type="checkbox" id="mSmoke"> CIGARETTE SMOKE (9:16 DESK SCENE)</label>
  <select id="mSmokeAmt"><option value="0.6">Light smoke</option><option value="1">Normal smoke</option><option value="1.5">Heavy smoke</option></select>
@@ -541,7 +558,7 @@ function thRender(){const el=$q('#mTH');if(!el||!YT())return;const b=ST.tape.on?
 function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();ytRender();thRender()};
- $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mHands').checked=!!ST.hands.on;$q('#mHands').onchange=e=>{ST.hands.on=e.target.checked;save();drawNow()};$q('#mSmoke').checked=!!ST.smoke.on;$q('#mSmokeAmt').value=String(ST.smoke.amt||1);$q('#mSmoke').onchange=e=>{ST.smoke.on=e.target.checked;save();drawNow()};$q('#mSmokeAmt').onchange=e=>{ST.smoke.amt=+e.target.value;save();drawNow()};$q('#mScene').value=ST.scene||'desk';$q('#mScene').onchange=e=>{ST.scene=e.target.value;save();drawNow()};$q('#mTxt').onchange=e=>{ST.text=e.target.checked;save();drawNow()};
+ $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mLamp').value=String(ST.lamp==null?2:ST.lamp);$q('#mLamp').onchange=e=>{ST.lamp=+e.target.value;save();drawNow()};$q('#mHands').checked=!!ST.hands.on;$q('#mHands').onchange=e=>{ST.hands.on=e.target.checked;save();drawNow()};$q('#mSmoke').checked=!!ST.smoke.on;$q('#mSmokeAmt').value=String(ST.smoke.amt||1);$q('#mSmoke').onchange=e=>{ST.smoke.on=e.target.checked;save();drawNow()};$q('#mSmokeAmt').onchange=e=>{ST.smoke.amt=+e.target.value;save();drawNow()};$q('#mScene').value=ST.scene||'desk';$q('#mScene').onchange=e=>{ST.scene=e.target.value;save();drawNow()};$q('#mTxt').onchange=e=>{ST.text=e.target.checked;save();drawNow()};
  $q('#mKit').onchange=e=>{if(!ST.beat)return;ST.kits=ST.kits||{};if(e.target.value==='')delete ST.kits[ST.beat];else ST.kits[ST.beat]=+e.target.value;save();if(S&&S.raw){applyKit();if(TP)TP=null;drawNow()}};
  $q('#mLen').onchange=e=>{ST.len=+e.target.value;save();if(ST.beat)pick(ST.beat)};
  $q('#mFh').onclick=()=>{ST.fmt='h';save();size();drawNow()};$q('#mFv').onclick=()=>{ST.fmt='v';save();size();drawNow()};
@@ -567,5 +584,5 @@ window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root
   ST=load();if(!ST.th)ST.th={seed:1,pal:'',fmt:'h'};if(!ST.yt.v)ST.yt.v=0;if(!ST.tape)ST.tape=defaults().tape;if(!ST.eng)ST.eng=defaults().eng;if(!ST.smoke)ST.smoke=defaults().smoke;if(!ST.hands)ST.hands=defaults().hands;if(!ST.gen)ST.gen=defaults().gen;S=null;root.innerHTML=html();wire();size();ytRender();genRender();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
 };
 window.mpcClose=function(){if(root)root.classList.remove('on');stopPlay()};
-window.__mpc={hand:(Sx,key,T)=>handAt(handHits(Sx)[key],T,DK,key),xf:XF,st:()=>ST,s:()=>S,tp:()=>TP,x:X,frame,analyze,PH,pv:()=>PV,buildTape};window.MZMpc={machine,PH,fitFont,mmss,clamp,img:()=>IMG,cut:()=>CUT,bg:k=>DESKBG[k],warm:()=>WARM,handsReady:()=>!!HANDS,hand:(c,key,padIdx,hover,lampPos)=>{if(!HANDS)return;const p=padC(PH,padIdx);drawOneHand(c,PH,key,{x:p[0],y:p[1],hover},true,0,lampPos)}};
+window.__mpc={lamp:T=>lampLevel(T),hand:(Sx,key,T)=>handAt(handHits(Sx)[key],T,DK,key),xf:XF,st:()=>ST,s:()=>S,tp:()=>TP,x:X,frame,analyze,PH,pv:()=>PV,buildTape};window.MZMpc={machine,PH,fitFont,mmss,clamp,img:()=>IMG,cut:()=>CUT,bg:k=>DESKBG[k],warm:()=>WARM,handsReady:()=>!!HANDS,hand:(c,key,padIdx,hover,lampPos)=>{if(!HANDS)return;const p=padC(PH,padIdx);drawOneHand(c,PH,key,{x:p[0],y:p[1],hover},true,0,lampPos)}};
 })();
