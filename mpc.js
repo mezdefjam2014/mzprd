@@ -34,7 +34,7 @@ const GEO={deskh:DK,deskv:DKV};
 const PAD_NAMES=['PERC 1','PERC 2','PERC 3','PERC 4','RIDE 1','RIDE 2','CRASH 1','CRASH 2','TOM 1','TOM 2','TOM 3','TOM 4','HIHAT','SNARE 1','SNARE 2','BASS'];
 
 let CUT=null,ST=null,S=null,beats=[],AC=null,IMG=null,PV={playing:false,raf:0,src:null,t0:0},busy=false;
-function defaults(){return{skin:'orig',res:'1080',can:{id:'orig',size:100,rot:0,x:0,y:0},gen:{n:25,angle:'',seed:1,fav:[],sort:'score',show:'all'},hands:{on:true},smoke:{on:true,amt:1},scene:'desk',eng:{hook:false,hookText:'',sub:true,loop:true,note:false,noteText:'Played live on the Akai MPC60 II',q:false,qText:'WHICH RAPPER GETS THIS BEAT?'},tape:{on:false,ids:[],title:'MZPRD BEAT TAPE VOL. 1',len:60,xf:1.2},th:{seed:1,pal:'',fmt:'h'},kits:{},beat:null,artist:'',fmt:'h',len:0,text:false,lcd:'',yt:{mode:'straight',when:'',v:0}}}
+function defaults(){return{cam:{dof:'0',rack:false,grade:'0'},intro:false,open:{g_beat:1},skin:'orig',res:'1080',can:{id:'orig',size:100,rot:0,x:0,y:0},gen:{n:25,angle:'',seed:1,fav:[],sort:'score',show:'all'},hands:{on:true},smoke:{on:true,amt:1},scene:'desk',eng:{hook:false,hookText:'',sub:true,loop:true,note:false,noteText:'Played live on the Akai MPC60 II',q:false,qText:'WHICH RAPPER GETS THIS BEAT?'},tape:{on:false,ids:[],title:'MZPRD BEAT TAPE VOL. 1',len:60,xf:1.2},th:{seed:1,pal:'',fmt:'h'},kits:{},beat:null,artist:'',fmt:'h',len:0,text:false,lcd:'',yt:{mode:'straight',when:'',v:0}}}
 function load(){try{const j=JSON.parse(localStorage.getItem(KEY)||'null');if(j)return Object.assign(defaults(),j)}catch(e){}return defaults()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}}
 const ctxA=()=>{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();return AC};
@@ -121,21 +121,28 @@ function machine(c,ox,oy,sc,S,o){
   for(let q=0;q<4;q++){const on=run&&lt>=0&&q===n%4,bx=L.x+L.w-12-(3-q)*12;c.fillStyle=on?'#1c3a12':'rgba(28,58,18,.22)';c.fillRect(bx,L.y+22,8,7)}}
  c.font=f(15);c.fillStyle='#1c3a12';c.fillText(l2,L.x+8,L.y+26);c.fillText(l3,L.x+8,L.y+39);
  c.fillStyle='rgba(28,58,18,.25)';c.fillRect(L.x+8,L.y+47,L.w-16,3);c.fillStyle='#1c3a12';c.fillRect(L.x+8,L.y+47,(L.w-16)*clamp(lt/Math.max(1,S.dur),0,1),3);
+
+ const bt=o.boot==null?-1:o.boot,sbv=bt<0?1:bt<.45?0:bt<.95?((bt-.45)/.5)*(.5+.5*Math.sin(bt*140)):1;
+ if(bt>=0){c.drawImage(LG.base,L.x,L.y,L.w,L.h);c.fillStyle='rgba(6,14,4,'+(.93*(1-sbv)).toFixed(3)+')';c.fillRect(L.x,L.y,L.w,L.h);
+  if(sbv>.6&&bt>=1.0){c.fillStyle='#1c3a12';c.textAlign='left';c.textBaseline='middle';
+   if(bt<2.4){c.font=f(20);c.fillText('AKAI PROFESSIONAL MPC60 II',L.x+8,L.y+12);c.font=f(15);c.fillText('SOFTWARE V3.10   16 PADS',L.x+8,L.y+27);c.fillText('LOADING FROM DISK'+'...'.slice(0,1+Math.floor(bt*4)%3),L.x+8,L.y+40);c.fillStyle='rgba(28,58,18,.25)';c.fillRect(L.x+8,L.y+47,L.w-16,3);c.fillStyle='#1c3a12';c.fillRect(L.x+8,L.y+47,(L.w-16)*clamp((bt-1)/1.3,0,1),3)}
+   else{const nm=(S.lcd||S.title||'BEAT').toUpperCase(),n=Math.min(nm.length,Math.floor((bt-2.4)/.07)),shown=nm.slice(0,n)+(Math.floor(bt*5)%2&&n<nm.length?'_':'');const sz2=fitFont(c,nm,f,23,L.w-16);c.font=f(sz2);c.fillText(shown,L.x+8,L.y+12);c.font=f(15);c.fillText(n>=nm.length?'READY':'LOADING BEAT',L.x+8,L.y+27);if(S.bpm)c.fillText('BPM '+S.bpm,L.x+8,L.y+40)}}}
  c.drawImage(LG.scan,L.x,L.y,L.w,L.h);
  c.restore();c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=1;c.strokeRect(L0.x+.5,L0.y+.5,L0.w-1,L0.h-1);
  /* a lit screen throws a little green light on the case */
- if(G.glow){c.save();c.globalCompositeOperation='lighter';const rg=c.createRadialGradient(L0.x+L0.w/2,L0.y+L0.h/2,10,L0.x+L0.w/2,L0.y+L0.h/2,L0.w*.95);rg.addColorStop(0,'rgba(110,255,110,'+(run?.2:.1)+')');rg.addColorStop(1,'rgba(110,255,110,0)');c.fillStyle=rg;c.fillRect(L0.x-L0.w,L0.y-L0.h*3,L0.w*3,L0.h*8);c.restore()}
+ if(G.glow){c.save();c.globalCompositeOperation='lighter';const rg=c.createRadialGradient(L0.x+L0.w/2,L0.y+L0.h/2,10,L0.x+L0.w/2,L0.y+L0.h/2,L0.w*.95);rg.addColorStop(0,'rgba(110,255,110,'+((run?.2:.1)*sbv).toFixed(3)+')');rg.addColorStop(1,'rgba(110,255,110,0)');c.fillStyle=rg;c.fillRect(L0.x-L0.w,L0.y-L0.h*3,L0.w*3,L0.h*8);c.restore()}
  /* lights */
  const led=(x,y,on,col)=>{c.fillStyle=on?col:'rgba(40,10,10,.9)';c.fillRect(x-4*u,y-2*u,8*u,3.4*u);if(on){const r=c.createRadialGradient(x,y,1,x,y,14*u);r.addColorStop(0,'rgba(255,60,40,.75)');r.addColorStop(1,'rgba(255,60,40,0)');c.fillStyle=r;c.fillRect(x-16*u,y-16*u,32*u,32*u)}};
  const ph=((lt%(bl*2))+bl*2)%(bl*2);
  led(G.leds.play[0],G.leds.play[1],run,'#ff3a24');led(G.leds.rec[0],G.leds.rec[1],run,'#ff3a24');led(G.leds.over[0],G.leds.over[1],run&&ph<bl*.5,'#ff3a24');
  c.restore()}
-const tlOne=Sx=>({kind:'one',tracks:[{S:Sx,start:LEAD,dur:Sx.dur}],total:LEAD+Sx.dur+TAIL,lead:LEAD,title:Sx.title});
+const INTRO=3.4,leadOf=()=>ST&&ST.intro?INTRO:LEAD;
+const tlOne=Sx=>{const L=leadOf();return{kind:'one',tracks:[{S:Sx,start:L,dur:Sx.dur}],total:L+Sx.dur+TAIL,lead:L,title:Sx.title,intro:ST&&ST.intro?INTRO:0}};
 function derive(X,fmt,cu){const E=ST.eng,sub=E.sub&&!cu,loop=E.loop&&X.kind==='one'&&fmt==='v';if(!sub&&!loop)return X;let tracks,total;
  if(loop){const Sx=X.tracks[0].S,xf=Math.min(3.8,Sx.dur*.3),lead=.12;
   const A={S:Sx,start:lead,off:xf,dur:Sx.dur-xf,fi:.04,fo:xf},B={S:Sx,start:lead+Sx.dur-2*xf,off:0,dur:xf,fi:xf,fo:0};tracks=[A,B];total=A.start+A.dur}
  else{tracks=X.tracks.map(t=>Object.assign({},t));const l=tracks[tracks.length-1];total=l.start+l.dur+3.6}
- return{kind:X.kind,tracks,total,lead:X.lead,title:X.title,sub:!!sub,subT0:sub?total-4.2:0,loop}}
+ return{kind:X.kind,tracks,total,lead:X.lead,title:X.title,sub:!!sub,subT0:sub?total-4.2:0,loop,intro:loop?0:(X.intro||0)}}
 const XF=fmt=>{const b=X();if(!b)return null;const k=fmt==='v'?'_v':fmt==='c'?'_c':'_h';if(!b[k])b[k]=derive(b,fmt==='c'?'v':fmt,fmt==='c');return b[k]};
 function dropV(){if(S&&S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}if(TP){TP._v=null;TP._h=null;TP._c=null}}
 const trackAt=(X,T)=>{let k=0;for(let i=0;i<X.tracks.length;i++)if(T>=X.tracks[i].start)k=i;return k};
@@ -319,16 +326,35 @@ function lampFx(c,W,H,ox,oy,sc,G,T){const a=lampAmt(),fl=LAMPFL,bx=ox+G.bulb[0]*
  {const hot=Math.pow(fl,2.2),r1=R*.2,g=c.createRadialGradient(bx,by,0,bx,by,r1);g.addColorStop(0,'rgba(255,240,200,'+(.6*hot).toFixed(3)+')');g.addColorStop(.3,'rgba(255,200,120,'+(.3*hot).toFixed(3)+')');g.addColorStop(1,'rgba(255,150,70,0)');c.fillStyle=g;c.fillRect(bx-r1,by-r1,2*r1,2*r1)}
  c.restore();
  if(dim>.1){c.save();c.globalCompositeOperation='multiply';c.fillStyle='rgba(120,130,170,'+(.16*dim).toFixed(3)+')';c.fillRect(0,0,W,H);c.restore()}}
+/* ---------- camera look (all optional): depth of field, focus pull, color grade ---------- */
+let CB=null,CL=null;
+const camOn=()=>{const m=ST.cam||{};return m.dof!=='0'&&m.dof!=null||m.rack||(m.grade&&m.grade!=='0')};
+function dofFx(c,W,H,T,ox,oy,sc,G,v){const m=ST.cam,amt=m.dof==='2'?2:m.dof==='1'?1:(m.rack?1:0);if(!amt)return;
+ const p=m.rack?ease((T-.15)/1.8):1,bulb=G&&G.bulb?[ox+G.bulb[0]*sc,oy+G.bulb[1]*sc]:[W*.15,H*.1],G0=G||PH,pc=[ox+(G0.pad.x0+2*G0.pad.px)*sc,oy+(G0.pad.y0+2*G0.pad.py)*sc];
+ const fx=bulb[0]+(pc[0]-bulb[0])*p,fy=bulb[1]+(pc[1]-bulb[1])*p,Rr=(v?W*.62:Math.max(W*.3,H*.46))*(1-.38*(1-p)),bl=(amt===2?3.4:1.9)*(1+(m.rack?(1-p)*1.8:0));
+ const sw=Math.round(W/4),sh=Math.round(H/4);if(!CB||CB.width!==sw||CB.height!==sh){CB=document.createElement('canvas');CB.width=sw;CB.height=sh;CL=document.createElement('canvas');CL.width=W;CL.height=H}
+ if(CL.width!==W||CL.height!==H){CL.width=W;CL.height=H}
+ const b=CB.getContext('2d');b.filter='blur('+bl.toFixed(2)+'px)';b.drawImage(c.canvas,0,0,sw,sh);b.filter='none';
+ const l=CL.getContext('2d');l.globalCompositeOperation='source-over';l.clearRect(0,0,W,H);l.imageSmoothingEnabled=true;l.drawImage(CB,0,0,W,H);
+ l.globalCompositeOperation='destination-out';const g=l.createRadialGradient(fx,fy,Rr*.55,fx,fy,Rr*1.25);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(1,'rgba(0,0,0,0)');l.fillStyle=g;l.fillRect(0,0,W,H);
+ c.drawImage(CL,0,0)}
+function gradeFx(c,W,H){const g=(ST.cam||{}).grade;if(!g||g==='0')return;c.save();const fill=(op,col,a)=>{c.globalCompositeOperation=op;c.globalAlpha=a==null?1:a;c.fillStyle=col;c.fillRect(0,0,W,H)};
+ const vig=(a)=>{c.globalCompositeOperation='multiply';c.globalAlpha=1;const r=c.createRadialGradient(W/2,H/2,Math.min(W,H)*.3,W/2,H/2,Math.max(W,H)*.78);r.addColorStop(0,'rgb(255,255,255)');r.addColorStop(1,'rgb('+Math.round(255*(1-a))+','+Math.round(255*(1-a))+','+Math.round(255*(1-a))+')');c.fillStyle=r;c.fillRect(0,0,W,H)};
+ if(g==='warm'){fill('multiply','rgb(255,236,212)');fill('overlay','rgb(255,160,70)',.14);fill('soft-light','rgb(255,200,150)',.35);vig(.22)}
+ else if(g==='teal'){const t=c.createLinearGradient(0,0,W,H);t.addColorStop(0,'rgb(30,120,140)');t.addColorStop(1,'rgb(255,140,60)');fill('soft-light',t,.7);fill('overlay','rgb(20,90,120)',.12);vig(.18)}
+ else if(g==='cold'){fill('multiply','rgb(214,228,248)');fill('overlay','rgb(90,150,255)',.10);fill('screen','rgb(30,50,90)',.06);vig(.12)}
+ else if(g==='faded'){fill('screen','rgb(52,50,70)',.2);fill('multiply','rgb(252,242,226)');fill('saturation','rgb(128,128,128)',.32);fill('soft-light','rgb(255,210,160)',.2);vig(.14)}
+ c.restore()}
 function frame(c,W,H,fmt,T,X){
  LAMPFL=lampLevel(T);const cu=fmt==='c';if(cu)fmt='v';const OV=!cu&&!X.long;
  const v=fmt==='v',E=ST.eng,sc0=v?.87*W/848:.6*W/848,k=trackAt(X,T),tr=X.tracks[k],Sx=tr.S,lt=T-tr.start,la=lt+(tr.off||0),tape=X.kind==='tape',last=X.tracks[X.tracks.length-1],lastEnd=last.start+last.dur,t0=X.tracks[0].start;
- const dx=(1.3*Math.sin(T*.31)+.7*Math.sin(T*.77+1.3))*W/1920,dy=(1.1*Math.sin(T*.27+.8)+.6*Math.sin(T*.69+2.1))*W/1920,zs=(1+.0028*Math.sin(T*.21+.4))*(E.hook?1+.2*(1-ease(T/.8)):1);
+ const dx=(1.3*Math.sin(T*.31)+.7*Math.sin(T*.77+1.3))*W/1920,dy=(1.1*Math.sin(T*.27+.8)+.6*Math.sin(T*.69+2.1))*W/1920,zs=(1+.0028*Math.sin(T*.21+.4))*(E.hook?1+.2*(1-ease(T/.8)):1)*(ST.cam&&ST.cam.rack?1+.014*(1-ease((T-.15)/1.8)):1);
  c.save();c.fillStyle='#fff';c.fillRect(0,0,W,H);c.translate(W/2+dx,H/2+dy);c.scale(zs,zs);c.translate(-W/2,-H/2);
  const SC=sceneOf(fmt),intro=tape&&T<t0;let sc=sc0,cx=W/2,cy=v?H*.5:H*.495,ox=cx-PH.cx*sc,oy=cy-PH.cy*sc;
  if(SC){sc=Math.max(W/SC.G.W,H/SC.G.H)*1.025;ox=(W-SC.G.W*sc)/2;oy=(H-SC.G.H*sc)/2}else ground(c,W+80,H+80,ox,oy,sc);
  if(cu){const G0=SC?SC.G:PH,pcx=G0.pad.x0+1.5*G0.pad.px+G0.pad.w/2,pcy=G0.pad.y0+1.5*G0.pad.py+G0.pad.h/2,zoom=(SC?1.78:1.55)*(1+.04*Math.sin(T*.23)),sc2=(SC?sc:sc0)*zoom;sc=sc2;ox=W/2-pcx*sc+Math.sin(T*.19)*6;oy=H*.47-pcy*sc+Math.cos(T*.16)*5}
  const fx={vol:(.21*ease((T-.15)/2.4))+.012*Math.sin(T*.6),con:.05*Math.sin(T*.4),fader:Math.max(0,26*(.5+.5*Math.sin(T*.29-.6))),btn:{play:0,start:pulse(T,t0-.42,t0-.12),rec:pulse(T,t0-.42,t0-.12),over:0,stop:pulse(T,lastEnd-.08,lastEnd+.2)}};
- machine(c,ox,oy,sc,Sx,{img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,run:la>=-.02&&T<lastEnd,trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
+ machine(c,ox,oy,sc,Sx,{boot:(X.intro>0&&T<X.intro)?T:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,run:la>=-.02&&T<lastEnd,trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
 {c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC?SC.G:PH;
   if(SC&&Gs.id==='deskh')drawCan(c,Gs,Sx);
   if(ST.hands&&ST.hands.on)drawHands(c,Gs,Sx,la,!!SC);
@@ -337,6 +363,7 @@ function frame(c,W,H,fmt,T,X){
   c.restore()}
  if(SC&&SC.G.lamp){lampFx(c,W,H,ox,oy,sc,SC.G,T)}else if(!SC)sheen(c,ox,oy,sc,T);
  c.restore();
+ if(camOn()){dofFx(c,W,H,T,ox,oy,sc,SC?SC.G:null,v);gradeFx(c,W,H)}
  /* optional words and the subscribe, drawn flat on top (no camera drift) */
  const topY=v?H*.17:H*.12,sz=v?Math.min(150,W*.12):Math.min(110,W*.058);
  if(OV&&E.hook&&T<2.9){const txt=(E.hookText||'').trim().toUpperCase()||HOOKS[(String(X.title||'').length*7+3)%HOOKS.length],lines=wrapTwo(txt),size=Math.min(sz,W*.9/Math.max(5,Math.max(...lines.map(l=>l.length)))*1.9);sticker(c,lines,W/2,topY,size,.04,T,{out:(2.9-T)/.3})}
@@ -364,7 +391,14 @@ function css(){if(document.getElementById('mpcCss'))return;const s=document.crea
 #mpcmk .ctl input[type=range]{flex:1;min-width:140px;accent-color:var(--red)}#mpcmk .time{font:600 12px Montserrat;color:#c9c9ce;min-width:92px;text-align:right}
 #mpcmk .msg{font:500 12px/1.5 Montserrat;color:#a9a9ae;margin-top:8px;min-height:16px}#mpcmk .bar{height:6px;background:#1b1b20;margin-top:8px}#mpcmk .bar b{display:block;height:100%;width:0;background:var(--red)}
 #mpcmk .it{display:flex;gap:10px;align-items:center;padding:9px;border-bottom:1px solid #1d1d21;font:600 12px Montserrat;color:#d9d9dc}#mpcmk .it b{flex:1;min-width:0;font-weight:600;white-space:normal}#mpcmk .it button{background:transparent;border:1px solid #4a4a50;color:#fff;font:600 9px Montserrat;letter-spacing:.12em;padding:6px 8px;cursor:pointer}
-#mpcmk .sec{border:1px solid #2a2a2e;margin:10px 0;background:#08080a}#mpcmk .sec>summary{cursor:pointer;padding:12px;font:700 11px Montserrat;letter-spacing:.22em;color:var(--gold);list-style:none}#mpcmk .sec .in{padding:0 12px 12px}`;document.head.appendChild(s)}
+#mpcmk .sec{border:1px solid #2a2a2e;margin:10px 0;background:#08080a}#mpcmk .sec>summary{cursor:pointer;padding:12px;font:700 11px Montserrat;letter-spacing:.22em;color:var(--gold);list-style:none}#mpcmk .sec .in{padding:0 12px 12px}
+#mpcmk .sec>summary{display:flex;justify-content:space-between;align-items:center;gap:8px}#mpcmk .sec>summary::-webkit-details-marker{display:none}
+#mpcmk .sec>summary:after{content:'+';font-size:16px;color:#8e8e94;margin-left:6px}#mpcmk .sec[open]>summary:after{content:'\\2212'}
+#mpcmk .sec>summary small{flex:1;text-align:right;color:#8e8e94;font:500 10px Montserrat;letter-spacing:.06em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#mpcmk .grp{border:1px solid #2a2a2e;margin:8px 0;background:#0a0a0d}#mpcmk .grp[open]{border-color:#3a3a40}#mpcmk .grp>summary{padding:13px 12px;font-size:11px}
+#mpcmk .sub{margin:14px 0 4px;font:700 10px Montserrat;letter-spacing:.22em;color:#c9a14a;border-top:1px solid #1d1d21;padding-top:10px}
+#mpcmk .sub2{border:1px solid #232327;margin:8px 0;background:#08080a}#mpcmk .sub2>summary{padding:9px 10px;font-size:10px;color:#c9c9ce}#mpcmk .sub2 .in{padding:0 10px 10px}
+#mpcmk .grp .chk{align-items:flex-start;line-height:1.35}#mpcmk .grp .chk input{margin-top:2px}`;document.head.appendChild(s)}
 function html(){return`<div class="mg"><div>
  <div class="pn"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3>MPC BEAT VIDEO</h3><div style="display:flex;gap:6px"><button class="btn" id="mFh">16:9</button><button class="btn" id="mFv">9:16</button></div></div>
   <div style="margin-top:10px;display:flex;justify-content:center;background:#000"><canvas class="box" id="mCv" width="1920" height="1080"></canvas></div>
@@ -375,57 +409,77 @@ function html(){return`<div class="mg"><div>
  <details class="pn sec" id="mTHd" style="padding:0"><summary>THUMBNAILS <small style="color:#8e8e94;font-weight:500;letter-spacing:.06em">the MPC in 12 looks, new set any time</small></summary><div class="in" id="mTH"></div></details>
  <details class="pn sec" id="mGnd" style="padding:0"><summary>PACKAGE GENERATOR <small style="color:#8e8e94;font-weight:500;letter-spacing:.06em">dozens of full YouTube packages, scored</small></summary><div class="in" id="mGN"></div></details>
  <details class="pn sec" id="mYTd" style="padding:0"><summary>YOUTUBE PACKAGE <small style="color:#8e8e94;font-weight:500;letter-spacing:.06em">titles, description with the beat link, tags</small></summary><div class="in" id="mYT"></div></details>
-</div><div><div class="pn">
- <h3>1. PICK THE BEAT</h3><label>BEAT</label><select id="mBeat"></select>
- <div id="mInfo" class="msg"></div>
- <label>SOUNDS LIKE (ARTIST, OPTIONAL: USED IN THE TITLES)</label><input type="text" id="mArt" placeholder="e.g. Lil Baby">
- <label>SCREEN TEXT (LEAVE EMPTY TO USE THE BEAT NAME)</label><input type="text" id="mLcd" maxlength="40">
- <h3 style="margin-top:16px">2. LOOK</h3>
- <label>LOOK OF THE VIDEOS</label><select id="mScene"><option value="desk">Desk scene (the worn desk, lamp and floppy disks)</option><option value="white">White studio</option></select>
- <label>MACHINE SKIN (DESK SCENES)</label><select id="mSkin">${SKINS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
- <label>CAN ON THE DESK (16:9)</label><select id="mCan"><option value="orig">The original Pepsi can (as in the picture)</option><option value="auto">A different can for each beat (automatic)</option>${CAN_NAMES.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('')}<option value="none">No can</option></select>
- <div id="mCanSet"><label>CAN SIZE: <span id="mCanSv">100</span>%</label><input type="range" id="mCanS" min="50" max="170" step="1" style="width:100%;accent-color:var(--red)">
- <label>CAN TILT: <span id="mCanRv">0</span> DEGREES</label><input type="range" id="mCanR" min="-60" max="60" step="1" style="width:100%;accent-color:var(--red)">
- <label>CAN LEFT / RIGHT</label><input type="range" id="mCanX" min="-330" max="120" step="1" style="width:100%;accent-color:var(--red)">
- <label>CAN UP / DOWN</label><input type="range" id="mCanY" min="-160" max="260" step="1" style="width:100%;accent-color:var(--red)"><button class="btn" id="mCanReset" style="width:100%;margin-top:6px">PUT THE CAN BACK</button></div>
- <label>VIDEO SIZE</label><select id="mRes"><option value="1080">Full HD (1920x1080 / 1080x1920)</option><option value="4k">4K (3840x2160 / 2160x3840): slower, much bigger file</option></select>
- <label>LAMP LIGHT (DESK SCENES)</label><select id="mLamp"><option value="0">Steady (no change)</option><option value="1">Gentle</option><option value="2">Real (it sags and flickers now and then)</option><option value="3">Dramatic</option></select>
- <label class="chk"><input type="checkbox" id="mHands"> HANDS TAPPING THE PADS (YOUR OWN HANDS, THEY STRIKE EVERY HIT)</label>
- <label class="chk"><input type="checkbox" id="mSmoke"> CIGARETTE SMOKE (9:16 DESK SCENE)</label>
- <select id="mSmokeAmt"><option value="0.6">Light smoke</option><option value="1">Normal smoke</option><option value="1.5">Heavy smoke</option></select>
- <label class="chk"><input type="checkbox" id="mTxt"> ALSO SHOW THE TITLE AS TEXT ON THE WHITE (OFF = CLEAN, ONLY THE MPC SCREEN)</label>
- <label>PAD LAYOUT (EACH BEAT GETS ITS OWN BY DEFAULT, THE SAME EVERY TIME)</label><select id="mKit"><option value="">Automatic for this beat</option>${KITS.map((k,i)=>`<option value="${i}">${k.n}</option>`).join('')}</select>
- <label>PAD HITS: HOW MANY (MORE = EVERY SMALL HIT)</label><select id="mSens"><option value="0">Only the clear hits</option><option value="1">Balanced</option><option value="2">Every hit</option></select>
- <label>TIMING NUDGE: <span id="mNudgeV">0</span> MS (MOVE THE PAD HITS EARLIER OR LATER)</label><input type="range" id="mNudge" min="-80" max="80" step="1" value="0" style="width:100%;accent-color:var(--red)">
- <label>HOW MUCH OF THE BEAT</label><select id="mLen"><option value="0">The whole preview</option><option value="15">First 15 seconds</option><option value="30">First 30 seconds</option><option value="45">First 45 seconds</option><option value="60">First 60 seconds</option></select>
- <div class="msg">The pads push in and get darker on every hit. The kick is the bottom right pad (BASS), snares are SNARE 1 and 2, hats are HIHAT, and chops and melody hits land on the toms, rides, crashes and percs.</div>
- <details class="sec" style="margin-top:10px"><summary>PAD MAP: WHAT THE TOOL HEARD</summary><div class="in msg" id="mMap"></div></details>
-<h3 style="margin-top:18px">3. BEAT TAPE</h3>
- <label class="chk"><input type="checkbox" id="mTpOn"> MAKE A BEAT TAPE: ONE VIDEO THAT PLAYS THE BEATS BELOW, ONE AFTER THE OTHER</label>
- <div id="mTpBox">
-  <label>TAPE TITLE (SHOWS ON THE SCREEN AT THE START)</label><input type="text" id="mTpT" maxlength="40">
-  <div class="two"><div><label>TIME PER BEAT</label><select id="mTpL"><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="0">The whole preview</option></select></div>
-  <div><label>BLEND BETWEEN BEATS</label><select id="mTpX"><option value="0.6">Short (0.6 s)</option><option value="1.2">Smooth (1.2 s)</option><option value="2">Long (2 s)</option></select></div></div>
-  <label>ADD A BEAT</label><div style="display:grid;grid-template-columns:1fr auto;gap:6px"><select id="mTpA"></select><button class="btn" id="mTpAdd">ADD</button></div>
-  <div id="mTpList"></div>
-  <button class="btn big" id="mTpBuild" style="margin-top:8px">BUILD THE TAPE (LISTEN TO EVERY BEAT)</button><div class="msg" id="mTpMsg">Add at least 2 beats, then build the tape. Then preview it and render it with the buttons on the left.</div>
- </div>
-<h3 style="margin-top:18px">4. KEEP THEM WATCHING</h3>
- <label class="chk"><input type="checkbox" id="mEhk"> BIG HOOK LINE AT THE START (SLAMS ON SCREEN, THE MPC PUNCHES IN)</label>
- <input type="text" id="mEhkT" maxlength="40" placeholder="Leave empty for an automatic line, or type your own">
- <label class="chk"><input type="checkbox" id="mEsub"> ANIMATED SUBSCRIBE AT THE END (BOTH FORMATS)</label>
- <label class="chk"><input type="checkbox" id="mEloop"> LOOPING ENDING (9:16 ONLY, SINGLE BEAT): THE END BLENDS BACK INTO THE START SO IT REPLAYS SMOOTHLY</label>
- <label class="chk"><input type="checkbox" id="mEnote"> PRODUCER'S NOTE AT THE START</label>
- <input type="text" id="mEnoteT" maxlength="60">
- <label class="chk"><input type="checkbox" id="mEq"> QUESTION ON SCREEN AT THE END</label>
- <input type="text" id="mEqT" maxlength="40">
-<h3 style="margin-top:18px">5. EXTRA VIDEOS (OPTIONAL)</h3>
- <div class="msg">Same beat, different uploads. Each one is a separate video for a different audience.</div>
- <button class="btn" id="mRcu" style="width:100%;margin-top:6px">RENDER PAD CLOSE-UP SHORT (9:16, NO TEXT)</button>
- <label>FREESTYLE LOOP (NO LYRICS): LENGTH AND SHAPE</label><div class="two"><select id="mLpM"><option value="10">10 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option></select><select id="mLpF"><option value="h">16:9 (720p)</option><option value="v">9:16 (720p)</option></select></div>
- <button class="btn" id="mRlp" style="width:100%;margin-top:6px">RENDER FREESTYLE LOOP VIDEO</button>
- <div class="msg">The loop is made at 720p and 15 frames a second so a 30 minute file stays a few hundred MB. It repeats the beat with a smooth blend. A 30 minute loop can take 10 to 20 minutes to render, so leave the tab open.</div>
- <div id="mLpOut"></div>
+</div><div><div class="pn" id="mRight">
+ <div style="display:flex;justify-content:space-between;align-items:center"><h3>SETTINGS</h3><div style="display:flex;gap:6px"><button class="btn" id="mOpenAll">OPEN ALL</button><button class="btn" id="mCloseAll">CLOSE ALL</button></div></div>
+ <details class="sec grp" id="g_beat"><summary>1. THE BEAT <small id="s_beat">pick a beat</small></summary><div class="in">
+  <label>BEAT</label><select id="mBeat"></select>
+  <div id="mInfo" class="msg"></div>
+  <label>SOUNDS LIKE (ARTIST, OPTIONAL: USED IN THE TITLES)</label><input type="text" id="mArt" placeholder="e.g. Lil Baby">
+  <label>SCREEN TEXT (LEAVE EMPTY TO USE THE BEAT NAME)</label><input type="text" id="mLcd" maxlength="40">
+  <label>HOW MUCH OF THE BEAT</label><select id="mLen"><option value="0">The whole preview</option><option value="15">First 15 seconds</option><option value="30">First 30 seconds</option><option value="45">First 45 seconds</option><option value="60">First 60 seconds</option></select>
+ </div></details>
+ <details class="sec grp" id="g_scene"><summary>2. SCENE <small id="s_scene"></small></summary><div class="in">
+  <label>LOOK OF THE VIDEOS</label><select id="mScene"><option value="desk">Desk scene (the worn desk, lamp and floppy disks)</option><option value="white">White studio</option></select>
+  <label>MACHINE SKIN (DESK SCENES)</label><select id="mSkin">${SKINS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
+  <div class="sub">CAN ON THE DESK (16:9)</div>
+  <select id="mCan"><option value="orig">The original Pepsi can (as in the picture)</option><option value="auto">A different can for each beat (automatic)</option>${CAN_NAMES.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('')}<option value="none">No can</option></select>
+  <details class="sec sub2" id="mCanSet"><summary>CAN SIZE, TILT AND POSITION</summary><div class="in"><label>SIZE: <span id="mCanSv">100</span>%</label><input type="range" id="mCanS" min="50" max="170" step="1" style="width:100%;accent-color:var(--red)">
+  <label>TILT: <span id="mCanRv">0</span> DEGREES</label><input type="range" id="mCanR" min="-60" max="60" step="1" style="width:100%;accent-color:var(--red)">
+  <label>LEFT / RIGHT</label><input type="range" id="mCanX" min="-330" max="120" step="1" style="width:100%;accent-color:var(--red)">
+  <label>UP / DOWN</label><input type="range" id="mCanY" min="-160" max="260" step="1" style="width:100%;accent-color:var(--red)"><button class="btn" id="mCanReset" style="width:100%;margin-top:6px">PUT THE CAN BACK</button></div></details>
+  <div class="sub">PICTURE SIZE</div>
+  <select id="mRes"><option value="1080">Full HD (1920x1080 / 1080x1920)</option><option value="4k">4K (3840x2160 / 2160x3840): slower, much bigger file</option></select>
+ </div></details>
+ <details class="sec grp" id="g_cam"><summary>3. CAMERA AND LIGHT <small id="s_cam"></small></summary><div class="in">
+  <label>LAMP LIGHT (DESK SCENES)</label><select id="mLamp"><option value="0">Steady (no change)</option><option value="1">Gentle</option><option value="2">Real (it sags and flickers now and then)</option><option value="3">Dramatic</option></select>
+  <label>DEPTH OF FIELD (BLURRED BACKGROUND, LIKE A REAL LENS)</label><select id="mDof"><option value="0">Off (everything sharp)</option><option value="1">Soft</option><option value="2">Strong</option></select>
+  <label class="chk"><input type="checkbox" id="mRack"> FOCUS PULL AT THE START (FOCUS SLIDES FROM THE LAMP TO THE PADS)</label>
+  <label>COLOR GRADE</label><select id="mGrade"><option value="0">None (as is)</option><option value="warm">Warm film</option><option value="teal">Teal and orange</option><option value="cold">Cold studio</option><option value="faded">Faded 90s</option></select>
+ </div></details>
+ <details class="sec grp" id="g_extras"><summary>4. DESK EXTRAS <small id="s_extras"></small></summary><div class="in">
+  <label class="chk"><input type="checkbox" id="mIntro"> POWER-ON INTRO (THE SCREEN BOOTS UP AND TYPES THE BEAT NAME, ABOUT 3 SECONDS)</label>
+  <div class="msg" id="mIntroN" style="margin-top:0">The intro is not used in the looping 9:16 version.</div>
+  <label class="chk"><input type="checkbox" id="mHands"> HANDS TAPPING THE PADS (YOUR OWN HANDS, THEY STRIKE EVERY HIT)</label>
+  <label class="chk"><input type="checkbox" id="mSmoke"> CIGARETTE SMOKE (9:16 DESK SCENE)</label>
+  <select id="mSmokeAmt"><option value="0.6">Light smoke</option><option value="1">Normal smoke</option><option value="1.5">Heavy smoke</option></select>
+  <label class="chk"><input type="checkbox" id="mTxt"> ALSO SHOW THE TITLE AS TEXT ON THE WHITE STUDIO (OFF = CLEAN)</label>
+ </div></details>
+ <details class="sec grp" id="g_hits"><summary>5. PAD HITS <small id="s_hits"></small></summary><div class="in">
+  <label>PAD LAYOUT (EACH BEAT GETS ITS OWN BY DEFAULT, THE SAME EVERY TIME)</label><select id="mKit"><option value="">Automatic for this beat</option>${KITS.map((k,i)=>`<option value="${i}">${k.n}</option>`).join('')}</select>
+  <label>HOW MANY HITS (MORE = EVERY SMALL HIT)</label><select id="mSens"><option value="0">Only the clear hits</option><option value="1">Balanced</option><option value="2">Every hit</option></select>
+  <label>TIMING NUDGE: <span id="mNudgeV">0</span> MS (MOVE THE PAD HITS EARLIER OR LATER)</label><input type="range" id="mNudge" min="-80" max="80" step="1" value="0" style="width:100%;accent-color:var(--red)">
+  <div class="msg">The kick is the bottom right pad (BASS), snares are SNARE 1 and 2, hats are HIHAT, and chops and melody hits land on the toms, rides, crashes and percs.</div>
+  <details class="sec sub2"><summary>WHAT THE TOOL HEARD</summary><div class="in msg" id="mMap"></div></details>
+ </div></details>
+ <details class="sec grp" id="g_watch"><summary>6. KEEP THEM WATCHING <small id="s_watch"></small></summary><div class="in">
+  <label class="chk"><input type="checkbox" id="mEhk"> BIG HOOK LINE AT THE START (SLAMS ON SCREEN, THE MPC PUNCHES IN)</label>
+  <input type="text" id="mEhkT" maxlength="40" placeholder="Leave empty for an automatic line, or type your own">
+  <label class="chk"><input type="checkbox" id="mEsub"> ANIMATED SUBSCRIBE AT THE END (BOTH FORMATS)</label>
+  <label class="chk"><input type="checkbox" id="mEloop"> LOOPING ENDING (9:16, SINGLE BEAT): THE END BLENDS BACK INTO THE START</label>
+  <label class="chk"><input type="checkbox" id="mEnote"> PRODUCER'S NOTE AT THE START</label>
+  <input type="text" id="mEnoteT" maxlength="60">
+  <label class="chk"><input type="checkbox" id="mEq"> QUESTION ON SCREEN AT THE END</label>
+  <input type="text" id="mEqT" maxlength="40">
+ </div></details>
+ <details class="sec grp" id="g_tape"><summary>7. BEAT TAPE <small id="s_tape">several beats in one video</small></summary><div class="in">
+  <label class="chk"><input type="checkbox" id="mTpOn"> MAKE A BEAT TAPE: ONE VIDEO THAT PLAYS THE BEATS BELOW, ONE AFTER THE OTHER</label>
+  <div id="mTpBox">
+   <label>TAPE TITLE (SHOWS ON THE SCREEN AT THE START)</label><input type="text" id="mTpT" maxlength="40">
+   <div class="two"><div><label>TIME PER BEAT</label><select id="mTpL"><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="0">The whole preview</option></select></div>
+   <div><label>BLEND BETWEEN BEATS</label><select id="mTpX"><option value="0.6">Short (0.6 s)</option><option value="1.2">Smooth (1.2 s)</option><option value="2">Long (2 s)</option></select></div></div>
+   <label>ADD A BEAT</label><div style="display:grid;grid-template-columns:1fr auto;gap:6px"><select id="mTpA"></select><button class="btn" id="mTpAdd">ADD</button></div>
+   <div id="mTpList"></div>
+   <button class="btn big" id="mTpBuild" style="margin-top:8px">BUILD THE TAPE (LISTEN TO EVERY BEAT)</button><div class="msg" id="mTpMsg">Add at least 2 beats, then build the tape. Then preview it and render it with the buttons on the left.</div>
+  </div>
+ </div></details>
+ <details class="sec grp" id="g_extra"><summary>8. EXTRA VIDEOS <small id="s_extra">close-up Short, freestyle loop</small></summary><div class="in">
+  <div class="msg" style="margin-top:0">Same beat, different uploads. Each one is a separate video for a different audience.</div>
+  <button class="btn" id="mRcu" style="width:100%;margin-top:6px">RENDER PAD CLOSE-UP SHORT (9:16, NO TEXT)</button>
+  <label>FREESTYLE LOOP (NO LYRICS): LENGTH AND SHAPE</label><div class="two"><select id="mLpM"><option value="10">10 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option></select><select id="mLpF"><option value="h">16:9 (720p)</option><option value="v">9:16 (720p)</option></select></div>
+  <button class="btn" id="mRlp" style="width:100%;margin-top:6px">RENDER FREESTYLE LOOP VIDEO</button>
+  <div class="msg">The loop is made at 720p and 15 frames a second so a 30 minute file stays a few hundred MB. A 30 minute loop can take 10 to 20 minutes to render, so leave the tab open.</div>
+  <div id="mLpOut"></div>
+ </div></details>
 </div></div></div>`}
 
 function applyKit(){const id=ST.beat,k=ST.kits&&ST.kits[id]!=null&&ST.kits[id]!==''?+ST.kits[id]:kitFor(id);S.kit=k;const L=layout(S.raw,k);S.hits=L.hits;S.per=L.per;
@@ -453,6 +507,9 @@ async function mixAudio(Xt,sr){if(Xt.mix&&Xt.mixSr===sr)return Xt.mix;const oa=n
   g.gain.setValueAtTime(.0001,s0);g.gain.linearRampToValueAtTime(1,s0+Math.max(.01,fin));if(fout>0){g.gain.setValueAtTime(1,Math.max(s0+fin,e0-fout));g.gain.linearRampToValueAtTime(.0001,e0)}else g.gain.setValueAtTime(1,e0);src.start(s0,tr.off||0,tr.dur)});
  if(Xt.sub){const at=Xt.subT0,tone=(t,f0,f1,d,v)=>{const o=oa.createOscillator(),g=oa.createGain();o.type='sine';o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+d);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(oa.destination);o.start(t);o.stop(t+d+.05)};
   tone(at+1.55,560,240,.07,.1);[1320,1980,2640].forEach((f,i)=>tone(at+1.72,f,f,1.3-i*.25,.045/(i+1)))}
+ if(Xt.intro>0){const o1=oa.createOscillator(),g1=oa.createGain();o1.type='sine';o1.frequency.setValueAtTime(95,.32);o1.frequency.exponentialRampToValueAtTime(38,.55);g1.gain.setValueAtTime(.0001,.32);g1.gain.linearRampToValueAtTime(.26,.335);g1.gain.exponentialRampToValueAtTime(.0001,.6);o1.connect(g1);g1.connect(oa.destination);o1.start(.32);o1.stop(.65);
+  const nb=oa.createBuffer(1,Math.ceil(sr*.12),sr),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;for(let k=0;k<7;k++){const s1=oa.createBufferSource();s1.buffer=nb;const bp=oa.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1500+k%3*500;bp.Q.value=3;const g2=oa.createGain();g2.gain.value=.05;s1.connect(bp);bp.connect(g2);g2.connect(oa.destination);s1.start(1.05+k*.17)}
+  const bp2=(t,f,d,v)=>{const o=oa.createOscillator(),g=oa.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(oa.destination);o.start(t);o.stop(t+d+.02)};bp2(2.32,1760,.07,.035);const nm=String(Xt.title||'').length;for(let i=0;i<Math.min(nm,18);i++)bp2(2.4+i*.07,1300+(i%3)*90,.02,.02);bp2(Math.min(3.2,2.45+Math.min(nm,18)*.07+.1),2093,.09,.035)}
  const ab=await oa.startRendering();Xt.mix=ab;Xt.mixSr=sr;return ab}
 async function play(){if(PV.playing||PV.loading){stopPlay();drawNow();return}await ensureScene(ST.fmt);const Xt=XF(ST.fmt);if(!Xt){$q('#mMsg').textContent=ST.tape.on?'Build the tape first (right side, section 3).':'Pick a beat first.';return}
  PV.loading=true;$q('#mPlay').textContent='LOADING...';const my=++PV.tok||(PV.tok=1);
@@ -534,8 +591,8 @@ function tpDirty(){TP=null;stopPlay();save();tpList();$q('#mTpMsg').textContent=
 async function buildTape(){const T=ST.tape,ids=T.ids.filter(beatById),msg=t=>{$q('#mTpMsg').textContent=t};if(ids.length<2){msg('Add at least 2 beats.');return}
  stopPlay();TP=null;const btn=$q('#mTpBuild');btn.disabled=true;
  try{const bs=ids.map(beatById);for(let i=0;i<bs.length;i++){msg('Listening to beat '+(i+1)+' of '+bs.length+': '+bs[i].title+'...');await loadBeat(bs[i])}
-  const lead=1.6,xf=+T.xf||1.2,tracks=[];let t=lead;bs.forEach(b=>{const Sx=mkS(b,+T.len||0,kitOf(b.id));tracks.push({S:Sx,start:t,dur:Sx.dur,b});t=t+Sx.dur-xf});
-  const last=tracks[tracks.length-1];TP={kind:'tape',tracks,lead,xf,title:T.title,total:last.start+last.dur+TAIL};
+  const lead=ST.intro?INTRO:1.6,xf=+T.xf||1.2,tracks=[];let t=lead;bs.forEach(b=>{const Sx=mkS(b,+T.len||0,kitOf(b.id));tracks.push({S:Sx,start:t,dur:Sx.dur,b});t=t+Sx.dur-xf});
+  const last=tracks[tracks.length-1];TP={kind:'tape',tracks,lead,xf,title:T.title,intro:ST.intro?INTRO:0,total:last.start+last.dur+TAIL};
   msg('The tape is ready: '+tracks.length+' beats, '+mmss(TP.total)+' long. Press PLAY on the left, or render it.');$q('#mMsg').textContent='Tape ready ('+mmss(TP.total)+').';mark('yt','th','gen');if(window.__lpShow)__lpShow();drawNow()}
  catch(e){msg('Could not build the tape: '+(e&&e.message||e))}finally{btn.disabled=false}}
 
@@ -612,10 +669,20 @@ function thRenderNow(){const el=$q('#mTH');if(!el||!YT())return;const b=ST.tape.
   el.querySelector('#mThA').onclick=async()=>{for(let k=0;k<12;k++){await dl(k);await new Promise(r=>setTimeout(r,500))}}});
  el.querySelector('#mThF').onchange=e=>{T.fmt=e.target.value;save();thRender()};el.querySelector('#mThH').onchange=e=>{T.hands=e.target.value;save();thRender()};el.querySelector('#mThD').onchange=e=>{T.bgm=e.target.value;save();thRender()};el.querySelector('#mThP').onchange=e=>{T.pal=e.target.value;save();thRender()};el.querySelector('#mThN').onclick=()=>{T.seed++;save();thRender()}}
 
+const SUM={scene:()=>(ST.scene==='white'?'White studio':'Desk / '+((SKINS.find(k=>k[0]===(ST.skin||'orig'))||[0,'Original'])[1]).replace(/^The /,''))+(ST.res==='4k'?' / 4K':''),
+ cam:()=>{const t=[];if(ST.lamp!=null&&+ST.lamp!==2)t.push('lamp '+['steady','gentle','real','dramatic'][ST.lamp]);const m=ST.cam||{};if(m.dof&&m.dof!=='0')t.push('DOF '+(m.dof==='2'?'strong':'soft'));if(m.rack)t.push('focus pull');if(m.grade&&m.grade!=='0')t.push({warm:'warm film',teal:'teal+orange',cold:'cold',faded:'faded 90s'}[m.grade]);return t.join(' / ')||'lamp real'},
+ extras:()=>{const t=[];if(ST.intro)t.push('intro');if(ST.hands&&ST.hands.on)t.push('hands');if(ST.smoke&&ST.smoke.on)t.push('smoke');return t.join(' / ')||'none'},
+ hits:()=>['clear hits','balanced','every hit'][ST.sens==null?1:ST.sens]+((ST.nudge||0)?' / '+ST.nudge+' ms':''),
+ watch:()=>{const E=ST.eng,t=[];if(E.hook)t.push('hook');if(E.sub)t.push('subscribe');if(E.loop)t.push('loop');if(E.note)t.push('note');if(E.q)t.push('question');return t.join(' / ')||'none'},
+ beat:()=>{const b=beats.find(x=>String(x.id)===String(ST.beat));return b?b.title:'pick a beat'}};
+function summ(){if(!root)return;for(const k in SUM){const e=root.querySelector('#s_'+k);if(e)e.textContent=SUM[k]()}const t=root.querySelector('#s_tape');if(t)t.textContent=ST.tape.on?(ST.tape.ids.length+' beats / ON'):'several beats in one video'}
 function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();mark('yt','th','gen')};for(const k in PNL){$q(PNL[k][0]).addEventListener('toggle',paintPanels)}
  $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};
+ const CM=ST.cam;$q('#mDof').value=CM.dof;$q('#mRack').checked=!!CM.rack;$q('#mGrade').value=CM.grade;
+ $q('#mDof').onchange=e=>{CM.dof=e.target.value;save();drawNow()};$q('#mRack').onchange=e=>{CM.rack=e.target.checked;save();drawNow()};$q('#mGrade').onchange=e=>{CM.grade=e.target.value;save();drawNow()};
+ $q('#mIntro').checked=!!ST.intro;$q('#mIntro').onchange=e=>{ST.intro=e.target.checked;save();stopPlay();if(S&&S.buf){S.tl=tlOne(S);dropV()}if(TP){TP=null;$q('#mTpMsg').textContent='The intro changed. Press BUILD THE TAPE again.';mark('yt','th','gen')}drawNow()};
  const CN=ST.can;$q('#mCan').value=String(CN.id);const canUi=()=>{$q('#mCanSet').style.display=(CN.id==='orig'||CN.id==='none')?'none':'block';$q('#mCanSv').textContent=CN.size;$q('#mCanRv').textContent=CN.rot};
  $q('#mCanS').value=String(CN.size);$q('#mCanR').value=String(CN.rot);$q('#mCanX').value=String(CN.x);$q('#mCanY').value=String(CN.y);canUi();
  $q('#mCan').onchange=async e=>{CN.id=e.target.value;canUi();await ensureScene(ST.fmt);save();drawNow()};
@@ -627,6 +694,8 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  $q('#mFh').onclick=async()=>{ST.fmt='h';save();await ensureScene('h');size();drawNow()};$q('#mFv').onclick=async()=>{ST.fmt='v';save();await ensureScene('v');size();drawNow()};
  $q('#mPlay').onclick=play;$q('#mScrub').oninput=()=>{if(PV.playing)stopPlay();drawNow()};
  const T=ST.tape;$q('#mSens').value=String(ST.sens==null?1:ST.sens);$q('#mNudge').value=String(ST.nudge||0);$q('#mNudgeV').textContent=String(ST.nudge||0);const relay=()=>{save();for(const id in CACHE){}if(S&&S.raw){applyKit();S._hh=null;if(S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}}if(TP){TP.tracks.forEach(t=>{const L=layout(t.S.raw,t.S.kit);t.S.hits=L.hits;t.S.per=L.per;t.S._hh=null});TP._v=null;TP._h=null;TP._c=null}drawNow()};$q('#mSens').onchange=e=>{ST.sens=+e.target.value;relay()};$q('#mNudge').oninput=e=>{ST.nudge=+e.target.value;$q('#mNudgeV').textContent=String(ST.nudge);relay()};$q('#mTpOn').checked=!!T.on;$q('#mTpT').value=T.title;$q('#mTpL').value=String(T.len);$q('#mTpX').value=String(T.xf);$q('#mTpBox').style.display=T.on?'block':'none';tpList();
+ root.querySelectorAll('details.grp').forEach(d=>{d.open=!!ST.open[d.id];d.addEventListener('toggle',()=>{ST.open[d.id]=d.open?1:0;save()})});$q('#mOpenAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=true);$q('#mCloseAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=false);
+ $q('#mRight').addEventListener('change',()=>setTimeout(summ,0));$q('#mRight').addEventListener('input',()=>setTimeout(summ,0));summ();
  $q('#mTpOn').onchange=e=>{T.on=e.target.checked;save();$q('#mTpBox').style.display=T.on?'block':'none';stopPlay();ytRender();thRender();drawNow()};
  $q('#mTpT').onchange=e=>{T.title=e.target.value.trim()||'MZPRD BEAT TAPE';if(TP){TP.title=T.title;TP.mix=null}save();ytRender();thRender();drawNow()};
  $q('#mTpL').onchange=e=>{T.len=+e.target.value;tpDirty()};$q('#mTpX').onchange=e=>{T.xf=+e.target.value;tpDirty()};
@@ -644,7 +713,7 @@ window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root
    await Promise.all(["40px Anton","600 40px Oswald","30px VT323","700 40px Caveat","40px Reenie Beanie"].map(f=>document.fonts.load(f).catch(()=>{})));prepHands(await loadImg('mpc/hand_r.webp'),await loadImg('mpc/hand_l.webp'))}
   catch(e){root.innerHTML='<div class="pn"><div class="msg">The MPC did not load. Refresh the page.</div></div>';return}
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,slug,tags').order('sort_order',{ascending:true}).order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}
-  ST=load();if(!ST.th)ST.th={seed:1,pal:'',fmt:'h'};if(!ST.yt.v)ST.yt.v=0;if(!ST.tape)ST.tape=defaults().tape;if(!ST.eng)ST.eng=defaults().eng;if(!ST.smoke)ST.smoke=defaults().smoke;if(!ST.hands)ST.hands=defaults().hands;if(!ST.gen)ST.gen=defaults().gen;if(!ST.can)ST.can=defaults().can;S=null;root.innerHTML=html();wire();await ensureScene(ST.fmt);size();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
+  ST=load();if(!ST.th)ST.th={seed:1,pal:'',fmt:'h'};if(!ST.yt.v)ST.yt.v=0;if(!ST.tape)ST.tape=defaults().tape;if(!ST.eng)ST.eng=defaults().eng;if(!ST.smoke)ST.smoke=defaults().smoke;if(!ST.hands)ST.hands=defaults().hands;if(!ST.gen)ST.gen=defaults().gen;if(!ST.can)ST.can=defaults().can;if(!ST.cam)ST.cam=defaults().cam;if(!ST.open)ST.open={g_beat:1};S=null;root.innerHTML=html();wire();await ensureScene(ST.fmt);size();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
 };
 window.mpcClose=function(){if(root)root.classList.remove('on');stopPlay()};
 window.__mpc={lamp:T=>lampLevel(T),hand:(Sx,key,T)=>handAt(handHits(Sx)[key],T,DK,key),xf:XF,st:()=>ST,s:()=>S,tp:()=>TP,x:X,frame,analyze,PH,pv:()=>PV,buildTape};window.MZMpc={machine,PH,fitFont,mmss,clamp,img:()=>IMG,cut:()=>CUT,bg:k=>DESKBG[k],warm:()=>WARM,handsReady:()=>!!HANDS,hand:(c,key,padIdx,hover,lampPos)=>{if(!HANDS)return;const p=padC(PH,padIdx);drawOneHand(c,PH,key,{x:p[0],y:p[1],hover},true,0,lampPos)}};
