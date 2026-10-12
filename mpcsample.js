@@ -1,6 +1,6 @@
 /* MZPRD MPC studio: SAMPLE TO BEAT, stage 1 = the sample chopper.
    Upload a sample; the tool finds the tempo, picks the best 4 bars, cuts it at its natural hits into 8-16 slices and puts them on the pads.
-   Click a pad to hear its slice. (Stage 2: trap + East Coast drum variations; stage 3: the whole thing shown on the MPC video.)
+   Click a pad to hear its slice. (Stage 2: East Coast drum variations; stage 3: the whole thing shown on the MPC video.)
    Everything lives in this file and in one optional settings group, so it can be switched off or removed on its own. */
 (function(){
 'use strict';
@@ -128,7 +128,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
  const vstop=()=>{try{vsrc&&vsrc.stop()}catch(e){}vsrc=null;paintV()};
  const ids=()=>{const d=D();let a=[...Array(d.COUNT)].map((_,i)=>i+1).filter(i=>i>d.HALF);if(false);else if(Z.vs==='fav')a=a.filter(i=>Z.fav.includes(i));if(Z.vk!=='all')a=a.filter(i=>String(d.dnaOf(i).kit)===String(Z.vk));if(order)a=a.slice().sort((x,y)=>order[x]-order[y]);return a};
  const label=i=>{const d=D().dnaOf(i);return{t:'#'+i+'  '+(d.style==='trap'?'TRAP':'EAST COAST')+'  /  '+d.kitName,s:R.bpm+' BPM  /  swing '+d.swing+'%  /  '+({loop:'sample loop',flip:'chop flip',sparse:'sparse chops'}[d.mode])+(D().pack()?(()=>{const q=D().soundsOf(d);return '  /  '+q.snare.n.replace(/^Snare /,'Snare ')+'  '+q.hat.n+'  '+q.kick.n})():'')}};
- function paintV(){const v=$('#sbVar');if(!R||!D()){v.style.display='none';return}v.style.display='block';$('#sbKey').textContent='Key of the sample: '+(KEY?KEY.name:'...')+". The 808 follows it. Trap variations keep the sample's tempo (hats run in 16ths with rolls); East Coast ones add swing.";
+ function paintV(){const v=$('#sbVar');if(!R||!D()){v.style.display='none';return}v.style.display='block';$('#sbKey').textContent='Key of the sample: '+(KEY?KEY.name:'...')+". The beats keep the sample's tempo and add swing, ghost notes and a producer feel (Premier, Pete Rock, Dilla and more).";
   const kitSel=$('#sbKit');if(!kitSel.options.length){kitSel.innerHTML='<option value="all">All kits</option>'+D().KITS.map((k,i)=>k.style==='trap'?'':`<option value="${i}">${k.style==='trap'?'Trap':'East Coast'}: ${k.n}</option>`).join('');kitSel.value=String(Z.vk)}
   $('#sbSty').value=Z.vs;const a=ids(),per=10,pages=Math.max(1,Math.ceil(a.length/per));Z.pg=clamp(Z.pg,0,pages-1);const pg=a.slice(Z.pg*per,(Z.pg+1)*per);
   $('#sbList').innerHTML=pg.length?pg.map(i=>{const L=label(i),fav=Z.fav.includes(i);return `<div class="it" style="align-items:center;${i===sel?'background:#17140c':''}"><button data-f="${i}" style="font-size:14px;padding:4px 8px;${fav?'color:var(--gold);border-color:var(--gold)':''}">${fav?'&#9733;':'&#9734;'}</button><b style="white-space:normal;min-width:0">${esc(L.t)}<br><small style="color:#8e8e94;font-weight:500">${esc(L.s)}</small></b><button data-p="${i}">${i===sel&&vsrc?'STOP':'PLAY'}</button><button data-v="${i}" title="Use this beat in the video">VIDEO</button></div>`}).join(''):'<div class="msg">Nothing here. Tap the star on some beats first.</div>';
