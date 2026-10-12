@@ -89,16 +89,13 @@ function plan(dna,Rr,keyInfo){const bpm=Rr.bpm,step=60/bpm/4,r=mul(dna.seed),kit
  return{events:ev.concat(chops).sort((a,b)=>a.t-b.t),bpm,step,loopLen:64*step,dna,kit:dna.kit,key:keyInfo||null,chopMode:CM}}
 
 /* ================= the user's drum pack ================= */
-let PACK=null,PACKP=null,PAT=[];
-function loadPack(){if(PACK)return Promise.resolve(PACK);return PACKP=PACKP||(async()=>{try{const u=n=>new URL('mpc/'+n,document.baseURI).href,[ab,meta,pt]=await Promise.all([fetch(u('drums.ogg?v=2')).then(r=>r.arrayBuffer()),fetch(u('drums.json?v=2')).then(r=>r.json()),fetch(u('patterns.json?v=2')).then(r=>r.ok?r.json():[]).catch(()=>[])]);PAT=pt;const dc=new OfflineAudioContext(1,1,44100),buf=await dc.decodeAudioData(ab);
-  if(meta.stem){const q=meta;PACK={buf,meta,stem:true,pools:{bb:{kick:q.kick,snare:q.snare,hat:q.hat},clap:[{o:0,d:.01}],open:q.hat,attack:q.kick,kick:{short:q.kick,any:q.kick,long:q.kick},snare:{dark:q.snare,mid:q.snare,bright:q.snare},hat:{dark:q.hat,mid:q.hat,bright:q.hat}}};return PACK}
-  const pc=(a,key,p)=>{const v=a.map(x=>x[key]).sort((x,y)=>x-y);return v[Math.floor((v.length-1)*p)]},sn=pc(meta.snare,'c',.4),sn2=pc(meta.snare,'c',.68),ht=pc(meta.hat,'c',.4),ht2=pc(meta.hat,'c',.68);
-  const band=(a,lo,hi)=>a.filter(x=>x.c>=lo&&x.c<=hi),pools={snare:{dark:band(meta.snare,0,sn),mid:band(meta.snare,sn,sn2),bright:band(meta.snare,sn2,1e9)},hat:{dark:band(meta.hat,0,ht),mid:band(meta.hat,ht,ht2),bright:band(meta.hat,ht2,1e9)},
-   kick:{short:meta.kick.filter(x=>x.d<.2),any:meta.kick,long:meta.kick.filter(x=>x.d>=.2)},attack:meta.b808.concat(meta.kick.filter(x=>x.d>=.3)),open:meta.open.length?meta.open:meta.hat.slice().sort((a,b)=>b.r-a.r).slice(0,8),clap:meta.clap};
-  for(const k in pools.snare)if(!pools.snare[k].length)pools.snare[k]=meta.snare;for(const k in pools.hat)if(!pools.hat[k].length)pools.hat[k]=meta.hat;if(!pools.kick.short.length)pools.kick.short=meta.kick;if(!pools.kick.long.length)pools.kick.long=meta.kick;if(!pools.attack.length)pools.attack=meta.kick;
-  const kb=meta.kick.filter(x=>x.d<.19&&x.c>=110&&x.c<=520),sb=meta.snare.filter(x=>x.d<.2&&x.c>=3300&&x.c<=5400&&x.l<.06),hb=meta.hat.filter(x=>x.r<.07&&x.c<=ht2*1.05);
-  pools.bb={kick:kb.length>=8?kb:pools.kick.short,snare:sb.length>=8?sb:meta.snare.filter(x=>x.d<.3),hat:hb.length>=8?hb:pools.hat.mid};
-  PACK={buf,meta,pools};return PACK}catch(e){console.warn('drum pack did not load',e);PACKP=null;return null}})()}
+let PACK=null,PATP=null,PAT=[];const PACKS={};
+function loadPatterns(){return PATP=PATP||fetch(new URL('mpc/patterns.json?v=3',document.baseURI).href).then(r=>r.ok?r.json():[]).catch(()=>[]).then(p=>(PAT=p))}
+/* every pattern brings its own one-shots (mpc/stems/<name>.ogg + .json, cut from its own stems); loadPack(dna) makes that beat's sounds the current ones */
+async function loadPack(dna){await loadPatterns();if(!dna||dna.stem===undefined||!PAT[dna.stem])return PACK;const name=PAT[dna.stem].pack;
+ if(!PACKS[name])PACKS[name]=(async()=>{try{const u=n=>new URL('mpc/'+n,document.baseURI).href,[ab,q]=await Promise.all([fetch(u(name+'.ogg?v=3')).then(r=>r.arrayBuffer()),fetch(u(name+'.json?v=3')).then(r=>r.json())]),buf=await new OfflineAudioContext(1,1,44100).decodeAudioData(ab);
+  return{buf,meta:q,stem:true,pools:{bb:{kick:q.kick,snare:q.snare,hat:q.hat},clap:[{o:0,d:.01}],open:q.hat,attack:q.kick,kick:{short:q.kick,any:q.kick,long:q.kick},snare:{dark:q.snare,mid:q.snare,bright:q.snare},hat:{dark:q.hat,mid:q.hat,bright:q.hat}}}}catch(e){console.warn('drum sounds did not load',e);return null}})();
+ PACK=await PACKS[name];return PACK}
 /* what each kit asks of the pack: brightness of snare and hats, kick length, and how much clap sits on the snare */
 const KP={T1:{sn:'mid',ht:'bright',kk:'short',cl:.8},T2:{sn:'bright',ht:'bright',kk:'short',cl:.7},T3:{sn:'mid',ht:'mid',kk:'any',cl:.95},T4:{sn:'bright',ht:'bright',kk:'short',cl:.55},T5:{sn:'dark',ht:'mid',kk:'any',cl:.9},
  E1:{sn:'dark',ht:'dark',kk:'short',cl:0},E2:{sn:'bright',ht:'mid',kk:'long',cl:0},E3:{sn:'bright',ht:'bright',kk:'short',cl:0},E4:{sn:'dark',ht:'dark',kk:'any',cl:0},E5:{sn:'mid',ht:'dark',kk:'any',cl:0}};
@@ -145,7 +142,7 @@ function v808(G,t,v,len,f,slideFrom){const x=G.ctx,b=G.kit.b,o=x.createOscillato
 function vChop(G,buf,sl,t,len,v){const x=G.ctx,s=x.createBufferSource();s.buffer=buf;const g=x.createGain();g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.005);g.gain.setValueAtTime(v,t+Math.max(.006,len-.025));g.gain.linearRampToValueAtTime(.0001,t+len);s.connect(g);g.connect(G.chopBus);s.start(t,sl.t0,len+.02);s.stop(t+len+.05)}
 
 /* ================= render a plan to audio ================= */
-async function render(buf,Rr,P_,opt){opt=opt||{};await loadPack();const loops=opt.loops||2,sr=44100,total=loops*P_.loopLen+1.6,ctx=new OfflineAudioContext(2,Math.ceil(total*sr),sr),kit=KITS[P_.kit],G=setup(ctx,P_.dna,kit);
+async function render(buf,Rr,P_,opt){opt=opt||{};await loadPack(P_.dna);const loops=opt.loops||2,sr=44100,total=loops*P_.loopLen+1.6,ctx=new OfflineAudioContext(2,Math.ceil(total*sr),sr),kit=KITS[P_.kit],G=setup(ctx,P_.dna,kit);
  if(G.crackle)G.crackle.start(0);
  const sample=P_.chopMode==='loop';
  for(let l=0;l<loops;l++){const off=l*P_.loopLen;

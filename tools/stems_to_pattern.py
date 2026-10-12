@@ -1,7 +1,8 @@
 """Turns one beat split into drum stems (Kick / Snare / Hat wavs of the same length) into:
    mpc/drums.ogg + drums.json  (one-shots cut from the stems, so the sounds are the user's own)
    mpc/patterns.json           (the beat as 4 bars of 16 steps per drum, with the tempo)
-Usage: python tools/stems_to_pattern.py "<stem folder>" [bpm]   (each run ADDS one pattern to mpc/patterns.json, named after the folder; the one-shots are only written if mpc/drums.ogg does not exist yet)   (stems found by name: kick, snare, hat/hatz)"""
+Usage: python tools/stems_to_pattern.py "<stem folder>" [bpm|auto] ["Beat name"]
+   Each run ADDS (or replaces, by name) one pattern in mpc/patterns.json AND writes that beat's own one-shots to mpc/stems/<name>.ogg/.json, so every beat sounds like its own stems.   (stems found by name: kick, snare, hat/hatz)"""
 import sys, os, glob, json, subprocess, numpy as np
 SR = 44100
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); OUT = os.path.join(root, 'mpc')
@@ -37,7 +38,7 @@ for k, lst in stems.items():
 # tempo + grid from the hats (or all hits): the step length that best fits every onset
 allt = np.array([h[0] / SR for k in hits for h in hits[k]])
 best = None
-for bpm in ([float(sys.argv[2])] if len(sys.argv) > 2 else np.arange(60, 200, .5)):
+for bpm in ([float(sys.argv[2])] if len(sys.argv) > 2 and sys.argv[2] != 'auto' else np.arange(60, 200, .5)):
     st = 60 / bpm / 4
     for off in np.arange(0, st, .002):
         q = (allt - off) / st; err = np.abs(q - np.round(q)).mean()
@@ -45,7 +46,10 @@ for bpm in ([float(sys.argv[2])] if len(sys.argv) > 2 else np.arange(60, 200, .5
 err, bpm, off = best; st = 60 / bpm / 4
 n = max(len(x) for lst in stems.values() for _, x in lst); steps = int(round((n / SR - off) / st))
 bars = min(4, max(1, steps // 16)); print('bpm', bpm, 'grid offset', round(off, 4), 'fit err', round(err, 3), 'bars', bars)
-pat = {'name': os.path.basename(os.path.normpath(src)), 'bpm': float(bpm), 'bars': bars, 'lanes': {}}
+NAME = sys.argv[3] if len(sys.argv) > 3 else os.path.basename(os.path.normpath(src))
+import re as _re; SLUG = _re.sub(r'[^a-z0-9]+', '-', NAME.lower()).strip('-')
+os.makedirs(os.path.join(OUT, 'stems'), exist_ok=True)
+pat = {'name': NAME, 'pack': 'stems/' + SLUG, 'bpm': float(bpm), 'bars': bars, 'lanes': {}}
 for k in hits:
     grid = [['.'] * 16 for _ in range(bars)]; pk = max([h[1] for h in hits[k]] or [1])
     for i, a, *_ in hits[k]:
@@ -73,8 +77,7 @@ for k in ('kick', 'snare', 'hat'):
         meta[k].append({'n': os.path.splitext(h[3])[0], 'o': round(pos / SR, 4), 'd': round(len(y) / SR, 4), 'c': 1000, 'l': .5, 'r': .1, 'f': 0})
         chunks += [y.astype(np.float32), gap]; pos += len(y) + len(gap)
 PF = os.path.join(OUT, 'patterns.json'); lst = json.load(open(PF)) if os.path.exists(PF) else []; lst = [q for q in lst if q['name'] != pat['name']] + [pat]; json.dump(lst, open(PF, 'w'), separators=(',', ':'))
-if os.path.exists(os.path.join(OUT, 'drums.ogg')): print('patterns:', [q['name'] for q in lst], '(sounds kept)'); sys.exit()
 sprite = np.concatenate(chunks); raw = os.path.join(OUT, '_d.raw'); (sprite * 32767).astype('<i2').tofile(raw)
-subprocess.run([FF, '-y', '-f', 's16le', '-ar', str(SR), '-ac', '1', '-i', raw, '-c:a', 'libvorbis', '-q:a', '3', os.path.join(OUT, 'drums.ogg')], check=True, capture_output=True); os.remove(raw)
-json.dump(meta, open(os.path.join(OUT, 'drums.json'), 'w'), separators=(',', ':'))
-print({k: len(v) for k, v in meta.items() if k != 'stem'}, 'KB', os.path.getsize(os.path.join(OUT, 'drums.ogg')) // 1024)
+subprocess.run([FF, '-y', '-f', 's16le', '-ar', str(SR), '-ac', '1', '-i', raw, '-c:a', 'libvorbis', '-q:a', '3', os.path.join(OUT, 'stems', SLUG + '.ogg')], check=True, capture_output=True); os.remove(raw)
+json.dump(meta, open(os.path.join(OUT, 'stems', SLUG + '.json'), 'w'), separators=(',', ':'))
+print({k: len(v) for k, v in meta.items() if k != 'stem'}, 'KB', os.path.getsize(os.path.join(OUT, 'stems', SLUG + '.ogg')) // 1024)

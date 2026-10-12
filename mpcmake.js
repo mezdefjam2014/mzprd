@@ -12,7 +12,7 @@ const mmss=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
 const LAYERS=[['kick','KICK'],['snare','SNARE'],['hat','HATS'],['b808','808']];
 
 async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBtn:true,overlay:true,layerBars:4,intro:0,name:'SAMPLE',typeBeat:false},opt);
- const D=window.MZMpcDrums,E=D.engine;await D.loadPack();const pl=D.plan(dna,Rr,key),kit=E.KITS[dna.kit],trap=dna.style==='trap',step=pl.step,bar=16*step,segLen=opt.layerBars===2?2*bar:4*bar,loopLen=pl.loopLen,sl=Rr.slices,N=sl.length;
+ const D=window.MZMpcDrums,E=D.engine;await D.loadPack(dna);const pl=D.plan(dna,Rr,key),kit=E.KITS[dna.kit],trap=dna.style==='trap',step=pl.step,bar=16*step,segLen=opt.layerBars===2?2*bar:4*bar,loopLen=pl.loopLen,sl=Rr.slices,N=sl.length;
  const layers=LAYERS.filter(l=>l[0]!=='b808'||trap),hits=[],btnEv=[],wheelEv=[],chops=[];
  const addHit=(t,pad,v)=>hits.push({t,pad,v});
  /* ---- the timeline ---- */
