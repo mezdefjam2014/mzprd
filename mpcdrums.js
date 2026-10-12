@@ -23,32 +23,11 @@ const KITS=[
  {id:'E5',style:'ec',n:'TAPE',k:{f0:52,drop:95,dec:.23,click:.2,sat:.6},sn:{tone:195,noise:.85,dec:.2,room:.28,hi:3800},hat:{hp:6000,dec:.045,open:.2,gain:.3},crackle:.05,lp:8800,tape:1}];
 
 /* ================= pattern parts (16 steps per bar; x normal, X accent, g ghost, o open hat, r double, t triplet) ================= */
-const P={trap:{
- kick:['x..x......x..x..','x.......x.x.....','x.x.....x...x...','x.....x.x.......','x..x....x..x....','x.......x.....x.','x.x.x...x.......','x......xx.......','x..x..x.....x...','x.......x..x..x.','x.x.....x.x.....','x.....x...x...x.'],
- snare:['........X.......','........X......g','........X.....x.','....g...X.......','........X..g....','....X.......X...','........X.g.....','........X.......'],
- hat:['xxxxxxxxxxxxxxxx','x.x.x.x.x.x.x.x.','x.x.x.xrx.x.x.xt','x.x.xxrxx.x.xxtx','xxxxxxxxxxxxxxrr','x.x.x.xxx.x.x.ot','Xxxxxxxxxxxxxxxx','x.xxx.xxx.xxx.xt','x.x.x.x.x.x.xxxx','xx.xx.xxx.xx.xrt'],
- fill:[{k:'x..x..x.x.x.x.xx',s:'........X.X.X.XX',h:'xxxxxxxxxxxxrrtt'},{k:'x.......x.x.....',s:'........X..X.XXX',h:'x.x.x.xxrrrrrrtt'},{k:'x..x....x..x..xx',s:'....X...X...XXXX',h:'xxxxrrxxxxxxrrtt'},{k:'x.x.....x.x.x...',s:'........X.....XX',h:'x.xxxxrrx.xxxxtt'}]},
- ec:{
- kick:['x.....x...x.....','x.......x.x.....','x..x......x.....','x.....x.x.......','x..x..x...x.....','x.......x..x.x..','x.x.....x.......','x......x..x.....','x..x....x.x.....','x.....x....x....','x.x...x...x.....','x.......xx......'],
- snare:['....X.......X...','....X..g....X...','....X.......X..g','....x.......X.g.','....X.......X.g.','g...X.......X...','....X..g....X..g'],
- hat:['x.x.x.x.x.x.x.x.','x.x.x.x.x.x.x.xx','X.x.X.x.X.x.X.x.','x...x...x...x...','x.x.x.xox.x.x.x.','x.xgx.x.x.xgx.x.','x.x.x.x.x.x.x.xo','xgx.xgx.xgx.xgx.','x.xxx.x.x.xxx.x.','X.x.x.xgX.x.x.xg'],
- fill:[{k:'x.......x.x.x...',s:'....X.......X.X.',h:'x.x.x.x.x.x.xxxx'},{k:'x..x....x.......',s:'....X...X.X.XXXX',h:'x.x.x.x.xxxxxxxx'},{k:'x.....x...x.x.x.',s:'....X.......XXXX',h:'x.x.x.x.x.x.x.xx'},{k:'x.......x..xx...',s:'....X...X...X.XX',h:'xxx.x.x.xxx.x.x.'}]}};
-
-/* ================= East Coast boom bap, researched: sparse kick that serves the sample (beat 1 plus the "and" of 2 / "and" of 3), snare on 2 and 4 (some a hair late), quiet ghost notes, 8th-note hats, swing 52-64%.
-   Seven producer feels; each has its own kick patterns, ghosts, hats, swing range and how late the snare sits. Steps: 0=1, 4=2, 8=3, 12=4, 6=and of 2, 10=and of 3. ================= */
-const BB=[
- {n:'PREMIER',sw:[52,54,55],late:0,hg:.8,kick:[[0,10],[0,7,10],[0,3,10],[0,6,10,14],[0,2,10],[0,10,13]],gh:[[],[],[15],[11]],hat:['x.x.x.x.x.x.x.x.','X.x.x.x.X.x.x.x.','x.x.x.x.x.x.x.xo']},
- {n:'PETE ROCK',sw:[56,58,60],late:.006,hg:.7,kick:[[0,7,10],[0,3,8,11],[0,6,8],[0,2,7,10],[0,7,9]],gh:[[7],[15],[3,15]],hat:['x.xgx.xgx.xgx.xg','x.x.xgx.x.x.xgx.','x.xxx.x.x.xxx.x.']},
- {n:'DILLA',sw:[58,61,64],late:.018,hg:.65,kick:[[0,5,10],[0,3,7,11],[0,6,9],[0,2,6,10],[0,5,8,11,14]],gh:[[6,15],[3,10],[7]],hat:['x.xxx.x.xxx.x.xx','xgx.xgxgx.xgx.xg','x.x.xxx.x.x.xxx.']},
- {n:'ALCHEMIST',sw:[54,56],late:.004,hg:.7,kick:[[0,10],[0,8],[0,6,10],[0,9]],gh:[[]],hat:['x...x...x...x...','x.......x.......','..x...x...x...x.','x...x...x...x..o']},
- {n:'9TH WONDER',sw:[57,59,61],late:.008,hg:.7,kick:[[0,7,10],[0,6,9],[0,3,10],[0,8,11]],gh:[[15],[7,15]],hat:['x.x.x.x.x.x.x.xo','x.x.x.xgx.x.x.xg']},
- {n:'HAVOC',sw:[52,53,54],late:0,hg:.75,kick:[[0,10],[0,2,10],[0,6,9],[0,3,6,10]],gh:[[]],hat:['x...x...x...x...','x.x.x.x.x.x.x.x.']},
- {n:'D.I.T.C.',sw:[55,57],late:.005,hg:.7,kick:[[0,7,10],[0,3,7,10],[0,10,14]],gh:[[],[15]],hat:['x.x.x.x.x.x.x.x.','xgx.x.xgx.x.x.xg']}];
-const BBFILL=[{k:'x.....x...x.x...',s:'....X.......X.xX'},{k:'x.......x.x.....',s:'....X.....g.X.XX'},{k:'x..x......x.....',s:'....X.......Xg.X'},{k:'x.x.....x.......',s:'....X...g...X.X.'}];
+const E4=()=>({kick:[],snare:[],hat:[],fill:[]});
+const P={trap:E4(),ec:E4()};   /* patterns removed on purpose: the new ones will be made from the user's own drum loops (converted to MIDI) */
+const BB=[],BBFILL=[];
 const strOf=(steps,ch,base)=>{const q=(base||'................').split('');steps.forEach(i=>q[i]=ch);return q.join('')};
-function bbBars(dna){const b=dna.bb,S=BB[b.s],ks=S.kick[b.k],kk=strOf(ks,'x'),sn=strOf(S.gh[b.g],'g',strOf([4,12],'X')),h=S.hat[b.h],out=[];
- for(let i=0;i<4;i++){let k=kk,s=sn;if(i===1&&dna.alt){const f=[14,7,2].find(x=>k[x]==='.'&&!ks.includes(x)&&x!==4&&x!==12);if(f!==undefined)k=strOf([f],'x',k)}
-  if(i===3&&b.f>=0){const f=BBFILL[b.f];k=f.k;s=f.s}out.push({k,s,h})}return out}
+function bbBars(dna){return[]}
 const STEPSETS=[[0,4,8,12],[0,3,6,10,12],[0,6,10],[0,2,4,8,10,12],[0,4,6,8,14],[0,5,8,13],[0,3,8,11]];
 const MINOR=[0,0,0,3,5,7,10,-2,-5,12],MAJOR=[0,0,0,4,5,7,9,-3,-5,12];
 
@@ -62,7 +41,7 @@ function keyOf(buf,ws,we){const sr=buf.sampleRate,L=buf.getChannelData(0),a=Math
  return{pc:best.pc,mode:best.mode,name:NM[best.pc]+' '+best.mode,score:best.s}}
 
 /* ================= a variation ("DNA"), picked from the id ================= */
-const COUNT=500,HALF=150;
+const COUNT=0,HALF=0;   /* no patterns until the user's drum loops are added */
 function dnaOf(id){id=clamp(Math.round(id),1,COUNT);
  if(id>HALF){const j=id-HALF-1,r=mul(id*7919+97),si=j%BB.length,S=BB[si],kits=KITS.filter(k=>k.style==='ec'),kit=KITS.indexOf(kits[Math.floor(j/BB.length+j*.37)%kits.length]),mr=r();
   const bb={s:si,k:Math.floor(j/BB.length)%S.kick.length,g:Math.floor(r()*S.gh.length),h:Math.floor(r()*S.hat.length),f:r()<.55?Math.floor(r()*BBFILL.length):-1};
