@@ -1,4 +1,4 @@
-/* MZPRD MPC studio: SAMPLE TO BEAT, stage 2 = drums and 300 variations.
+/* MZPRD MPC studio: SAMPLE TO BEAT, stage 2 = drums and 300 variations. The drum sounds are the user's own pack (mpc/drums.ogg + drums.json, built by tools/make_drumpack.py); the synthesized drums below are only a fallback if that file cannot load.
    - 10 synthesized drum kits: 5 trap (808s, snappy snare + clap, fast hats) and 5 East Coast (dusty kick, cracking snare, loose swung hats, vinyl crackle, tape)
    - hand-written pattern parts (kick, snare, hat motifs and fills) for each style that combine into 150 trap + 150 East Coast variations
    - each variation is a "plan": a list of timed events (which drum, which chop, how hard, when). The audio is rendered from the plan, and stage 3
@@ -75,7 +75,23 @@ function plan(dna,Rr,keyInfo){const bpm=Rr.bpm,step=60/bpm/4,r=mul(dna.seed),kit
    st.forEach((s,i)=>{const t=(b*16+s)*step,nx=i<st.length-1?(b*16+st[i+1])*step:(b*16+16)*step,sli=sl[order[i]],len=Math.min(sli.t1-sli.t0,(nx-t)*1.04);chops.push({t:t+((s%2)?(2*dna.swing/100-1)*step:0),lane:'chop',vel:b===0&&i===0?1:.88,n:sli.i-1,len:Math.max(.08,len),bar:b,step:s})})}}
  return{events:ev.concat(chops).sort((a,b)=>a.t-b.t),bpm,step,loopLen:64*step,dna,kit:dna.kit,key:keyInfo||null,chopMode:CM}}
 
+/* ================= the user's drum pack ================= */
+let PACK=null,PACKP=null;
+function loadPack(){if(PACK)return Promise.resolve(PACK);return PACKP=PACKP||(async()=>{try{const u=n=>new URL('mpc/'+n,document.baseURI).href,[ab,meta]=await Promise.all([fetch(u('drums.ogg?v=1')).then(r=>r.arrayBuffer()),fetch(u('drums.json?v=1')).then(r=>r.json())]),dc=new OfflineAudioContext(1,1,44100),buf=await dc.decodeAudioData(ab);
+  const pc=(a,key,p)=>{const v=a.map(x=>x[key]).sort((x,y)=>x-y);return v[Math.floor((v.length-1)*p)]},sn=pc(meta.snare,'c',.4),sn2=pc(meta.snare,'c',.68),ht=pc(meta.hat,'c',.4),ht2=pc(meta.hat,'c',.68);
+  const band=(a,lo,hi)=>a.filter(x=>x.c>=lo&&x.c<=hi),pools={snare:{dark:band(meta.snare,0,sn),mid:band(meta.snare,sn,sn2),bright:band(meta.snare,sn2,1e9)},hat:{dark:band(meta.hat,0,ht),mid:band(meta.hat,ht,ht2),bright:band(meta.hat,ht2,1e9)},
+   kick:{short:meta.kick.filter(x=>x.d<.2),any:meta.kick,long:meta.kick.filter(x=>x.d>=.2)},attack:meta.b808.concat(meta.kick.filter(x=>x.d>=.3)),open:meta.open.length?meta.open:meta.hat.slice().sort((a,b)=>b.r-a.r).slice(0,8),clap:meta.clap};
+  for(const k in pools.snare)if(!pools.snare[k].length)pools.snare[k]=meta.snare;for(const k in pools.hat)if(!pools.hat[k].length)pools.hat[k]=meta.hat;if(!pools.kick.short.length)pools.kick.short=meta.kick;if(!pools.kick.long.length)pools.kick.long=meta.kick;if(!pools.attack.length)pools.attack=meta.kick;
+  PACK={buf,meta,pools};return PACK}catch(e){console.warn('drum pack did not load',e);PACKP=null;return null}})()}
+/* what each kit asks of the pack: brightness of snare and hats, kick length, and how much clap sits on the snare */
+const KP={T1:{sn:'mid',ht:'bright',kk:'short',cl:.8},T2:{sn:'bright',ht:'bright',kk:'short',cl:.7},T3:{sn:'mid',ht:'mid',kk:'any',cl:.95},T4:{sn:'bright',ht:'bright',kk:'short',cl:.55},T5:{sn:'dark',ht:'mid',kk:'any',cl:.9},
+ E1:{sn:'dark',ht:'dark',kk:'short',cl:0},E2:{sn:'bright',ht:'mid',kk:'long',cl:0},E3:{sn:'bright',ht:'bright',kk:'short',cl:0},E4:{sn:'dark',ht:'dark',kk:'any',cl:0},E5:{sn:'mid',ht:'dark',kk:'any',cl:0}};
+function soundsOf(dna){if(!PACK)return null;const kit=KITS[dna.kit],kp=KP[kit.id],r=mul(dna.seed+4242),pl=PACK.pools,pk=a=>a[Math.floor(r()*a.length)];
+ return{kick:pk(pl.kick[kp.kk]),snare:pk(pl.snare[kp.sn]),clap:pk(pl.clap),hat:pk(pl.hat[kp.ht]),open:pk(pl.open),attack:pk(pl.attack),clapMix:kp.cl}}
+
 /* ================= the drum voices ================= */
+/* a hit from the pack */
+function hit(G,t,v,e,gain,rate){const x=G.ctx,s=x.createBufferSource();s.buffer=G.pack.buf;if(rate)s.playbackRate.value=rate;const g=x.createGain();g.gain.value=Math.max(.0001,v*gain);s.connect(g);g.connect(G.bus);s.start(t,e.o,e.d+.01);return g}
 function setup(ctx,dna,kit){const sr=ctx.sampleRate,rn=mul(dna.seed+99),nb=ctx.createBuffer(1,Math.floor(sr*.8),sr),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=rn()*2-1;
  const ir=ctx.createBuffer(2,Math.floor(sr*.55),sr);for(let c=0;c<2;c++){const q=ir.getChannelData(c);for(let i=0;i<q.length;i++)q[i]=(rn()*2-1)*Math.pow(1-i/q.length,3.2)}
  const bus=ctx.createGain(),sat=ctx.createWaveShaper(),k=((kit.tape||0)*2.2+(kit.k?kit.k.sat:0)*1.6)+.3,cv=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/512-1;cv[i]=Math.tanh(x*k)/Math.tanh(k)}sat.curve=cv;sat.oversample='2x';
@@ -83,32 +99,34 @@ function setup(ctx,dna,kit){const sr=ctx.sampleRate,rn=mul(dna.seed+99),nb=ctx.c
  const out=ctx.createGain();out.gain.value=.9;bus.connect(sat);sat.connect(lp);lp.connect(comp);comp.connect(out);out.connect(ctx.destination);
  const verb=ctx.createConvolver();verb.buffer=ir;const vg=ctx.createGain();vg.gain.value=1;verb.connect(vg);vg.connect(bus);
  const chopBus=ctx.createGain();chopBus.gain.value=.8;const clp=ctx.createBiquadFilter();clp.type='lowpass';clp.frequency.value=Math.min(kit.lp||18000,dna.style==='ec'?9500:16000);chopBus.connect(clp);clp.connect(bus);
- const G={ctx,nb,bus,verb,chopBus,kit,og:null,drive:{}};
+ const G={ctx,nb,bus,verb,chopBus,kit,og:null,drive:{},pack:PACK,snd:PACK?soundsOf(dna):null};
  if(kit.crackle){const L=Math.floor(sr*3),cb=ctx.createBuffer(1,L,sr),q=cb.getChannelData(0);for(let i=0;i<L;i++)q[i]=(rn()*2-1)*.004;for(let p=0;p<90;p++){const at=Math.floor(rn()*L),a=(rn()*.6+.15)*(rn()<.15?1:.4);for(let j=0;j<24&&at+j<L;j++)q[at+j]+=a*(j%2?-1:1)*Math.exp(-j/6)}
   const cs=ctx.createBufferSource();cs.buffer=cb;cs.loop=true;const cg=ctx.createGain();cg.gain.value=kit.crackle;const hp=ctx.createBiquadFilter();hp.type='highpass';hp.frequency.value=900;cs.connect(hp);hp.connect(cg);cg.connect(ctx.destination);G.crackle=cs}
  return G}
 const noiseAt=(G,t,dur)=>{const s=G.ctx.createBufferSource();s.buffer=G.nb;s.start(t,Math.random()*.3,dur);return s};
 const env=(G,node,t,a,peak,dec,floor)=>{node.gain.setValueAtTime(.0001,t);node.gain.linearRampToValueAtTime(Math.max(.0002,peak),t+a);node.gain.exponentialRampToValueAtTime(floor||.0001,t+a+dec)};
-function vKick(G,t,v){const x=G.ctx,k=G.kit.k||{f0:50,drop:120,dec:.17,click:.3,sat:.2},o=x.createOscillator(),g=x.createGain();o.type='sine';o.frequency.setValueAtTime(k.f0+k.drop,t);o.frequency.exponentialRampToValueAtTime(k.f0,t+.045);env(G,g,t,.003,v*.95,k.dec);o.connect(g);g.connect(G.bus);o.start(t);o.stop(t+k.dec+.05);
+function vKick(G,t,v){if(G.pack){hit(G,t,v,G.snd.kick,.95);return}const x=G.ctx,k=G.kit.k||{f0:50,drop:120,dec:.17,click:.3,sat:.2},o=x.createOscillator(),g=x.createGain();o.type='sine';o.frequency.setValueAtTime(k.f0+k.drop,t);o.frequency.exponentialRampToValueAtTime(k.f0,t+.045);env(G,g,t,.003,v*.95,k.dec);o.connect(g);g.connect(G.bus);o.start(t);o.stop(t+k.dec+.05);
  const n=noiseAt(G,t,.02),hp=x.createBiquadFilter(),g2=x.createGain();hp.type='highpass';hp.frequency.value=2200;env(G,g2,t,.001,v*k.click*.55,.012);n.connect(hp);hp.connect(g2);g2.connect(G.bus)}
 function vClap(G,t,v){const x=G.ctx;[0,.011,.022,.034].forEach((o,i)=>{const n=noiseAt(G,t+o,.14),bp=x.createBiquadFilter(),g=x.createGain();bp.type='bandpass';bp.frequency.value=1250;bp.Q.value=1.1;const last=i===3;env(G,g,t+o,.001,v*(last?.55:.4),last?.13:.012);n.connect(bp);bp.connect(g);g.connect(G.bus);if(last&&G.kit.sn.room){const gv=x.createGain();gv.gain.value=G.kit.sn.room*.7;g.connect(gv);gv.connect(G.verb)}})}
-function vSnare(G,t,v){const x=G.ctx,s=G.kit.sn,o=x.createOscillator(),g=x.createGain();o.type='triangle';o.frequency.setValueAtTime(s.tone*1.5,t);o.frequency.exponentialRampToValueAtTime(s.tone,t+.03);env(G,g,t,.002,v*.42,.09);o.connect(g);g.connect(G.bus);o.start(t);o.stop(t+.15);
+function vSnare(G,t,v){if(G.pack){const g=hit(G,t,v,G.snd.snare,.78);if(G.kit.sn.room){const gv=G.ctx.createGain();gv.gain.value=G.kit.sn.room*.55;g.connect(gv);gv.connect(G.verb)}if(G.snd.clapMix>0)hit(G,t+.002,v,G.snd.clap,.5*G.snd.clapMix);return}const x=G.ctx,s=G.kit.sn,o=x.createOscillator(),g=x.createGain();o.type='triangle';o.frequency.setValueAtTime(s.tone*1.5,t);o.frequency.exponentialRampToValueAtTime(s.tone,t+.03);env(G,g,t,.002,v*.42,.09);o.connect(g);g.connect(G.bus);o.start(t);o.stop(t+.15);
  const n=noiseAt(G,t,s.dec+.05),bp=x.createBiquadFilter(),hp=x.createBiquadFilter(),g2=x.createGain();bp.type='bandpass';bp.frequency.value=1900;bp.Q.value=.65;hp.type='highpass';hp.frequency.value=650;env(G,g2,t,.001,v*s.noise*.75,s.dec);n.connect(bp);bp.connect(hp);hp.connect(g2);g2.connect(G.bus);
  if(s.room){const gv=x.createGain();gv.gain.value=s.room*.6;g2.connect(gv);gv.connect(G.verb)}
  const n2=noiseAt(G,t,.015),h2=x.createBiquadFilter(),g3=x.createGain();h2.type='highpass';h2.frequency.value=s.hi;env(G,g3,t,.0005,v*.45,.012);n2.connect(h2);h2.connect(g3);g3.connect(G.bus);
  if(s.clap)vClap(G,t,v*s.clap*.8)}
 function vHat(G,t,v,open){const x=G.ctx,h=G.kit.hat;if(!open&&G.og){G.og.gain.setTargetAtTime(.0001,t,.004);G.og=null}
+ if(G.pack){const g=hit(G,t,v,open?G.snd.open:G.snd.hat,h.gain*(open?1.1:1)*1.15);if(open)G.og=g;return}
  const dec=open?h.open:h.dec,n=noiseAt(G,t,dec+.05),hp=x.createBiquadFilter(),lp=x.createBiquadFilter(),g=x.createGain();hp.type='highpass';hp.frequency.value=h.hp;lp.type='lowpass';lp.frequency.value=15500;env(G,g,t,.001,v*h.gain*(open?1.1:1),dec);n.connect(hp);hp.connect(lp);lp.connect(g);g.connect(G.bus);if(open)G.og=g}
 function drvCurve(G,d){const key=Math.round(d*10);if(G.drive[key])return G.drive[key];const k=1+d*14,c=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/512-1;c[i]=Math.tanh(x*k)/Math.tanh(k)}return G.drive[key]=c}
 function v808(G,t,v,len,f,slideFrom){const x=G.ctx,b=G.kit.b,o=x.createOscillator(),g=x.createGain(),sh=x.createWaveShaper();o.type='sine';
- if(slideFrom){o.frequency.setValueAtTime(slideFrom,t);o.frequency.linearRampToValueAtTime(f,t+.07)}else{o.frequency.setValueAtTime(f*1.9,t);o.frequency.exponentialRampToValueAtTime(f,t+.022)}
+ if(G.pack&&G.snd&&G.snd.attack&&!slideFrom)hit(G,t,v,G.snd.attack,.5);
+ if(slideFrom){o.frequency.setValueAtTime(slideFrom,t);o.frequency.linearRampToValueAtTime(f,t+.07)}else{o.frequency.setValueAtTime(G.pack?f*1.15:f*1.9,t);o.frequency.exponentialRampToValueAtTime(f,t+.03)}
  g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v*.95,t+.005);g.gain.setValueAtTime(v*.95,t+len*.35);g.gain.exponentialRampToValueAtTime(.0001,t+len);
  sh.curve=drvCurve(G,b.drive);const lp=x.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2600;o.connect(sh);sh.connect(lp);lp.connect(g);g.connect(G.bus);o.start(t);o.stop(t+len+.05);
  if(b.tri){const o2=x.createOscillator(),g2=x.createGain();o2.type='triangle';o2.frequency.setValueAtTime(f,t);if(slideFrom){o2.frequency.setValueAtTime(slideFrom,t);o2.frequency.linearRampToValueAtTime(f,t+.07)}g2.gain.value=b.tri*.35;o2.connect(g2);g2.connect(g);o2.start(t);o2.stop(t+len+.05)}}
 function vChop(G,buf,sl,t,len,v){const x=G.ctx,s=x.createBufferSource();s.buffer=buf;const g=x.createGain();g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.005);g.gain.setValueAtTime(v,t+Math.max(.006,len-.025));g.gain.linearRampToValueAtTime(.0001,t+len);s.connect(g);g.connect(G.chopBus);s.start(t,sl.t0,len+.02);s.stop(t+len+.05)}
 
 /* ================= render a plan to audio ================= */
-async function render(buf,Rr,P_,opt){opt=opt||{};const loops=opt.loops||2,sr=44100,total=loops*P_.loopLen+1.6,ctx=new OfflineAudioContext(2,Math.ceil(total*sr),sr),kit=KITS[P_.kit],G=setup(ctx,P_.dna,kit);
+async function render(buf,Rr,P_,opt){opt=opt||{};await loadPack();const loops=opt.loops||2,sr=44100,total=loops*P_.loopLen+1.6,ctx=new OfflineAudioContext(2,Math.ceil(total*sr),sr),kit=KITS[P_.kit],G=setup(ctx,P_.dna,kit);
  if(G.crackle)G.crackle.start(0);
  const sample=P_.chopMode==='loop';
  for(let l=0;l<loops;l++){const off=l*P_.loopLen;
@@ -123,5 +141,5 @@ async function render(buf,Rr,P_,opt){opt=opt||{};const loops=opt.loops||2,sr=441
  return out}
 function wav(buf){const n=buf.length,ch=buf.numberOfChannels,a=new DataView(new ArrayBuffer(44+n*ch*2)),w=(o,s)=>{for(let i=0;i<s.length;i++)a.setUint8(o+i,s.charCodeAt(i))};w(0,'RIFF');a.setUint32(4,36+n*ch*2,true);w(8,'WAVE');w(12,'fmt ');a.setUint32(16,16,true);a.setUint16(20,1,true);a.setUint16(22,ch,true);a.setUint32(24,buf.sampleRate,true);a.setUint32(28,buf.sampleRate*ch*2,true);a.setUint16(32,ch*2,true);a.setUint16(34,16,true);w(36,'data');a.setUint32(40,n*ch*2,true);
  const d=[];for(let c=0;c<ch;c++)d.push(buf.getChannelData(c));let o=44;for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const v=Math.max(-1,Math.min(1,d[c][i]));a.setInt16(o,v<0?v*32768:v*32767,true);o+=2}return new Blob([a.buffer],{type:'audio/wav'})}
-window.MZMpcDrums={KITS,P,COUNT,HALF,dnaOf,plan,render,keyOf,wav,STEPSETS};
+window.MZMpcDrums={KITS,P,COUNT,HALF,dnaOf,plan,render,keyOf,wav,STEPSETS,loadPack,soundsOf,pack:()=>PACK};
 })();

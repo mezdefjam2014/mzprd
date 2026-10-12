@@ -110,7 +110,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
  const D=()=>window.MZMpcDrums;let sel=0,vsrc=null,KEY=null,cache=new Map(),order=null,busy=false;
  const vstop=()=>{try{vsrc&&vsrc.stop()}catch(e){}vsrc=null;paintV()};
  const ids=()=>{const d=D();let a=[...Array(d.COUNT)].map((_,i)=>i+1);if(Z.vs==='trap')a=a.filter(i=>i<=d.HALF);else if(Z.vs==='ec')a=a.filter(i=>i>d.HALF);else if(Z.vs==='fav')a=a.filter(i=>Z.fav.includes(i));if(Z.vk!=='all')a=a.filter(i=>String(d.dnaOf(i).kit)===String(Z.vk));if(order)a=a.slice().sort((x,y)=>order[x]-order[y]);return a};
- const label=i=>{const d=D().dnaOf(i);return{t:'#'+i+'  '+(d.style==='trap'?'TRAP':'EAST COAST')+'  /  '+d.kitName,s:R.bpm+' BPM  /  swing '+d.swing+'%  /  '+({loop:'sample loop',flip:'chop flip',sparse:'sparse chops'}[d.mode])}};
+ const label=i=>{const d=D().dnaOf(i);return{t:'#'+i+'  '+(d.style==='trap'?'TRAP':'EAST COAST')+'  /  '+d.kitName,s:R.bpm+' BPM  /  swing '+d.swing+'%  /  '+({loop:'sample loop',flip:'chop flip',sparse:'sparse chops'}[d.mode])+(D().pack()?(()=>{const q=D().soundsOf(d);return '  /  '+q.snare.n.replace(/^Snare /,'Snare ')+'  '+q.hat.n+'  '+q.kick.n})():'')}};
  function paintV(){const v=$('#sbVar');if(!R||!D()){v.style.display='none';return}v.style.display='block';$('#sbKey').textContent='Key of the sample: '+(KEY?KEY.name:'...')+". The 808 follows it. Trap variations keep the sample's tempo (hats run in 16ths with rolls); East Coast ones add swing.";
   const kitSel=$('#sbKit');if(!kitSel.options.length){kitSel.innerHTML='<option value="all">All kits</option>'+D().KITS.map((k,i)=>`<option value="${i}">${k.style==='trap'?'Trap':'East Coast'}: ${k.n}</option>`).join('');kitSel.value=String(Z.vk)}
   $('#sbSty').value=Z.vs;const a=ids(),per=10,pages=Math.max(1,Math.ceil(a.length/per));Z.pg=clamp(Z.pg,0,pages-1);const pg=a.slice(Z.pg*per,(Z.pg+1)*per);
@@ -127,7 +127,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
  $('#sbRand').onclick=()=>{const a=ids();if(a.length)playVar(a[Math.floor(Math.random()*a.length)])};
  $('#sbVStop').onclick=vstop;
  $('#sbVWav').onclick=async()=>{if(!R||!sel)return;$('#sbVMsg').textContent='Rendering 16 bars for download...';const d=D(),dna=d.dnaOf(sel),pl=d.plan(dna,R,KEY),out=await d.render(buf,R,pl,{loops:4}),a=document.createElement('a');a.href=URL.createObjectURL(d.wav(out));a.download=(fname||'sample')+' - beat '+sel+'.wav';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),8000);$('#sbVMsg').textContent='Downloaded.'};
- const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=1');KEY=D().keyOf(buf,R.ws,R.we);cache=new Map();sel=0;paintV()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
+ const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=2');await D().loadPack();KEY=D().keyOf(buf,R.ws,R.we);cache=new Map();sel=0;paintV()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
  window.__s2bAfter=afterChop;
  return{chop:()=>R,buf:()=>buf,stop,after:afterChop,key:()=>KEY,dev:{renderVar,playVar}}}
 window.MZMpcSample={chop,tempoOf,fluxOf,pickPeaks,playSlice,mount,padIdx,PAD_NAMES};
