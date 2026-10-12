@@ -29,6 +29,9 @@ const DKV={id:'deskv',W:1131,H:2000,u:1.2,sampled:true,glow:true,lamp:[800,140,1
  vol:[238,742,22],con:[541,737,10],fader:{x:158,y:1214,w:28,h:44,slot:[167,1214,12,38],hx:161,hy:1216,hw:21,hh:39},faderPt:[200,1242],
  smoke:{x:908,y:1564},label:{cx:699,cy:1887,ang:.33,w:205,h:117}};
 DK.bulb=[190,120];DKV.bulb=[772,150];DK.cone={apex:[-163,13],a0:.024,a1:1.017,len:2700};DKV.cone={apex:[772,150],a0:1.34,a1:2.42,len:2300};
+Object.assign(DK.btn,{soft1:[1271,570,36,16],soft2:[1318,570,38,16],soft3:[1371,570,35,16],soft4:[1418,570,38,16],sounds:[1418,615,38,16],enter:[1190,705,39,15],k0:[1092,704,37,16],kdot:[1141,704,38,16],k1:[1095,659,34,16],k2:[1140,659,39,16],k3:[1190,660,39,15],k4:[1091,615,38,16],k5:[1140,615,39,16],k6:[1190,616,39,15],k7:[1096,570,33,16],k8:[1140,570,39,16],k9:[1190,571,39,15]});
+Object.assign(DKV.btn,{soft1:[759,936,34,16],soft2:[803,936,34,16],soft3:[847,936,35,16],soft4:[892,936,35,16],sounds:[892,977,35,16],enter:[688,1061,34,15],k0:[599,1061,34,15],kdot:[643,1060,35,16],k1:[599,1019,34,15],k2:[643,1018,35,16],k3:[688,1018,34,16],k4:[599,977,34,16],k5:[643,977,35,15],k6:[688,977,34,15],k7:[599,935,34,16],k8:[643,935,35,16],k9:[688,935,34,16]});
+DK.wheel=[1160,822,35];DKV.wheel=[660,1170,31];
 const GEO={deskh:DK,deskv:DKV};
 /* pad order on the MPC60 II, top row first */
 const PAD_NAMES=['PERC 1','PERC 2','PERC 3','PERC 4','RIDE 1','RIDE 2','CRASH 1','CRASH 2','TOM 1','TOM 2','TOM 3','TOM 4','HIHAT','SNARE 1','SNARE 2','BASS'];
@@ -93,12 +96,14 @@ const LGC={};
 function lcdGlass(w){const key=Math.round(w);if(LGC[key])return LGC[key];const k=3,W=Math.round(w*k),H=54*k,mk=()=>{const c=document.createElement('canvas');c.width=W;c.height=H;return c};const base=mk(),scan=mk();let x=base.getContext('2d');x.scale(k,k);
  const g=x.createLinearGradient(0,0,0,54);g.addColorStop(0,'#c4ee93');g.addColorStop(1,'#93cf6c');x.fillStyle=g;x.fillRect(0,0,w,54);const gl=x.createRadialGradient(w/2,27,6,w/2,27,w*.62);gl.addColorStop(0,'rgba(255,255,220,.35)');gl.addColorStop(1,'rgba(255,255,220,0)');x.fillStyle=gl;x.fillRect(0,0,w,54);
  x=scan.getContext('2d');x.scale(k,k);x.fillStyle='rgba(20,60,10,.07)';for(let y=0;y<54;y+=2)x.fillRect(0,y,w,1);for(let q=0;q<w;q+=2)x.fillRect(q,0,1,54);return LGC[key]={base,scan}}
+/* the data wheel has no markings, so a pale notch on the rim shows it turning */
+function wheelMark(c,w,ang){const r=w[2];c.save();c.translate(w[0],w[1]);c.rotate(ang);c.fillStyle='rgba(235,235,238,.55)';c.fillRect(-r*.04,-r*.9,r*.08,r*.28);c.fillStyle='rgba(0,0,0,.25)';c.fillRect(-r*.04+r*.08,-r*.9,r*.02,r*.28);c.restore()}
 function machine(c,ox,oy,sc,S,o){
  const G=o.geo||PH,SRC=o.src||IMG,u=G.u||1;
  c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.drawImage(o.img,ox,oy,G.W*sc,G.H*sc);
  c.save();c.translate(ox,oy);c.scale(sc,sc);
  const P=G.pad;
- if(o.fx){knob(c,SRC,G.vol[0],G.vol[1],G.vol[2],o.fx.vol);knob(c,SRC,G.con[0],G.con[1],G.con[2],o.fx.con);fader(c,G,SRC,o.fx.fader*u);for(const k in G.btn)button(c,SRC,G,G.btn[k],o.fx.btn[k]||0)}
+ if(o.fx){knob(c,SRC,G.vol[0],G.vol[1],G.vol[2],o.fx.vol);knob(c,SRC,G.con[0],G.con[1],G.con[2],o.fx.con);fader(c,G,SRC,o.fx.fader*u);for(const k in G.btn)button(c,SRC,G,G.btn[k],o.fx.btn[k]||0);if(G.wheel&&o.fx.wheel!=null)wheelMark(c,G.wheel,o.fx.wheel)}
  for(let i=0;i<16;i++){const col=i%4,row=Math.floor(i/4),x=P.x0+col*P.px,y=P.y0+row*P.py,p=o.press(i);if(!(p>.004))continue;
   c.fillStyle=plateCol(G,SRC,i);c.fillRect(x-3*u,y-3*u,P.w+6*u,P.h+6*u);
   const k=1-.12*p,w=P.w*k,h=P.h*k,px=x+(P.w-w)/2,py=y+(P.h-h)/2+1.6*u*p;
@@ -112,9 +117,10 @@ function machine(c,ox,oy,sc,S,o){
  const LG=lcdGlass(L.w);c.drawImage(LG.base,L.x,L.y,L.w,L.h);
  c.fillStyle='#1c3a12';c.textBaseline='middle';c.textAlign='left';
  const pad2=n=>String(n).padStart(2,'0'),f=q=>q+"px VT323,monospace";
- const l1=(o.head||S.lcd||S.title||'BEAT').toUpperCase(),sz=fitFont(c,l1,f,23,L.w-16);c.font=f(sz);c.fillText(l1,L.x+8,L.y+11);
+ const l1=(o.lcd?o.lcd[0]:(o.head||S.lcd||S.title||'BEAT')).toUpperCase(),sz=fitFont(c,l1,f,23,L.w-16);c.font=f(sz);c.fillText(l1,L.x+8,L.y+11);
  let l2,l3;
- if(o.head){l2=o.sub||'';l3='LOADING...'}
+ if(o.lcd){l2=o.lcd[1];l3=o.lcd[2]}
+ else if(o.head){l2=o.sub||'';l3='LOADING...'}
  else{const x=(lt-(S.off||0))/bl,n=x<0?0:Math.floor(x);l2='BAR '+String(Math.floor(n/4)+1).padStart(3,'0')+'   BEAT '+(n%4+1);
   l3=(run?'PLAY ':'READY ')+mmss(clamp(lt,0,S.dur))+'   '+(o.trk?'TRK '+pad2(o.trk[0])+'/'+pad2(o.trk[1]):(S.bpm||'--')+' BPM  '+(S.key||'').toUpperCase());
   if(o.loading&&lt<.6)l3='LOADING...';
@@ -142,7 +148,7 @@ function derive(X,fmt,cu){const E=ST.eng,sub=E.sub&&!cu,loop=E.loop&&X.kind==='o
  if(loop){const Sx=X.tracks[0].S,xf=Math.min(3.8,Sx.dur*.3),lead=.12;
   const A={S:Sx,start:lead,off:xf,dur:Sx.dur-xf,fi:.04,fo:xf},B={S:Sx,start:lead+Sx.dur-2*xf,off:0,dur:xf,fi:xf,fo:0};tracks=[A,B];total=A.start+A.dur}
  else{tracks=X.tracks.map(t=>Object.assign({},t));const l=tracks[tracks.length-1];total=l.start+l.dur+3.6}
- return{kind:X.kind,tracks,total,lead:X.lead,title:X.title,sub:!!sub,subT0:sub?total-4.2:0,loop,intro:loop?0:(X.intro||0)}}
+ return{kind:X.kind,tracks,total,lead:X.lead,title:X.title,sub:!!sub,subT0:sub?total-4.2:0,loop,intro:loop?0:(X.intro||0),make:X.make}}
 const XF=fmt=>{const b=X();if(!b)return null;const k=fmt==='v'?'_v':fmt==='c'?'_c':'_h';if(!b[k])b[k]=derive(b,fmt==='c'?'v':fmt,fmt==='c');return b[k]};
 function dropV(){if(S&&S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}if(TP){TP._v=null;TP._h=null;TP._c=null}}
 const trackAt=(X,T)=>{let k=0;for(let i=0;i<X.tracks.length;i++)if(T>=X.tracks[i].start)k=i;return k};
@@ -216,7 +222,9 @@ function prepHands(r,l){if(!r||!l)return;const mk=(img,warm)=>{const cv=document
  const blurs=cv=>[0,1.2,2.6,4.5].map(b=>{if(!b)return cv;const o=document.createElement('canvas');o.width=cv.width;o.height=cv.height;const x=o.getContext('2d');x.filter='blur('+b+'px)';x.drawImage(cv,0,0);return o});
  const one=(img)=>{const sl=sil(img);return{norm:mk(img,false),warm:mk(img,true),sil:sl,silB:blurs(sl),sh:{}}};
  HANDS={r:one(r),l:one(l)}}
-function handHits(Sx){if(Sx._hh)return Sx._hh;const o={l:[],r:[]},last={l:-9,r:-9};(Sx.hits||[]).forEach(h=>{const key=(h.pad%4)<2?'l':'r';if(h.t-last[key]<.115)return;last[key]=h.t;o[key].push(h)});return Sx._hh=o}
+const btnC=(G,k)=>{const r=G.btn&&G.btn[k];return r?[r[0]+r[2]/2,r[1]+r[3]*.55]:null};
+function handHits(Sx,G){const ck='_hh'+(G&&G.id||'');if(Sx[ck])return Sx[ck];const o={l:[],r:[]},last={l:-9,r:-9};(Sx.hits||[]).forEach(h=>{let key,hh=h;if(h.btn){const pc=btnC(G||{},h.btn);if(!pc)return;key='r';hh={t:h.t,pad:-1,v:h.v,pos:pc}}else key=(h.pad%4)<2?'l':'r';if(h.t-last[key]<.115)return;last[key]=h.t;o[key].push(hh)});return Sx[ck]=o}
+const hpos=(G,h)=>h.pos||padC(G,h.pad);
 const padC=(G,i)=>[G.pad.x0+(i%4)*G.pad.px+G.pad.w/2,G.pad.y0+Math.floor(i/4)*G.pad.py+G.pad.h*.58];
 /* Hand motion model. Everything is a smooth physical curve of time (no random shake):
    - travel between pads is a lightly under-damped spring, so the hand arrives with a hair of overshoot, like a real arm
@@ -226,7 +234,7 @@ const padC=(G,i)=>[G.pad.x0+(i%4)*G.pad.px+G.pad.w/2,G.pad.y0+Math.floor(i/4)*G.
    - at the end of the beat the hand just rests, floating with a slow breathing sway */
 const spring=u=>{if(u<=0)return 0;if(u>=1)return 1;const z=.8,w=9.5,wd=w*Math.sqrt(1-z*z);return 1-Math.exp(-z*w*u)*(Math.cos(wd*u)+(z*w/wd)*Math.sin(wd*u))};
 function handPose(list,T,G,key){let i=0;while(i<list.length&&list[i].t<=T)i++;const prev=i>0?list[i-1]:null,next=i<list.length?list[i]:null,restY=G.pad.y0+G.pad.py*3+G.pad.h+G.pad.py*1.7;let A,B,tA,tB;
- if(next){B=padC(G,next.pad);tB=next.t;if(prev){A=padC(G,prev.pad);tA=prev.t}else{A=[B[0]+(key==='r'?30:-30),restY];tA=tB-1.5}}else{A=padC(G,prev.pad);tA=prev.t;B=A;tB=tA+9}
+ if(next){B=hpos(G,next);tB=next.t;if(prev){A=hpos(G,prev);tA=prev.t}else{A=[B[0]+(key==='r'?30:-30),restY];tA=tB-1.5}}else{A=hpos(G,prev);tA=prev.t;B=A;tB=tA+9}
  const gap=tB-tA,v=(prev?prev.v:.7);
  /* where the hand is */
  const travel=Math.max(.07,gap-.12),e=spring((T-tA-.015)/travel),x=A[0]+(B[0]-A[0])*e,y=A[1]+(B[1]-A[1])*e;
@@ -243,7 +251,7 @@ function handPose(list,T,G,key){let i=0;while(i<list.length&&list[i].t<=T)i++;co
  return{x:x+sx*G.pad.w/72,y:y+sy*G.pad.w/72,hover:h,contact:c}}
 function handAt(list,T,G,key){if(!list.length)return null;const a=handPose(list,T,G,key),b=handPose(list,T-.022,G,key);a.vx=(a.x-b.x)/.022;a.vy=(a.y-b.y)/.022;a.vh=(a.hover-b.hover)/.022;return a}
 /* a hard tap: the hand floats up, drops fast and lands on the pad; its shadow is big and soft when lifted and tight and dark on contact */
-function drawHands(c,G,Sx,T,desk){if(!HANDS)return;const H=handHits(Sx);for(const key of ['l','r']){const st=handAt(H[key],T,G,key);if(st)drawOneHand(c,G,key,st,desk,T)}}
+function drawHands(c,G,Sx,T,desk){if(!HANDS)return;const H=handHits(Sx,G);for(const key of ['l','r']){const st=handAt(H[key],T,G,key);if(st)drawOneHand(c,G,key,st,desk,T)}}
 const SHQ=[.3,.45,.6,.8,1];
 function drawOneHand(c,G,key,st,desk,T,lampOver){const k=G.pad.w/72,lp=lampOver||G.lamp||[G.W*.2,-G.H*.35,0];st.vx=st.vx||0;st.vy=st.vy||0;st.vh=st.vh||0;st.contact=st.contact||0;
  {const m=HM[key],hv=st.hover,sq=1-.03*st.contact,s0=G.pad.w*.5/m.fw,s=s0*(1+.17*hv)*sq,sx=G.W*(key==='r'?.66:.34),sy=G.H*1.55,ang=Math.atan2(sx-st.x,sy-st.y),lean=clamp(st.vx/k*.00055,-.07,.07),rot=m.axis-ang+lean,push=(1-hv)*5*k+st.contact*5*k,HI=HANDS[key];
@@ -347,14 +355,15 @@ function gradeFx(c,W,H){const g=(ST.cam||{}).grade;if(!g||g==='0')return;c.save(
  c.restore()}
 function frame(c,W,H,fmt,T,X){
  LAMPFL=lampLevel(T);const cu=fmt==='c';if(cu)fmt='v';const OV=!cu&&!X.long;
- const v=fmt==='v',E=ST.eng,sc0=v?.87*W/848:.6*W/848,k=trackAt(X,T),tr=X.tracks[k],Sx=tr.S,lt=T-tr.start,la=lt+(tr.off||0),tape=X.kind==='tape',last=X.tracks[X.tracks.length-1],lastEnd=last.start+last.dur,t0=X.tracks[0].start;
+ const v=fmt==='v',E=ST.eng,sc0=v?.87*W/848:.6*W/848,k=trackAt(X,T),tr=X.tracks[k],Sx=tr.S,lt=T-tr.start,la=lt+(tr.off||0),tape=X.kind==='tape',last=X.tracks[X.tracks.length-1],lastEnd=last.start+last.dur,t0=X.make?X.make.T0:X.tracks[0].start;
  const dx=(1.3*Math.sin(T*.31)+.7*Math.sin(T*.77+1.3))*W/1920,dy=(1.1*Math.sin(T*.27+.8)+.6*Math.sin(T*.69+2.1))*W/1920,zs=(1+.0028*Math.sin(T*.21+.4))*(E.hook?1+.2*(1-ease(T/.8)):1)*(ST.cam&&ST.cam.rack?1+.014*(1-ease((T-.15)/1.8)):1);
  c.save();c.fillStyle='#fff';c.fillRect(0,0,W,H);c.translate(W/2+dx,H/2+dy);c.scale(zs,zs);c.translate(-W/2,-H/2);
  const SC=sceneOf(fmt),intro=tape&&T<t0;let sc=sc0,cx=W/2,cy=v?H*.5:H*.495,ox=cx-PH.cx*sc,oy=cy-PH.cy*sc;
  if(SC){sc=Math.max(W/SC.G.W,H/SC.G.H)*1.025;ox=(W-SC.G.W*sc)/2;oy=(H-SC.G.H*sc)/2}else ground(c,W+80,H+80,ox,oy,sc);
  if(cu){const G0=SC?SC.G:PH,pcx=G0.pad.x0+1.5*G0.pad.px+G0.pad.w/2,pcy=G0.pad.y0+1.5*G0.pad.py+G0.pad.h/2,zoom=(SC?1.78:1.55)*(1+.04*Math.sin(T*.23)),sc2=(SC?sc:sc0)*zoom;sc=sc2;ox=W/2-pcx*sc+Math.sin(T*.19)*6;oy=H*.47-pcy*sc+Math.cos(T*.16)*5}
  const fx={vol:(.21*ease((T-.15)/2.4))+.012*Math.sin(T*.6),con:.05*Math.sin(T*.4),fader:Math.max(0,26*(.5+.5*Math.sin(T*.29-.6))),btn:{play:0,start:pulse(T,t0-.42,t0-.12),rec:pulse(T,t0-.42,t0-.12),over:0,stop:pulse(T,lastEnd-.08,lastEnd+.2)}};
- machine(c,ox,oy,sc,Sx,{boot:(X.intro>0&&T<X.intro)?T:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,run:la>=-.02&&T<lastEnd,trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
+ if(X.make){for(const e of Sx.btnEv){const q=pulse(T,e.t-.05,e.t+.16);if(q>(fx.btn[e.k]||0))fx.btn[e.k]=q}fx.wheel=X.make.wheelAngle(T)}
+ machine(c,ox,oy,sc,Sx,{lcd:X.make&&!((X.intro>0)&&T<X.intro)?X.make.lcdAt(T):null,boot:(X.intro>0&&T<X.intro)?T:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,run:la>=-.02&&T<lastEnd,trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
 {c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC?SC.G:PH;
   if(SC&&Gs.id==='deskh')drawCan(c,Gs,Sx);
   if(ST.hands&&ST.hands.on)drawHands(c,Gs,Sx,la,!!SC);
@@ -370,6 +379,7 @@ function frame(c,W,H,fmt,T,X){
  if(OV&&E.note&&(E.noteText||'').trim()&&T>2.4&&T<7.4)pill(c,E.noteText.trim(),W/2,v?(SC?H*.722:H*.775):H*.95,v?40:28,Math.min(ease((T-2.4)/.4),ease((7.4-T)/.4)));
  if(OV&&E.q&&(E.qText||'').trim()&&X.total>14&&T>X.total-10.5&&T<X.total-.15){const txt=E.qText.trim().toUpperCase(),lines=wrapTwo(txt),size=Math.min(v?100:72,W*.9/Math.max(5,Math.max(...lines.map(l=>l.length)))*1.9),pu=1+.025*Math.sin(T*5);sticker(c,lines,W/2,topY,size*pu,X.total-10.5,T,{fill:'#e0242f',out:Math.min(1,(X.total-.15-T)/.3)})}
  if(OV&&X.sub)subscribe(c,W,H,T-X.subT0,v?(SC?.905:0):.9,!v);
+ if(X.make&&window.MZMpcMake&&!cu)MZMpcMake.overlay(c,W,H,T,X,v);
  if(OV&&ST.text&&!SC)text(c,W,H,v,{title:tape?X.title:Sx.title,bpm:Sx.bpm,key:Sx.key,sub:tape&&!intro?(k+1)+'. '+Sx.title:''})}
 function text(c,W,H,v,S){const ink='#111';c.save();c.fillStyle=ink;c.textBaseline='alphabetic';
  if(v){c.textAlign='center';const t=(S.title||'').toUpperCase(),f=s=>'700 '+s+'px Anton, Oswald, sans-serif',s=fitFont(c,t,f,150,W*.86);c.font=f(s);c.fillText(t,W/2,H*.2);c.font='600 44px Oswald, sans-serif';c.fillStyle='#666';c.fillText(S.sub?S.sub.toUpperCase():([S.bpm?S.bpm+' BPM':'',S.key||'','PROD. MZPRD'].filter(Boolean)).join('   /   '),W/2,H*.2+70);
@@ -490,10 +500,11 @@ async function loadBeat(b){if(CACHE[b.id])return CACHE[b.id];const r=await fetch
 const kitOf=id=>ST.kits&&ST.kits[id]!=null&&ST.kits[id]!==''?+ST.kits[id]:kitFor(id);
 function mkS(b,len,kit){const C=CACHE[b.id],Sx={title:b.title,bpm:Number(b.bpm)||0,key:b.musical_key||'',lcd:'',raw:C.raw,buf:C.buf,off:C.raw.off||0,kit,dur:len?Math.min(C.buf.duration,len):C.buf.duration};const L=layout(C.raw,kit);Sx.hits=L.hits;Sx.per=L.per;return Sx}
 let TP=null;
-const X=()=>ST.tape.on?TP:(S&&S.tl);
+let EP=null;
+const X=()=>(ST.s2b&&ST.s2b.useEp&&EP)?EP:(ST.tape.on?TP:(S&&S.tl));
 function applyKit(){const id=ST.beat,k=kitOf(id),L=layout(S.raw,k);S.kit=k;S.hits=L.hits;S.per=L.per;
  const tot=S.per.map((x,i)=>x.length?PAD_NAMES[i]+' '+x.length:'').filter(Boolean);const m=root&&$q('#mMap');if(m)m.textContent='Kit: '+KITS[k].n+'. '+(tot.join(' / ')||'Nothing was found.');const ks=root&&$q('#mKit');if(ks)ks.value=(ST.kits&&ST.kits[id]!=null&&ST.kits[id]!=='')?String(ST.kits[id]):''}
-async function pick(id){ST.beat=id;save();stopPlay();const b=beats.find(x=>String(x.id)===String(id));if(!b)return;
+async function pick(id){ST.beat=id;if(EP){EP=null;if(ST.s2b)ST.s2b.useEp=false}save();stopPlay();const b=beats.find(x=>String(x.id)===String(id));if(!b)return;
  S=null;drawNow();$q('#mMsg').textContent='Loading "'+b.title+'" and listening for the hits...';$q('#mInfo').textContent='';
  try{await loadBeat(b);if(String(ST.beat)!==String(id))return;S=mkS(b,ST.len,kitOf(id));S.lcd=ST.lcd.trim();S.tl=tlOne(S);applyKit();
   $q('#mInfo').textContent=mmss(CACHE[b.id].buf.duration)+' preview / '+S.hits.length+' pad hits found';$q('#mMsg').textContent='Ready. Press PLAY to watch it, or render the video.';mark('yt','th','gen');if(window.__lpShow)__lpShow();drawNow()}
@@ -695,7 +706,7 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  $q('#mFh').onclick=async()=>{ST.fmt='h';save();await ensureScene('h');size();drawNow()};$q('#mFv').onclick=async()=>{ST.fmt='v';save();await ensureScene('v');size();drawNow()};
  $q('#mPlay').onclick=play;$q('#mScrub').oninput=()=>{if(PV.playing)stopPlay();drawNow()};
  const T=ST.tape;$q('#mSens').value=String(ST.sens==null?1:ST.sens);$q('#mNudge').value=String(ST.nudge||0);$q('#mNudgeV').textContent=String(ST.nudge||0);const relay=()=>{save();for(const id in CACHE){}if(S&&S.raw){applyKit();S._hh=null;if(S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}}if(TP){TP.tracks.forEach(t=>{const L=layout(t.S.raw,t.S.kit);t.S.hits=L.hits;t.S.per=L.per;t.S._hh=null});TP._v=null;TP._h=null;TP._c=null}drawNow()};$q('#mSens').onchange=e=>{ST.sens=+e.target.value;relay()};$q('#mNudge').oninput=e=>{ST.nudge=+e.target.value;$q('#mNudgeV').textContent=String(ST.nudge);relay()};$q('#mTpOn').checked=!!T.on;$q('#mTpT').value=T.title;$q('#mTpL').value=String(T.len);$q('#mTpX').value=String(T.xf);$q('#mTpBox').style.display=T.on?'block':'none';tpList();
- const mountS2B=async()=>{if(mountS2B.done)return;mountS2B.done=1;try{await loadS('mpcsample.js?v=3');window.__s2b=MZMpcSample.mount($q('#mS2B'),{ST,save:()=>{save();summ()},esc,ctx:ctxA,loadS});summ()}catch(e){mountS2B.done=0;$q('#mS2B').innerHTML='<div class="msg">The sample chopper did not load. Refresh the page.</div>'}};
+ const mountS2B=async()=>{if(mountS2B.done)return;mountS2B.done=1;try{await loadS('mpcsample.js?v=5');window.__s2b=MZMpcSample.mount($q('#mS2B'),{ST,save:()=>{save();summ()},esc,ctx:ctxA,loadS,cpy,dlf,ensureScene:()=>ensureScene(ST.fmt),setEp:x=>{EP=x;if(ST.s2b)ST.s2b.useEp=!!x;stopPlay();dropV();if(x){const cv=$q('#mScrub');if(cv)cv.value='0'}drawNow();summ()},hasEp:()=>!!EP});summ()}catch(e){mountS2B.done=0;$q('#mS2B').innerHTML='<div class="msg">The sample chopper did not load. Refresh the page.</div>'}};
  root.querySelectorAll('details.grp').forEach(d=>{d.open=!!ST.open[d.id];if(d.id==='g_s2b'){d.addEventListener('toggle',()=>{if(d.open)mountS2B()});if(d.open)mountS2B()}d.addEventListener('toggle',()=>{ST.open[d.id]=d.open?1:0;save()})});$q('#mOpenAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=true);$q('#mCloseAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=false);
  $q('#mRight').addEventListener('change',()=>setTimeout(summ,0));$q('#mRight').addEventListener('input',()=>setTimeout(summ,0));summ();
  $q('#mTpOn').onchange=e=>{T.on=e.target.checked;save();$q('#mTpBox').style.display=T.on?'block':'none';stopPlay();ytRender();thRender();drawNow()};
@@ -718,5 +729,5 @@ window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root
   ST=load();if(!ST.th)ST.th={seed:1,pal:'',fmt:'h'};if(!ST.yt.v)ST.yt.v=0;if(!ST.tape)ST.tape=defaults().tape;if(!ST.eng)ST.eng=defaults().eng;if(!ST.smoke)ST.smoke=defaults().smoke;if(!ST.hands)ST.hands=defaults().hands;if(!ST.gen)ST.gen=defaults().gen;if(!ST.can)ST.can=defaults().can;if(!ST.cam)ST.cam=defaults().cam;if(!ST.open)ST.open={g_beat:1};S=null;root.innerHTML=html();wire();await ensureScene(ST.fmt);size();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
 };
 window.mpcClose=function(){if(root)root.classList.remove('on');stopPlay()};
-window.__mpc={lamp:T=>lampLevel(T),hand:(Sx,key,T)=>handAt(handHits(Sx)[key],T,DK,key),xf:XF,st:()=>ST,s:()=>S,tp:()=>TP,x:X,frame,analyze,PH,pv:()=>PV,buildTape};window.MZMpc={machine,PH,fitFont,mmss,clamp,img:()=>IMG,cut:()=>CUT,bg:k=>DESKBG[k],warm:()=>WARM,handsReady:()=>!!HANDS,hand:(c,key,padIdx,hover,lampPos)=>{if(!HANDS)return;const p=padC(PH,padIdx);drawOneHand(c,PH,key,{x:p[0],y:p[1],hover},true,0,lampPos)}};
+window.__mpc={lamp:T=>lampLevel(T),hand:(Sx,key,T)=>handAt(handHits(Sx,DK)[key],T,DK,key),xf:XF,st:()=>ST,s:()=>S,tp:()=>TP,x:X,frame,analyze,PH,pv:()=>PV,buildTape};window.MZMpc={machine,PH,fitFont,mmss,clamp,img:()=>IMG,cut:()=>CUT,bg:k=>DESKBG[k],warm:()=>WARM,handsReady:()=>!!HANDS,hand:(c,key,padIdx,hover,lampPos)=>{if(!HANDS)return;const p=padC(PH,padIdx);drawOneHand(c,PH,key,{x:p[0],y:p[1],hover},true,0,lampPos)}};
 })();

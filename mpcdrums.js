@@ -141,5 +141,5 @@ async function render(buf,Rr,P_,opt){opt=opt||{};await loadPack();const loops=op
  return out}
 function wav(buf){const n=buf.length,ch=buf.numberOfChannels,a=new DataView(new ArrayBuffer(44+n*ch*2)),w=(o,s)=>{for(let i=0;i<s.length;i++)a.setUint8(o+i,s.charCodeAt(i))};w(0,'RIFF');a.setUint32(4,36+n*ch*2,true);w(8,'WAVE');w(12,'fmt ');a.setUint32(16,16,true);a.setUint16(20,1,true);a.setUint16(22,ch,true);a.setUint32(24,buf.sampleRate,true);a.setUint32(28,buf.sampleRate*ch*2,true);a.setUint16(32,ch*2,true);a.setUint16(34,16,true);w(36,'data');a.setUint32(40,n*ch*2,true);
  const d=[];for(let c=0;c<ch;c++)d.push(buf.getChannelData(c));let o=44;for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const v=Math.max(-1,Math.min(1,d[c][i]));a.setInt16(o,v<0?v*32768:v*32767,true);o+=2}return new Blob([a.buffer],{type:'audio/wav'})}
-window.MZMpcDrums={KITS,P,COUNT,HALF,dnaOf,plan,render,keyOf,wav,STEPSETS,loadPack,soundsOf,pack:()=>PACK};
+window.MZMpcDrums={KITS,P,COUNT,HALF,dnaOf,plan,render,keyOf,wav,STEPSETS,loadPack,soundsOf,pack:()=>PACK,engine:{setup,vKick,vSnare,vHat,v808,vChop,noiseAt,KITS}};
 })();
