@@ -28,6 +28,11 @@ const P={trap:{
  snare:['........X.......','........X......g','........X.....x.','....g...X.......','........X..g....','....X.......X...','........X.g.....','........X.......'],
  hat:['xxxxxxxxxxxxxxxx','x.x.x.x.x.x.x.x.','x.x.x.xrx.x.x.xt','x.x.xxrxx.x.xxtx','xxxxxxxxxxxxxxrr','x.x.x.xxx.x.x.ot','Xxxxxxxxxxxxxxxx','x.xxx.xxx.xxx.xt','x.x.x.x.x.x.xxxx','xx.xx.xxx.xx.xrt'],
  fill:[{k:'x..x..x.x.x.x.xx',s:'........X.X.X.XX',h:'xxxxxxxxxxxxrrtt'},{k:'x.......x.x.....',s:'........X..X.XXX',h:'x.x.x.xxrrrrrrtt'},{k:'x..x....x..x..xx',s:'....X...X...XXXX',h:'xxxxrrxxxxxxrrtt'},{k:'x.x.....x.x.x...',s:'........X.....XX',h:'x.xxxxrrx.xxxxtt'}]},
+ ec2:{
+ kick:['x.....x..x......','x..x......x...x.','x.......x.x.x...','x.x.......x.....','x.....x.x.x.....','x..x..x.....x...','x......x.x.x....','x.x.....x......x','x...x.....x.x...','x..x.....x..x...','x.....xx..x.....','x.x...x.....x...','x.......x..x...x','x..x..x...x..x..'],
+ snare:['....X.......X...','....X.....g.X...','....X.......X.x.','...gX.......X...','....X..g....X.g.','....X.......Xg..','....x...X...X...','g...X.....g.X..g'],
+ hat:['x.x.x.x.x.x.x.x.','xgx.xgx.xgx.xgx.','x.xgx.x.x.xgx.x.','X.x.x.X.x.x.x.x.','x.x.x.xgx.x.xox.','xxx.x.xxx.x.x.x.','x.x.xgx.x.xgx.xo','x...x.x.x...x.x.','x.x.x.x.xgx.x.xg','Xgx.xgX.xgx.xgx.','x.xxx.x.x.x.xxx.','x.x.x.x.x.x.xrxx'],
+ fill:[{k:'x.....x.x.x.x...',s:'....X.......X.XX',h:'x.x.x.x.x.x.xxxx'},{k:'x..x..x.x.......',s:'....X...X.X.X.XX',h:'x.x.x.xxx.xxxxrr'},{k:'x.......x.xx....',s:'....X.....X.XXXX',h:'xgx.xgx.xxxxxxxx'},{k:'x..x....x..xx.x.',s:'....X.......XXXX',h:'x.x.x.x.x.xxxxtt'},{k:'x.x.x...x.......',s:'....X...X.....XX',h:'xxx.x.x.xxx.xxrr'},{k:'x.....x.x..x..xx',s:'....X..g....X.XX',h:'x.x.x.x.xxxxxxxx'}]},
  ec:{
  kick:['x.....x...x.....','x.......x.x.....','x..x......x.....','x.....x.x.......','x..x..x...x.....','x.......x..x.x..','x.x.....x.......','x......x..x.....','x..x....x.x.....','x.....x....x....','x.x...x...x.....','x.......xx......'],
  snare:['....X.......X...','....X..g....X...','....X.......X..g','....x.......X.g.','....X.......X.g.','g...X.......X...','....X..g....X..g'],
@@ -46,17 +51,17 @@ function keyOf(buf,ws,we){const sr=buf.sampleRate,L=buf.getChannelData(0),a=Math
  return{pc:best.pc,mode:best.mode,name:NM[best.pc]+' '+best.mode,score:best.s}}
 
 /* ================= a variation ("DNA"), picked from the id ================= */
-const COUNT=300,HALF=150;
-function dnaOf(id){id=clamp(Math.round(id),1,COUNT);const trap=id<=HALF,j=trap?id-1:id-HALF-1,st=trap?'trap':'ec',r=mul(id*7919+(trap?11:97)),PP=P[st],kits=KITS.filter(k=>k.style===st);
+const COUNT=500,HALF=150;
+function dnaOf(id){id=clamp(Math.round(id),1,COUNT);const trap=id<=HALF,x2=id>300,j=trap?id-1:x2?id-301:id-HALF-1,st=trap?'trap':'ec',r=mul(id*7919+(trap?11:97)),PP=P[x2?'ec2':st],kits=KITS.filter(k=>k.style===st);
  const kick=j%PP.kick.length,hat=(Math.floor(j/PP.kick.length)*3+j%7)%PP.hat.length,snare=(j+Math.floor(j/5))%PP.snare.length,fill=Math.floor(r()*PP.fill.length),kit=KITS.indexOf(kits[(j+Math.floor(j/3))%kits.length]);
  const swing=trap?pick(r,[50,50,52,54,56]):pick(r,[54,56,58,60,62,64]),mr=r(),mode=trap?(mr<.3?'loop':mr<.8?'flip':'sparse'):(mr<.4?'loop':mr<.8?'flip':'sparse');
- return{id,style:st,kit,kick,snare,hat,fill,swing,mode,steps:Math.floor(r()*STEPSETS.length),hum:trap?3:6,seed:id*131+7,alt:r()<.6,bassSeed:Math.floor(r()*1e6),reverse:r()<.12,kitName:KITS[kit].n}}
+ return{id,style:st,pool:x2?'ec2':st,kit,kick,snare,hat,fill,swing,mode,steps:Math.floor(r()*STEPSETS.length),hum:trap?3:6,seed:id*131+7,alt:r()<.6,bassSeed:Math.floor(r()*1e6),reverse:r()<.12,kitName:KITS[kit].n}}
 
 /* ================= the plan: every event of one 4-bar loop ================= */
 function parseLane(str,bar,lane,out,step,sw,jit,r,velMul){for(let s=0;s<16;s++){const c=str[s];if(c==='.'||!c)continue;const base=(bar*16+s)*step+((s%2)?(2*sw/100-1)*step:0),vel=({x:.78,X:1,g:.34,o:.8,r:.8,t:.78}[c]||.8)*(velMul||1)*(1-.06*r());
   const add=(dt,v,kind)=>out.push({t:Math.max(0,base+dt+(r()-.5)*jit*.002),lane:kind||lane,vel:clamp(v,.1,1),bar,step:s});
   if(c==='r'){add(0,vel);add(step*.5,vel*.8)}else if(c==='t'){add(0,vel*.8);add(step/3,vel*.9);add(step*2/3,vel)}else if(c==='o')add(0,vel,'open');else add(0,vel)}}
-function plan(dna,Rr,keyInfo){const bpm=Rr.bpm,step=60/bpm/4,r=mul(dna.seed),kit=KITS[dna.kit],trap=dna.style==='trap',PP=P[dna.style],ev=[],jit=dna.hum;
+function plan(dna,Rr,keyInfo){const bpm=Rr.bpm,step=60/bpm/4,r=mul(dna.seed),kit=KITS[dna.kit],trap=dna.style==='trap',PP=P[dna.pool||dna.style],ev=[],jit=dna.hum;
  const kickBars=[],snareBars=[],hatBars=[];
  for(let b=0;b<4;b++){let k=PP.kick[dna.kick],s=PP.snare[dna.snare],h=PP.hat[dna.hat];
   if(b===3){const f=PP.fill[dna.fill];k=f.k;s=f.s;h=f.h}else if(b===1&&dna.alt){const q=k.split('');const i=q.indexOf('x',3);if(i>0&&i<15&&q[i+1]==='.'){q[i]='.';q[i+1]='x'}k=q.join('')}
