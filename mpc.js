@@ -472,6 +472,7 @@ function html(){return`<div class="mg"><div>
    <button class="btn big" id="mTpBuild" style="margin-top:8px">BUILD THE TAPE (LISTEN TO EVERY BEAT)</button><div class="msg" id="mTpMsg">Add at least 2 beats, then build the tape. Then preview it and render it with the buttons on the left.</div>
   </div>
  </div></details>
+ <details class="sec grp" id="g_s2b"><summary>9. SAMPLE TO BEAT <small id="s_s2b">optional series: chop a sample</small></summary><div class="in" id="mS2B"></div></details>
  <details class="sec grp" id="g_extra"><summary>8. EXTRA VIDEOS <small id="s_extra">close-up Short, freestyle loop</small></summary><div class="in">
   <div class="msg" style="margin-top:0">Same beat, different uploads. Each one is a separate video for a different audience.</div>
   <button class="btn" id="mRcu" style="width:100%;margin-top:6px">RENDER PAD CLOSE-UP SHORT (9:16, NO TEXT)</button>
@@ -675,7 +676,7 @@ const SUM={scene:()=>(ST.scene==='white'?'White studio':'Desk / '+((SKINS.find(k
  hits:()=>['clear hits','balanced','every hit'][ST.sens==null?1:ST.sens]+((ST.nudge||0)?' / '+ST.nudge+' ms':''),
  watch:()=>{const E=ST.eng,t=[];if(E.hook)t.push('hook');if(E.sub)t.push('subscribe');if(E.loop)t.push('loop');if(E.note)t.push('note');if(E.q)t.push('question');return t.join(' / ')||'none'},
  beat:()=>{const b=beats.find(x=>String(x.id)===String(ST.beat));return b?b.title:'pick a beat'}};
-function summ(){if(!root)return;for(const k in SUM){const e=root.querySelector('#s_'+k);if(e)e.textContent=SUM[k]()}const t=root.querySelector('#s_tape');if(t)t.textContent=ST.tape.on?(ST.tape.ids.length+' beats / ON'):'several beats in one video'}
+function summ(){if(!root)return;const sb=root.querySelector('#s_s2b');if(sb)sb.textContent=(ST.s2b&&ST.s2b.on)?(ST.s2b.last?ST.s2b.last.chops+' chops / '+ST.s2b.last.bpm+' BPM':'ON'):'optional series: chop a sample';for(const k in SUM){const e=root.querySelector('#s_'+k);if(e)e.textContent=SUM[k]()}const t=root.querySelector('#s_tape');if(t)t.textContent=ST.tape.on?(ST.tape.ids.length+' beats / ON'):'several beats in one video'}
 function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();mark('yt','th','gen')};for(const k in PNL){$q(PNL[k][0]).addEventListener('toggle',paintPanels)}
@@ -694,7 +695,8 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  $q('#mFh').onclick=async()=>{ST.fmt='h';save();await ensureScene('h');size();drawNow()};$q('#mFv').onclick=async()=>{ST.fmt='v';save();await ensureScene('v');size();drawNow()};
  $q('#mPlay').onclick=play;$q('#mScrub').oninput=()=>{if(PV.playing)stopPlay();drawNow()};
  const T=ST.tape;$q('#mSens').value=String(ST.sens==null?1:ST.sens);$q('#mNudge').value=String(ST.nudge||0);$q('#mNudgeV').textContent=String(ST.nudge||0);const relay=()=>{save();for(const id in CACHE){}if(S&&S.raw){applyKit();S._hh=null;if(S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}}if(TP){TP.tracks.forEach(t=>{const L=layout(t.S.raw,t.S.kit);t.S.hits=L.hits;t.S.per=L.per;t.S._hh=null});TP._v=null;TP._h=null;TP._c=null}drawNow()};$q('#mSens').onchange=e=>{ST.sens=+e.target.value;relay()};$q('#mNudge').oninput=e=>{ST.nudge=+e.target.value;$q('#mNudgeV').textContent=String(ST.nudge);relay()};$q('#mTpOn').checked=!!T.on;$q('#mTpT').value=T.title;$q('#mTpL').value=String(T.len);$q('#mTpX').value=String(T.xf);$q('#mTpBox').style.display=T.on?'block':'none';tpList();
- root.querySelectorAll('details.grp').forEach(d=>{d.open=!!ST.open[d.id];d.addEventListener('toggle',()=>{ST.open[d.id]=d.open?1:0;save()})});$q('#mOpenAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=true);$q('#mCloseAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=false);
+ const mountS2B=async()=>{if(mountS2B.done)return;mountS2B.done=1;try{await loadS('mpcsample.js?v=1');window.__s2b=MZMpcSample.mount($q('#mS2B'),{ST,save:()=>{save();summ()},esc,ctx:ctxA});summ()}catch(e){mountS2B.done=0;$q('#mS2B').innerHTML='<div class="msg">The sample chopper did not load. Refresh the page.</div>'}};
+ root.querySelectorAll('details.grp').forEach(d=>{d.open=!!ST.open[d.id];if(d.id==='g_s2b'){d.addEventListener('toggle',()=>{if(d.open)mountS2B()});if(d.open)mountS2B()}d.addEventListener('toggle',()=>{ST.open[d.id]=d.open?1:0;save()})});$q('#mOpenAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=true);$q('#mCloseAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=false);
  $q('#mRight').addEventListener('change',()=>setTimeout(summ,0));$q('#mRight').addEventListener('input',()=>setTimeout(summ,0));summ();
  $q('#mTpOn').onchange=e=>{T.on=e.target.checked;save();$q('#mTpBox').style.display=T.on?'block':'none';stopPlay();ytRender();thRender();drawNow()};
  $q('#mTpT').onchange=e=>{T.title=e.target.value.trim()||'MZPRD BEAT TAPE';if(TP){TP.title=T.title;TP.mix=null}save();ytRender();thRender();drawNow()};
