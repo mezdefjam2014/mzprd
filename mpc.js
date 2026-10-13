@@ -29,8 +29,8 @@ const DKV={id:'deskv',W:1131,H:2000,u:1.2,sampled:true,glow:true,lamp:[800,140,1
  vol:[238,742,22],con:[541,737,10],fader:{x:158,y:1214,w:28,h:44,slot:[167,1214,12,38],hx:161,hy:1216,hw:21,hh:39},faderPt:[200,1242],
  smoke:{x:908,y:1564},label:{cx:699,cy:1887,ang:.33,w:205,h:117}};
 DK.bulb=[190,120];DKV.bulb=[772,150];DK.cone={apex:[-163,13],a0:.024,a1:1.017,len:2700};DKV.cone={apex:[772,150],a0:1.34,a1:2.42,len:2300};
-Object.assign(DK.btn,{power:[629,360,30,19],soft1:[1271,570,36,16],soft2:[1318,570,38,16],soft3:[1371,570,35,16],soft4:[1418,570,38,16],sounds:[1418,615,38,16],enter:[1190,705,39,15],k0:[1092,704,37,16],kdot:[1141,704,38,16],k1:[1095,659,34,16],k2:[1140,659,39,16],k3:[1190,660,39,15],k4:[1091,615,38,16],k5:[1140,615,39,16],k6:[1190,616,39,15],k7:[1096,570,33,16],k8:[1140,570,39,16],k9:[1190,571,39,15]});
-Object.assign(DKV.btn,{power:[188,741,26,16],soft1:[759,936,34,16],soft2:[803,936,34,16],soft3:[847,936,35,16],soft4:[892,936,35,16],sounds:[892,977,35,16],enter:[688,1061,34,15],k0:[599,1061,34,15],kdot:[643,1060,35,16],k1:[599,1019,34,15],k2:[643,1018,35,16],k3:[688,1018,34,16],k4:[599,977,34,16],k5:[643,977,35,15],k6:[688,977,34,15],k7:[599,935,34,16],k8:[643,935,35,16],k9:[688,935,34,16]});
+Object.assign(DK.btn,{power:[646,233,30,19],soft1:[1271,570,36,16],soft2:[1318,570,38,16],soft3:[1371,570,35,16],soft4:[1418,570,38,16],sounds:[1418,615,38,16],enter:[1190,705,39,15],k0:[1092,704,37,16],kdot:[1141,704,38,16],k1:[1095,659,34,16],k2:[1140,659,39,16],k3:[1190,660,39,15],k4:[1091,615,38,16],k5:[1140,615,39,16],k6:[1190,616,39,15],k7:[1096,570,33,16],k8:[1140,570,39,16],k9:[1190,571,39,15]});
+Object.assign(DKV.btn,{power:[202,606,26,16],soft1:[759,936,34,16],soft2:[803,936,34,16],soft3:[847,936,35,16],soft4:[892,936,35,16],sounds:[892,977,35,16],enter:[688,1061,34,15],k0:[599,1061,34,15],kdot:[643,1060,35,16],k1:[599,1019,34,15],k2:[643,1018,35,16],k3:[688,1018,34,16],k4:[599,977,34,16],k5:[643,977,35,15],k6:[688,977,34,15],k7:[599,935,34,16],k8:[643,935,35,16],k9:[688,935,34,16]});
 DK.wheel=[1160,822,35];DKV.wheel=[660,1170,31];
 const GEO={deskh:DK,deskv:DKV};
 /* pad order on the MPC60 II, top row first */
@@ -78,7 +78,10 @@ const kitFor=id=>hashStr('mpc'+id)%KITS.length;
 function layout(raw,kit){const K=KITS[kit],hits=[],vmin=[.55,.3,.12][ST.sens==null?1:ST.sens],nd=(ST.nudge||0)/1000,add=(h,pad,v)=>{if(v>=vmin)hits.push({t:Math.max(0,h.t+nd),pad,v})};
  raw.kick.forEach(h=>add(h,K.kick,h.v));let sc=0;raw.snare.forEach(h=>add(h,h.v>.62?K.sn[0]:K.sn[(sc++%2)?1:0],h.v));raw.hat.forEach(h=>add(h,K.hat,h.v*.9));
  if((ST.sens==null?1:ST.sens)===2)raw.mid.forEach(h=>add(h,K.mid[h.bin],h.v));raw.hi.forEach(h=>add(h,K.hi[h.bin],h.v*.95));(raw.keys||[]).forEach(h=>add(h,K.weak[h.bin],h.v*.9));
- hits.sort((a,b)=>a.t-b.t);const per=PAD_NAMES.map(()=>[]);hits.forEach(h=>per[h.pad].push(h));return{hits,per}}
+ /* focus on the drums: every kick, snare and hi-hat is tapped; a sample / chop / percussion pad only when it stands out (strong), is not on top of a drum hit, and the hands have room (one at most every ~0.45 s) */
+ const drum=new Set([K.kick,...K.sn,K.hat]),dt=hits.filter(h=>drum.has(h.pad)).map(h=>h.t).sort((a,b)=>a-b),near=t=>{let lo=0,hi=dt.length;while(lo<hi){const m=(lo+hi)>>1;if(dt[m]<t)lo=m+1;else hi=m}return(lo<dt.length&&dt[lo]-t<.12)||(lo>0&&t-dt[lo-1]<.12)};
+ hits.sort((a,b)=>a.t-b.t||(drum.has(b.pad)?1:0)-(drum.has(a.pad)?1:0));let lastO=-9;const kept=hits.filter(h=>{if(drum.has(h.pad))return true;if(h.v<.5||near(h.t)||h.t-lastO<.35)return false;lastO=h.t;return true});
+ const per=PAD_NAMES.map(()=>[]);kept.forEach(h=>per[h.pad].push(h));return{hits:kept,per}}
 function pressAt(S,pad,T){const a=S.per[pad];if(!a||!a.length)return 0;let lo=0,hi=a.length-1,r=-1;const tt=T+.006;while(lo<=hi){const m=(lo+hi)>>1;if(a[m].t<=tt){r=m;lo=m+1}else hi=m-1}if(r<0)return 0;const dt=tt-a[r].t;if(dt>.5)return 0;const k=.6+.4*a[r].v;return k*(dt<.03?dt/.03:Math.exp(-(dt-.03)/.085))}
 
 /* ---------- drawing (a pure function of time, so preview and export match) ---------- */
@@ -151,7 +154,7 @@ function powerSwitch(c,G,u,p){const r=G.btn.power,x=r[0],y=r[1],w=r[2],h=r[3],pl
  const hw=w/2,onSide=p>.5,drawHalf=(hx,up)=>{const g=c.createLinearGradient(0,y,0,y+h);if(up){g.addColorStop(0,'#e4e2dc');g.addColorStop(1,'#a9a69d')}else{g.addColorStop(0,'#3a3a3d');g.addColorStop(1,'#1d1d20')}c.fillStyle=g;const yy=up?y:y+h*.12,hh=up?h:h*.88;c.beginPath();c.roundRect?c.roundRect(hx+.6*u,yy,hw-1.2*u,hh,2*u):c.rect(hx+.6*u,yy,hw-1.2*u,hh);c.fill()};
  drawHalf(x,!onSide);drawHalf(x+hw,onSide);
  c.fillStyle=onSide?'#262628':'#c9c7c0';c.font='700 '+Math.round(h*.45)+'px Montserrat,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('O',x+hw/2,y+h*.52);c.fillStyle=onSide?'#262628':'#6b6b6e';c.fillText('I',x+hw*1.5,y+h*.52);
- c.fillStyle='rgba(235,230,215,.85)';c.font='700 '+Math.round(h*.34)+'px Montserrat,sans-serif';c.fillText('POWER',x+w/2,y-h*.42);
+ c.fillStyle='rgba(58,55,48,.85)';c.font='700 '+Math.round(h*.34)+'px Montserrat,sans-serif';c.fillText('POWER',x+w/2,y-h*.42);
  const lx=x+w+pl+4*u,ly=y+h/2;c.fillStyle=onSide?'#3dff5a':'#102614';c.beginPath();c.arc(lx,ly,2.4*u,0,6.2832);c.fill();if(onSide){const rg=c.createRadialGradient(lx,ly,1,lx,ly,12*u);rg.addColorStop(0,'rgba(61,255,90,.55)');rg.addColorStop(1,'rgba(61,255,90,0)');c.fillStyle=rg;c.fillRect(lx-12*u,ly-12*u,24*u,24*u)}
  c.restore()}
 /* the start of every video: the unit is dark, a hand switches it on (the screen boots and types the beat name), then the hand presses PLAY START and the beat begins */
