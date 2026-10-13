@@ -39,26 +39,29 @@ function snapAttack(x,sr,t){let i=Math.floor(t*sr);const a=Math.max(1,i-Math.flo
  let k=i;while(k>lim&&Math.abs(x[k])>thr)k--;while(k>lim&&Math.abs(x[k])>thr*.4)k--;
  const zl=Math.max(1,k-Math.floor(.002*sr));let z=k;for(let q=k;q>zl;q--)if(x[q]*x[q-1]<=0){z=q;break}
  return Math.max(0,z/sr-.001)}
-/* ---------- chopping ---------- */
+/* ---------- chopping ----------
+   A producer loop is a whole number of bars, so the file length gives the EXACT tempo (a loop is then sample-perfect). opt.fixed = {ws,len} chops a window that is already
+   cut and stretched to the beat (4 bars at the beat's tempo, plus a little tail). The first slice always starts on the window start, slices follow each other with no gaps,
+   and the last slice runs into the tail so the loop seam rings out naturally. */
 function chop(buf,n,opt){opt=opt||{};const sr=buf.sampleRate,x=mono(buf),{fl,F,fps}=fluxOf(x,sr),dur=buf.duration;
- const bpm=opt.bpm||tempoOf(fl,fps),beat=60/bpm,bar=beat*4,ph=gridPhase(fl,fps,bpm),peaks=pickPeaks(fl,fps).map(p=>({t:(p.f*HOP+WIN*.28)/sr+.004,s:p.s}));
- /* the best 4 bars (or fewer if the sample is short): the window with the most musical activity, starting on the grid */
- const bars=dur>=bar*4+.5?4:dur>=bar*2+.4?2:1,len=bar*bars;let ws=0,wv=-1;for(let t=ph;t+len<=dur+.01;t+=bar){let s=0;for(const p of peaks)if(p.t>=t&&p.t<t+len)s+=p.s;if(s>wv){wv=s;ws=t}}
- if(wv<0)ws=0;const we=Math.min(dur,ws+len);
+ const bpm0=opt.bpm||tempoOf(fl,fps);let bpm=bpm0,exact=false;
+ if(!opt.noSnap){let bk=0,be=9;for(let k=1;k<=128;k++){const e=Math.abs(k*240/dur-bpm0)/bpm0;if(e<be){be=e;bk=k}}if(bk&&be<.012){bpm=bk*240/dur;exact=true}}
+ const beat=60/bpm,bar=beat*4,ph=(exact||opt.fixed)?0:gridPhase(fl,fps,bpm),peaks=pickPeaks(fl,fps).map(p=>({t:(p.f*HOP+WIN*.28)/sr+.004,s:p.s}));
+ let bars,len,ws,we;
+ if(opt.fixed){bars=4;ws=opt.fixed.ws;len=opt.fixed.len;we=ws+len}
+ else{bars=dur>=bar*4+.5?4:dur>=bar*2+.4?2:1;len=bar*bars;ws=0;let wv=-1;for(let t=ph;t+len<=dur+.01;t+=bar){let sc=0;for(const p of peaks)if(p.t>=t&&p.t<t+len)sc+=p.s;if(sc>wv){wv=sc;ws=t}}if(wv<0)ws=0;we=Math.min(dur,ws+len)}
  let cand=peaks.filter(p=>p.t>=ws-.02&&p.t<we-.1);
- /* always start on the first hit of the window */
- const first=cand.find(p=>p.t<ws+beat*.6),start=first?first.t:ws;
- const chosen=[{t:start,s:99}];const gap=Math.max(.2,beat*.45);
+ const first=cand.find(p=>p.t<ws+beat*.6),chosen=[{t:ws,s:first?first.s:99}],gap=Math.max(.2,beat*.45);
  const gfit=t=>{const q=(t-ph)/(beat/4),d=Math.abs(q-Math.round(q))*(beat/4),k=Math.round(q);return d>.035?0:(k%4===0?.55:k%2===0?.3:.12)};
  cand.forEach(p=>{p.w=p.s*(1+gfit(p.t))});
  cand.filter(p=>p!==first).sort((a,b)=>b.w-a.w).forEach(p=>{if(chosen.length>=n)return;if(chosen.every(c=>Math.abs(c.t-p.t)>=gap))chosen.push(p)});
  /* not enough natural hits: cut at the grid (eighths, then sixteenths) */
  for(const div of [2,4]){if(chosen.length>=n)break;const st=beat/div;for(let t=ws;t<we-.1&&chosen.length<n;t+=st){if(chosen.every(c=>Math.abs(c.t-t)>=st*.7))chosen.push({t,s:0})}}
- chosen.sort((a,b)=>a.t-b.t);chosen.forEach(c=>{if(c.s)c.t=snapAttack(x,sr,c.t)});chosen.sort((a,b)=>a.t-b.t);
- const maxLen=Math.max(.6,beat*3),slices=chosen.map((c,i)=>{const nx=i<chosen.length-1?chosen[i+1].t-.003:we,t1=Math.min(nx,c.t+maxLen);return{i:i+1,t0:c.t,t1:Math.max(c.t+.12,t1),s:c.s,pad:i+5}});
+ chosen.sort((a,b)=>a.t-b.t);chosen.forEach((c,i)=>{if(i>0&&c.s)c.t=snapAttack(x,sr,c.t)});chosen.sort((a,b)=>a.t-b.t);
+ const endAll=opt.fixed?Math.min(dur,we+.5):we,slices=chosen.map((c,i)=>{const t1=i<chosen.length-1?chosen[i+1].t:endAll;return{i:i+1,t0:c.t,t1:Math.max(c.t+.12,t1),s:c.s,pad:i+5}});
  /* a short list of display peaks */
  const B=900,pk=new Float32Array(B*2),span=Math.floor(x.length/B);for(let b=0;b<B;b++){let mn=0,mx=0;for(let i=b*span;i<(b+1)*span;i+=4){const v=x[i];if(v<mn)mn=v;if(v>mx)mx=v}pk[b*2]=mn;pk[b*2+1]=mx}
- return{bpm,beat,bar,bars,ws,we,slices,peaks:pk,dur,sr,grid:ph}}
+ return{bpm:Math.round(bpm*10)/10,bpmX:bpm,exact,beat,bar,bars,ws,we,slices,peaks:pk,dur,sr,grid:ph,tail:Math.max(0,dur-we)}}
 
 /* ---------- playing a slice ---------- */
 function playSlice(ctx,buf,sl,when,gain){const s=ctx.createBufferSource();s.buffer=buf;const g=ctx.createGain(),t=when||ctx.currentTime+.01,d=Math.max(.05,sl.t1-sl.t0);
@@ -70,7 +73,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
  const stop=()=>{srcs.forEach(s=>{try{s.stop()}catch(e){}});srcs=[];playing=false;paint()};
  el.innerHTML=`<label class="chk"><input type="checkbox" id="sbOn"> SAMPLE TO BEAT (OPTIONAL SERIES: UPLOAD A SAMPLE, THE TOOL CHOPS IT ON THE PADS)</label>
  <div id="sbBox">
-  <div class="msg" style="margin-top:0">Upload a sample and the tool finds its tempo, takes the best 4 bars, cuts it at its natural hits and puts the slices on the pads (click a pad to hear its slice). Then browse your drum patterns made from it with your drum pack, and put your favorite in the video as a start-to-finish episode.</div>
+  <div class="msg" style="margin-top:0">Upload a sample and the tool finds its tempo, takes the best 4 bars, cuts it at its natural hits and puts the slices on the pads (click a pad to hear its slice). Every beat keeps its own tempo: the sample is time-stretched to fit the beat (it never speeds the drums up or down). Put your favorite beat in the video as a start-to-finish episode.</div>
   <label>SAMPLE FILE (MP3, WAV, M4A)</label><input type="file" id="sbFile" accept="audio/*">
   <div class="two"><div><label>HOW MANY CHOPS</label><select id="sbN"><option value="6">6 chops</option><option value="8">8 chops</option><option value="12">12 chops (every pad above the drums)</option></select></div><div><label>TEMPO (BPM, LEAVE EMPTY FOR AUTO)</label><input type="text" id="sbBpm" placeholder="auto"></div></div>
   <label>WHERE THE SAMPLE COMES FROM (SHOWN IN THE DESCRIPTION)</label><input type="text" id="sbSrc" maxlength="80" placeholder="e.g. royalty-free soul loop, or my own recording">
@@ -82,7 +85,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
   <div id="sbVar" style="display:none">
    <h4 style="font:700 11px Montserrat;letter-spacing:.26em;color:var(--gold);margin:16px 0 8px">BEAT VARIATIONS (YOUR DRUM PATTERNS)</h4>
    <div class="msg" style="margin-top:0" id="sbKey"></div>
-   <div class="two"><div><label>STYLE</label><select id="sbSty"><option value="all">All patterns</option><option value="fav">My picks</option></select></div><div><label>DRUM KIT</label><select id="sbKit"></select></div></div>
+   <div class="two"><div><label>SHOW</label><select id="sbSty"><option value="all">All beats (closest tempo first)</option><option value="fav">My picks</option></select></div><div><label>BEATS THAT FIT WITHIN</label><select id="sbFit"><option value="6">6% (the sample barely changes)</option><option value="12">12% (a small stretch)</option><option value="25">25% (a big stretch)</option><option value="999">any tempo</option></select></div></div>
    <div class="two" style="margin-top:6px"><button class="btn" id="sbShuf">SHUFFLE THE ORDER</button><button class="btn" id="sbRand">PLAY A RANDOM ONE</button></div>
    <div id="sbList" style="margin-top:8px"></div>
    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><button class="btn" id="sbPrev">PREV</button><span class="msg" id="sbPg" style="margin:0"></span><button class="btn" id="sbNext">NEXT</button></div>
@@ -94,6 +97,13 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
    <label class="chk"><input type="checkbox" id="mkBtn"> PRESS THE REAL BUTTONS WHILE CHOPPING (SOUNDS, SOFT KEYS, NUMBER KEYS, ENTER, THE DATA WHEEL TURNS)</label>
    <label class="chk"><input type="checkbox" id="mkHb"> HANDS PRESS THE BUTTONS TOO (DESK SCENES, NEEDS "HANDS TAPPING THE PADS" ON)</label>
    <label class="chk"><input type="checkbox" id="mkTb"> ALSO WRITE "TYPE BEAT" TITLES (USES THE "SOUNDS LIKE" ARTIST)</label>
+   <div id="mkVarBox" style="margin:10px 0;padding:10px;border:1px solid #2a2a30">
+    <div class="sub" style="font:700 10px Montserrat;letter-spacing:.2em;color:#c9a14a;margin-bottom:6px">CHOP PATTERNS</div>
+    <label class="chk"><input type="checkbox" id="mkVar"> A DIFFERENT CHOP PATTERN EVERY LOOP OF THE FULL BEAT (A NEW SET EVERY TIME YOU MAKE AN EPISODE; THE FIRST LOOP IS THE ORIGINAL PHRASE)</label>
+    <label class="chk"><input type="checkbox" id="mkSafe"> ONLY USE PATTERNS INSIDE ONE BAR WHEN THE SAMPLE CHANGES CHORDS (AUTOMATIC CHECK)</label>
+    <div class="msg" id="mkProgMsg">Chop a sample first and the patterns appear here.</div>
+    <div id="mkProgList"></div>
+   </div>
    <label>TIME PER DRUM LAYER</label><select id="mkLb"><option value="4">4 bars (longer, easier to follow)</option><option value="2">2 bars (shorter video)</option></select>
    <div class="two" style="margin-top:8px"><button class="btn big" id="mkGo">USE THE SELECTED BEAT IN THE VIDEO</button><button class="btn" id="mkBack">BACK TO THE NORMAL VIDEO</button></div>
    <div class="msg" id="mkMsg">Press VIDEO on a beat in the list above, or play one and press the big button.</div>
@@ -121,48 +131,62 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
   g.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const i=+b.dataset.p;selected=i;stop();srcs.push(playSlice(api.ctx(),buf,R.slices[i]));paint()});
   $('#sbAll').textContent=playing==='all'?'STOP':'PLAY THE CHOPS IN ORDER';$('#sbLoop').textContent=playing==='loop'?'STOP':'PLAY THE 4 BARS'}
  $('#sbGo').onclick=async()=>{if(!buf){msg('Upload a sample first.');return}stop();msg('Listening and chopping...');await new Promise(r=>setTimeout(r,30));
-  const bp=parseFloat($('#sbBpm').value);try{R=chop(buf,Z.n,{bpm:bp>40&&bp<220?bp:0});selected=-1;paint();Z.last={bpm:R.bpm,chops:R.slices.length,name:fname};api.save();if(window.__s2bAfter)window.__s2bAfter();msg('Done: '+R.bpm+' BPM, '+R.bars+' bars, '+R.slices.length+' chops'+(R.slices.length<Z.n?' (the sample only had that many clear hits)':'')+'. Click a pad to hear a chop.')}catch(err){console.warn(err);msg('Could not chop this sample: '+(err&&err.message||err))}};
+  const bp=parseFloat($('#sbBpm').value),hn=parseFloat((fname.match(/(\d{2,3}(?:\.\d+)?)\s*bpm/i)||[])[1]),hb=bp>40&&bp<220?bp:(hn>40&&hn<220?hn:0);try{R=chop(buf,Z.n,{bpm:hb});selected=-1;paint();Z.last={bpm:R.bpm,chops:R.slices.length,name:fname};api.save();if(window.__s2bAfter)window.__s2bAfter();msg('Done: '+R.bpm+' BPM, '+R.bars+' bars, '+R.slices.length+' chops'+(R.slices.length<Z.n?' (the sample only had that many clear hits)':'')+'. Click a pad to hear a chop.')}catch(err){console.warn(err);msg('Could not chop this sample: '+(err&&err.message||err))}};
  $('#sbAll').onclick=()=>{if(playing==='all'){stop();return}if(!R)return;stop();const a=api.ctx(),t0=a.currentTime+.05;let t=t0;R.slices.forEach(s=>{srcs.push(playSlice(a,buf,s,t));t+=(s.t1-s.t0)+.04});playing='all';paint();setTimeout(()=>{if(playing==='all'){playing=false;paint()}},(t-t0+.3)*1000)};
  $('#sbLoop').onclick=()=>{if(playing==='loop'){stop();return}if(!R)return;stop();const a=api.ctx(),s=a.createBufferSource();s.buffer=buf;s.connect(a.destination);s.start(a.currentTime+.05,R.ws,R.we-R.ws);srcs.push(s);playing='loop';paint();setTimeout(()=>{if(playing==='loop'){playing=false;paint()}},(R.we-R.ws+.3)*1000)};
- const D=()=>window.MZMpcDrums;let sel=0,vsrc=null,KEY=null,cache=new Map(),order=null,busy=false;
+ const D=()=>window.MZMpcDrums;let sel=0,vsrc=null,KEY=null,CH=null,fitC=new Map(),order=null,busy=false;
  const vstop=()=>{try{vsrc&&vsrc.stop()}catch(e){}vsrc=null;paintV()};
- const ids=()=>{const d=D();let a=[...Array(d.COUNT)].map((_,i)=>i+1).filter(i=>i>d.HALF);if(false);else if(Z.vs==='fav')a=a.filter(i=>Z.fav.includes(i));if(Z.vk!=='all')a=a.filter(i=>String(d.dnaOf(i).kit)===String(Z.vk));if(order)a=a.slice().sort((x,y)=>order[x]-order[y]);return a};
- const label=i=>{const d=D().dnaOf(i);return{t:'#'+i+'  '+(d.style==='trap'?'TRAP':'EAST COAST')+'  /  '+d.kitName,s:R.bpm+' BPM  /  swing '+d.swing+'%  /  '+({loop:'sample loop',flip:'chop flip',sparse:'sparse chops'}[d.mode])}};
- function paintV(){const v=$('#sbVar');if(!R||!D()){v.style.display='none';return}v.style.display='block';$('#sbKey').textContent='Key of the sample: '+(KEY?KEY.name:'...')+". The beats keep the sample's tempo and add swing, ghost notes and a producer feel (Premier, Pete Rock, Dilla and more).";
-  const kitSel=$('#sbKit');if(!kitSel.options.length){kitSel.innerHTML='<option value="all">All kits</option>'+D().KITS.map((k,i)=>k.style==='trap'?'':`<option value="${i}">${k.style==='trap'?'Trap':'East Coast'}: ${k.n}</option>`).join('');kitSel.value=String(Z.vk)}
-  $('#sbSty').value=Z.vs;const a=ids(),per=10,pages=Math.max(1,Math.ceil(a.length/per));Z.pg=clamp(Z.pg,0,pages-1);const pg=a.slice(Z.pg*per,(Z.pg+1)*per);
-  $('#sbList').innerHTML=pg.length?pg.map(i=>{const L=label(i),fav=Z.fav.includes(i);return `<div class="it" style="align-items:center;${i===sel?'background:#17140c':''}"><button data-f="${i}" style="font-size:14px;padding:4px 8px;${fav?'color:var(--gold);border-color:var(--gold)':''}">${fav?'&#9733;':'&#9734;'}</button><b style="white-space:normal;min-width:0">${esc(L.t)}<br><small style="color:#8e8e94;font-weight:500">${esc(L.s)}</small></b><button data-p="${i}">${i===sel&&vsrc?'STOP':'PLAY'}</button><button data-v="${i}" title="Use this beat in the video">VIDEO</button></div>`}).join(''):'<div class="msg">'+(D().COUNT?'Nothing here. Tap the star on some beats first.':'No drum patterns yet. They will be made from your own drum loops (converted to MIDI). Add your drum loop folder to bring them back.')+'</div>';
+ const sessionSeed=()=>(Math.random()*2147483647)|0;
+ /* ---- fitting the sample to a beat: the beat keeps its own tempo, the sample is stretched to it ---- */
+ function fitInfo(i){const d=D().dnaOf(i),B=d.bpm,S=R.bpmX||R.bpm;let c=S,e=Math.abs(Math.log(B/S));for(const m of [.5,2]){const e2=Math.abs(Math.log(B/(S*m)));if(e2<e-.03){c=S*m;e=e2}}return{B,c,pct:(B/c-1)*100,abs:Math.abs(B/c-1)*100}}
+ const fitWord=p=>p<2?'a perfect fit':p<6?'a very small stretch':p<12?'a small stretch':p<25?'a big stretch':'a very big stretch';
+ async function fit(i){const f=fitInfo(i),key=[f.B.toFixed(3),f.c.toFixed(3),buf.length,Z.n].join('|');if(fitC.has(key))return fitC.get(key);
+  const R1=Math.abs(f.c-(R.bpmX||R.bpm))<.01?R:chop(buf,Z.n,{bpm:f.c}),sr=buf.sampleRate,C=buf.numberOfChannels,tail=Math.min(.5,Math.max(0,buf.duration-R1.we)),a=Math.floor(R1.ws*sr),b=Math.min(buf.length,Math.floor((R1.we+tail)*sr)),seg=new AudioBuffer({numberOfChannels:C,length:b-a,sampleRate:sr});
+  for(let k=0;k<C;k++)seg.copyToChannel(buf.getChannelData(k).subarray(a,b),k);
+  await new Promise(r=>setTimeout(r,10));const sb=D().stretch(seg,f.c/f.B),loopLen=16*60/f.B,mainN=Math.round(R1.bars*(240/f.B)*sr),tailN=Math.max(0,sb.length-mainN),reps=4/R1.bars,tiled=new AudioBuffer({numberOfChannels:C,length:reps*mainN+tailN,sampleRate:sr});
+  for(let k=0;k<C;k++){const src=sb.getChannelData(k),dst=tiled.getChannelData(k);for(let r=0;r<reps;r++)dst.set(src.subarray(0,mainN),r*mainN);dst.set(src.subarray(mainN,mainN+tailN),reps*mainN)}
+  const R2=chop(tiled,Z.n,{bpm:f.B,fixed:{ws:0,len:loopLen},noSnap:true}),out={buf:tiled,R:R2,B:f.B,c:f.c,pct:f.pct,abs:f.abs};fitC.set(key,out);if(fitC.size>6)fitC.delete(fitC.keys().next().value);return out}
+ /* ---- the chop patterns the user allows ---- */
+ const progAllow=()=>mkp().progs&&mkp().progs.length?mkp().progs.slice():D().RO_ALL.slice(),mkp=()=>Z.mk,safeOnly=()=>!!(Z.mk.safe&&CH&&!CH.uniform),loopOpts=n=>({n,session:sessionSeed(),allow:progAllow(),safeOnly:safeOnly(),vary:!!Z.mk.vary});
+ const ids=()=>{const d=D();let a=[...Array(d.COUNT)].map((_,i)=>i+1);if(Z.vs==='fav')a=a.filter(i=>Z.fav.includes(i));const lim=Z.fitMax||12;const all0=a;a=a.filter(i=>fitInfo(i).abs<=lim);if(!a.length)a=all0.slice().sort((x,y)=>fitInfo(x).abs-fitInfo(y).abs).slice(0,10);if(order)a=a.slice().sort((x,y)=>order[x]-order[y]);else a=a.slice().sort((x,y)=>fitInfo(x).abs-fitInfo(y).abs);return a};
+ const label=i=>{const d=D().dnaOf(i),f=fitInfo(i);return{t:'#'+i+'  '+d.name,s:Math.round(f.B)+' BPM beat  /  the sample is '+(f.abs<.5?'left as it is':(f.pct>0?'sped up ':'slowed down ')+f.abs.toFixed(1)+'%')+' ('+fitWord(f.abs)+')'+(d.hasHat?'':'  /  kick + snare only')}};
+ function paintV(){const v=$('#sbVar');if(!R||!D()){v.style.display='none';return}v.style.display='block';$('#sbKey').textContent='Key of the sample: '+(KEY?KEY.name:'...')+'. Each beat keeps its own tempo and the sample is stretched to fit it. The beats are listed closest tempo first.';
+  $('#sbSty').value=Z.vs;$('#sbFit').value=String(Z.fitMax||12);const a=ids(),per=10,pages=Math.max(1,Math.ceil(a.length/per));Z.pg=clamp(Z.pg,0,pages-1);const pg=a.slice(Z.pg*per,(Z.pg+1)*per);
+  $('#sbList').innerHTML=pg.length?pg.map(i=>{const L=label(i),fav=Z.fav.includes(i);return `<div class="it" style="align-items:center;${i===sel?'background:#17140c':''}"><button data-f="${i}" style="font-size:14px;padding:4px 8px;${fav?'color:var(--gold);border-color:var(--gold)':''}">${fav?'&#9733;':'&#9734;'}</button><b style="white-space:normal;min-width:0">${esc(L.t)}<br><small style="color:#8e8e94;font-weight:500">${esc(L.s)}</small></b><button data-p="${i}">${i===sel&&vsrc?'STOP':'PLAY'}</button><button data-v="${i}" title="Use this beat in the video">VIDEO</button></div>`}).join(''):'<div class="msg">'+(D().COUNT?'No beat fits this tempo window. Widen "beats that fit within".':'No beats loaded.')+'</div>';
   $('#sbPg').textContent='page '+(Z.pg+1)+' of '+pages+' ('+a.length+' beats)';$('#sbVCtl').style.display='grid';
   $('#sbList').querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const i=+b.dataset.f,k=Z.fav.indexOf(i);if(k>=0)Z.fav.splice(k,1);else Z.fav.push(i);api.save();paintV()});
   $('#sbList').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>playVar(+b.dataset.p));
   $('#sbList').querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>makeEp(+b.dataset.v))}
- async function renderVar(i){const key=i+'|'+R.bpm+'|'+R.slices.length+'|'+buf.length;if(cache.has(key))return cache.get(key);const d=D(),dna=d.dnaOf(i),pl=d.plan(dna,R,KEY),out=await d.render(buf,R,pl,{loops:2});cache.set(key,{out,pl});if(cache.size>8)cache.delete(cache.keys().next().value);return{out,pl}}
- async function playVar(i){if(busy)return;if(i===sel&&vsrc){vstop();return}vstop();stop();sel=i;busy=true;$('#sbVMsg').textContent='Making beat #'+i+'...';paintV();
-  try{const{out}=await renderVar(i),a=api.ctx(),s=a.createBufferSource();s.buffer=out;s.connect(a.destination);s.onended=()=>{if(vsrc===s){vsrc=null;paintV()}};s.start(a.currentTime+.05);vsrc=s;const L=label(i);$('#sbVMsg').textContent='Playing '+L.t+'  ('+out.duration.toFixed(1)+' s)'}catch(err){console.warn(err);$('#sbVMsg').textContent='Could not make this beat: '+(err&&err.message||err)}busy=false;paintV()}
- $('#sbSty').onchange=e=>{Z.vs=e.target.value;Z.pg=0;api.save();paintV()};$('#sbKit').onchange=e=>{Z.vk=e.target.value;Z.pg=0;api.save();paintV()};
+ async function playVar(i){if(busy)return;if(i===sel&&vsrc){vstop();return}vstop();stop();sel=i;busy=true;$('#sbVMsg').textContent='Fitting the sample to beat #'+i+' and making it...';paintV();
+  try{const f=await fit(i),dna=D().dnaOf(i),LP=D().planLoops(dna,f.R,loopOpts(4)),out=await D().render(f.buf,f.R,LP.plans,{loops:4}),a=api.ctx(),s2=a.createBufferSource();s2.buffer=out;s2.connect(a.destination);s2.onended=()=>{if(vsrc===s2){vsrc=null;paintV()}};s2.start(a.currentTime+.05);vsrc=s2;const L=label(i);$('#sbVMsg').textContent='Playing '+L.t+'  ('+out.duration.toFixed(1)+' s). Chop pattern by loop: '+LP.progs.map(g=>g?D().RO[g].n:'original').join('  >  ')}catch(err){console.warn(err);$('#sbVMsg').textContent='Could not make this beat: '+(err&&err.message||err)}busy=false;paintV()}
+ $('#sbSty').onchange=e=>{Z.vs=e.target.value;Z.pg=0;api.save();paintV()};$('#sbFit').onchange=e=>{Z.fitMax=+e.target.value;Z.pg=0;api.save();paintV()};
  $('#sbPrev').onclick=()=>{Z.pg--;paintV()};$('#sbNext').onclick=()=>{Z.pg++;paintV()};
- $('#sbShuf').onclick=()=>{order={};const seed=Math.random();for(let i=1;i<=500;i++){const q=Math.sin(i*12.9898+seed*78.233)*43758.5453;order[i]=q-Math.floor(q)}Z.pg=0;paintV()};
- $('#sbRand').onclick=()=>{const a=ids();if(a.length)playVar(a[Math.floor(Math.random()*a.length)])};
+ $('#sbShuf').onclick=()=>{order={};const seed=Math.random();for(let i=1;i<=D().COUNT;i++){const q=Math.sin(i*12.9898+seed*78.233)*43758.5453;order[i]=q-Math.floor(q)}Z.pg=0;paintV()};
+ $('#sbRand').onclick=()=>{const a=ids().slice(0,12);if(a.length)playVar(a[Math.floor(Math.random()*a.length)])};
  $('#sbVStop').onclick=vstop;
- $('#sbVWav').onclick=async()=>{if(!R||!sel)return;$('#sbVMsg').textContent='Rendering 16 bars for download...';const d=D(),dna=d.dnaOf(sel),pl=d.plan(dna,R,KEY),out=await d.render(buf,R,pl,{loops:4}),a=document.createElement('a');a.href=URL.createObjectURL(d.wav(out));a.download=(fname||'sample')+' - beat '+sel+'.wav';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),8000);$('#sbVMsg').textContent='Downloaded.'};
- const mk=Z.mk,mset=()=>{$('#mkOv').checked=!!mk.ov;$('#mkBtn').checked=!!mk.btn;$('#mkHb').checked=!!mk.hb;$('#mkTb').checked=!!mk.tb;$('#mkLb').value=String(mk.lb)};
+ $('#sbVWav').onclick=async()=>{if(!R||!sel)return;$('#sbVMsg').textContent='Rendering 16 bars for download...';const d=D(),f=await fit(sel),LP=d.planLoops(d.dnaOf(sel),f.R,loopOpts(4)),out=await d.render(f.buf,f.R,LP.plans,{loops:4}),a=document.createElement('a');a.href=URL.createObjectURL(d.wav(out));a.download=(fname||'sample')+' - beat '+sel+'.wav';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),8000);$('#sbVMsg').textContent='Downloaded.'};
+ const mk=Z.mk;if(mk.vary===undefined)mk.vary=1;if(mk.safe===undefined)mk.safe=1;if(!mk.progs)mk.progs=null;
+ const mset=()=>{$('#mkOv').checked=!!mk.ov;$('#mkBtn').checked=!!mk.btn;$('#mkHb').checked=!!mk.hb;$('#mkTb').checked=!!mk.tb;$('#mkLb').value=String(mk.lb);$('#mkVar').checked=!!mk.vary;$('#mkSafe').checked=!!mk.safe};
  const mmsg=t=>{$('#mkMsg').textContent=t};
- [['#mkOv','ov'],['#mkBtn','btn'],['#mkHb','hb'],['#mkTb','tb']].forEach(([id,k])=>$(id).onchange=e=>{mk[k]=e.target.checked?1:0;api.save()});$('#mkLb').onchange=e=>{mk.lb=+e.target.value;api.save()};
+ [['#mkOv','ov'],['#mkBtn','btn'],['#mkHb','hb'],['#mkTb','tb'],['#mkVar','vary'],['#mkSafe','safe']].forEach(([id,k])=>$(id).onchange=e=>{mk[k]=e.target.checked?1:0;api.save();if(k==='safe')paintProg()});$('#mkLb').onchange=e=>{mk.lb=+e.target.value;api.save()};
+ const paintProg=()=>{if(!D()||!D().RO)return;const RO=D().RO,on=mk.progs||D().RO_ALL,box=$('#mkProgList');box.innerHTML=D().RO_ALL.map(i=>'<label class="chk" style="font-size:11px"><input type="checkbox" data-pg="'+i+'"'+(on.includes(i)?' checked':'')+'> '+esc(RO[i].n)+(RO[i].safe?'':' <small style="color:#c9a14a">(moves whole bars)</small>')+'</label>').join('');
+  box.querySelectorAll('[data-pg]').forEach(c=>c.onchange=()=>{const cur=new Set(mk.progs||D().RO_ALL);if(c.checked)cur.add(+c.dataset.pg);else cur.delete(+c.dataset.pg);mk.progs=[...cur].sort((a,b)=>a-b);api.save()});
+  $('#mkProgMsg').textContent=CH?(CH.uniform?'Chord check: this sample keeps the same chord through its bars, so every pattern is allowed.':'Chord check: this sample changes chords between bars'+(mk.safe?', so only the patterns inside one bar are used.':', but the check is off, so every pattern is used.')):'Chord check unavailable: every pattern is allowed.'};
  let epBusy=false;
- async function makeEp(i){if(!R||!buf){mmsg('Chop a sample first.');return}if(epBusy)return;if(!i)i=sel;if(!i){mmsg('Choose a beat: press VIDEO on one in the list.');return}epBusy=true;vstop();stop();sel=i;mmsg('Building the episode for beat #'+i+'...');await new Promise(r=>setTimeout(r,40));
-  try{if(!window.MZMpcMake)await api.loadS('mpcmake.js?v=4');const d=D(),dna=d.dnaOf(i);await api.ensureScene();
-   const X=await window.MZMpcMake.build(buf,R,dna,KEY,{buttons:!!mk.btn,handsBtn:!!mk.hb,overlay:!!mk.ov,layerBars:mk.lb,intro:ST.intro?3.4:0,name:fname||'SAMPLE',typeBeat:!!mk.tb});
+ async function makeEp(i){if(!R||!buf){mmsg('Chop a sample first.');return}if(epBusy)return;if(!i)i=sel;if(!i){mmsg('Choose a beat: press VIDEO on one in the list.');return}epBusy=true;vstop();stop();sel=i;mmsg('Fitting the sample to beat #'+i+' and building the episode...');await new Promise(r=>setTimeout(r,40));
+  try{if(!window.MZMpcMake)await api.loadS('mpcmake.js?v=20');const d=D(),dna=d.dnaOf(i);await api.ensureScene();const f=await fit(i),lo=loopOpts(1);
+   const X=await window.MZMpcMake.build(f.buf,f.R,dna,KEY,{buttons:!!mk.btn,handsBtn:!!mk.hb,overlay:!!mk.ov,layerBars:mk.lb,intro:ST.intro?3.4:0,name:fname||'SAMPLE',typeBeat:!!mk.tb,session:lo.session,allow:lo.allow,safeOnly:lo.safeOnly,vary:lo.vary});
    Z.typeBeat=!!mk.tb;api.setEp(X);const P=window.MZMpcMake.pack(X,ST,{});
    const bits=[['TITLES',P.titles.map((t,j)=>'<div class="it"><b>'+esc(t)+'</b><small style="color:#8e8e94">'+t.length+'/100</small><button data-ct="'+j+'">COPY</button></div>').join('')],['DESCRIPTION','<textarea rows="12" id="mkD" style="font:500 12px/1.5 monospace">'+esc(P.desc)+'</textarea><button class="btn" id="mkCd" style="width:100%;margin-top:4px">COPY DESCRIPTION</button>'],['TAGS','<textarea rows="2" id="mkT" style="font:500 12px/1.5 monospace">'+esc(P.tags)+'</textarea><button class="btn" id="mkCt" style="width:100%;margin-top:4px">COPY TAGS</button>'],['PINNED COMMENT','<div class="it"><b>'+esc(P.pinned[0])+'</b><button data-cp="0">COPY</button></div><div class="it"><b>'+esc(P.pinned[1])+'</b><button data-cp="1">COPY</button></div><div class="it"><b>'+esc(P.pinned[2])+'</b><button data-cp="2">COPY</button></div>']];
    $('#mkPack').innerHTML='<h4 style="font:700 11px Montserrat;letter-spacing:.26em;color:var(--gold);margin:16px 0 6px">EPISODE TITLES AND DESCRIPTION</h4>'+bits.map(b=>'<div class="sub" style="margin:10px 0 4px;font:700 10px Montserrat;letter-spacing:.2em;color:#c9a14a">'+b[0]+'</div>'+b[1]).join('')+(Z.src?'':'<div class="msg">Tip: fill in "where the sample comes from" above so it shows in the description.</div>');
    const cp=async(t,e)=>{const ok=await api.cpy(t);e.textContent=ok?'COPIED':'FAILED';setTimeout(()=>{if(e.dataset.l)e.textContent=e.dataset.l},1200)};
    $('#mkPack').querySelectorAll('[data-ct]').forEach(b=>{b.dataset.l='COPY';b.onclick=()=>cp(P.titles[+b.dataset.ct],b)});$('#mkPack').querySelectorAll('[data-cp]').forEach(b=>{b.dataset.l='COPY';b.onclick=()=>cp(P.pinned[+b.dataset.cp],b)});
    $('#mkCd').onclick=e=>cp($('#mkD').value,e.target);$('#mkCt').onclick=e=>cp($('#mkT').value,e.target);
-   const M=X.make;mmsg('Episode ready: beat #'+i+' ('+M.style.toUpperCase().replace('EC','EAST COAST')+', '+M.kit+'), '+Math.floor(M.total/60)+':'+String(Math.round(M.total%60)).padStart(2,'0')+' long. Press PLAY on the left to watch it, or RENDER 16:9 / 9:16.')}
+   const M=X.make;mmsg('Episode ready: '+dna.name+' ('+Math.round(f.B)+' BPM, the sample '+(f.abs<.5?'left as it is':(f.pct>0?'sped up ':'slowed down ')+f.abs.toFixed(1)+'%')+'), '+Math.floor(Math.round(M.total)/60)+':'+String(Math.round(M.total)%60).padStart(2,'0')+' long. Press PLAY on the left to watch it, or RENDER 16:9 / 9:16.')}
   catch(err){console.warn(err);mmsg('Could not build the episode: '+(err&&err.message||err))}epBusy=false}
  $('#mkGo').onclick=()=>makeEp(sel);$('#mkBack').onclick=()=>{api.setEp(null);mmsg('Back to the normal video.')};mset();
- const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=9');await D().loadPack();KEY=D().keyOf(buf,R.ws,R.we);cache=new Map();sel=0;paintV()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
+ const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=22');await D().loadPatterns();KEY=D().keyOf(buf,R.ws,R.we);try{CH=D().chordUniform(buf,R)}catch(e){CH=null}fitC=new Map();sel=0;paintV();paintProg()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
  window.__s2bAfter=afterChop;
- return{chop:()=>R,buf:()=>buf,stop,after:afterChop,key:()=>KEY,dev:{renderVar,playVar,makeEp}}}
+ return{chop:()=>R,buf:()=>buf,stop,after:afterChop,key:()=>KEY,dev:{fit,fitInfo,playVar,makeEp,loopOpts}}}
 window.MZMpcSample={chop,tempoOf,fluxOf,pickPeaks,playSlice,mount,padIdx,PAD_NAMES};
 })();
