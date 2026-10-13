@@ -58,6 +58,17 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
     [12,13,14,15].forEach((s,i)=>evs.push({t:(3*16+s)*step,lane:'snare',vel:.45+.17*i,bar:3,step:s}));if(dropsOut)dropsOut.push({a:off+2*bar,b:off+4*bar})}
    sched(off,evs)}};
  musicPass(ctx,G,{flip:flipT,layers:layerT,full:fullT},addHit,drops);
+ /* optional: the mixing shown on the MPC. The build-up plays with rough levels (sample a little loud, kick a little soft); in the first loop of the full beat
+    a hand pulls the sample fader down, pushes the kick fader up and turns the master knob, and the sound changes exactly as the fader moves */
+ const mixEv=[];if(opt.mixShow&&G.mix){const M_=G.mix,L=loopLen,a0=fullT+.35,d=Math.min(2.4,L*.28),db=x=>Math.pow(10,x/20);
+  const ramp=(node,startDb,t,dd)=>{const v=node.gain.value;node.gain.setValueAtTime(v*db(startDb),0);node.gain.setValueAtTime(v*db(startDb),t);node.gain.linearRampToValueAtTime(v,t+dd)};
+  const e1={k:'fader',lab:'SAMPLE',t:a0,d,from:.72,to:.48,db:-4},e2={k:'fader',lab:'KICK',t:a0+L*.42,d,from:.4,to:.7,db:4},e3={k:'knob',lab:'MASTER',t:a0+L*.78,d:Math.min(1.4,L*.15),from:.2,to:.3};
+  ramp(M_.smp,4,e1.t,e1.d);ramp(M_.kB,-4,e2.t,e2.d);
+  mixEv.push(e1,e2,e3);mixEv.forEach(e=>hits.push({t:e.t,pad:-1,v:.6,[e.k]:{d:e.d,from:e.from,to:e.to}}))}
+ const mixWin=mixEv.length?{a:mixEv[0].t-1.2,b:mixEv[2].t+mixEv[2].d+1}:null;
+ const faderAt=T=>{if(!mixWin||T<mixWin.a||T>mixWin.b)return null;const fs=mixEv.filter(e=>e.k==='fader');let cur=fs[0];for(const e of fs)if(T>=e.t-.6)cur=e;const u=clamp((T-cur.t)/cur.d,0,1),s=u*u*(3-2*u);return cur.from+(cur.to-cur.from)*s};
+ const knobAt=T=>{if(!mixWin||T<mixWin.a)return null;const e=mixEv[2],u=clamp((T-e.t)/e.d,0,1),s=u*u*(3-2*u);return e.from+(e.to-e.from)*s};
+ const mixLab=T=>{if(!mixWin||T<mixWin.a||T>mixWin.b)return null;let cur=mixEv[0];for(const e of mixEv)if(T>=e.t-.6)cur=e;return cur};
  /* the build-up as one continuous beat with no button sounds, no pauses and no sample audition (rendered when asked for) */
  const renderClean=async()=>{const O={flip:0,layers:[],full:0};let cur=segLen;layers.forEach((l,k)=>{O.layers[k]=cur;cur+=segLen});O.full=cur;const len=cur+loopLen*fullLoops+TAIL,c2=new OfflineAudioContext(2,Math.ceil(len*sr),sr),G2=E.setup(c2,dna,kit);if(G2.crackle)G2.crackle.start(0);D.mixPrep(G2,buf,Rr);
   musicPass(c2,G2,O,()=>{},null);const o2=await c2.startRendering();let pk=0;for(let c=0;c<2;c++){const d=o2.getChannelData(c);for(let i=0;i<d.length;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}}const k=pk>.0001?.92/pk:1;for(let c=0;c<2;c++){const d=o2.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=k}if(D.mixOn())D.finish(o2);return o2};
@@ -68,7 +79,8 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  const out=await ctx.startRendering();let pk=0;for(let c=0;c<2;c++){const d=out.getChannelData(c);for(let i=0;i<d.length;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}}const gk=pk>.0001?.92/pk:1;for(let c=0;c<2;c++){const d=out.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=gk}if(D.mixOn())D.finish(out);
  hits.sort((a,b)=>a.t-b.t);const per=PAD_NAMES.map(()=>[]);hits.forEach(h=>{if(h.pad>=0)per[h.pad].push({t:h.t,v:clamp(h.v,.4,1)})});
  /* ---- what the video needs ---- */
- const lcdAt=T=>{if(T<T0)return[opt.name.toUpperCase().slice(0,20),'SAMPLE TO BEAT','READY'];
+ const lcdAt=T=>{const ml=mixLab(T);if(ml){const v=ml.k==='knob'?knobAt(T):faderAt(T),n=Math.round(v*16);return['MIX  '+ml.lab,(ml.k==='knob'?'MASTER LEVEL ':'LEVEL ')+Math.round(v*100),'['+'#'.repeat(n)+'.'.repeat(16-n)+']']}
+  if(T<T0)return[opt.name.toUpperCase().slice(0,20),'SAMPLE TO BEAT','READY'];
   if(T<sample.t+sample.d+.3)return[opt.name.toUpperCase().slice(0,20),'SAMPLE  '+mmss(Math.max(0,T-sample.t))+'/'+mmss(sample.d),Rr.bpm+' BPM  '+(key?key.name.toUpperCase():'')];
   if(T<flipT){const c=chops.find(q=>T>=q.t0&&T<q.end);if(!c)return null;const s=c.slice;
    if(T<c.tEnter){/* the digits appear on the screen as they are pressed */const typed=opt.buttons?c.btns.filter(b=>/^k\d$/.test(b[0])&&b[1]<=T).map(b=>b[0][1]).join(''):'',armed=opt.buttons&&c.btns.some(b=>b[0]==='soft3'&&b[1]<=T);
@@ -79,7 +91,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  const phase=T=>T<sample.t+sample.d+.3?0:T<flipT?1:T<layerT[0]?2:T<fullT?3:4;
  const chapters=[['0:00','Intro'],[mmss(sample.t),'The sample'],[mmss(chopStart),'Chopping it on the pads'],[mmss(flipT),isLoop?'Playing the loop':'Playing the chops']].concat(layers.map((l,k)=>[mmss(layerT[k]),'Adding the '+l[1].toLowerCase()])).concat([[mmss(fullT),'The full beat']]);
  const waveBins=(()=>{const B=Rr.peaks.length/2,a=Math.floor(Rr.ws/Rr.dur*B),b=Math.max(a+2,Math.ceil(Rr.we/Rr.dur*B));return{a,b,B}})();
- const M={T0,sample,chops,flipT,segLen,layers:layers.map((l,k)=>({k:l[0],name:l[1],t:layerT[k]})),fullT,endMusic,loopLen,drops,roNames:Array.from({length:fullLoops},(_,q)=>roPick(q)?D.RO[roPick(q)].n:''),renderClean,total,name:opt.name,bpm:Rr.bpm,key:key?key.name:'',style:dna.style,kit:kit.n,id:dna.id,mode:pl.chopMode,chapters,lcdAt,wheelAngle,phase,overlayOn:opt.overlay,wave:waveBins,R:Rr,opt};
+ const M={T0,sample,chops,flipT,segLen,layers:layers.map((l,k)=>({k:l[0],name:l[1],t:layerT[k]})),fullT,endMusic,loopLen,drops,roNames:Array.from({length:fullLoops},(_,q)=>roPick(q)?D.RO[roPick(q)].n:''),renderClean,total,name:opt.name,bpm:Rr.bpm,key:key?key.name:'',style:dna.style,kit:kit.n,id:dna.id,mode:pl.chopMode,chapters,lcdAt,wheelAngle,faderAt,knobAt,mixLab,phase,overlayOn:opt.overlay,wave:waveBins,R:Rr,opt};
  const Sx={title:opt.name,bpm:Rr.bpm,key:(key?key.name:'').replace(' minor','m').replace(' major',''),lcd:'',buf:out,off:flipT,kit:0,dur:total,hits,per,btnEv,wheelEv,raw:null};
  const X={kind:'make',tracks:[{S:Sx,start:0,dur:total}],total,lead:0,title:opt.name,intro:opt.intro,make:M};
  return X}
@@ -112,6 +124,7 @@ function overlay(c,W,H,T,X,v){const M=X.make;if(!M||!M.overlayOn||T<M.T0-.2)retu
  else if(ph===1){const cc=M.chops.find(q=>T>=q.t0&&T<q.end)||M.chops[M.chops.length-1],pn=cc.slice.pad;cap='CHOP '+(cc.i+1)+' OF '+M.chops.length+'   >   PAD '+pn+'  ('+PAD_NAMES[padIdx(pn)]+')'}
  else if(ph===2)cap=M.mode==='loop'?'PLAYING THE SAMPLE LOOP':'PLAYING THE CHOPS ON THE PADS';
  else if(ph===3){const k=M.layers.reduce((a,l,i)=>T>=l.t?i:a,0);cap='ADDING THE '+M.layers[k].name}
+ else if(M.mixLab&&M.mixLab(T))cap='MIXING   /   '+M.mixLab(T).lab+(M.mixLab(T).k==='knob'?' VOLUME':' LEVEL');
  else cap=M.drops&&M.drops.some(d=>T>=d.a&&T<d.b)?'THE DROP   /   REBUILD':(M.roNames&&T>=M.fullT&&T<M.endMusic&&M.roNames[Math.floor((T-M.fullT)/M.loopLen)])?'CHOP ORDER   /   '+M.roNames[Math.floor((T-M.fullT)/M.loopLen)].toUpperCase():(M.loopLen&&T>=M.fullT&&T<M.endMusic&&Math.floor((T-M.fullT)/M.loopLen)%4?'CHOP FLIP '+(Math.floor((T-M.fullT)/M.loopLen)%4)+'   /   ':'')+'THE FULL BEAT   /   '+M.style.toUpperCase().replace('EC','EAST COAST')+'  '+M.kit+'   /   '+M.bpm+' BPM';
  c.font='700 '+Math.round(fs*1.05)+'px Oswald, sans-serif';c.textAlign='center';const tw=c.measureText(cap).width+36,cx=W/2;c.fillStyle='rgba(8,6,4,.7)';c.fillRect(cx-tw/2,cy,tw,ch*1.05);c.fillStyle='#fff';c.fillText(cap,cx,cy+ch*.55);
  /* drum layer chips (step 4 and 5) */
