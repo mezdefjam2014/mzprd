@@ -224,18 +224,22 @@ function prepHands(r,l){if(!r||!l)return;const mk=(img,warm)=>{const cv=document
  HANDS={r:one(r),l:one(l)}}
 const btnC=(G,k)=>{const r=G.btn&&G.btn[k];return r?[r[0]+r[2]/2,r[1]+r[3]*.55]:null};
 function handHits(Sx,G){const ck='_hh'+(G&&G.id||'');if(Sx[ck])return Sx[ck];const GG=G&&G.pad?G:DK,o={l:[],r:[]},last={l:-9,r:-9},lp={l:-1,r:-1};
- /* Who plays what: a hand keeps its own side (left = columns 1-2, right = columns 3-4) and may reach one column over the middle. Two hits at the same moment on neighbouring pads are played by one hand with two fingers (the fingertip lands between the pads), never two hands on one pad. A hit that no free hand can reach is left out. */
+ /* Who plays what: a hand keeps its own side (left = columns 1-2, right = columns 3-4) and may reach one column over the middle. Two hits at the same moment on neighbouring pads are played by one hand with two fingers (the fingertip lands between the pads), never two hands on one pad. A hit that no free hand can reach is left out.
+    The hands never cross: the left hand always stays left of where the right hand is (and the other way round), with a gap so the fingers never land on top of each other. */
  const reach=(k,col)=>k==='l'?col<=2:col>=1,busy=(k,h)=>h.t-last[k]<(lp[k]===h.pad?.085:.115);
- (Sx.hits||[]).slice().sort((a,b)=>a.t-b.t).forEach(h=>{let key,hh;if(h.btn){const pc=btnC(GG,h.btn);if(!pc)return;key='r';hh={t:h.t,pad:-1,v:h.v,pos:pc}}else{key=(h.pad%4)<2?'l':'r';hh={t:h.t,pad:h.pad,v:h.v}}
-  if(busy(key,h)){const L=o[key],pv=L[L.length-1];
-   if(pv&&pv.pad>=12&&h.pad>=12&&h.t-pv.t<.03&&pv.pad!==h.pad&&Math.abs((pv.pad%4)-(h.pad%4))<=1&&Math.abs(Math.floor(pv.pad/4)-Math.floor(h.pad/4))<=1){const a=hpos(GG,pv),b=hpos(GG,hh);pv.pos=[(a[0]+b[0])/2,(a[1]+b[1])/2];pv.v=Math.max(pv.v,h.v);return}
-   const other=key==='l'?'r':'l',chop=!h.btn&&h.pad<12;
-   /* a chop must always be played on a pad (it is the sound the viewer is following): the other hand may reach any column for it, and if both hands are busy it replaces a hi-hat tap, never a kick or a snare */
-   if(h.btn||!(chop||reach(other,h.pad%4)))return;
-   if(!busy(other,h)){key=other}
-   else if(chop){let k2=null;for(const k of [key,other]){const Lk=o[k],pk=Lk[Lk.length-1];if(pk&&pk.pad===12&&h.t-pk.t<.115){k2=k;break}}if(!k2)return;key=k2;const Lk=o[key];Lk.pop();const pp=Lk[Lk.length-1];last[key]=pp?pp.t:-9;lp[key]=pp?pp.pad:-1}
-   else return}
-  last[key]=h.t;lp[key]=h.pad;o[key].push(hh)});return Sx[ck]=o}
+ const gap=GG.pad.px*.6,cx={l:null,r:null},ok=(k,x)=>{const ox=k==='l'?cx.r:cx.l;return ox==null||(k==='l'?x<ox-gap:x>ox+gap)};
+ const take=(k,h,hh,x)=>{last[k]=h.t;lp[k]=h.pad;o[k].push(hh);cx[k]=x};
+ (Sx.hits||[]).slice().sort((a,b)=>a.t-b.t).forEach(h=>{let key,hh;if(h.btn){const pc=btnC(GG,h.btn);if(!pc)return;hh={t:h.t,pad:-1,v:h.v,pos:pc};if(!busy('r',h))take('r',h,hh,pc[0]);return}
+  key=(h.pad%4)<2?'l':'r';hh={t:h.t,pad:h.pad,v:h.v};const x=hpos(GG,hh)[0];
+  if(!busy(key,h)&&ok(key,x))return take(key,h,hh,x);
+  const L=o[key],pv=L[L.length-1];
+  if(busy(key,h)&&pv&&pv.pad>=12&&h.pad>=12&&h.t-pv.t<.03&&pv.pad!==h.pad&&Math.abs((pv.pad%4)-(h.pad%4))<=1&&Math.abs(Math.floor(pv.pad/4)-Math.floor(h.pad/4))<=1){const a=hpos(GG,pv),b=hpos(GG,hh),mx=(a[0]+b[0])/2;if(ok(key,mx)){pv.pos=[mx,(a[1]+b[1])/2];pv.v=Math.max(pv.v,h.v);cx[key]=mx;return}}
+  const other=key==='l'?'r':'l',chop=h.pad<12;
+  /* a chop must always be played on a pad (it is the sound the viewer is following): the other hand may reach any column for it, and if both hands are busy it replaces a hi-hat tap, never a kick or a snare */
+  if((chop||reach(other,h.pad%4))&&!busy(other,h)&&ok(other,x))return take(other,h,hh,x);
+  if(!chop)return;
+  for(const k of [key,other]){const Lk=o[k],pk=Lk[Lk.length-1];if(pk&&pk.pad===12&&h.t-pk.t<.115&&ok(k,x)){Lk.pop();const pp=Lk[Lk.length-1];last[k]=pp?pp.t:-9;lp[k]=pp?pp.pad:-1;return take(k,h,hh,x)}}});
+ return Sx[ck]=o}
 const hpos=(G,h)=>h.pos||padC(G,h.pad);
 const padC=(G,i)=>[G.pad.x0+(i%4)*G.pad.px+G.pad.w/2,G.pad.y0+Math.floor(i/4)*G.pad.py+G.pad.h*.58];
 /* Hand motion model. Everything is a smooth physical curve of time (no random shake):
