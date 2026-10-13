@@ -20,7 +20,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  /* ---- the timeline ---- */
  let t=opt.intro>0?opt.intro+.25:.7;const T0=t,sample={t,d:Math.min(6.5,Math.max(2,Rr.we-Rr.ws))};t+=sample.d+.6;const chopStart=t;
  sl.forEach((s,i)=>{const c={i,slice:s,t0:t,len:Math.min(s.t1-s.t0,1.0)};wheelEv.push({t:t,d:.45,a:(i%2?-1:1)*1.5});let a=t+.5;
-  if(opt.buttons){if(i===0){c.btns=[['sounds',t+.35],['soft1',t+.68]];a=t+1.0}else c.btns=[];c.btns.push(['soft3',a]);const dg=String(s.pad).split('');dg.forEach((d,j)=>c.btns.push(['k'+d,a+.26+j*.18]));const en=a+.26+dg.length*.18+.06;c.btns.push(['enter',en]);c.tEnter=en;c.aud=en+.28}
+  if(opt.buttons){if(i===0){c.btns=[['sounds',t+.35],['soft1',t+.68]];a=t+1.0}else c.btns=[];c.btns.push(['soft3',a]);const dg=String(s.pad).split('');dg.forEach((d,j)=>c.btns.push(['k'+d,a+.26+j*.24]));const en=a+.26+dg.length*.24+.08;c.btns.push(['enter',en]);c.tEnter=en;c.aud=en+.28}
   else{c.btns=[];c.tEnter=t+.6;c.aud=t+.75}
   c.btns.forEach(b=>{btnEv.push({t:b[1],k:b[0]});if(opt.handsBtn)hits.push({t:b[1],pad:-1,btn:b[0],v:.8})});
   addHit(c.aud,padIdx(s.pad),.9);c.end=c.aud+c.len+.3;t=c.end;chops.push(c)});
@@ -71,7 +71,8 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  const lcdAt=T=>{if(T<T0)return[opt.name.toUpperCase().slice(0,20),'SAMPLE TO BEAT','READY'];
   if(T<sample.t+sample.d+.3)return[opt.name.toUpperCase().slice(0,20),'SAMPLE  '+mmss(Math.max(0,T-sample.t))+'/'+mmss(sample.d),Rr.bpm+' BPM  '+(key?key.name.toUpperCase():'')];
   if(T<flipT){const c=chops.find(q=>T>=q.t0&&T<q.end);if(!c)return null;const s=c.slice;
-   if(T<c.tEnter)return['TRIM  CHOP '+(c.i+1)+'/'+N,'START '+s.t0.toFixed(2)+'  END '+s.t1.toFixed(2),opt.buttons?'ASSIGN TO PAD...':'MOVE THE CUT...'];
+   if(T<c.tEnter){/* the digits appear on the screen as they are pressed */const typed=opt.buttons?c.btns.filter(b=>/^k\d$/.test(b[0])&&b[1]<=T).map(b=>b[0][1]).join(''):'',armed=opt.buttons&&c.btns.some(b=>b[0]==='soft3'&&b[1]<=T);
+    return['TRIM  CHOP '+(c.i+1)+'/'+N,'START '+s.t0.toFixed(2)+'  END '+s.t1.toFixed(2),opt.buttons?(armed?'ASSIGN TO PAD: '+typed+(Math.floor(T*3)%2||typed?'_':' '):'ASSIGN TO PAD...'):'MOVE THE CUT...']}
    return['ASSIGNED  CHOP '+(c.i+1),'PAD '+s.pad+'  '+PAD_NAMES[padIdx(s.pad)],'LENGTH '+(s.t1-s.t0).toFixed(2)+' SEC']}
   return null};
  const wheelAngle=T=>{let a=0;for(const e of wheelEv){if(T>e.t)a+=e.a*ease((T-e.t)/e.d)}return a};
