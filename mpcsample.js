@@ -107,6 +107,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
    </div>
    <label>TIME PER DRUM LAYER</label><select id="mkLb"><option value="4">4 bars (longer, easier to follow)</option><option value="2">2 bars (shorter video)</option></select>
    <div class="two" style="margin-top:8px"><button class="btn big" id="mkGo">USE THE SELECTED BEAT IN THE VIDEO</button><button class="btn" id="mkBack">BACK TO THE NORMAL VIDEO</button></div>
+   <button class="btn" id="mkWavFull" disabled style="width:100%;margin-top:6px">DOWNLOAD THE FULL BEAT FROM THIS SESSION (WAV, WITH ALL THE CHOP SWITCH-UPS)</button>
    <div class="msg" id="mkMsg">Press VIDEO on a beat in the list above, or play one and press the big button.</div>
    <div id="mkPack"></div>
   </div>
@@ -135,7 +136,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
   const bp=parseFloat($('#sbBpm').value),hn=parseFloat((fname.match(/(\d{2,3}(?:\.\d+)?)\s*bpm/i)||[])[1]),hb=bp>40&&bp<220?bp:(hn>40&&hn<220?hn:0);try{R=chop(buf,Z.n,{bpm:hb});selected=-1;paint();Z.last={bpm:R.bpm,chops:R.slices.length,name:fname};api.save();if(window.__s2bAfter)window.__s2bAfter();msg('Done: '+R.bpm+' BPM, '+R.bars+' bars, '+R.slices.length+' chops'+(R.slices.length<Z.n?' (the sample only had that many clear hits)':'')+'. Click a pad to hear a chop.')}catch(err){console.warn(err);msg('Could not chop this sample: '+(err&&err.message||err))}};
  $('#sbAll').onclick=()=>{if(playing==='all'){stop();return}if(!R)return;stop();const a=api.ctx(),t0=a.currentTime+.05;let t=t0;R.slices.forEach(s=>{srcs.push(playSlice(a,buf,s,t));t+=(s.t1-s.t0)+.04});playing='all';paint();setTimeout(()=>{if(playing==='all'){playing=false;paint()}},(t-t0+.3)*1000)};
  $('#sbLoop').onclick=()=>{if(playing==='loop'){stop();return}if(!R)return;stop();const a=api.ctx(),s=a.createBufferSource();s.buffer=buf;s.connect(a.destination);s.start(a.currentTime+.05,R.ws,R.we-R.ws);srcs.push(s);playing='loop';paint();setTimeout(()=>{if(playing==='loop'){playing=false;paint()}},(R.we-R.ws+.3)*1000)};
- const D=()=>window.MZMpcDrums;let sel=0,vsrc=null,KEY=null,CH=null,fitC=new Map(),order=null,busy=false;
+ const D=()=>window.MZMpcDrums;let lastEp=null,lastEpId=0,sel=0,vsrc=null,KEY=null,CH=null,fitC=new Map(),order=null,busy=false;
  const vstop=()=>{try{vsrc&&vsrc.stop()}catch(e){}vsrc=null;paintV()};
  const sessionSeed=()=>(Math.random()*2147483647)|0;
  /* ---- fitting the sample to a beat: the beat keeps its own tempo, the sample is stretched to it ---- */
@@ -175,9 +176,9 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
   $('#mkProgMsg').textContent=CH?(CH.uniform?'Chord check: this sample keeps the same chord through its bars, so every pattern is allowed.':'Chord check: this sample changes chords between bars'+(mk.safe?', so only the patterns inside one bar are used.':', but the check is off, so every pattern is used.')):'Chord check unavailable: every pattern is allowed.'};
  let epBusy=false;
  async function makeEp(i){if(!R||!buf){mmsg('Chop a sample first.');return}if(epBusy)return;if(!i)i=sel;if(!i){mmsg('Choose a beat: press VIDEO on one in the list.');return}epBusy=true;vstop();stop();sel=i;mmsg('Fitting the sample to beat #'+i+' and building the episode...');await new Promise(r=>setTimeout(r,40));
-  try{if(!window.MZMpcMake)await api.loadS('mpcmake.js?v=27');const d=D(),dna=d.dnaOf(i);await api.ensureScene();const f=await fit(i),lo=loopOpts(1);
-   const X=await window.MZMpcMake.build(f.buf,f.R,dna,KEY,{buttons:!!mk.btn,handsBtn:!!mk.hb,overlay:!!mk.ov,layerBars:mk.lb,intro:ST.intro?3.4:0,name:fname||'SAMPLE',typeBeat:!!mk.tb,visuals:!!mk.vis,session:lo.session,allow:lo.allow,safeOnly:lo.safeOnly,vary:lo.vary});
-   Z.typeBeat=!!mk.tb;api.setEp(X);const P=window.MZMpcMake.pack(X,ST,{});
+  try{if(!window.MZMpcMake)await api.loadS('mpcmake.js?v=30');const d=D(),dna=d.dnaOf(i);await api.ensureScene();const f=await fit(i),lo=loopOpts(1);
+   const X=await window.MZMpcMake.build(f.buf,f.R,dna,KEY,{buttons:!!mk.btn,handsBtn:!!mk.hb,overlay:!!mk.ov,layerBars:mk.lb,intro:ST.start!==false?4.2:0,name:fname||'SAMPLE',typeBeat:!!mk.tb,visuals:!!mk.vis,session:lo.session,allow:lo.allow,safeOnly:lo.safeOnly,vary:lo.vary});
+   Z.typeBeat=!!mk.tb;api.setEp(X);lastEp=X;lastEpId=i;$('#mkWavFull').disabled=false;const P=window.MZMpcMake.pack(X,ST,{});
    const bits=[['TITLES',P.titles.map((t,j)=>'<div class="it"><b>'+esc(t)+'</b><small style="color:#8e8e94">'+t.length+'/100</small><button data-ct="'+j+'">COPY</button></div>').join('')],['DESCRIPTION','<textarea rows="12" id="mkD" style="font:500 12px/1.5 monospace">'+esc(P.desc)+'</textarea><button class="btn" id="mkCd" style="width:100%;margin-top:4px">COPY DESCRIPTION</button>'],['TAGS','<textarea rows="2" id="mkT" style="font:500 12px/1.5 monospace">'+esc(P.tags)+'</textarea><button class="btn" id="mkCt" style="width:100%;margin-top:4px">COPY TAGS</button>'],['PINNED COMMENT','<div class="it"><b>'+esc(P.pinned[0])+'</b><button data-cp="0">COPY</button></div><div class="it"><b>'+esc(P.pinned[1])+'</b><button data-cp="1">COPY</button></div><div class="it"><b>'+esc(P.pinned[2])+'</b><button data-cp="2">COPY</button></div>']];
    $('#mkPack').innerHTML='<h4 style="font:700 11px Montserrat;letter-spacing:.26em;color:var(--gold);margin:16px 0 6px">EPISODE TITLES AND DESCRIPTION</h4>'+bits.map(b=>'<div class="sub" style="margin:10px 0 4px;font:700 10px Montserrat;letter-spacing:.2em;color:#c9a14a">'+b[0]+'</div>'+b[1]).join('')+(Z.src?'':'<div class="msg">Tip: fill in "where the sample comes from" above so it shows in the description.</div>');
    const cp=async(t,e)=>{const ok=await api.cpy(t);e.textContent=ok?'COPIED':'FAILED';setTimeout(()=>{if(e.dataset.l)e.textContent=e.dataset.l},1200)};
@@ -185,6 +186,10 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
    $('#mkCd').onclick=e=>cp($('#mkD').value,e.target);$('#mkCt').onclick=e=>cp($('#mkT').value,e.target);
    const M=X.make;mmsg('Episode ready: '+dna.name+' ('+Math.round(f.B)+' BPM, the sample '+(f.abs<.5?'left as it is':(f.pct>0?'sped up ':'slowed down ')+f.abs.toFixed(1)+'%')+'), '+Math.floor(Math.round(M.total)/60)+':'+String(Math.round(M.total)%60).padStart(2,'0')+' long. Press PLAY on the left to watch it, or RENDER 16:9 / 9:16.')}
   catch(err){console.warn(err);mmsg('Could not build the episode: '+(err&&err.message||err))}epBusy=false}
+ /* the full beat exactly as it plays in the video: every loop with its chop switch-ups (flams, reverse swells, pushes...), without the intro, the chopping or the build-up */
+ $('#mkWavFull').onclick=()=>{if(!lastEp||!D())return;const B=lastEp.tracks[0].S.buf,M=lastEp.make,sr=B.sampleRate,a=Math.floor(M.fullT*sr),b=Math.min(B.length,Math.ceil((M.endMusic+1.2)*sr)),o=new AudioBuffer({numberOfChannels:B.numberOfChannels,length:b-a,sampleRate:sr});
+  for(let c=0;c<B.numberOfChannels;c++){const d=B.getChannelData(c).slice(a,b),f=Math.min(d.length,Math.floor(sr*.25));for(let q=0;q<f;q++)d[d.length-1-q]*=q/f;o.copyToChannel(d,c)}
+  api.dlf(D().wav(o),(fname||'sample').replace(/\.[^.]+$/,'')+' - beat '+lastEpId+' - full beat.wav');mmsg('Downloaded the full beat ('+Math.round(o.duration)+' s).')};
  $('#mkGo').onclick=()=>makeEp(sel);$('#mkBack').onclick=()=>{api.setEp(null);mmsg('Back to the normal video.')};mset();
  const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=25');await D().loadPatterns();KEY=D().keyOf(buf,R.ws,R.we);try{CH=D().chordUniform(buf,R)}catch(e){CH=null}fitC=new Map();sel=0;paintV();paintProg()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
  window.__s2bAfter=afterChop;

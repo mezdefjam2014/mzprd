@@ -24,6 +24,8 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
   else{c.btns=[];c.tEnter=t+.6;c.aud=t+.75}
   c.btns.forEach(b=>{btnEv.push({t:b[1],k:b[0]});if(opt.handsBtn)hits.push({t:b[1],pad:-1,btn:b[0],v:.8})});
   addHit(c.aud,padIdx(s.pad),.9);c.end=c.aud+c.len+.3;t=c.end;chops.push(c)});
+ /* the start: the hand switches the unit on at .6 s (the screen boots), then presses PLAY START as the sample begins */
+ if(opt.intro>0&&opt.buttons){const pw=.6,ps=T0-.27;btnEv.push({t:ps,k:'start'});if(opt.handsBtn){hits.push({t:pw,pad:-1,btn:'power',v:.8});hits.push({t:ps,pad:-1,btn:'start',v:.8})}}
  const flipT=t+.15,layerT=layers.map((l,k)=>flipT+segLen*(k+1)),fullT=flipT+segLen*(layers.length+1),endMusic=fullT+loopLen*fullLoops,TAIL=3.8,total=endMusic+TAIL,stopT=endMusic+.05,pdT=endMusic+1.0;   /* the hand presses STOP, then the unit powers down */
  /* ---- the audio, from the same plan ---- */
  const sr=44100,ctx=new OfflineAudioContext(2,Math.ceil(total*sr),sr),G=E.setup(ctx,dna);
@@ -41,6 +43,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  layers.forEach((l,k)=>{const allowed=new Set(['chop']);for(let j=0;j<=k;j++)allowed.add(layers[j][0]);sched(layerT[k],evOf(LP.plans[0],allowed,segLen))});
  /* step 5: everything, loop after loop; every loop plays a different chop pattern (loop 1 and every 4th loop are the original phrase) */
  const all=new Set(['chop','kick','snare','hat']);for(let q=0;q<fullLoops;q++)sched(fullT+q*loopLen,evOf(LP.plans[q],all,loopLen));
+ if(opt.intro>0&&opt.buttons){click(.6,.12,700);click(T0-.27,.13,1800)}
  /* STOP, then the power goes: a relay click, then a low thump that falls away */
  if(opt.buttons){btnEv.push({t:stopT,k:'stop'});if(opt.handsBtn)hits.push({t:stopT,pad:-1,btn:'stop',v:.8});click(stopT,.14,1800)}
  {click(pdT+.42,.2,500);const o=ctx.createOscillator(),g=ctx.createGain(),t1=pdT+.45;o.type='sine';o.frequency.setValueAtTime(78,t1);o.frequency.exponentialRampToValueAtTime(24,t1+.5);g.gain.setValueAtTime(.0001,t1);g.gain.linearRampToValueAtTime(.16,t1+.012);g.gain.exponentialRampToValueAtTime(.0001,t1+.55);o.connect(g);g.connect(ctx.destination);o.start(t1);o.stop(t1+.6)}

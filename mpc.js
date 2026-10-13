@@ -29,8 +29,8 @@ const DKV={id:'deskv',W:1131,H:2000,u:1.2,sampled:true,glow:true,lamp:[800,140,1
  vol:[238,742,22],con:[541,737,10],fader:{x:158,y:1214,w:28,h:44,slot:[167,1214,12,38],hx:161,hy:1216,hw:21,hh:39},faderPt:[200,1242],
  smoke:{x:908,y:1564},label:{cx:699,cy:1887,ang:.33,w:205,h:117}};
 DK.bulb=[190,120];DKV.bulb=[772,150];DK.cone={apex:[-163,13],a0:.024,a1:1.017,len:2700};DKV.cone={apex:[772,150],a0:1.34,a1:2.42,len:2300};
-Object.assign(DK.btn,{soft1:[1271,570,36,16],soft2:[1318,570,38,16],soft3:[1371,570,35,16],soft4:[1418,570,38,16],sounds:[1418,615,38,16],enter:[1190,705,39,15],k0:[1092,704,37,16],kdot:[1141,704,38,16],k1:[1095,659,34,16],k2:[1140,659,39,16],k3:[1190,660,39,15],k4:[1091,615,38,16],k5:[1140,615,39,16],k6:[1190,616,39,15],k7:[1096,570,33,16],k8:[1140,570,39,16],k9:[1190,571,39,15]});
-Object.assign(DKV.btn,{soft1:[759,936,34,16],soft2:[803,936,34,16],soft3:[847,936,35,16],soft4:[892,936,35,16],sounds:[892,977,35,16],enter:[688,1061,34,15],k0:[599,1061,34,15],kdot:[643,1060,35,16],k1:[599,1019,34,15],k2:[643,1018,35,16],k3:[688,1018,34,16],k4:[599,977,34,16],k5:[643,977,35,15],k6:[688,977,34,15],k7:[599,935,34,16],k8:[643,935,35,16],k9:[688,935,34,16]});
+Object.assign(DK.btn,{power:[1498,326,32,20],soft1:[1271,570,36,16],soft2:[1318,570,38,16],soft3:[1371,570,35,16],soft4:[1418,570,38,16],sounds:[1418,615,38,16],enter:[1190,705,39,15],k0:[1092,704,37,16],kdot:[1141,704,38,16],k1:[1095,659,34,16],k2:[1140,659,39,16],k3:[1190,660,39,15],k4:[1091,615,38,16],k5:[1140,615,39,16],k6:[1190,616,39,15],k7:[1096,570,33,16],k8:[1140,570,39,16],k9:[1190,571,39,15]});
+Object.assign(DKV.btn,{power:[934,690,28,18],soft1:[759,936,34,16],soft2:[803,936,34,16],soft3:[847,936,35,16],soft4:[892,936,35,16],sounds:[892,977,35,16],enter:[688,1061,34,15],k0:[599,1061,34,15],kdot:[643,1060,35,16],k1:[599,1019,34,15],k2:[643,1018,35,16],k3:[688,1018,34,16],k4:[599,977,34,16],k5:[643,977,35,15],k6:[688,977,34,15],k7:[599,935,34,16],k8:[643,935,35,16],k9:[688,935,34,16]});
 DK.wheel=[1160,822,35];DKV.wheel=[660,1170,31];
 const GEO={deskh:DK,deskv:DKV};
 /* pad order on the MPC60 II, top row first */
@@ -72,9 +72,11 @@ const KITS=[
  {n:'TOM KICK',kick:11,sn:[13,14],hat:12,mid:[10,9,8,3],hi:[5,6,7,15],weak:[0,1,2,4]},
  {n:'RIDE HATS',kick:15,sn:[13,14],hat:4,mid:[11,10,9,8],hi:[5,6,7,12],weak:[0,1,2,3]},
  {n:'TOM SNARES',kick:15,sn:[9,10],hat:12,mid:[11,8,13,14],hi:[4,5,6,7],weak:[0,1,2,3]},
- {n:'PERC GROOVE',kick:8,sn:[14,13],hat:5,mid:[3,2,1,0],hi:[7,6,4,12],weak:[9,10,11,15]}];
+ {n:'PERC GROOVE',kick:8,sn:[14,13],hat:5,mid:[3,2,1,0],hi:[7,6,4,12],weak:[9,10,11,15]},
+ {n:'STANDARD (SAME PADS ALWAYS)',kick:15,sn:[14,14],hat:12,mid:[11,10,9,8],hi:[4,5,6,7],weak:[0,1,2,3]}];
+const STD=KITS.length-1;
 const hashStr=s=>{let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
-const kitFor=id=>hashStr('mpc'+id)%KITS.length;
+const kitFor=id=>STD;   /* every beat uses the standard layout unless you picked another for it: kick, snare and hat are always on the same pads */
 function layout(raw,kit){const K=KITS[kit],hits=[],vmin=[.55,.3,.12][ST.sens==null?1:ST.sens],nd=(ST.nudge||0)/1000,add=(h,pad,v)=>{if(v>=vmin)hits.push({t:Math.max(0,h.t+nd),pad,v})};
  raw.kick.forEach(h=>add(h,K.kick,h.v));let sc=0;raw.snare.forEach(h=>add(h,h.v>.62?K.sn[0]:K.sn[(sc++%2)?1:0],h.v));raw.hat.forEach(h=>add(h,K.hat,h.v*.9));
  if((ST.sens==null?1:ST.sens)===2)raw.mid.forEach(h=>add(h,K.mid[h.bin],h.v));raw.hi.forEach(h=>add(h,K.hi[h.bin],h.v*.95));(raw.keys||[]).forEach(h=>add(h,K.weak[h.bin],h.v*.9));
@@ -144,8 +146,10 @@ function machine(c,ox,oy,sc,S,o){
  const ph=((lt%(bl*2))+bl*2)%(bl*2);
  led(G.leds.play[0],G.leds.play[1],run,'#ff3a24');led(G.leds.rec[0],G.leds.rec[1],run,'#ff3a24');led(G.leds.over[0],G.leds.over[1],run&&ph<bl*.5,'#ff3a24');
  c.restore()}
-const INTRO=3.4,leadOf=()=>ST&&ST.intro?INTRO:LEAD;
-const tlOne=Sx=>{const L=leadOf();return{kind:'one',tracks:[{S:Sx,start:L,dur:Sx.dur}],total:L+Sx.dur+TAIL,lead:L,title:Sx.title,intro:ST&&ST.intro?INTRO:0}};
+/* the start of every video: the unit is dark, a hand switches it on (the screen boots and types the beat name), then the hand presses PLAY START and the beat begins */
+const INTRO=4.2,PW=.6,startOn=()=>!!(ST&&ST.start!==false),leadOf=()=>startOn()?INTRO:LEAD;
+const preHits=L=>[{t:PW-L,pad:-1,btn:'power',v:.8},{t:-.27,pad:-1,btn:'start',v:.8}];
+const tlOne=Sx=>{const L=leadOf();Object.keys(Sx).forEach(k=>{if(k.startsWith('_hh'))delete Sx[k]});Sx.pre=startOn()?preHits(L):null;return{kind:'one',tracks:[{S:Sx,start:L,dur:Sx.dur}],total:L+Sx.dur+TAIL,lead:L,title:Sx.title,intro:startOn()?INTRO:0}};
 function derive(X,fmt,cu){const E=ST.eng,sub=E.sub&&!cu,loop=E.loop&&X.kind==='one'&&fmt==='v';if(!sub&&!loop)return X;let tracks,total;
  if(loop){const Sx=X.tracks[0].S,xf=Math.min(3.8,Sx.dur*.3),lead=.12;
   const A={S:Sx,start:lead,off:xf,dur:Sx.dur-xf,fi:.04,fo:xf},B={S:Sx,start:lead+Sx.dur-2*xf,off:0,dur:xf,fi:xf,fo:0};tracks=[A,B];total=A.start+A.dur}
@@ -225,7 +229,7 @@ function prepHands(r,l){if(!r||!l)return;const mk=(img,warm)=>{const cv=document
  const one=(img)=>{const sl=sil(img);return{norm:mk(img,false),warm:mk(img,true),sil:sl,silB:blurs(sl),sh:{}}};
  HANDS={r:one(r),l:one(l)}}
 const btnC=(G,k)=>{const r=G.btn&&G.btn[k];return r?[r[0]+r[2]/2,r[1]+r[3]*.55]:null};
-function handHits(Sx,G){const ck='_hh'+(G&&G.id||'');if(Sx[ck])return Sx[ck];const o={l:[],r:[]},last={l:-9,r:-9};(Sx.hits||[]).forEach(h=>{let key,hh=h;if(h.btn){const pc=btnC(G||{},h.btn);if(!pc)return;key='r';hh={t:h.t,pad:-1,v:h.v,pos:pc}}else key=(h.pad%4)<2?'l':'r';if(h.t-last[key]<.115)return;last[key]=h.t;o[key].push(hh)});return Sx[ck]=o}
+function handHits(Sx,G){const ck='_hh'+(G&&G.id||'');if(Sx[ck])return Sx[ck];const o={l:[],r:[]},last={l:-9,r:-9};(Sx.pre||[]).concat(Sx.hits||[]).forEach(h=>{let key,hh=h;if(h.btn){const pc=btnC(G||{},h.btn);if(!pc)return;key='r';hh={t:h.t,pad:-1,v:h.v,pos:pc}}else key=(h.pad%4)<2?'l':'r';if(h.t-last[key]<.115)return;last[key]=h.t;o[key].push(hh)});return Sx[ck]=o}
 const hpos=(G,h)=>h.pos||padC(G,h.pad);
 const padC=(G,i)=>[G.pad.x0+(i%4)*G.pad.px+G.pad.w/2,G.pad.y0+Math.floor(i/4)*G.pad.py+G.pad.h*.58];
 /* Hand motion model. Everything is a smooth physical curve of time (no random shake):
@@ -389,7 +393,7 @@ function frame(c,W,H,fmt,T,X){
  if(cu){const G0=SC?SC.G:PH,pcx=G0.pad.x0+1.5*G0.pad.px+G0.pad.w/2,pcy=G0.pad.y0+1.5*G0.pad.py+G0.pad.h/2,zoom=(SC?1.78:1.55)*(1+.04*Math.sin(T*.23)),sc2=(SC?sc:sc0)*zoom;sc=sc2;ox=W/2-pcx*sc+Math.sin(T*.19)*6;oy=H*.47-pcy*sc+Math.cos(T*.16)*5}
  const fx={vol:(.21*ease((T-.15)/2.4))+.012*Math.sin(T*.6),con:.05*Math.sin(T*.4),fader:Math.max(0,26*(.5+.5*Math.sin(T*.29-.6))),btn:{play:0,start:pulse(T,t0-.42,t0-.12),rec:pulse(T,t0-.42,t0-.12),over:0,stop:X.make?0:pulse(T,lastEnd-.08,lastEnd+.2)}};
  if(X.make){for(const e of Sx.btnEv){const q=pulse(T,e.t-.05,e.t+.16);if(q>(fx.btn[e.k]||0))fx.btn[e.k]=q}fx.wheel=X.make.wheelAngle(T)}
- machine(c,ox,oy,sc,Sx,{lcd:X.make&&!((X.intro>0)&&T<X.intro)?X.make.lcdAt(T):null,boot:(X.intro>0&&T<X.intro)?T:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,pdown:X.make&&X.make.pdAt?X.make.pdAt(T):-1,run:la>=-.02&&T<(X.make&&X.make.stopT?X.make.stopT:lastEnd),trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
+ machine(c,ox,oy,sc,Sx,{lcd:X.make&&!((X.intro>0)&&T<X.intro)?X.make.lcdAt(T):null,boot:(X.intro>0&&T<X.intro&&T>=PW)?T-PW:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,pdown:(X.intro>0&&T<PW)?5:(X.make&&X.make.pdAt?X.make.pdAt(T):-1),run:la>=-.02&&T<(X.make&&X.make.stopT?X.make.stopT:lastEnd),trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
 {c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC?SC.G:PH;
   if(SC&&Gs.id==='deskh')drawCan(c,Gs,Sx);
   if(ST.hands&&ST.hands.on)drawHands(c,Gs,Sx,la,!!SC);
@@ -483,7 +487,7 @@ function html(){return`<div class="mg"><div>
   <label>COLOR GRADE</label><select id="mGrade"><option value="0">None (as is)</option><option value="warm">Warm film</option><option value="teal">Teal and orange</option><option value="cold">Cold studio</option><option value="faded">Faded 90s</option></select>
  </div></details>
  <details class="sec grp" id="g_extras"><summary>4. DESK EXTRAS <small id="s_extras"></small></summary><div class="in">
-  <label class="chk"><input type="checkbox" id="mIntro"> POWER-ON INTRO (THE SCREEN BOOTS UP AND TYPES THE BEAT NAME, ABOUT 3 SECONDS)</label>
+  <label class="chk"><input type="checkbox" id="mIntro"> START OF THE VIDEO: A HAND SWITCHES THE UNIT ON (THE SCREEN BOOTS AND TYPES THE BEAT NAME), THEN PRESSES PLAY START AND GETS TO WORK (ABOUT 4 SECONDS)</label>
   <div class="msg" id="mIntroN" style="margin-top:0">The intro is not used in the looping 9:16 version.</div>
   <label class="chk"><input type="checkbox" id="mHands"> HANDS TAPPING THE PADS (YOUR OWN HANDS, THEY STRIKE EVERY HIT)</label>
   <label class="chk"><input type="checkbox" id="mSmoke"> CIGARETTE SMOKE (9:16 DESK SCENE)</label>
@@ -491,7 +495,7 @@ function html(){return`<div class="mg"><div>
   <label class="chk"><input type="checkbox" id="mTxt"> ALSO SHOW THE TITLE AS TEXT ON THE WHITE STUDIO (OFF = CLEAN)</label>
  </div></details>
  <details class="sec grp" id="g_hits"><summary>5. PAD HITS <small id="s_hits"></small></summary><div class="in">
-  <label>PAD LAYOUT (EACH BEAT GETS ITS OWN BY DEFAULT, THE SAME EVERY TIME)</label><select id="mKit"><option value="">Automatic for this beat</option>${KITS.map((k,i)=>`<option value="${i}">${k.n}</option>`).join('')}</select>
+  <label>PAD LAYOUT (STANDARD BY DEFAULT: KICK, SNARE AND HAT ALWAYS ON THE SAME PADS, REMEMBERED FOR EACH BEAT)</label><select id="mKit"><option value="">Standard (remembered for this beat)</option>${KITS.map((k,i)=>`<option value="${i}">${k.n}</option>`).join('')}</select>
   <label>HOW MANY HITS (MORE = EVERY SMALL HIT)</label><select id="mSens"><option value="0">Only the clear hits</option><option value="1">Balanced</option><option value="2">Every hit</option></select>
   <label>TIMING NUDGE: <span id="mNudgeV">0</span> MS (MOVE THE PAD HITS EARLIER OR LATER)</label><input type="range" id="mNudge" min="-80" max="80" step="1" value="0" style="width:100%;accent-color:var(--red)">
   <div class="msg">The kick is the bottom right pad (BASS), snares are SNARE 1 and 2, hats are HIHAT, and chops and melody hits land on the toms, rides, crashes and percs.</div>
@@ -530,7 +534,8 @@ function html(){return`<div class="mg"><div>
  </div></details>
 </div></div></div>`}
 
-function applyKit(){const id=ST.beat,k=ST.kits&&ST.kits[id]!=null&&ST.kits[id]!==''?+ST.kits[id]:kitFor(id);S.kit=k;const L=layout(S.raw,k);S.hits=L.hits;S.per=L.per;
+function applyKit(){const id=ST.beat;ST.kits=ST.kits||{};if(ST.kits[id]==null||ST.kits[id]==='')ST.kits[id]=kitFor(id);   /* pad memory: the layout a beat was made with is kept for that beat */
+ const k=+ST.kits[id];S.kit=k;const L=layout(S.raw,k);S.hits=L.hits;S.per=L.per;
  const tot=S.per.map((x,i)=>x.length?PAD_NAMES[i]+' '+x.length:'').filter(Boolean);const m=root&&$q('#mMap');if(m)m.textContent='Kit: '+KITS[k].n+'. '+(tot.join(' / ')||'Nothing was found.');const ks=root&&$q('#mKit');if(ks)ks.value=(ST.kits&&ST.kits[id]!=null&&ST.kits[id]!=='')?String(ST.kits[id]):''}
 const CACHE={};
 async function loadBeat(b){if(CACHE[b.id])return CACHE[b.id];const r=await fetch(pubU(b.preview_path));if(!r.ok)throw new Error('The preview of "'+b.title+'" did not load ('+r.status+').');const buf=await ctxA().decodeAudioData(await r.arrayBuffer());const raw=window.MZMpcDetect?await MZMpcDetect.analyze(buf):await analyze(buf);return CACHE[b.id]={buf,raw}}
@@ -640,8 +645,8 @@ function tpDirty(){TP=null;stopPlay();save();tpList();$q('#mTpMsg').textContent=
 async function buildTape(){const T=ST.tape,ids=T.ids.filter(beatById),msg=t=>{$q('#mTpMsg').textContent=t};if(ids.length<2){msg('Add at least 2 beats.');return}
  stopPlay();TP=null;const btn=$q('#mTpBuild');btn.disabled=true;
  try{const bs=ids.map(beatById);for(let i=0;i<bs.length;i++){msg('Listening to beat '+(i+1)+' of '+bs.length+': '+bs[i].title+'...');await loadBeat(bs[i])}
-  const lead=ST.intro?INTRO:1.6,xf=+T.xf||1.2,tracks=[];let t=lead;bs.forEach(b=>{const Sx=mkS(b,+T.len||0,kitOf(b.id));tracks.push({S:Sx,start:t,dur:Sx.dur,b});t=t+Sx.dur-xf});
-  const last=tracks[tracks.length-1];TP={kind:'tape',tracks,lead,xf,title:T.title,intro:ST.intro?INTRO:0,total:last.start+last.dur+TAIL};
+  const lead=startOn()?INTRO:1.6,xf=+T.xf||1.2,tracks=[];let t=lead;bs.forEach(b=>{const Sx=mkS(b,+T.len||0,kitOf(b.id));if(tracks.length===0)Sx.pre=startOn()?preHits(lead):null;tracks.push({S:Sx,start:t,dur:Sx.dur,b});t=t+Sx.dur-xf});
+  const last=tracks[tracks.length-1];TP={kind:'tape',tracks,lead,xf,title:T.title,intro:startOn()?INTRO:0,total:last.start+last.dur+TAIL};
   msg('The tape is ready: '+tracks.length+' beats, '+mmss(TP.total)+' long. Press PLAY on the left, or render it.');$q('#mMsg').textContent='Tape ready ('+mmss(TP.total)+').';mark('yt','th','gen');if(window.__lpShow)__lpShow();drawNow()}
  catch(e){msg('Could not build the tape: '+(e&&e.message||e))}finally{btn.disabled=false}}
 
@@ -720,7 +725,7 @@ function thRenderNow(){const el=$q('#mTH');if(!el||!YT())return;const b=ST.tape.
 
 const SUM={scene:()=>(ST.scene==='white'?'White studio':'Desk / '+((SKINS.find(k=>k[0]===(ST.skin||'orig'))||[0,'Original'])[1]).replace(/^The /,''))+(ST.res==='4k'?' / 4K':''),
  cam:()=>{const t=[];if(ST.lamp!=null&&+ST.lamp!==2)t.push('lamp '+['steady','gentle','real','dramatic'][ST.lamp]);const m=ST.cam||{};if(m.dof&&m.dof!=='0')t.push('DOF '+(m.dof==='2'?'strong':'soft'));if(m.rack)t.push('focus pull');if(m.moves&&camAny(m.moves)){const n=CAMMV.filter(([k])=>m.moves[k]).length;t.push(n+(n===1?' camera move':' camera moves'))}if(m.grade&&m.grade!=='0')t.push({warm:'warm film',teal:'teal+orange',cold:'cold',faded:'faded 90s'}[m.grade]);return t.join(' / ')||'lamp real'},
- extras:()=>{const t=[];if(ST.intro)t.push('intro');if(ST.hands&&ST.hands.on)t.push('hands');if(ST.smoke&&ST.smoke.on)t.push('smoke');return t.join(' / ')||'none'},
+ extras:()=>{const t=[];if(startOn())t.push('hands power on');if(ST.hands&&ST.hands.on)t.push('hands');if(ST.smoke&&ST.smoke.on)t.push('smoke');return t.join(' / ')||'none'},
  hits:()=>['clear hits','balanced','every hit'][ST.sens==null?1:ST.sens]+((ST.nudge||0)?' / '+ST.nudge+' ms':''),
  watch:()=>{const E=ST.eng,t=[];if(E.hook)t.push('hook');if(E.sub)t.push('subscribe');if(E.loop)t.push('loop');if(E.meters!==false)t.push('meters');if(E.note)t.push('note');if(E.q)t.push('question');return t.join(' / ')||'none'},
  beat:()=>{const b=beats.find(x=>String(x.id)===String(ST.beat));return b?b.title:'pick a beat'}};
@@ -731,7 +736,7 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};
  const CM=ST.cam;CM.moves=CM.moves||{};{const box=$q('#mCamMvList');box.innerHTML=CAMMV.map(([k,t])=>'<label class="chk" style="font-size:11px"><input type="checkbox" data-mv="'+k+'"'+(CM.moves[k]?' checked':'')+'> '+t+'</label>').join('');box.querySelectorAll('[data-mv]').forEach(c=>c.onchange=()=>{CM.moves[c.dataset.mv]=c.checked;save();drawNow();summ()})}$q('#mDof').value=CM.dof;$q('#mRack').checked=!!CM.rack;$q('#mGrade').value=CM.grade;
  $q('#mDof').onchange=e=>{CM.dof=e.target.value;save();drawNow()};$q('#mRack').onchange=e=>{CM.rack=e.target.checked;save();drawNow()};$q('#mGrade').onchange=e=>{CM.grade=e.target.value;save();drawNow()};
- $q('#mIntro').checked=!!ST.intro;$q('#mIntro').onchange=e=>{ST.intro=e.target.checked;save();stopPlay();if(S&&S.buf){S.tl=tlOne(S);dropV()}if(TP){TP=null;$q('#mTpMsg').textContent='The intro changed. Press BUILD THE TAPE again.';mark('yt','th','gen')}drawNow()};
+ $q('#mIntro').checked=startOn();$q('#mIntro').onchange=e=>{ST.start=e.target.checked;save();stopPlay();if(S&&S.buf){S.tl=tlOne(S);dropV()}if(TP){TP=null;$q('#mTpMsg').textContent='The intro changed. Press BUILD THE TAPE again.';mark('yt','th','gen')}drawNow()};
  const CN=ST.can;$q('#mCan').value=String(CN.id);const canUi=()=>{$q('#mCanSet').style.display=(CN.id==='orig'||CN.id==='none')?'none':'block';$q('#mCanSv').textContent=CN.size;$q('#mCanRv').textContent=CN.rot};
  $q('#mCanS').value=String(CN.size);$q('#mCanR').value=String(CN.rot);$q('#mCanX').value=String(CN.x);$q('#mCanY').value=String(CN.y);canUi();
  $q('#mCan').onchange=async e=>{CN.id=e.target.value;canUi();await ensureScene(ST.fmt);save();drawNow()};
@@ -743,7 +748,7 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  $q('#mFh').onclick=async()=>{ST.fmt='h';save();await ensureScene('h');size();drawNow()};$q('#mFv').onclick=async()=>{ST.fmt='v';save();await ensureScene('v');size();drawNow()};
  $q('#mPlay').onclick=play;$q('#mScrub').oninput=()=>{if(PV.playing)stopPlay();drawNow()};
  const T=ST.tape;$q('#mSens').value=String(ST.sens==null?1:ST.sens);$q('#mNudge').value=String(ST.nudge||0);$q('#mNudgeV').textContent=String(ST.nudge||0);const relay=()=>{save();for(const id in CACHE){}if(S&&S.raw){applyKit();S._hh=null;if(S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}}if(TP){TP.tracks.forEach(t=>{const L=layout(t.S.raw,t.S.kit);t.S.hits=L.hits;t.S.per=L.per;t.S._hh=null});TP._v=null;TP._h=null;TP._c=null}drawNow()};$q('#mSens').onchange=e=>{ST.sens=+e.target.value;relay()};$q('#mNudge').oninput=e=>{ST.nudge=+e.target.value;$q('#mNudgeV').textContent=String(ST.nudge);relay()};$q('#mTpOn').checked=!!T.on;$q('#mTpT').value=T.title;$q('#mTpL').value=String(T.len);$q('#mTpX').value=String(T.xf);$q('#mTpBox').style.display=T.on?'block':'none';tpList();
- const mountS2B=async()=>{if(mountS2B.done)return;mountS2B.done=1;try{await loadS('mpcsample.js?v=37');window.__s2b=MZMpcSample.mount($q('#mS2B'),{ST,save:()=>{save();summ()},esc,ctx:ctxA,loadS,cpy,dlf,ensureScene:()=>ensureScene(ST.fmt),setEp:x=>{EP=x;if(ST.s2b)ST.s2b.useEp=!!x;stopPlay();dropV();if(x){const cv=$q('#mScrub');if(cv)cv.value='0'}drawNow();summ()},hasEp:()=>!!EP});summ()}catch(e){mountS2B.done=0;$q('#mS2B').innerHTML='<div class="msg">The sample chopper did not load. Refresh the page.</div>'}};
+ const mountS2B=async()=>{if(mountS2B.done)return;mountS2B.done=1;try{await loadS('mpcsample.js?v=40');window.__s2b=MZMpcSample.mount($q('#mS2B'),{ST,save:()=>{save();summ()},esc,ctx:ctxA,loadS,cpy,dlf,ensureScene:()=>ensureScene(ST.fmt),setEp:x=>{EP=x;if(ST.s2b)ST.s2b.useEp=!!x;stopPlay();dropV();if(x){const cv=$q('#mScrub');if(cv)cv.value='0'}drawNow();summ()},hasEp:()=>!!EP});summ()}catch(e){mountS2B.done=0;$q('#mS2B').innerHTML='<div class="msg">The sample chopper did not load. Refresh the page.</div>'}};
  root.querySelectorAll('details.grp').forEach(d=>{d.open=!!ST.open[d.id];if(d.id==='g_s2b'){d.addEventListener('toggle',()=>{if(d.open)mountS2B()});if(d.open)mountS2B()}d.addEventListener('toggle',()=>{ST.open[d.id]=d.open?1:0;save()})});$q('#mOpenAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=true);$q('#mCloseAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=false);
  $q('#mRight').addEventListener('change',()=>setTimeout(summ,0));$q('#mRight').addEventListener('input',()=>setTimeout(summ,0));summ();
  $q('#mTpOn').onchange=e=>{T.on=e.target.checked;save();$q('#mTpBox').style.display=T.on?'block':'none';stopPlay();ytRender();thRender();drawNow()};
