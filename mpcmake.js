@@ -45,7 +45,12 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  const all=new Set(['chop','kick','snare','hat','open','b808']);
  /* the chops are flipped on the pads every loop (a new phrase from the same slices, each slice at its exact place in the sample); every 4th loop goes back to the original */
  const flipPlan=q=>(q===0||q%4===0)?pl:D.plan(Object.assign({},dna,{mode:'flip',fv:q,seed:dna.seed+q*131}),Rr,key);
- for(let q=0;q<fullLoops;q++){const off=fullT+q*loopLen,P=flipPlan(q);if(isLoop&&P===pl)loopSample(off,loopLen);sched(off,P.events.filter(e=>e.t<loopLen&&all.has(e.lane)))}
+ const drops=[];
+ for(let q=0;q<fullLoops;q++){const off=fullT+q*loopLen,P=flipPlan(q);if(isLoop&&P===pl)loopSample(off,loopLen);let evs=P.events.filter(e=>e.t<loopLen&&all.has(e.lane));
+  /* optional drop and rebuild: every other loop the hats leave in bar 3, then everything but the chops leaves in bar 4 behind a rising snare roll, and the next loop slams back in */
+  if(opt.drops&&q%2===1&&q<fullLoops-1){evs=evs.filter(e=>e.bar===3?e.lane==='chop':e.bar===2?(e.lane!=='hat'&&e.lane!=='open'):true);
+   [12,13,14,15].forEach((s,i)=>evs.push({t:(3*16+s)*step,lane:'snare',vel:.45+.17*i,bar:3,step:s}));drops.push({a:off+2*bar,b:off+4*bar})}
+  sched(off,evs)}
  /* the hand presses PLAY whenever the music starts (the sample, the chops, each new drum layer, the full beat) and STOP at the end */
  if(opt.buttons){const press=(k,tt)=>{btnEv.push({t:tt,k});if(opt.handsBtn)hits.push({t:tt,pad:-1,btn:k,v:.8});click(tt,.13,1800)};
   const lead=PG-.08;   /* press PLAY, the hand lifts away, and the music starts a beat later so the first kick is tapped */
@@ -63,7 +68,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  const phase=T=>T<sample.t+sample.d+.3?0:T<flipT?1:T<layerT[0]?2:T<fullT?3:4;
  const chapters=[['0:00','Intro'],[mmss(sample.t),'The sample'],[mmss(chopStart),'Chopping it on the pads'],[mmss(flipT),isLoop?'Playing the loop':'Playing the chops']].concat(layers.map((l,k)=>[mmss(layerT[k]),'Adding the '+l[1].toLowerCase()])).concat([[mmss(fullT),'The full beat']]);
  const waveBins=(()=>{const B=Rr.peaks.length/2,a=Math.floor(Rr.ws/Rr.dur*B),b=Math.max(a+2,Math.ceil(Rr.we/Rr.dur*B));return{a,b,B}})();
- const M={T0,sample,chops,flipT,segLen,layers:layers.map((l,k)=>({k:l[0],name:l[1],t:layerT[k]})),fullT,endMusic,loopLen,total,name:opt.name,bpm:Rr.bpm,key:key?key.name:'',style:dna.style,kit:kit.n,id:dna.id,mode:pl.chopMode,chapters,lcdAt,wheelAngle,phase,overlayOn:opt.overlay,wave:waveBins,R:Rr,opt};
+ const M={T0,sample,chops,flipT,segLen,layers:layers.map((l,k)=>({k:l[0],name:l[1],t:layerT[k]})),fullT,endMusic,loopLen,drops,total,name:opt.name,bpm:Rr.bpm,key:key?key.name:'',style:dna.style,kit:kit.n,id:dna.id,mode:pl.chopMode,chapters,lcdAt,wheelAngle,phase,overlayOn:opt.overlay,wave:waveBins,R:Rr,opt};
  const Sx={title:opt.name,bpm:Rr.bpm,key:(key?key.name:'').replace(' minor','m').replace(' major',''),lcd:'',buf:out,off:flipT,kit:0,dur:total,hits,per,btnEv,wheelEv,raw:null};
  const X={kind:'make',tracks:[{S:Sx,start:0,dur:total}],total,lead:0,title:opt.name,intro:opt.intro,make:M};
  return X}
@@ -96,7 +101,7 @@ function overlay(c,W,H,T,X,v){const M=X.make;if(!M||!M.overlayOn||T<M.T0-.2)retu
  else if(ph===1){const cc=M.chops.find(q=>T>=q.t0&&T<q.end)||M.chops[M.chops.length-1],pn=cc.slice.pad;cap='CHOP '+(cc.i+1)+' OF '+M.chops.length+'   >   PAD '+pn+'  ('+PAD_NAMES[padIdx(pn)]+')'}
  else if(ph===2)cap=M.mode==='loop'?'PLAYING THE SAMPLE LOOP':'PLAYING THE CHOPS ON THE PADS';
  else if(ph===3){const k=M.layers.reduce((a,l,i)=>T>=l.t?i:a,0);cap='ADDING THE '+M.layers[k].name}
- else cap=(M.loopLen&&T>=M.fullT&&T<M.endMusic&&Math.floor((T-M.fullT)/M.loopLen)%4?'CHOP FLIP '+(Math.floor((T-M.fullT)/M.loopLen)%4)+'   /   ':'')+'THE FULL BEAT   /   '+M.style.toUpperCase().replace('EC','EAST COAST')+'  '+M.kit+'   /   '+M.bpm+' BPM';
+ else cap=M.drops&&M.drops.some(d=>T>=d.a&&T<d.b)?'THE DROP   /   REBUILD':(M.loopLen&&T>=M.fullT&&T<M.endMusic&&Math.floor((T-M.fullT)/M.loopLen)%4?'CHOP FLIP '+(Math.floor((T-M.fullT)/M.loopLen)%4)+'   /   ':'')+'THE FULL BEAT   /   '+M.style.toUpperCase().replace('EC','EAST COAST')+'  '+M.kit+'   /   '+M.bpm+' BPM';
  c.font='700 '+Math.round(fs*1.05)+'px Oswald, sans-serif';c.textAlign='center';const tw=c.measureText(cap).width+36,cx=W/2;c.fillStyle='rgba(8,6,4,.7)';c.fillRect(cx-tw/2,cy,tw,ch*1.05);c.fillStyle='#fff';c.fillText(cap,cx,cy+ch*.55);
  /* drum layer chips (step 4 and 5) */
  if(ph>=3){const ly=cy+ch*1.05+H*.008,n=M.layers.length,lw=(v?.9:.5)*W/n,lx=(W-lw*n)/2;M.layers.forEach((l,i)=>{const on=T>=l.t,x=lx+i*lw;c.fillStyle=on?'rgba(232,185,74,.95)':'rgba(8,6,4,.6)';c.fillRect(x+2,ly,lw-4,ch*.9);c.font='700 '+Math.round(fs*.95)+'px Oswald, sans-serif';c.fillStyle=on?'#17110a':'#8e8e94';c.fillText(l.name,x+lw/2,ly+ch*.47)})}
