@@ -75,12 +75,12 @@ const KITS=[
  {n:'PERC GROOVE',kick:8,sn:[14,13],hat:5,mid:[3,2,1,0],hi:[7,6,4,12],weak:[9,10,11,15]}];
 const hashStr=s=>{let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
 const kitFor=id=>hashStr('mpc'+id)%KITS.length;
-function layout(raw,kit){const K=KITS[kit],hits=[],vmin=[.55,.3,.12][ST.sens==null?1:ST.sens],nd=(ST.nudge||0)/1000,add=(h,pad,v)=>{if(v>=vmin)hits.push({t:Math.max(0,h.t+nd),pad,v})};
+function layout(raw,kit){const K=KITS[kit],hits=[],vmin=[.55,.3,.12][ST.sens==null?1:ST.sens],nd=(ST.nudge||0)/1000,add=(h,pad,v,src)=>{if(pad==null)return;if(v>=(src==='d'?Math.min(.1,vmin):vmin))hits.push({t:Math.max(0,h.t+nd),pad,v,src:src||'d'})};
  raw.kick.forEach(h=>add(h,K.kick,h.v));let sc=0;raw.snare.forEach(h=>add(h,h.v>.62?K.sn[0]:K.sn[(sc++%2)?1:0],h.v));raw.hat.forEach(h=>add(h,K.hat,h.v*.9));
- if((ST.sens==null?1:ST.sens)===2)raw.mid.forEach(h=>add(h,K.mid[h.bin],h.v));raw.hi.forEach(h=>add(h,K.hi[h.bin],h.v*.95));(raw.keys||[]).forEach(h=>add(h,K.weak[h.bin],h.v*.9));
+ if((ST.sens==null?1:ST.sens)===2)raw.mid.forEach(h=>add(h,K.mid[h.bin],h.v,'m'+h.bin));raw.hi.forEach(h=>add(h,K.hi[h.bin],h.v*.95,'h'+h.bin));(raw.keys||[]).forEach(h=>add(h,K.weak[h.bin],h.v*.9,'k'+h.bin));
  /* focus on the drums: every kick, snare and hi-hat is tapped; a sample / chop / percussion pad only when it stands out (strong), is not on top of a drum hit, and the hands have room (one at most every ~0.45 s) */
  const drum=new Set([K.kick,...K.sn,K.hat]),dt=hits.filter(h=>drum.has(h.pad)).map(h=>h.t).sort((a,b)=>a-b),near=t=>{let lo=0,hi=dt.length;while(lo<hi){const m=(lo+hi)>>1;if(dt[m]<t)lo=m+1;else hi=m}return(lo<dt.length&&dt[lo]-t<.12)||(lo>0&&t-dt[lo-1]<.12)};
- hits.sort((a,b)=>a.t-b.t||(drum.has(b.pad)?1:0)-(drum.has(a.pad)?1:0));let lastO=-9;const kept=hits.filter(h=>{if(drum.has(h.pad))return true;if(h.v<.5||near(h.t)||h.t-lastO<.35)return false;lastO=h.t;return true});
+ hits.sort((a,b)=>a.t-b.t||(drum.has(b.pad)?1:0)-(drum.has(a.pad)?1:0));const d0=dt.length?dt[0]-.05:1e9,own={};let lastO=-9;const kept=hits.filter(h=>{if(drum.has(h.pad))return true;if(own[h.pad]&&own[h.pad]!==h.src)return false;const intro=h.t<d0;if(h.v<(intro?.3:.5)||near(h.t)||h.t-lastO<(intro?.2:.35))return false;own[h.pad]=h.src;lastO=h.t;return true});
  const per=PAD_NAMES.map(()=>[]);kept.forEach(h=>per[h.pad].push(h));return{hits:kept,per}}
 function pressAt(S,pad,T){const a=S.per[pad];if(!a||!a.length)return 0;let lo=0,hi=a.length-1,r=-1;const tt=T+.006;while(lo<=hi){const m=(lo+hi)>>1;if(a[m].t<=tt){r=m;lo=m+1}else hi=m-1}if(r<0)return 0;const dt=tt-a[r].t;if(dt>.5)return 0;const k=.6+.4*a[r].v;return k*(dt<.03?dt/.03:Math.exp(-(dt-.03)/.085))}
 
@@ -240,7 +240,16 @@ function prepHands(r,l){if(!r||!l)return;const mk=(img,warm)=>{const cv=document
  const one=(img)=>{const sl=sil(img);return{norm:mk(img,false),warm:mk(img,true),sil:sl,silB:blurs(sl),sh:{}}};
  HANDS={r:one(r),l:one(l)}}
 const btnC=(G,k)=>{const r=G.btn&&G.btn[k];return r?[r[0]+r[2]/2,r[1]+r[3]*.55]:null};
-function handHits(Sx,G){const ck='_hh'+(G&&G.id||'');if(Sx[ck])return Sx[ck];const o={l:[],r:[]},last={l:-9,r:-9};(Sx.pre||[]).concat(Sx.hits||[]).forEach(h=>{let key,hh=h;if(h.btn){const pc=btnC(G||{},h.btn);if(!pc)return;key=(h.btn==='power'&&G&&G.pad&&pc[0]<G.pad.x0+1.5*G.pad.px)?'l':'r';hh={t:h.t,pad:-1,v:h.v,pos:pc}}else key=(h.pad%4)<2?'l':'r';if(h.t-last[key]<.115)return;last[key]=h.t;o[key].push(hh)});return Sx[ck]=o}
+function handHits(Sx,G){const ck='_hh'+(G&&G.id||'');if(Sx[ck])return Sx[ck];const K=Sx.raw&&Sx.kit!=null&&KITS[Sx.kit]?KITS[Sx.kit]:null,o={l:[],r:[]},last={l:-9,r:-9};
+ /* kick and snare are never skipped: if the hand is busy, the other hand takes it (one column across), or it replaces that hand's last hi-hat / sample tap. Hi-hats and samples give way. */
+ const isMain=h=>h.pad>=0&&(K?(h.pad===K.kick||K.sn.includes(h.pad)):(h.pad===15||h.pad===14||h.pad===13)),gap=.1,reach=(k,p)=>k==='l'?(p%4)<=2:(p%4)>=1;
+ const list=(Sx.pre||[]).concat(Sx.hits||[]).slice().sort((a,b)=>a.t-b.t||(isMain(b)?1:0)-(isMain(a)?1:0));
+ list.forEach(h=>{let key,hh=h;if(h.btn){const pc=btnC(G||{},h.btn);if(!pc)return;key=(h.btn==='power'&&G&&G.pad&&pc[0]<G.pad.x0+1.5*G.pad.px)?'l':'r';hh={t:h.t,pad:-1,v:h.v,pos:pc}}else key=(h.pad%4)<2?'l':'r';
+  if(h.t-last[key]<gap){const ot=key==='l'?'r':'l';
+   if(!h.btn&&reach(ot,h.pad)&&h.t-last[ot]>=gap)key=ot;
+   else if(isMain(h)){const L=o[key],pv=L[L.length-1];if(pv&&!isMain(pv)&&pv.pad>=0){L.pop();const pp=L[L.length-1];last[key]=pp?pp.t:-9;if(h.t-last[key]<gap*.6)return}else{const L2=o[ot],p2=L2[L2.length-1];if(reach(ot,h.pad)&&p2&&!isMain(p2)&&p2.pad>=0){L2.pop();key=ot}else if(pv&&pv.pad>=0&&reach(ot,pv.pad)&&(!p2||pv.t-p2.t>=gap||(p2.pad>=0&&!isMain(p2)&&(L2.length<2||pv.t-L2[L2.length-2].t>=gap)))){if(p2&&pv.t-p2.t<gap)L2.pop();L.pop();L2.push(pv);last[ot]=pv.t;const pp=L[L.length-1];last[key]=pp?pp.t:-9;if(h.t-last[key]<gap*.6)return}else return}}
+   else return}
+  last[key]=h.t;o[key].push(hh)});return Sx[ck]=o}
 const hpos=(G,h)=>h.pos||padC(G,h.pad);
 const padC=(G,i)=>[G.pad.x0+(i%4)*G.pad.px+G.pad.w/2,G.pad.y0+Math.floor(i/4)*G.pad.py+G.pad.h*.58];
 /* Hand motion model. Everything is a smooth physical curve of time (no random shake):
