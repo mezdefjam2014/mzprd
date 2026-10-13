@@ -81,7 +81,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  /* ---- what the video needs ---- */
  const lcdAt=T=>{const ml=mixLab(T);if(ml){const v=ml.k==='knob'?knobAt(T):faderAt(T),n=Math.round(v*16);return['MIX  '+ml.lab,(ml.k==='knob'?'MASTER LEVEL ':'LEVEL ')+Math.round(v*100),'['+'#'.repeat(n)+'.'.repeat(16-n)+']']}
   if(T<T0)return[opt.name.toUpperCase().slice(0,20),'SAMPLE TO BEAT','READY'];
-  if(T<sample.t+sample.d+.3)return[opt.name.toUpperCase().slice(0,20),'SAMPLE  '+mmss(Math.max(0,T-sample.t))+'/'+mmss(sample.d),Rr.bpm+' BPM  '+(key?key.name.toUpperCase():'')];
+  if(T<sample.t+sample.d+.3)return[opt.name.toUpperCase().slice(0,20),(opt.partNo?'PART '+opt.partNo+'  ':'SAMPLE  ')+mmss(Math.max(0,T-sample.t))+'/'+mmss(sample.d),Rr.bpm+' BPM  '+(key?key.name.toUpperCase():'')];
   if(T<flipT){const c=chops.find(q=>T>=q.t0&&T<q.end);if(!c)return null;const s=c.slice;
    if(T<c.tEnter){/* the digits appear on the screen as they are pressed */const typed=opt.buttons?c.btns.filter(b=>/^k\d$/.test(b[0])&&b[1]<=T).map(b=>b[0][1]).join(''):'',armed=opt.buttons&&c.btns.some(b=>b[0]==='soft3'&&b[1]<=T);
     return['TRIM  CHOP '+(c.i+1)+'/'+N,'START '+s.t0.toFixed(2)+'  END '+s.t1.toFixed(2),opt.buttons?(armed?'ASSIGN TO PAD: '+typed+(Math.floor(T*3)%2||typed?'_':' '):'ASSIGN TO PAD...'):'MOVE THE CUT...']}
@@ -120,7 +120,7 @@ function overlay(c,W,H,T,X,v){const M=X.make;if(!M||!M.overlayOn||T<M.T0-.2)retu
   c.restore();c.save();c.textBaseline='middle'}
  /* the caption */
  let cap='';const cy=ph<=2?sy+sh+H*.012:sy;
- if(ph===0)cap='THE SAMPLE:  '+M.name.toUpperCase()+'   /   '+M.bpm+' BPM   /   '+M.key.toUpperCase();
+ if(ph===0)cap='THE SAMPLE:  '+M.name.toUpperCase()+(M.opt&&M.opt.partNo?'   /   PART '+M.opt.partNo:'')+'   /   '+M.bpm+' BPM   /   '+M.key.toUpperCase();
  else if(ph===1){const cc=M.chops.find(q=>T>=q.t0&&T<q.end)||M.chops[M.chops.length-1],pn=cc.slice.pad;cap='CHOP '+(cc.i+1)+' OF '+M.chops.length+'   >   PAD '+pn+'  ('+PAD_NAMES[padIdx(pn)]+')'}
  else if(ph===2)cap=M.mode==='loop'?'PLAYING THE SAMPLE LOOP':'PLAYING THE CHOPS ON THE PADS';
  else if(ph===3){const k=M.layers.reduce((a,l,i)=>T>=l.t?i:a,0);cap='ADDING THE '+M.layers[k].name}
