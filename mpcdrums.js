@@ -134,8 +134,14 @@ async function render(buf,R,plans,opt){opt=opt||{};const pl=Array.isArray(plans)
  const ctx=new OfflineAudioContext(2,Math.ceil(total*sr),sr),G=setup(ctx,first.dna);
  for(let l=0;l<loops;l++){const P=pl[l%pl.length],off=l*first.loopLen;for(const e of P.events){const t=off+e.t;if(e.lane==='kick')vKick(G,t,e.vel);else if(e.lane==='snare')vSnare(G,t,e.vel);else if(e.lane==='hat')vHat(G,t,e.vel);else if(e.lane==='chop')vEvent(G,buf,R,e,t)}}
  const raw=await ctx.startRendering();return opt.raw?raw:peakNorm(raw,.9)}
-function wav(buf){const n=buf.length,ch=buf.numberOfChannels,a=new DataView(new ArrayBuffer(44+n*ch*2)),w=(o,s)=>{for(let i=0;i<s.length;i++)a.setUint8(o+i,s.charCodeAt(i))};w(0,'RIFF');a.setUint32(4,36+n*ch*2,true);w(8,'WAVE');w(12,'fmt ');a.setUint32(16,16,true);a.setUint16(20,1,true);a.setUint16(22,ch,true);a.setUint32(24,buf.sampleRate,true);a.setUint32(28,buf.sampleRate*ch*2,true);a.setUint16(32,ch*2,true);a.setUint16(34,16,true);w(36,'data');a.setUint32(40,n*ch*2,true);
- const d=[];for(let c=0;c<ch;c++)d.push(buf.getChannelData(c));let o=44;for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const v=Math.max(-1,Math.min(1,d[c][i]));a.setInt16(o,v<0?v*32768:v*32767,true);o+=2}return new Blob([a.buffer],{type:'audio/wav'})}
+/* a 16-bit stereo WAV at the session's own sample rate (44.1 kHz). meta {title,artist,comment,year} is written as standard RIFF INFO tags so the file is named and labelled in any player or DAW. */
+function wav(buf,meta){const n=buf.length,ch=buf.numberOfChannels,enc=new TextEncoder(),tags=[];
+ if(meta){const T=(id,v)=>{if(!v)return;const b=enc.encode(String(v).slice(0,200)+'\0'),pad=b.length%2;tags.push({id,b,len:b.length+pad})};T('INAM',meta.title);T('IART',meta.artist);T('ICMT',meta.comment);T('ICRD',meta.year);T('ISFT','MZPRD MPC studio')}
+ const infoLen=tags.length?4+tags.reduce((s,t)=>s+8+t.len,0):0,dataLen=n*ch*2,a=new DataView(new ArrayBuffer(44+dataLen+(tags.length?8+infoLen:0))),w=(o,s)=>{for(let i=0;i<s.length;i++)a.setUint8(o+i,s.charCodeAt(i))};
+ w(0,'RIFF');a.setUint32(4,36+dataLen+(tags.length?8+infoLen:0),true);w(8,'WAVE');w(12,'fmt ');a.setUint32(16,16,true);a.setUint16(20,1,true);a.setUint16(22,ch,true);a.setUint32(24,buf.sampleRate,true);a.setUint32(28,buf.sampleRate*ch*2,true);a.setUint16(32,ch*2,true);a.setUint16(34,16,true);w(36,'data');a.setUint32(40,dataLen,true);
+ const d=[];for(let c=0;c<ch;c++)d.push(buf.getChannelData(c));let o=44;for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const v=Math.max(-1,Math.min(1,d[c][i]));a.setInt16(o,v<0?v*32768:v*32767,true);o+=2}
+ if(tags.length){w(o,'LIST');a.setUint32(o+4,infoLen,true);w(o+8,'INFO');let p=o+12;tags.forEach(t=>{w(p,t.id);a.setUint32(p+4,t.len,true);new Uint8Array(a.buffer,p+8,t.b.length).set(t.b);p+=8+t.len})}
+ return new Blob([a.buffer],{type:'audio/wav'})}
 
 window.MZMpcDrums={get COUNT(){return PAT.length},pat:i=>PAT[i-1],dnaOf,plan,planLoops,pickProgs,render,keyOf,chordUniform,stretch,wav,loadPack,loadPatterns,RO,RO_SAFE,RO_ALL,peakNorm,
  engine:{setup,vKick,vSnare,vHat,vChop,vEvent,noiseAt}};
