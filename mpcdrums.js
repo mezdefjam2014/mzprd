@@ -136,10 +136,10 @@ function plan(dna,Rr,keyInfo){const bpm=Rr.bpmX||Rr.bpm,step=60/bpm/4,r=mul(dna.
 
 /* ================= the user's drum pack ================= */
 let PACK=null,PATP=null,PAT=[];const PACKS={};
-function loadPatterns(){return PATP=PATP||fetch(new URL('mpc/patterns.json?v=4',document.baseURI).href).then(r=>r.ok?r.json():[]).catch(()=>[]).then(p=>(PAT=p))}
+function loadPatterns(){return PATP=PATP||fetch(new URL('mpc/patterns.json?v=5',document.baseURI).href).then(r=>r.ok?r.json():[]).catch(()=>[]).then(p=>(PAT=p))}
 /* every pattern brings its own one-shots (mpc/stems/<name>.ogg + .json, cut from its own stems); loadPack(dna) makes that beat's sounds the current ones */
 async function loadPack(dna){await loadPatterns();if(!dna||dna.stem===undefined||!PAT[dna.stem])return PACK;const name=PAT[dna.stem].pack;
- if(!PACKS[name])PACKS[name]=(async()=>{try{const u=n=>new URL('mpc/'+n,document.baseURI).href,[ab,q]=await Promise.all([fetch(u(name+'.ogg?v=3')).then(r=>r.arrayBuffer()),fetch(u(name+'.json?v=3')).then(r=>r.json())]),buf=await new OfflineAudioContext(1,1,44100).decodeAudioData(ab);
+ if(!PACKS[name])PACKS[name]=(async()=>{try{const u=n=>new URL('mpc/'+n,document.baseURI).href,[ab,q]=await Promise.all([fetch(u(name+'.ogg?v=4')).then(r=>r.arrayBuffer()),fetch(u(name+'.json?v=4')).then(r=>r.json())]),buf=await new OfflineAudioContext(1,1,44100).decodeAudioData(ab);
   return{buf,meta:q,stem:true,pools:{bb:{kick:q.kick,snare:q.snare,hat:q.hat},clap:[{o:0,d:.01}],open:q.hat,attack:q.kick,kick:{short:q.kick,any:q.kick,long:q.kick},snare:{dark:q.snare,mid:q.snare,bright:q.snare},hat:{dark:q.hat,mid:q.hat,bright:q.hat}}}}catch(e){console.warn('drum sounds did not load',e);return null}})();
  PACK=await PACKS[name];return PACK}
 /* what each kit asks of the pack: brightness of snare and hats, kick length, and how much clap sits on the snare */
