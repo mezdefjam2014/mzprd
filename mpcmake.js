@@ -58,7 +58,10 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  const phase=T=>T<sample.t+sample.d+.3?0:T<flipT?1:T<layerT[0]?2:T<fullT?3:4;
  const chapters=[['0:00','Intro'],[mmss(sample.t),'The sample'],[mmss(chopStart),'Chopping it on the pads'],[mmss(flipT),'Playing the chops']].concat(layers.map((l,k)=>[mmss(layerT[k]),'Adding the '+l[1].toLowerCase()])).concat([[mmss(fullT),'The full beat']]);
  const waveBins=(()=>{const B=Rr.peaks.length/2,a=Math.floor(Rr.ws/Rr.dur*B),b=Math.max(a+2,Math.ceil(Rr.we/Rr.dur*B));return{a,b,B}})();
- const M={T0,sample,chops,flipT,segLen,layers:layers.map((l,k)=>({k:l[0],name:l[1],t:layerT[k]})),fullT,endMusic,loopLen,stopT,pdAt:T=>T<pdT?-1:T-pdT,total,name:opt.name,bpm:Rr.bpm,key:key?key.name:'',style:'ec',kit:dna.name,id:dna.id,mode:'flip',progNames:LP.plans.map(P=>P.progName),chapters,lcdAt,wheelAngle,phase,overlayOn:opt.overlay,wave:waveBins,R:Rr,opt};
+ /* the hits per lane (for the on-screen meters) and where we are in the loop (for the bar counter) */
+ const lanes={kick:[],snare:[],hat:[],chop:[]};hits.forEach(h=>{if(h.pad<0)return;const k=h.pad===15?'kick':h.pad===14?'snare':h.pad===12?'hat':h.pad<12?'chop':null;if(k)lanes[k].push({t:h.t,v:clamp(h.v,.4,1)})});Object.values(lanes).forEach(a=>a.sort((x,y)=>x.t-y.t));
+ const barAt=T=>{if(T<flipT||T>=endMusic)return null;const starts=[flipT].concat(layerT,[fullT]);let si=0;while(si+1<starts.length&&starts[si+1]<=T)si++;const full=si===starts.length-1,len=full?loopLen:segLen,rel=T-starts[si],inLoop=full?rel%loopLen:rel%segLen;return{bar:Math.min(4,Math.floor(inLoop/bar)+1),loop:full?Math.floor(rel/loopLen)+1:0,loops:fullLoops}};
+ const M={lanes,barAt,T0,sample,chops,flipT,segLen,layers:layers.map((l,k)=>({k:l[0],name:l[1],t:layerT[k]})),fullT,endMusic,loopLen,stopT,pdAt:T=>T<pdT?-1:T-pdT,total,name:opt.name,bpm:Rr.bpm,key:key?key.name:'',style:'ec',kit:dna.name,id:dna.id,mode:'flip',progNames:LP.plans.map(P=>P.progName),chapters,lcdAt,wheelAngle,phase,overlayOn:opt.overlay,wave:waveBins,R:Rr,opt};
  const Sx={title:opt.name,bpm:Rr.bpm,key:(key?key.name:'').replace(' minor','m').replace(' major',''),lcd:'',buf:out,off:flipT,kit:0,dur:total,hits,per,btnEv,wheelEv,raw:null};
  const X={kind:'make',tracks:[{S:Sx,start:0,dur:total}],total,lead:0,title:opt.name,intro:opt.intro,make:M};
  return X}
@@ -95,6 +98,11 @@ function overlay(c,W,H,T,X,v){const M=X.make;if(!M||!M.overlayOn||T<M.T0-.2)retu
  c.font='700 '+Math.round(fs*1.05)+'px Oswald, sans-serif';c.textAlign='center';const tw=c.measureText(cap).width+36,cx=W/2;c.fillStyle='rgba(8,6,4,.7)';c.fillRect(cx-tw/2,cy,tw,ch*1.05);c.fillStyle='#fff';c.fillText(cap,cx,cy+ch*.55);
  /* drum layer chips (step 4 and 5) */
  if(ph>=3){const ly=cy+ch*1.05+H*.008,n=M.layers.length,lw=(v?.9:.5)*W/n,lx=(W-lw*n)/2;M.layers.forEach((l,i)=>{const on=T>=l.t,x=lx+i*lw;c.fillStyle=on?'rgba(232,185,74,.95)':'rgba(8,6,4,.6)';c.fillRect(x+2,ly,lw-4,ch*.9);c.font='700 '+Math.round(fs*.95)+'px Oswald, sans-serif';c.fillStyle=on?'#17110a':'#8e8e94';c.fillText(l.name,x+lw/2,ly+ch*.47)})}
+ /* beat meters and the bar counter (optional): four LED ladders that jump on every hit, so the full beat keeps moving on screen */
+ if(M.opt.visuals!==false&&ph>=2){const lv=a=>{let lo=0,hi=a.length;while(lo<hi){const m=(lo+hi)>>1;if(a[m].t<=T)lo=m+1;else hi=m}const h=lo>0?a[lo-1]:null;return h?Math.exp(-(T-h.t)/.16)*h.v:0},LN=[['KICK','kick'],['SNARE','snare'],['HATS','hat'],['CHOPS','chop']],mw=W*(v?.105:.042),mg=W*(v?.02:.008),mh=H*(v?.07:.09),n=LN.length,mx0=W*(v?.045:.03),my=H-mh-H*(v?.07:.075),seg=8,sh=mh/seg;
+  LN.forEach(([nm,k],i)=>{const x=mx0+i*(mw+mg),L=lv(M.lanes[k]),on=Math.round(L*seg);for(let s=0;s<seg;s++){const y=my+mh-(s+1)*sh,lit=s<on,hue=s<5?'232,185,74':s<7?'255,150,60':'255,74,58';c.fillStyle=lit?'rgba('+hue+',.95)':'rgba(255,255,255,.1)';if(lit){c.shadowColor='rgba('+hue+',.8)';c.shadowBlur=sh*.9}c.fillRect(x,y+sh*.14,mw,sh*.72);c.shadowBlur=0}
+   c.font='700 '+Math.max(11,Math.round(H*(v?.0125:.018)))+'px Oswald, sans-serif';c.textAlign='center';c.fillStyle=L>.2?'#e8b94a':'rgba(255,255,255,.55)';c.fillText(nm,x+mw/2,my+mh+H*(v?.016:.024))});
+  const ba=M.barAt(T);if(ba){c.font='700 '+Math.max(13,Math.round(H*(v?.016:.024)))+'px Oswald, sans-serif';c.textAlign='left';c.fillStyle='rgba(255,255,255,.88)';c.fillText('BAR '+ba.bar+' / 4'+(ba.loop?'     LOOP '+ba.loop+' / '+ba.loops:''),mx0,my-H*(v?.014:.02))}}
  c.restore()}
 
 /* ---------- the YouTube text for the episode ---------- */
