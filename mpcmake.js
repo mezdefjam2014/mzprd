@@ -15,8 +15,8 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  const D=window.MZMpcDrums,E=D.engine;await D.loadPack(dna);const pl=D.plan(dna,Rr,key),kit=E.KITS[dna.kit],trap=dna.style==='trap',step=pl.step,bar=16*step,segLen=opt.layerBars===2?2*bar:4*bar,loopLen=pl.loopLen,sl=Rr.slices,N=sl.length;
  const layers=LAYERS.filter(l=>l[0]==='b808'?trap:pl.events.some(e=>e.lane===l[0])),hits=[],btnEv=[],wheelEv=[],chops=[];
  const addHit=(t,pad,v)=>hits.push({t,pad,v});
- /* the snare is never next to the hi-hat pad (12): with hats it sits on pad 14 (right hand, beside the kick); with no hats it sits on pad 13 so the left hand still plays */
- const snarePad=layers.some(l=>l[0]==='hat')?14:13;
+ /* the snare always sits on pad 14 (beside the kick, never next to the hi-hat pad 12), on every beat, so viewers learn where it is */
+ const snarePad=14;
  /* ---- the timeline ---- */
  let t=opt.intro>0?opt.intro+.25:.7;const T0=t,sample={t,d:Math.min(6.5,Math.max(2,Rr.we-Rr.ws))};t+=sample.d+.6;const chopStart=t;
  sl.forEach((s,i)=>{const c={i,slice:s,t0:t,len:Math.min(s.t1-s.t0,1.0)};wheelEv.push({t:t,d:.45,a:(i%2?-1:1)*1.5});let a=t+.5;
