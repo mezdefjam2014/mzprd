@@ -26,7 +26,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
   addHit(c.aud,padIdx(s.pad),.9);c.end=c.aud+c.len+.3;t=c.end;chops.push(c)});
  const PG=.5,flipT=t+.15+PG,fullLoops=Math.max(2,Math.ceil(90/loopLen)),layerT=layers.map((l,k)=>flipT+(segLen+PG)*(k+1)),fullT=flipT+(segLen+PG)*(layers.length+1),endMusic=fullT+loopLen*fullLoops,TAIL=1.4,total=endMusic+TAIL;
  /* ---- the audio, from the same plan ---- */
- const sr=44100,ctx=new OfflineAudioContext(2,Math.ceil(total*sr),sr),G=E.setup(ctx,dna,kit);if(G.crackle)G.crackle.start(0);
+ const sr=44100,ctx=new OfflineAudioContext(2,Math.ceil(total*sr),sr),G=E.setup(ctx,dna,kit);if(G.crackle)G.crackle.start(0);D.mixPrep(G,buf,Rr);
  const click=(tt,v,f)=>{const n=E.noiseAt(G,tt,.03),hp=ctx.createBiquadFilter(),g=ctx.createGain();hp.type='highpass';hp.frequency.value=f||1800;g.gain.setValueAtTime(.0001,tt);g.gain.linearRampToValueAtTime(v,tt+.001);g.gain.exponentialRampToValueAtTime(.0001,tt+.02);n.connect(hp);hp.connect(g);g.connect(ctx.destination)};
  const mkPlay=(ctx,G)=>(at,from,len,gain,seam)=>{const s=ctx.createBufferSource();s.buffer=buf;const g=ctx.createGain(),fi=seam?.002:.01,fo=seam?.002:.06;g.gain.setValueAtTime(.0001,at);g.gain.linearRampToValueAtTime(gain,at+fi);g.gain.setValueAtTime(gain,at+Math.max(.02,len-fo));g.gain.linearRampToValueAtTime(.0001,at+len);s.connect(g);g.connect(G.chopBus);s.start(at,from,len)};
  const playSample=mkPlay(ctx,G);
@@ -59,13 +59,13 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
    sched(off,evs)}};
  musicPass(ctx,G,{flip:flipT,layers:layerT,full:fullT},addHit,drops);
  /* the build-up as one continuous beat with no button sounds, no pauses and no sample audition (rendered when asked for) */
- const renderClean=async()=>{const O={flip:0,layers:[],full:0};let cur=segLen;layers.forEach((l,k)=>{O.layers[k]=cur;cur+=segLen});O.full=cur;const len=cur+loopLen*fullLoops+TAIL,c2=new OfflineAudioContext(2,Math.ceil(len*sr),sr),G2=E.setup(c2,dna,kit);if(G2.crackle)G2.crackle.start(0);
-  musicPass(c2,G2,O,()=>{},null);const o2=await c2.startRendering();let pk=0;for(let c=0;c<2;c++){const d=o2.getChannelData(c);for(let i=0;i<d.length;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}}const k=pk>.0001?.92/pk:1;for(let c=0;c<2;c++){const d=o2.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=k}return o2};
+ const renderClean=async()=>{const O={flip:0,layers:[],full:0};let cur=segLen;layers.forEach((l,k)=>{O.layers[k]=cur;cur+=segLen});O.full=cur;const len=cur+loopLen*fullLoops+TAIL,c2=new OfflineAudioContext(2,Math.ceil(len*sr),sr),G2=E.setup(c2,dna,kit);if(G2.crackle)G2.crackle.start(0);D.mixPrep(G2,buf,Rr);
+  musicPass(c2,G2,O,()=>{},null);const o2=await c2.startRendering();let pk=0;for(let c=0;c<2;c++){const d=o2.getChannelData(c);for(let i=0;i<d.length;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}}const k=pk>.0001?.92/pk:1;for(let c=0;c<2;c++){const d=o2.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=k}if(D.mixOn())D.finish(o2);return o2};
  /* the hand presses PLAY whenever the music starts (the sample, the chops, each new drum layer, the full beat) and STOP at the end */
  if(opt.buttons){const press=(k,tt)=>{btnEv.push({t:tt,k});if(opt.handsBtn)hits.push({t:tt,pad:-1,btn:k,v:.8});click(tt,.13,1800)};
   const lead=PG-.08;   /* press PLAY, the hand lifts away, and the music starts a beat later so the first kick is tapped */
   press('play',sample.t-.3);press('play',flipT-lead);layers.forEach((l,k)=>press('play',layerT[k]-lead));press('play',fullT-lead);press('stop',endMusic+.05)}
- const out=await ctx.startRendering();let pk=0;for(let c=0;c<2;c++){const d=out.getChannelData(c);for(let i=0;i<d.length;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}}const gk=pk>.0001?.92/pk:1;for(let c=0;c<2;c++){const d=out.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=gk}
+ const out=await ctx.startRendering();let pk=0;for(let c=0;c<2;c++){const d=out.getChannelData(c);for(let i=0;i<d.length;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}}const gk=pk>.0001?.92/pk:1;for(let c=0;c<2;c++){const d=out.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=gk}if(D.mixOn())D.finish(out);
  hits.sort((a,b)=>a.t-b.t);const per=PAD_NAMES.map(()=>[]);hits.forEach(h=>{if(h.pad>=0)per[h.pad].push({t:h.t,v:clamp(h.v,.4,1)})});
  /* ---- what the video needs ---- */
  const lcdAt=T=>{if(T<T0)return[opt.name.toUpperCase().slice(0,20),'SAMPLE TO BEAT','READY'];
