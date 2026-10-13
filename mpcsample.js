@@ -69,7 +69,7 @@ function playSlice(ctx,buf,sl,when,gain){const s=ctx.createBufferSource();s.buff
  s.connect(g);g.connect(ctx.destination);s.start(t,sl.t0,d+.01);return s}
 
 /* ---------- the panel ---------- */
-function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12,src:''};const Z=ST.s2b;Z.mk=Z.mk||{ov:1,btn:1,hb:1,lb:4,tb:0};if(Z.n>12)Z.n=12;Z.fav=Z.fav||[];Z.vs=Z.vs||'all';Z.vk=Z.vk||'all';Z.pg=Z.pg||0;let lastEp=null,lastEpId=0,buf=null,R=null,srcs=[],playing=false,fname='',selected=-1;
+function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12,src:''};const Z=ST.s2b;Z.mk=Z.mk||{ov:1,btn:1,hb:1,lb:4,tb:0};if(Z.mk.roAuto===undefined)Z.mk.roAuto=1;Z.mk.roIds=Z.mk.roIds||[];   /* every chop order starts switched off */if(Z.n>12)Z.n=12;Z.fav=Z.fav||[];Z.vs=Z.vs||'all';Z.vk=Z.vk||'all';Z.pg=Z.pg||0;let CH=null,lastEp=null,lastEpId=0,buf=null,R=null,srcs=[],playing=false,fname='',selected=-1;
  const stop=()=>{srcs.forEach(s=>{try{s.stop()}catch(e){}});srcs=[];playing=false;paint()};
  el.innerHTML=`<label class="chk"><input type="checkbox" id="sbOn"> SAMPLE TO BEAT (OPTIONAL SERIES: UPLOAD A SAMPLE, THE TOOL CHOPS IT ON THE PADS)</label>
  <div id="sbBox">
@@ -98,16 +98,25 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
    <label class="chk"><input type="checkbox" id="mkHb"> HANDS PRESS THE BUTTONS TOO (DESK SCENES, NEEDS "HANDS TAPPING THE PADS" ON)</label>
    <label class="chk"><input type="checkbox" id="mkDr"> DROPS AND REBUILDS IN THE FULL BEAT (EVERY OTHER LOOP THE DRUMS DROP OUT BEHIND A SNARE ROLL, THEN SLAM BACK IN)</label>
    <label class="chk"><input type="checkbox" id="mkTb"> ALSO WRITE "TYPE BEAT" TITLES (USES THE "SOUNDS LIKE" ARTIST)</label>
+   <div id="mkRoBox" style="margin:10px 0;padding:10px;border:1px solid #2a2a30">
+    <div class="sub" style="font:700 10px Montserrat;letter-spacing:.2em;color:#c9a14a;margin-bottom:6px">CHOP ORDER VARIATIONS (OPTIONAL)</div>
+    <label class="chk"><input type="checkbox" id="mkRo"> IN THE FLIP LOOPS OF THE FULL BEAT, PLAY THE CHOPS IN A DIFFERENT ORDER (ONE NEW ORDER PER LOOP, EVERY 4TH LOOP IS THE ORIGINAL)</label>
+    <label class="chk"><input type="checkbox" id="mkRoAuto"> ONLY USE THE ONES INSIDE ONE BAR WHEN THE SAMPLE CHANGES CHORDS (AUTOMATIC CHECK)</label>
+    <div class="msg" id="mkRoMsg">Chop the sample first and the list of orders appears here.</div>
+    <div style="display:flex;gap:6px;margin:6px 0"><button class="btn" id="mkRoPick" style="flex:1">MY PICKS</button><button class="btn" id="mkRoAll" style="flex:1">ALL 20</button><button class="btn" id="mkRoNone" style="flex:1">NONE</button></div>
+    <div id="mkRoList"></div>
+   </div>
    <label>TIME PER DRUM LAYER</label><select id="mkLb"><option value="4">4 bars (longer, easier to follow)</option><option value="2">2 bars (shorter video)</option></select>
    <div class="two" style="margin-top:8px"><button class="btn big" id="mkGo">USE THE SELECTED BEAT IN THE VIDEO</button><button class="btn" id="mkBack">BACK TO THE NORMAL VIDEO</button></div>
    <div class="two" style="margin-top:6px"><button class="btn" id="mkWavAll" disabled>DOWNLOAD THE WHOLE EPISODE AUDIO (WAV)</button><button class="btn" id="mkWavFull" disabled>DOWNLOAD THE FULL BEAT ONLY (WAV)</button></div>
+   <button class="btn" id="mkWavBuild" disabled style="width:100%;margin-top:6px">DOWNLOAD THE BUILD-UP AS ONE BEAT, NO BUTTON SOUNDS (WAV)</button>
    <div class="msg" id="mkMsg">Press VIDEO on a beat in the list above, or play one and press the big button.</div>
    <div id="mkPack"></div>
   </div>
   <div class="msg">Use samples you own, made yourself, or have cleared. A sample from someone else's record can get your video claimed by YouTube.</div>
  </div>`;
  const $=s=>el.querySelector(s),box=$('#sbBox');
- const show=()=>{box.style.display=Z.on?'block':'none'};$('#sbOn').checked=!!Z.on;show();$('#sbOn').onchange=e=>{Z.on=e.target.checked;show();api.save()};
+ const show=()=>{box.style.display=Z.on?'block':'none'};$('#sbOn').checked=!!Z.on;show();$('#sbOn').onchange=e=>{Z.on=e.target.checked;show();api.save();api.thumbs&&api.thumbs()};
  $('#sbN').value=String(Z.n);$('#sbN').onchange=e=>{Z.n=+e.target.value;api.save()};$('#sbSrc').value=Z.src||'';$('#sbSrc').oninput=e=>{Z.src=e.target.value;api.save()};
  const msg=t=>{$('#sbMsg').textContent=t};
  $('#sbFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;stop();msg('Reading '+f.name+'...');try{const ab=await f.arrayBuffer();buf=await api.ctx().decodeAudioData(ab);fname=f.name.replace(/\.[^.]+$/,'');R=null;msg('Loaded "'+fname+'" ('+buf.duration.toFixed(1)+' seconds). Press CHOP IT.')}catch(err){buf=null;msg('That file could not be read. Try an MP3 or WAV.')}};
@@ -150,29 +159,36 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
  $('#sbRand').onclick=()=>{const a=ids();if(a.length)playVar(a[Math.floor(Math.random()*a.length)])};
  $('#sbVStop').onclick=vstop;
  $('#sbVWav').onclick=async()=>{if(!R||!sel)return;$('#sbVMsg').textContent='Rendering 16 bars for download...';const d=D(),dna=d.dnaOf(sel),pl=d.plan(dna,R,KEY),out=await d.render(buf,R,pl,{loops:4}),a=document.createElement('a');a.href=URL.createObjectURL(d.wav(out));a.download=(fname||'sample')+' - beat '+sel+'.wav';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),8000);$('#sbVMsg').textContent='Downloaded.'};
- const mk=Z.mk,mset=()=>{$('#mkOv').checked=!!mk.ov;$('#mkBtn').checked=!!mk.btn;$('#mkHb').checked=!!mk.hb;$('#mkTb').checked=!!mk.tb;$('#mkDr').checked=!!mk.dr;$('#mkLb').value=String(mk.lb)};
+ const mk=Z.mk,mset=()=>{$('#mkOv').checked=!!mk.ov;$('#mkBtn').checked=!!mk.btn;$('#mkHb').checked=!!mk.hb;$('#mkTb').checked=!!mk.tb;$('#mkDr').checked=!!mk.dr;$('#mkRo').checked=!!mk.roOn;$('#mkRoAuto').checked=!!mk.roAuto;$('#mkLb').value=String(mk.lb)};
  const mmsg=t=>{$('#mkMsg').textContent=t};
- [['#mkOv','ov'],['#mkBtn','btn'],['#mkHb','hb'],['#mkTb','tb'],['#mkDr','dr']].forEach(([id,k])=>$(id).onchange=e=>{mk[k]=e.target.checked?1:0;api.save()});$('#mkLb').onchange=e=>{mk.lb=+e.target.value;api.save()};
+ [['#mkOv','ov'],['#mkBtn','btn'],['#mkHb','hb'],['#mkTb','tb'],['#mkDr','dr'],['#mkRo','roOn'],['#mkRoAuto','roAuto']].forEach(([id,k])=>$(id).onchange=e=>{mk[k]=e.target.checked?1:0;api.save()});$('#mkLb').onchange=e=>{mk.lb=+e.target.value;api.save()};
  let epBusy=false;
  async function makeEp(i){if(!R||!buf){mmsg('Chop a sample first.');return}if(epBusy)return;if(!i)i=sel;if(!i){mmsg('Choose a beat: press VIDEO on one in the list.');return}epBusy=true;vstop();stop();sel=i;mmsg('Building the episode for beat #'+i+'...');await new Promise(r=>setTimeout(r,40));
-  try{if(!window.MZMpcMake)await api.loadS('mpcmake.js?v=11');const d=D(),dna=d.dnaOf(i);await api.ensureScene();
-   const X=await window.MZMpcMake.build(buf,R,dna,KEY,{buttons:!!mk.btn,handsBtn:!!mk.hb,overlay:!!mk.ov,layerBars:mk.lb,intro:ST.intro?3.4:0,name:fname||'SAMPLE',typeBeat:!!mk.tb,drops:!!mk.dr});
+  try{if(!window.MZMpcMake)await api.loadS('mpcmake.js?v=13');const d=D(),dna=d.dnaOf(i);await api.ensureScene();
+   const X=await window.MZMpcMake.build(buf,R,dna,KEY,{buttons:!!mk.btn,handsBtn:!!mk.hb,overlay:!!mk.ov,layerBars:mk.lb,intro:ST.intro?3.4:0,name:fname||'SAMPLE',typeBeat:!!mk.tb,drops:!!mk.dr,ro:mk.roOn?mk.roIds.slice():null,roChange:!!(mk.roAuto&&CH&&!CH.uniform)});
    Z.typeBeat=!!mk.tb;api.setEp(X);const P=window.MZMpcMake.pack(X,ST,{});
    const bits=[['TITLES',P.titles.map((t,j)=>'<div class="it"><b>'+esc(t)+'</b><small style="color:#8e8e94">'+t.length+'/100</small><button data-ct="'+j+'">COPY</button></div>').join('')],['DESCRIPTION','<textarea rows="12" id="mkD" style="font:500 12px/1.5 monospace">'+esc(P.desc)+'</textarea><button class="btn" id="mkCd" style="width:100%;margin-top:4px">COPY DESCRIPTION</button>'],['TAGS','<textarea rows="2" id="mkT" style="font:500 12px/1.5 monospace">'+esc(P.tags)+'</textarea><button class="btn" id="mkCt" style="width:100%;margin-top:4px">COPY TAGS</button>'],['PINNED COMMENT','<div class="it"><b>'+esc(P.pinned[0])+'</b><button data-cp="0">COPY</button></div><div class="it"><b>'+esc(P.pinned[1])+'</b><button data-cp="1">COPY</button></div><div class="it"><b>'+esc(P.pinned[2])+'</b><button data-cp="2">COPY</button></div>']];
    $('#mkPack').innerHTML='<h4 style="font:700 11px Montserrat;letter-spacing:.26em;color:var(--gold);margin:16px 0 6px">EPISODE TITLES AND DESCRIPTION</h4>'+bits.map(b=>'<div class="sub" style="margin:10px 0 4px;font:700 10px Montserrat;letter-spacing:.2em;color:#c9a14a">'+b[0]+'</div>'+b[1]).join('')+(Z.src?'':'<div class="msg">Tip: fill in "where the sample comes from" above so it shows in the description.</div>');
    const cp=async(t,e)=>{const ok=await api.cpy(t);e.textContent=ok?'COPIED':'FAILED';setTimeout(()=>{if(e.dataset.l)e.textContent=e.dataset.l},1200)};
    $('#mkPack').querySelectorAll('[data-ct]').forEach(b=>{b.dataset.l='COPY';b.onclick=()=>cp(P.titles[+b.dataset.ct],b)});$('#mkPack').querySelectorAll('[data-cp]').forEach(b=>{b.dataset.l='COPY';b.onclick=()=>cp(P.pinned[+b.dataset.cp],b)});
    $('#mkCd').onclick=e=>cp($('#mkD').value,e.target);$('#mkCt').onclick=e=>cp($('#mkT').value,e.target);
-   lastEp=X;lastEpId=i;$('#mkWavAll').disabled=false;$('#mkWavFull').disabled=false;
+   lastEp=X;lastEpId=i;$('#mkWavAll').disabled=false;$('#mkWavFull').disabled=false;$('#mkWavBuild').disabled=false;
    const M=X.make;mmsg('Episode ready: beat #'+i+' ('+M.style.toUpperCase().replace('EC','EAST COAST')+', '+M.kit+'), '+Math.floor(Math.round(M.total)/60)+':'+String(Math.round(M.total)%60).padStart(2,'0')+' long. Press PLAY on the left to watch it, or RENDER 16:9 / 9:16.')}
   catch(err){console.warn(err);mmsg('Could not build the episode: '+(err&&err.message||err))}epBusy=false}
  /* the beat exactly as it plays in the video: every layer, chop flip and drop, same audio the video uses */
  const epWav=full=>{if(!lastEp||!D())return;const B=lastEp.tracks[0].S.buf,M=lastEp.make,sr=B.sampleRate,a=full?Math.floor(M.fullT*sr):0,b=full?Math.min(B.length,Math.ceil((M.endMusic+1.4)*sr)):B.length,o=new AudioBuffer({numberOfChannels:B.numberOfChannels,length:b-a,sampleRate:sr});
   for(let c=0;c<B.numberOfChannels;c++){const d=B.getChannelData(c).slice(a,b),f=Math.min(d.length,Math.floor(sr*.25));for(let q=0;q<f;q++)d[d.length-1-q]*=q/f;o.copyToChannel(d,c)}
   api.dlf(D().wav(o),(fname||'sample').replace(/\.[^.]+$/,'')+' - beat '+lastEpId+(full?' - full beat':' - episode')+'.wav')};
+ $('#mkWavBuild').onclick=async()=>{if(!lastEp||!lastEp.make.renderClean)return;const b=$('#mkWavBuild');b.disabled=true;mmsg('Rendering the build-up without the button sounds...');try{const o=await lastEp.make.renderClean(),sr=o.sampleRate,f=Math.min(o.length,Math.floor(sr*.25));for(let c=0;c<o.numberOfChannels;c++){const d=o.getChannelData(c);for(let q=0;q<f;q++)d[d.length-1-q]*=q/f}api.dlf(D().wav(o),(fname||'sample').replace(/\.[^.]+$/,'')+' - beat '+lastEpId+' - build-up, no button sounds.wav');mmsg('Done: the build-up as one beat, '+Math.round(o.duration)+' s.')}catch(e){console.warn(e);mmsg('Could not render it: '+(e&&e.message||e))}b.disabled=false};
  $('#mkWavAll').onclick=()=>epWav(false);$('#mkWavFull').onclick=()=>epWav(true);
  $('#mkGo').onclick=()=>makeEp(sel);$('#mkBack').onclick=()=>{api.setEp(null);mmsg('Back to the normal video.')};mset();
- const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=15');await D().loadPack();KEY=D().keyOf(buf,R.ws,R.we);cache=new Map();sel=0;paintV()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
+ /* the list of chop orders, grouped; the ones that move whole bars are marked and are skipped automatically when the sample changes chords */
+ const paintRo=()=>{if(!D()||!D().RO)return;const RO=D().RO,SAFE=D().RO_SAFE,box=$('#mkRoList'),G={light:'LIGHT: THE PHRASE STAYS RECOGNIZABLE',medium:'MEDIUM: A CLEARLY NEW PHRASE',bigger:'BIGGER: USE SPARINGLY'};let h='';
+  ['light','medium','bigger'].forEach(g=>{h+='<div class="sub" style="margin:8px 0 2px;font:700 10px Montserrat;letter-spacing:.16em;color:#8e8e94">'+G[g]+'</div>';for(let i=1;i<RO.length;i++)if(RO[i].g===g)h+='<label class="chk" style="font-size:11px"><input type="checkbox" data-ro="'+i+'"'+(mk.roIds.includes(i)?' checked':'')+'> '+i+'. '+esc(RO[i].n)+(SAFE.includes(i)?'':' <small style="color:#c9a14a">(moves whole bars)</small>')+'</label>'});
+  box.innerHTML=h;box.querySelectorAll('[data-ro]').forEach(c=>c.onchange=()=>{const i=+c.dataset.ro,k=mk.roIds.indexOf(i);if(c.checked&&k<0)mk.roIds.push(i);if(!c.checked&&k>=0)mk.roIds.splice(k,1);api.save()});
+  $('#mkRoMsg').textContent=CH?(CH.uniform?'Chord check: this sample keeps the same chord through its bars, so every order is allowed.':'Chord check: this sample changes chords between bars, so with the automatic check on only the orders inside one bar are used.'):'Chord check unavailable: all selected orders will be used.'};
+ const roSet=ids=>{mk.roIds=ids.slice();api.save();paintRo()};$('#mkRoPick').onclick=()=>roSet([1,5,6,10,15,20]);$('#mkRoAll').onclick=()=>roSet([...Array(20)].map((_,i)=>i+1));$('#mkRoNone').onclick=()=>roSet([]);
+ const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=17');await D().loadPack();KEY=D().keyOf(buf,R.ws,R.we);try{CH=D().chordUniform(buf,R)}catch(e){CH=null}if(Z.last&&KEY)Z.last.key=KEY.name.replace(' minor','m').replace(' major','');api.thumbs&&api.thumbs();cache=new Map();sel=0;paintV();paintRo()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
  window.__s2bAfter=afterChop;
  return{chop:()=>R,buf:()=>buf,stop,after:afterChop,key:()=>KEY,dev:{renderVar,playVar,makeEp}}}
 window.MZMpcSample={chop,tempoOf,fluxOf,pickPeaks,playSlice,mount,padIdx,PAD_NAMES};

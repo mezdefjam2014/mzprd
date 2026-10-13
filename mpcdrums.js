@@ -54,10 +54,49 @@ function dnaOf(id){id=clamp(Math.round(id),1,Math.max(1,PAT.length));
  const swing=pick(r,[50,50,52,54,56]),mr=r(),mode=mr<.3?'loop':mr<.8?'flip':'sparse';
  return{id,style:st,kit,kick,snare,hat,fill,swing,mode,steps:Math.floor(r()*STEPSETS.length),hum:3,seed:id*131+7,alt:r()<.6,bassSeed:Math.floor(r()*1e6),reverse:r()<.12,kitName:KITS[kit].n}}
 
+/* does the sample keep the same chord through its bars? (then whole-bar re-orders are safe) */
+function chordUniform(buf,Rr){const sr=buf.sampleRate,L=buf.getChannelData(0),ds=4,nb=Math.max(1,Math.min(4,Rr.bars||4)),bar=Rr.bar||(Rr.we-Rr.ws)/nb,cs=[];
+ for(let k=0;k<nb;k++){const a=Math.floor((Rr.ws+k*bar)*sr),n=Math.floor(Math.min(bar*sr,L.length-a)/ds);if(n<2000){cs.push(null);continue}const x=new Float32Array(n);for(let i=0;i<n;i++){const o=a+i*ds;x[i]=(L[o]+L[o+1]+L[o+2]+L[o+3])/4}const fs=sr/ds,ch=new Float32Array(12);
+  for(let m=45;m<=81;m++){const f=440*Math.pow(2,(m-69)/12);if(f>fs/2-150)continue;const w=2*Math.PI*f/fs,c=2*Math.cos(w);let s1=0,s2=0;for(let i=0;i<n;i++){const s0=x[i]+c*s1-s2;s2=s1;s1=s0}ch[m%12]+=Math.sqrt(Math.max(0,s1*s1+s2*s2-c*s1*s2))/n}cs.push(ch)}
+ const cos=(p,q)=>{let d=0,a=0,b=0;for(let i=0;i<12;i++){d+=p[i]*q[i];a+=p[i]*p[i];b+=q[i]*q[i]}return d/Math.sqrt(a*b+1e-12)},ok=cs.filter(Boolean);if(ok.length<2)return{uniform:true,sims:[]};
+ const sims=ok.slice(1).map(c=>+cos(ok[0],c).toFixed(3));return{uniform:Math.min(...sims)>=.85,sims}}
 /* ================= the plan: every event of one 4-bar loop ================= */
 function parseLane(str,bar,lane,out,step,sw,jit,r,velMul){for(let s=0;s<16;s++){const c=str[s];if(c==='.'||!c)continue;const base=(bar*16+s)*step+((s%2)?(2*sw/100-1)*step:0),vel=({x:.78,X:1,g:.34,o:.8,r:.8,t:.78}[c]||.8)*(velMul||1)*(1-.06*r());
   const add=(dt,v,kind)=>out.push({t:Math.max(0,base+dt+(r()-.5)*jit*.002),lane:kind||lane,vel:clamp(v,.1,1),bar,step:s});
   if(c==='r'){add(0,vel);add(step*.5,vel*.8)}else if(c==='t'){add(0,vel*.8);add(step/3,vel*.9);add(step*2/3,vel)}else if(c==='o')add(0,vel,'open');else add(0,vel)}}
+/* ================= chop order variations (optional): the same slices in a different order. Slots (the grid positions of the slices) stay where they are; only which slice plays in a slot changes, a slice that stays in its own slot keeps its exact sample timing, and plan() trims every chop so none overlaps the next. 'safe' ones stay inside one bar (one chord); 'bar' ones move whole bars and are only used when the sample keeps the same chord. ================= */
+const RO=[null,
+ {n:'Swap two neighbouring slices',g:'light',bars:'one'},{n:'Rotate the bar by one slice',g:'light',bars:'odd'},{n:'Rotate the bar by half',g:'light',bars:'odd'},{n:'Last slice first',g:'light',bars:'odd'},
+ {n:'Skip one slice, play it at the end',g:'light',bars:'one'},{n:'Echo the opening slice at the end',g:'light',bars:'one'},{n:'Swap the slices in pairs',g:'light',bars:'odd'},{n:'Mirror the first half',g:'light',bars:'odd'},
+ {n:'Swap bar 1 and 3, bar 2 and 4',g:'medium',bars:'all',bar:1},{n:'Question and answer (bar 2 plays bar 1 backwards)',g:'medium',bars:'b1'},{n:'Play the bars back to front',g:'medium',bars:'all',bar:1},{n:'Alternate slices from two bars',g:'medium',bars:'odd',bar:1},
+ {n:'First half of bar 1, then of bar 3',g:'medium',bars:'b1',bar:1},{n:'Repeat bar 2 in bar 3',g:'medium',bars:'b2',bar:1},{n:'Strongest slice on the downbeat',g:'medium',bars:'all'},{n:'Start the phrase on beat 2',g:'medium',bars:'odd'},
+ {n:'Build up: one slice, then two, then three',g:'bigger',bars:'all'},{n:'Peel down: remove a slice each bar',g:'bigger',bars:'all'},{n:'Only the strongest slices',g:'bigger',bars:'all'},{n:'Reorder bars 1-3, keep bar 4',g:'bigger',bars:'all',bar:1}];
+const RO_SAFE=[1,2,3,4,5,6,7,8,10,15,16,17,18,19];   /* stay inside one bar; the rest move whole bars */
+function roOrder(id,b,sb,items,cx){const m=items.length;if(!m)return items;const slots=items.map(z=>z.w),R=RO[id],aff=R.bars==='all'||(R.bars==='odd'&&b%2===1)||(R.bars==='one'&&b===cx.pb)||(R.bars==='b1'&&b===1)||(R.bars==='b2'&&b===2);if(!aff)return items;
+ const mk=order=>order.map((src,j)=>src?{n:src.n,w:slots[j],len:src.len,s:src.s,dt:src===items[j]?src.dt:undefined}:null).filter(Boolean),keep=a=>a.map(z=>({n:z.n,w:z.w,len:z.len,s:z.s,dt:z.dt})),idx=j=>items[((j%m)+m)%m],B=k=>{const q=cx.barItems(((k%cx.nb)+cx.nb)%cx.nb);return q.length?q:items},ord=items.map((_,j)=>j);
+ const strongest=()=>{let k=0;items.forEach((z,i)=>{if(z.s>items[k].s)k=i});return k};
+ switch(id){
+  case 1:{if(m<2)return items;const i=Math.floor(cx.rc()*(m-1)),o=ord.map(j=>items[j]);o[i]=items[i+1];o[i+1]=items[i];return mk(o)}
+  case 2:return mk(ord.map(j=>idx(j+1)));
+  case 3:return mk(ord.map(j=>idx(j+Math.floor(m/2))));
+  case 4:return mk(ord.map(j=>idx(j-1)));
+  case 5:{if(m<3)return items;const i=1+Math.floor(cx.rc()*(m-2)),o=ord.map(j=>items[j]);o[i]=null;o[m-1]=items[i];return mk(o)}
+  case 6:{if(m<2)return items;const o=ord.map(j=>items[j]);o[m-1]=items[0];return mk(o)}
+  case 7:return mk(ord.map(j=>(j^1)<m?items[j^1]:items[j]));
+  case 8:{if(m<4)return items;const h=Math.ceil(m/2),o=ord.map(j=>items[j]);for(let t=0;t<m-h;t++)o[h+t]=items[h-1-t];return mk(o)}
+  case 9:{if(cx.nb<2)return items;return keep(B((b+2)%4))}
+  case 10:{return mk(ord.map(j=>items[m-1-j]))}
+  case 11:return keep(B(3-b));
+  case 12:{const Bn=B(sb+1);return mk(ord.map(j=>j%2===0?items[j]:Bn[j%Bn.length]))}
+  case 13:{const Bn=B(sb+2).filter(z=>z.w<8),hi=items.filter(z=>z.w>=8),lo=items.filter(z=>z.w<8);const out=keep(lo);hi.forEach((z,i)=>{const q=Bn[i];if(q)out.push({n:q.n,w:z.w,len:q.len,s:q.s,dt:undefined})});return out}
+  case 14:return keep(B(1));
+  case 15:{const k=strongest();if(k===0)return items;const o=ord.map(j=>items[j]);o[0]=items[k];o[k]=items[0];return mk(o)}
+  case 16:{const k=Math.max(1,items.filter(z=>z.w<4).length);return mk(ord.map(j=>idx(j+k)))}
+  case 17:return keep(items.slice(0,Math.min(m,b+1)));
+  case 18:return keep(items.slice(0,Math.max(1,m-b)));
+  case 19:{const top=items.slice().sort((x,y)=>y.s-x.s).slice(0,3);return keep(items.filter(z=>top.includes(z)))}
+  case 20:{if(b===3||cx.nb<2)return items;return keep(B(cx.perm[b]))}
+ }return items}
 function plan(dna,Rr,keyInfo){const bpm=Rr.bpmX||Rr.bpm,step=60/bpm/4,r=mul(dna.seed),kit=KITS[dna.kit],trap=dna.style==='trap',PP=P[dna.pool||dna.style],ev=[],jit=dna.hum,rr=dna.stem!==undefined?(()=>.5):r;   /* your beats: no swing, no random timing or loudness, so the loop is exact */
  const kickBars=[],snareBars=[],hatBars=[];
  const BBB=dna.bb?bbBars(dna):null;
@@ -80,7 +119,9 @@ function plan(dna,Rr,keyInfo){const bpm=Rr.bpmX||Rr.bpm,step=60/bpm/4,r=mul(dna.
  if(CM==='loop'){chops.push({t:0,lane:'loop',vel:1,len:Math.min(Rr.bars,4)*4*16*step/4*1,bar:0,step:0})}
  else{let v1=Math.floor(rc()*3),v3=Math.floor(rc()*3);if(dna.fv!==undefined){v1=dna.fv%3;v3=(dna.fv*2+1)%3}   /* flip loops walk through every variation in turn */
   
+  const rocx={barItems,nb,rc:mul(dna.seed+77),pb:(dna.seed>>3)%4,perm:[[1,2,0],[2,0,1],[2,1,0]][(dna.seed>>5)%3]};
   for(let b=0;b<4;b++){const sb=b%nb;let it=barItems(sb);if(!it.length)it=barItems(0);if(!it.length)continue;
+   if(dna.ro&&CM==='flip'){play(b,roOrder(dna.ro,b,sb,it,rocx),b===0?1:.92);continue}
    if(CM==='sparse'){if(b%2===1)continue;const top=it.slice().sort((x,y)=>y.s-x.s).slice(0,2).sort((x,y)=>x.w-y.w);top.forEach((z,i)=>put(b,z,i<top.length-1?top[i+1].w:16,b===0&&i===0?1:.88));continue}
    if(b===0||b===2){play(b,it,b===0?1:.92);continue}
    if(b===1){if(v1===0){const k=it.filter((z,i)=>i===0||i%2===0);play(b,k,.9)}                      /* breathe: every other slice */
@@ -162,5 +203,5 @@ async function render(buf,Rr,P_,opt){opt=opt||{};await loadPack(P_.dna);const lo
  return out}
 function wav(buf){const n=buf.length,ch=buf.numberOfChannels,a=new DataView(new ArrayBuffer(44+n*ch*2)),w=(o,s)=>{for(let i=0;i<s.length;i++)a.setUint8(o+i,s.charCodeAt(i))};w(0,'RIFF');a.setUint32(4,36+n*ch*2,true);w(8,'WAVE');w(12,'fmt ');a.setUint32(16,16,true);a.setUint16(20,1,true);a.setUint16(22,ch,true);a.setUint32(24,buf.sampleRate,true);a.setUint32(28,buf.sampleRate*ch*2,true);a.setUint16(32,ch*2,true);a.setUint16(34,16,true);w(36,'data');a.setUint32(40,n*ch*2,true);
  const d=[];for(let c=0;c<ch;c++)d.push(buf.getChannelData(c));let o=44;for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const v=Math.max(-1,Math.min(1,d[c][i]));a.setInt16(o,v<0?v*32768:v*32767,true);o+=2}return new Blob([a.buffer],{type:'audio/wav'})}
-window.MZMpcDrums={KITS,P,get COUNT(){return PAT.length},HALF,dnaOf,plan,render,keyOf,wav,STEPSETS,loadPack,soundsOf,pack:()=>PACK,engine:{setup,vKick,vSnare,vHat,v808,vChop,noiseAt,KITS}};
+window.MZMpcDrums={RO,RO_SAFE,chordUniform,KITS,P,get COUNT(){return PAT.length},HALF,dnaOf,plan,render,keyOf,wav,STEPSETS,loadPack,soundsOf,pack:()=>PACK,engine:{setup,vKick,vSnare,vHat,v808,vChop,noiseAt,KITS}};
 })();
