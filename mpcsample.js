@@ -54,19 +54,21 @@ function snapAttack(x,sr,t){let i=Math.floor(t*sr);const a=Math.max(1,i-Math.flo
  return Math.max(0,z/sr-.001)}
 /* ---------- chopping ---------- */
 function chop(buf,n,opt){opt=opt||{};const sr=buf.sampleRate,x=mono(buf),{fl,F,fps}=fluxOf(x,sr),dur=buf.duration;
- const bpm0=opt.bpm||opt.hint||tempoOf(fl,fps);let bpm=bpm0,exact=false;
+ /* a fast tempo in the file name (trap loops, 116+) is read at half-time, like a producer flips it: bars twice as long, real phrases on the pads */
+ const hint=opt.hint>115?opt.hint/2:opt.hint,bpm0=opt.bpm||hint||tempoOf(fl,fps);let bpm=bpm0,exact=false;
  /* a producer loop is a whole number of bars: if the file length fits 1, 2, 4, 8... bars at about this tempo, use the exact tempo so the loop is sample-perfect */
  if(!opt.bpm){let bk=0,be=9;for(let k=1;k<=128;k++){const e=Math.abs(k*240/dur-bpm0)/bpm0;if(e<be){be=e;bk=k}}if(bk&&be<.012){bpm=bk*240/dur;exact=true}}
  const beat=60/bpm,bar=beat*4,ph=exact?0:gridPhase(fl,fps,bpm),peaks=pickPeaks(fl,fps).map(p=>({t:(p.f*HOP+WIN*.28)/sr+.004,s:p.s}));
  /* the best 4 bars (or fewer if the sample is short): the window with the most musical activity, starting on the grid */
- const bars=dur>=bar*4+.5?4:dur>=bar*2+.4?2:1,len=bar*bars;let ws=0,wv=-1;for(let t=ph;t+len<=dur+.01;t+=bar){let s=0;for(const p of peaks)if(p.t>=t&&p.t<t+len)s+=p.s;if(s>wv){wv=s;ws=t}}
+ const bars=dur>=bar*4+.5?4:dur>=bar*2+.4?2:1,len=bar*bars;let ws=0,wv=-1;for(let t=ph;t+len<=dur+.01;t+=len){let s=0;for(const p of peaks)if(p.t>=t&&p.t<t+len)s+=p.s;if(s>wv){wv=s;ws=t}}
  if(wv<0)ws=0;const we=Math.min(dur,ws+len);
  let cand=peaks.filter(p=>p.t>=ws-.02&&p.t<we-.1);
  /* always start on the first hit of the window */
  const first=cand.find(p=>p.t<ws+beat*.6),start=first?first.t:ws;
  const chosen=[{t:start,s:99}];const gap=Math.max(.2,beat*.45);
  const gfit=t=>{const q=(t-ph)/(beat/4),d=Math.abs(q-Math.round(q))*(beat/4),k=Math.round(q);return d>.035?0:(k%4===0?.55:k%2===0?.3:.12)};
- cand.forEach(p=>{p.w=p.s*(1+gfit(p.t))});
+ /* cuts land on the beat grid: a hit off the sixteenth grid is a weak choice */
+ cand.forEach(p=>{const g=gfit(p.t);p.w=p.s*(g?1+g:.35)});
  cand.filter(p=>p!==first).sort((a,b)=>b.w-a.w).forEach(p=>{if(chosen.length>=n)return;if(chosen.every(c=>Math.abs(c.t-p.t)>=gap))chosen.push(p)});
  /* not enough natural hits: cut at the grid (eighths, then sixteenths) */
  for(const div of [2,4]){if(chosen.length>=n)break;const st=beat/div;for(let t=ws;t<we-.1&&chosen.length<n;t+=st){if(chosen.every(c=>Math.abs(c.t-t)>=st*.7))chosen.push({t,s:0})}}
