@@ -72,17 +72,19 @@ function plan(dna,Rr,keyInfo){const bpm=Rr.bpmX||Rr.bpm,step=60/bpm/4,r=mul(dna.
    ev.push({t:k.t,lane:'b808',vel:clamp(k.vel/.6*.92,.5,1),len,freq:f,slideFrom:slide,semi,bar:k.bar,step:k.step});prev=f})}
  /* the chops: each slice goes back where it sits in the sample (so the phrase fits the drums), then the bars are flipped on purpose: drop to breathe, call and response, swap in another phrase, stutter turnaround */
  const sl=Rr.slices,N=sl.length,chops=[],nb=Math.max(1,Math.min(4,Rr.bars||4)),rc=mul(dna.seed+5);let CM=dna.mode;
- const nat=[];sl.forEach((q,n)=>{const st=clamp(Math.round((q.t0-Rr.ws)/step),0,nb*16-1);if(!nat.some(z=>z.st===st))nat.push({n,st,s:q.s||0,len:q.t1-q.t0})});
- const barItems=sb=>nat.filter(z=>Math.floor(z.st/16)===sb).map(z=>({n:z.n,w:z.st%16,s:z.s,len:z.len}));
- const put=(b,it,nx,vel,lenSteps)=>{const t=(b*16+it.w)*step+((it.w%2)?(2*dna.swing/100-1)*step:0),ls=lenSteps||Math.max(1,(nx===undefined?16:nx)-it.w);chops.push({t,lane:'chop',vel,n:it.n,len:Math.max(.08,Math.min(it.len,ls*step*1.02)),bar:b,step:it.w})};
+ const nat=[];sl.forEach((q,n)=>{const st=clamp(Math.round((q.t0-Rr.ws)/step),0,nb*16-1);if(!nat.some(z=>z.st===st))nat.push({n,st,s:q.s||0,len:q.t1-q.t0,dt:(q.t0-Rr.ws)-st*step})});
+ const barItems=sb=>nat.filter(z=>Math.floor(z.st/16)===sb).map(z=>({n:z.n,w:z.st%16,s:z.s,len:z.len,dt:z.dt}));
+ /* a slice that sits where it was in the sample plays at its exact original time and length (sample-accurate); a moved slice snaps to the grid */
+ const put=(b,it,nx,vel,lenSteps)=>{const ex=it.dt!==undefined,t=(b*16+it.w)*step+(ex?it.dt:((it.w%2)?(2*dna.swing/100-1)*step:0)),ls=lenSteps||Math.max(1,(nx===undefined?16:nx)-it.w);chops.push({t:Math.max(0,t),lane:'chop',vel,n:it.n,len:Math.max(.08,ex?it.len:Math.min(it.len,ls*step*1.02)),bar:b,step:it.w})};
  const play=(b,items,vel)=>items.forEach((it,i)=>put(b,it,i<items.length-1?items[i+1].w:16,vel));
  if(CM==='loop'){chops.push({t:0,lane:'loop',vel:1,len:Math.min(Rr.bars,4)*4*16*step/4*1,bar:0,step:0})}
- else{const v1=Math.floor(rc()*3),v3=Math.floor(rc()*3);
+ else{let v1=Math.floor(rc()*3),v3=Math.floor(rc()*3);if(dna.fv!==undefined){v1=dna.fv%3;v3=(dna.fv*2+1)%3}   /* flip loops walk through every variation in turn */
+  
   for(let b=0;b<4;b++){const sb=b%nb;let it=barItems(sb);if(!it.length)it=barItems(0);if(!it.length)continue;
    if(CM==='sparse'){if(b%2===1)continue;const top=it.slice().sort((x,y)=>y.s-x.s).slice(0,2).sort((x,y)=>x.w-y.w);top.forEach((z,i)=>put(b,z,i<top.length-1?top[i+1].w:16,b===0&&i===0?1:.88));continue}
    if(b===0||b===2){play(b,it,b===0?1:.92);continue}
    if(b===1){if(v1===0){const k=it.filter((z,i)=>i===0||i%2===0);play(b,k,.9)}                      /* breathe: every other slice */
-    else if(v1===1){const top=it.slice().sort((x,y)=>y.s-x.s)[0],base=it.filter(z=>z.w<8||z===top);play(b,base,.92);put(b,{n:top.n,w:8,len:top.len},12,.82)}  /* call and response */
+    else if(v1===1){const top=it.slice().sort((x,y)=>y.s-x.s)[0],base=it.filter(z=>z.w<8||z===top);play(b,base,.92);const rw=top.w<8?top.w+8:top.w-8;put(b,{n:top.n,w:rw,len:top.len},Math.min(16,rw+4),.82)}  /* call and response */
     else{const alt=barItems((sb+1)%nb);play(b,alt.length?alt:it,.9)}continue}                          /* a different phrase */
    if(b===3){if(v3===0){const top=it.slice().sort((x,y)=>y.s-x.s)[0],head=it.filter(z=>z.w<10);play(b,head,.92);[12,13,14,15].forEach((w,i)=>put(b,{n:top.n,w,len:top.len},w+1,.7+.1*i,1))}   /* stutter turnaround */
     else if(v3===1)play(b,it.filter(z=>z.w<12),.9);else play(b,it,.9)}}}
