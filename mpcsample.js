@@ -32,6 +32,17 @@ function tempoOf(fl,fps){const F=fl.length;let best=0,bs=-1;const sc=[];
  let bpm=best;for(const c of [best/2,best*2]){if(c>=62&&c<=190&&c>=78&&c<=105&&get(c)>.88*bs)bpm=c}
  return Math.round(bpm*2)/2}
 /* where the beat grid starts, so slices line up with the groove */
+/* slow a sample down: play it slower like a turntable (pitch drops with the speed), then optionally pitch it back up by 'up' semitones
+   with a time-stretch (WSOLA) so the length stays slowed. rate < 1 = slower. */
+async function slowBuf(buf,rate,up){const sr=buf.sampleRate,f=rate*Math.pow(2,(up||0)/12),len=Math.ceil(buf.length/f);
+ const oc=new OfflineAudioContext(buf.numberOfChannels,len,sr),src=oc.createBufferSource();src.buffer=buf;src.playbackRate.value=f;src.connect(oc.destination);src.start();let rs=await oc.startRendering();
+ const k=f/rate;if(Math.abs(k-1)<1e-3)return rs;return stretch(rs,k)}
+function stretch(b,k){const sr=b.sampleRate,N=2048,Ha=N/2,Hs=Math.round(Ha*k),tol=Math.round(sr*.012),C=b.numberOfChannels,inL=b.length,outL=Math.ceil(inL*k),win=new Float32Array(N);for(let i=0;i<N;i++)win[i]=.5-.5*Math.cos(2*Math.PI*i/N);
+ const mono=new Float32Array(inL);for(let c=0;c<C;c++){const d=b.getChannelData(c);for(let i=0;i<inL;i++)mono[i]+=d[i]/C}
+ const out=[...Array(C)].map(()=>new Float32Array(outL+N)),norm=new Float32Array(outL+N);let prev=0;
+ for(let o=0,m=0;o<outL;o+=Hs,m++){const nom=Math.round(o/k);let best=nom;if(m>0){const ref=prev+Hs;let bv=-1e9;for(let d=-tol;d<=tol;d+=2){const p=nom+d;if(p<0||p+N>inL)continue;let s=0;for(let i=0;i<N/2;i+=4)s+=mono[p+i]*mono[Math.min(inL-1,ref+i)];if(s>bv){bv=s;best=p}}}
+  best=Math.max(0,Math.min(inL-N,best));for(let c=0;c<C;c++){const d=b.getChannelData(c),od=out[c];for(let i=0;i<N;i++)od[o+i]+=d[best+i]*win[i]}for(let i=0;i<N;i++)norm[o+i]+=win[i];prev=best}
+ const res=new AudioBuffer({numberOfChannels:C,length:outL,sampleRate:sr});for(let c=0;c<C;c++){const od=out[c];for(let i=0;i<outL;i++)od[i]/=Math.max(norm[i],.1);res.copyToChannel(od.subarray(0,outL),c)}return res}
 /* tempo written in the file name ("Waves 156 BPM", "90bpm", "loop_84_"), 0 when none */
 function nameBpm(n){n=String(n||'');let m=n.match(/(\d{2,3}(?:\.\d+)?)\s*-?\s*bpm/i)||n.match(/bpm\s*-?\s*(\d{2,3}(?:\.\d+)?)/i)||n.match(/(?:^|[\s_\-(\[])(\d{2,3})(?=[\s_\-)\].]|$)/);const v=m?parseFloat(m[1]):0;return v>=60&&v<=200?v:0}
 function gridPhase(fl,fps,bpm){const beat=fps*60/bpm,step=beat/4,F=fl.length;let bp=0,bv=-1;for(let ph=0;ph<beat;ph+=.5){let s=0;for(let t=ph;t<F-2;t+=step)s+=fl[Math.floor(t)];if(s>bv){bv=s;bp=ph}}return bp/fps}
@@ -71,13 +82,15 @@ function playSlice(ctx,buf,sl,when,gain){const s=ctx.createBufferSource();s.buff
  s.connect(g);g.connect(ctx.destination);s.start(t,sl.t0,d+.01);return s}
 
 /* ---------- the panel ---------- */
-function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12,src:''};const Z=ST.s2b;Z.mk=Z.mk||{ov:1,btn:1,hb:1,lb:4,tb:0};if(Z.mk.roAuto===undefined)Z.mk.roAuto=1;Z.mk.roIds=Z.mk.roIds||[];   /* every chop order starts switched off */if(Z.n>12)Z.n=12;Z.fav=Z.fav||[];Z.vs=Z.vs||'all';Z.vk=Z.vk||'all';Z.pg=Z.pg||0;let CH=null,lastEp=null,lastEpId=0,buf=null,R=null,srcs=[],playing=false,fname='',selected=-1;
+function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12,src:''};const Z=ST.s2b;Z.mk=Z.mk||{ov:1,btn:1,hb:1,lb:4,tb:0};if(Z.mk.roAuto===undefined)Z.mk.roAuto=1;Z.mk.roIds=Z.mk.roIds||[];   /* every chop order starts switched off */if(Z.n>12)Z.n=12;Z.fav=Z.fav||[];Z.vs=Z.vs||'all';Z.vk=Z.vk||'all';Z.pg=Z.pg||0;if(Z.slow===undefined){Z.slow=0;Z.slowTo=90;Z.up=0}let orig=null,CH=null,lastEp=null,lastEpId=0,buf=null,R=null,srcs=[],playing=false,fname='',selected=-1;
  const stop=()=>{srcs.forEach(s=>{try{s.stop()}catch(e){}});srcs=[];playing=false;paint()};
  el.innerHTML=`<label class="chk"><input type="checkbox" id="sbOn"> SAMPLE TO BEAT (OPTIONAL SERIES: UPLOAD A SAMPLE, THE TOOL CHOPS IT ON THE PADS)</label>
  <div id="sbBox">
   <div class="msg" style="margin-top:0">Upload a sample and the tool finds its tempo, takes the best 4 bars, cuts it at its natural hits and puts the slices on the pads (click a pad to hear its slice). Then browse your drum patterns made from it with your drum pack, and put your favorite in the video as a start-to-finish episode.</div>
   <label>SAMPLE FILE (MP3, WAV, M4A)</label><input type="file" id="sbFile" accept="audio/*">
   <div class="two"><div><label>HOW MANY CHOPS</label><select id="sbN"><option value="6">6 chops</option><option value="8">8 chops</option><option value="12">12 chops (every pad above the drums)</option></select></div><div><label>TEMPO (BPM, LEAVE EMPTY FOR AUTO)</label><input type="text" id="sbBpm" placeholder="auto"></div></div>
+  <label class="chk"><input type="checkbox" id="sbSlow"> SLOW DOWN FAST SAMPLES (ONLY A SAMPLE FASTER THAN THE LIMIT IS SLOWED SO THE BEAT IS NOT TOO FAST)</label>
+  <div class="two" id="sbSlowBox"><div><label>LIMIT / SLOW IT TO (BPM)</label><select id="sbSlowTo">${[80,85,88,90,92,95,100].map(v=>`<option value="${v}">${v} BPM</option>`).join('')}</select></div><div><label>PITCH IT BACK UP AFTER SLOWING</label><select id="sbUp"><option value="0">no (deeper, slowed record sound)</option><option value="-1">all the way (original key)</option><option value="-2">half way</option>${[1,2,3,4,5,6,7,8,9,10,11,12].map(v=>`<option value="${v}">+${v} semitone${v>1?'s':''}</option>`).join('')}</select></div></div>
   <label>WHERE THE SAMPLE COMES FROM (SHOWN IN THE DESCRIPTION)</label><input type="text" id="sbSrc" maxlength="80" placeholder="e.g. royalty-free soul loop, or my own recording">
   <button class="btn big" id="sbGo" style="margin-top:8px">CHOP IT</button>
   <div class="msg" id="sbMsg">Upload a sample, then press CHOP IT.</div>
@@ -119,9 +132,10 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
  </div>`;
  const $=s=>el.querySelector(s),box=$('#sbBox');
  const show=()=>{box.style.display=Z.on?'block':'none'};$('#sbOn').checked=!!Z.on;show();$('#sbOn').onchange=e=>{Z.on=e.target.checked;show();api.save();api.thumbs&&api.thumbs()};
+ const slowUI=()=>{$('#sbSlowBox').style.display=Z.slow?'':'none'};$('#sbSlow').checked=!!Z.slow;$('#sbSlow').onchange=e=>{Z.slow=e.target.checked?1:0;slowUI();api.save()};$('#sbSlowTo').value=String(Z.slowTo);$('#sbSlowTo').onchange=e=>{Z.slowTo=+e.target.value;api.save()};$('#sbUp').value=String(Z.up);$('#sbUp').onchange=e=>{Z.up=+e.target.value;api.save()};slowUI();
  $('#sbN').value=String(Z.n);$('#sbN').onchange=e=>{Z.n=+e.target.value;api.save()};$('#sbSrc').value=Z.src||'';$('#sbSrc').oninput=e=>{Z.src=e.target.value;api.save()};
  const msg=t=>{$('#sbMsg').textContent=t};
- $('#sbFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;stop();msg('Reading '+f.name+'...');try{const ab=await f.arrayBuffer();buf=await api.ctx().decodeAudioData(ab);fname=f.name.replace(/\.[^.]+$/,'');R=null;msg('Loaded "'+fname+'" ('+buf.duration.toFixed(1)+' seconds). Press CHOP IT.')}catch(err){buf=null;msg('That file could not be read. Try an MP3 or WAV.')}};
+ $('#sbFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;stop();msg('Reading '+f.name+'...');try{const ab=await f.arrayBuffer();buf=orig=await api.ctx().decodeAudioData(ab);fname=f.name.replace(/\.[^.]+$/,'');R=null;msg('Loaded "'+fname+'" ('+buf.duration.toFixed(1)+' seconds). Press CHOP IT.')}catch(err){buf=null;msg('That file could not be read. Try an MP3 or WAV.')}};
  function paint(){const c=$('#sbWave');if(!R){c.style.display='none';$('#sbPads').style.display='none';$('#sbCtl').style.display='none';return}
   c.style.display='block';const x=c.getContext('2d'),W=c.width,H=c.height,k=W/R.dur;x.fillStyle='#050506';x.fillRect(0,0,W,H);
   /* the 4 bars window */
@@ -137,7 +151,10 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
   g.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const i=+b.dataset.p;selected=i;stop();srcs.push(playSlice(api.ctx(),buf,R.slices[i]));paint()});
   $('#sbAll').textContent=playing==='all'?'STOP':'PLAY THE CHOPS IN ORDER';$('#sbLoop').textContent=playing==='loop'?'STOP':'PLAY THE 4 BARS'}
  $('#sbGo').onclick=async()=>{if(!buf){msg('Upload a sample first.');return}stop();msg('Listening and chopping...');await new Promise(r=>setTimeout(r,30));
-  const bp=parseFloat($('#sbBpm').value);try{R=chop(buf,Z.n,{bpm:bp>40&&bp<220?bp:0,hint:nameBpm(fname)});selected=-1;paint();Z.last={bpm:R.bpm,chops:R.slices.length,name:fname};api.save();if(window.__s2bAfter)window.__s2bAfter();msg('Done: '+R.bpm+' BPM, '+R.bars+' bars, '+R.slices.length+' chops'+(R.slices.length<Z.n?' (the sample only had that many clear hits)':'')+'. Click a pad to hear a chop.')}catch(err){console.warn(err);msg('Could not chop this sample: '+(err&&err.message||err))}};
+  const bp=parseFloat($('#sbBpm').value);try{buf=orig;const o1={bpm:bp>40&&bp<220?bp:0,hint:nameBpm(fname)};R=chop(buf,Z.n,o1);let slowNote='';
+  /* a sample faster than the limit is slowed to it (whole sample, like slowing the record), then pitched back up if asked */
+  if(Z.slow&&R.bpmX>Z.slowTo+.5){const from=R.bpmX,rate=Z.slowTo/from,drop=-12*Math.log2(rate),up=Z.up===-1?drop:Z.up===-2?drop/2:Math.min(Z.up,drop);msg('Slowing the sample from '+R.bpm+' to '+Z.slowTo+' BPM...');await new Promise(r=>setTimeout(r,30));
+   buf=await slowBuf(orig,rate,up);R=chop(buf,Z.n,{hint:from*rate});slowNote=' (slowed from '+(Math.round(from*10)/10)+' BPM, '+(up>0?'pitched back up '+up.toFixed(1)+' of '+drop.toFixed(1)+' semitones':'pitch down '+drop.toFixed(1)+' semitones')+')'}selected=-1;paint();Z.last={bpm:R.bpm,chops:R.slices.length,name:fname};api.save();if(window.__s2bAfter)window.__s2bAfter();msg('Done: '+R.bpm+' BPM'+slowNote+', '+R.bars+' bars, '+R.slices.length+' chops'+(R.slices.length<Z.n?' (the sample only had that many clear hits)':'')+'. Click a pad to hear a chop.')}catch(err){console.warn(err);msg('Could not chop this sample: '+(err&&err.message||err))}};
  $('#sbAll').onclick=()=>{if(playing==='all'){stop();return}if(!R)return;stop();const a=api.ctx(),t0=a.currentTime+.05;let t=t0;R.slices.forEach(s=>{srcs.push(playSlice(a,buf,s,t));t+=(s.t1-s.t0)+.04});playing='all';paint();setTimeout(()=>{if(playing==='all'){playing=false;paint()}},(t-t0+.3)*1000)};
  $('#sbLoop').onclick=()=>{if(playing==='loop'){stop();return}if(!R)return;stop();const a=api.ctx(),s=a.createBufferSource();s.buffer=buf;s.connect(a.destination);s.start(a.currentTime+.05,R.ws,R.we-R.ws);srcs.push(s);playing='loop';paint();setTimeout(()=>{if(playing==='loop'){playing=false;paint()}},(R.we-R.ws+.3)*1000)};
  const D=()=>window.MZMpcDrums;let sel=0,vsrc=null,KEY=null,cache=new Map(),order=null,busy=false;
@@ -193,5 +210,5 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
  const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=19');await D().loadPack();KEY=D().keyOf(buf,R.ws,R.we);try{CH=D().chordUniform(buf,R)}catch(e){CH=null}if(Z.last&&KEY)Z.last.key=KEY.name.replace(' minor','m').replace(' major','');api.thumbs&&api.thumbs();cache=new Map();sel=0;paintV();paintRo()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
  window.__s2bAfter=afterChop;
  return{chop:()=>R,buf:()=>buf,stop,after:afterChop,key:()=>KEY,dev:{renderVar,playVar,makeEp}}}
-window.MZMpcSample={chop,tempoOf,nameBpm,fluxOf,pickPeaks,playSlice,mount,padIdx,PAD_NAMES};
+window.MZMpcSample={slowBuf,chop,tempoOf,nameBpm,fluxOf,pickPeaks,playSlice,mount,padIdx,PAD_NAMES};
 })();
