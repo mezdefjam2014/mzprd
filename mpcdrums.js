@@ -118,6 +118,9 @@ function plan(dna,Rr,keyInfo){const bpm=Rr.bpmX||Rr.bpm,step=60/bpm/4,r=mul(dna.
   if(BBB){k=BBB[b].k;s=BBB[b].s;h=BBB[b].h;[k,s,h]=varyBar(dna,b,k,s,h)}
   kickBars.push(k);snareBars.push(s);hatBars.push(h);
   parseLane(k,b,'kick',ev,step,dna.swing,jit,rr,trap?.6:dna.bb?.92:1);const n0=ev.length;parseLane(s,b,'snare',ev,step,dna.swing,jit,rr,1);if(dna.late)for(let q=n0;q<ev.length;q++)ev[q].t+=dna.late;parseLane(h,b,'hat',ev,step,dna.swing,jit,rr,dna.bb?(dna.stem!==undefined?1:BB[dna.bb.s].hg):1)}
+ /* the drums sit in the sample's own groove: every hit moves to where that sixteenth really falls in the sample (same every loop, so the loop stays exact) */
+ const GM=Rr.gm&&Rr.gm.length?Rr.gm:null,gOff=j=>GM?GM[((j%GM.length)+GM.length)%GM.length]:0;
+ if(GM)ev.forEach(e=>{const j=e.bar*16+e.step;e.t=Math.max(0,e.t+gOff(j))});
  /* the 808 follows the kicks (trap only) */
  if(trap){const key=keyInfo||{pc:9,mode:'minor'},midi=28+((key.pc-4+12)%12),scale=key.mode==='major'?MAJOR:MINOR,rb=mul(dna.bassSeed),kicks=ev.filter(e=>e.lane==='kick').sort((a,b)=>a.t-b.t);let prev=null;
   kicks.forEach((k,i)=>{const nxt=i<kicks.length-1?kicks[i+1].t:4*16*step,semi=i===0?0:pick(rb,scale),m=midi+semi,f=440*Math.pow(2,(m-69)/12),len=Math.min(kit.b.len,Math.max(.14,nxt-k.t-.01)),slide=prev!==null&&rb()<.22?prev:0;
@@ -127,7 +130,7 @@ function plan(dna,Rr,keyInfo){const bpm=Rr.bpmX||Rr.bpm,step=60/bpm/4,r=mul(dna.
  const nat=[];sl.forEach((q,n)=>{const st=clamp(Math.round((q.t0-Rr.ws)/step),0,nb*16-1);if(!nat.some(z=>z.st===st))nat.push({n,st,s:q.s||0,len:q.t1-q.t0,dt:(q.t0-Rr.ws)-st*step})});
  const barItems=sb=>nat.filter(z=>Math.floor(z.st/16)===sb).map(z=>({n:z.n,w:z.st%16,s:z.s,len:z.len,dt:z.dt}));
  /* a slice that sits where it was in the sample plays at its exact original time and length (sample-accurate); a moved slice snaps to the grid */
- const put=(b,it,nx,vel,lenSteps)=>{const ex=it.dt!==undefined,t=(b*16+it.w)*step+(ex?it.dt:((it.w%2)?(2*dna.swing/100-1)*step:0)),ls=lenSteps||Math.max(1,(nx===undefined?16:nx)-it.w);chops.push({t:Math.max(0,t),lane:'chop',vel,n:it.n,len:Math.max(.08,ex?it.len:Math.min(it.len,ls*step*1.02)),bar:b,step:it.w})};
+ const put=(b,it,nx,vel,lenSteps)=>{const ex=it.dt!==undefined,t=(b*16+it.w)*step+(ex?it.dt:GM?gOff(b*16+it.w):((it.w%2)?(2*dna.swing/100-1)*step:0)),ls=lenSteps||Math.max(1,(nx===undefined?16:nx)-it.w);chops.push({t:Math.max(0,t),lane:'chop',vel,n:it.n,len:Math.max(.08,ex?it.len:Math.min(it.len,ls*step*1.02)),bar:b,step:it.w})};
  const play=(b,items,vel)=>items.forEach((it,i)=>put(b,it,i<items.length-1?items[i+1].w:16,vel));
  if(CM==='loop'){chops.push({t:0,lane:'loop',vel:1,len:Math.min(Rr.bars,4)*4*16*step/4*1,bar:0,step:0})}
  else{let v1=Math.floor(rc()*3),v3=Math.floor(rc()*3);if(dna.fv!==undefined){v1=dna.fv%3;v3=(dna.fv*2+1)%3}   /* flip loops walk through every variation in turn */

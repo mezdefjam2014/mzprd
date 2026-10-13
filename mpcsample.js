@@ -53,30 +53,49 @@ function snapAttack(x,sr,t){let i=Math.floor(t*sr);const a=Math.max(1,i-Math.flo
  const zl=Math.max(1,k-Math.floor(.002*sr));let z=k;for(let q=k;q>zl;q--)if(x[q]*x[q-1]<=0){z=q;break}
  return Math.max(0,z/sr-.001)}
 /* ---------- chopping ---------- */
+/* ---------- the groove map: where the sample's beats and sixteenths really fall ----------
+   Real samples are not on a straight grid: they swing, push and lag. We measure it once and both the chops and the drums use it. */
+const near=(pk,t,w)=>{let b=null;for(const p of pk){if(Math.abs(p.t-t)<w&&(!b||p.s>b.s))b=p}return b};
+const median=a=>{if(!a.length)return null;const q=a.slice().sort((x,y)=>x-y),m=q.length>>1;return q.length%2?q[m]:(q[m-1]+q[m])/2};
+/* the bar's first beat: the beat where the low end (kick, bass) hits hardest */
+function downbeat(x,sr,ph,beat,dur){const a=Math.exp(-2*Math.PI*150/sr),xl=new Float32Array(x.length);let y=0;for(let i=0;i<x.length;i++){y=y*a+(1-a)*x[i];xl[i]=y}
+ const {fl,fps}=fluxOf(xl,sr),at=t=>{const f=Math.round(t*fps),w=Math.round(.03*fps);let m=0;for(let k=Math.max(0,f-w);k<=Math.min(fl.length-1,f+w);k++)m=Math.max(m,fl[k]);return m};
+ let bk=0,bv=-1;for(let k=0;k<4;k++){let v=0;for(let t=ph+k*beat;t<dur;t+=4*beat)v+=at(t)+.5*at(t+2*beat);if(v>bv){bv=v;bk=k}}return ph+bk*beat}
+function grooveMap(pk,ws,beat,nb){const st=beat/4,nBeats=nb*4,W=Math.min(beat*.12,.04);
+ /* careful on purpose: a timing is only used when the sample agrees with itself across its bars (a wrong guess would make the drums flam against the sample) */
+ const agree=d=>{if(d.length<Math.max(2,nb))return 0;const m=median(d),mad=median(d.map(v=>Math.abs(v-m)));return mad<=.012?m:0};
+ /* each beat of the bar: how early or late it sits (the same beat across the bars must agree) */
+ const bo=[];for(let q=0;q<4;q++){const d=[];for(let k=0;k<nb;k++){const tb=ws+(k*4+q)*beat,p=near(pk,tb,W);if(p)d.push(p.t-tb)}bo.push(clamp(agree(d),-.03,.03))}
+ /* the feel inside a beat: how late the 2nd, 3rd and 4th sixteenths sit (the sample's swing) */
+ const cap=Math.min(st*.33,.045),sub=[0];for(let q=1;q<4;q++){const d=[];for(let b=0;b<nBeats;b++){const tn=ws+b*beat+bo[b&3]+q*st,p=near(pk,tn,Math.min(st*.3,.035));if(p)d.push(p.t-tn)}sub.push(clamp(agree(d),-cap,cap))}
+ /* the swing number producers know: 50 = straight, 66 = full triplet swing */
+ const sw=Math.round(50*(1+(sub[1]+sub[3])/2/st));
+ const gm=[];for(let j=0;j<nBeats*4;j++)gm.push(bo[(j>>2)&3]+sub[j&3]);return{gm,swing:clamp(sw,40,75),beatOff:bo,sub}}
 function chop(buf,n,opt){opt=opt||{};const sr=buf.sampleRate,x=mono(buf),{fl,F,fps}=fluxOf(x,sr),dur=buf.duration;
  /* a fast tempo in the file name (trap loops, 116+) is read at half-time, like a producer flips it: bars twice as long, real phrases on the pads */
  const hint=opt.hint>115?opt.hint/2:opt.hint,bpm0=opt.bpm||hint||tempoOf(fl,fps);let bpm=bpm0,exact=false;
  /* a producer loop is a whole number of bars: if the file length fits 1, 2, 4, 8... bars at about this tempo, use the exact tempo so the loop is sample-perfect */
  if(!opt.bpm){let bk=0,be=9;for(let k=1;k<=128;k++){const e=Math.abs(k*240/dur-bpm0)/bpm0;if(e<be){be=e;bk=k}}if(bk&&be<.012){bpm=bk*240/dur;exact=true}}
- const beat=60/bpm,bar=beat*4,ph=exact?0:gridPhase(fl,fps,bpm),peaks=pickPeaks(fl,fps).map(p=>({t:(p.f*HOP+WIN*.28)/sr+.004,s:p.s}));
+ const beat=60/bpm,bar=beat*4,ph=exact?0:downbeat(x,sr,gridPhase(fl,fps,bpm)%beat,beat,dur),peaks=pickPeaks(fl,fps).map(p=>({t:(p.f*HOP+WIN*.28)/sr+.004,s:p.s}));
  /* the best 4 bars (or fewer if the sample is short): the window with the most musical activity, starting on the grid */
  const bars=dur>=bar*4+.5?4:dur>=bar*2+.4?2:1,len=bar*bars;let ws=0,wv=-1;for(let t=ph;t+len<=dur+.01;t+=len){let s=0;for(const p of peaks)if(p.t>=t&&p.t<t+len)s+=p.s;if(s>wv){wv=s;ws=t}}
  if(wv<0)ws=0;const we=Math.min(dur,ws+len);
+ const G=grooveMap(peaks,ws,beat,bars),st16=beat/4,gT=j=>ws+j*st16+G.gm[((j%G.gm.length)+G.gm.length)%G.gm.length];
  let cand=peaks.filter(p=>p.t>=ws-.02&&p.t<we-.1);
  /* always start on the first hit of the window */
  const first=cand.find(p=>p.t<ws+beat*.6),start=first?first.t:ws;
  const chosen=[{t:start,s:99}];const gap=Math.max(.2,beat*.45);
- const gfit=t=>{const q=(t-ph)/(beat/4),d=Math.abs(q-Math.round(q))*(beat/4),k=Math.round(q);return d>.035?0:(k%4===0?.55:k%2===0?.3:.12)};
+ const gfit=t=>{const k=Math.round((t-ws)/st16),d=Math.abs(t-gT(k));return d>.035?0:(k%4===0?.55:k%2===0?.3:.12)};
  /* cuts land on the beat grid: a hit off the sixteenth grid is a weak choice */
  cand.forEach(p=>{const g=gfit(p.t);p.w=p.s*(g?1+g:.35)});
  cand.filter(p=>p!==first).sort((a,b)=>b.w-a.w).forEach(p=>{if(chosen.length>=n)return;if(chosen.every(c=>Math.abs(c.t-p.t)>=gap))chosen.push(p)});
  /* not enough natural hits: cut at the grid (eighths, then sixteenths) */
- for(const div of [2,4]){if(chosen.length>=n)break;const st=beat/div;for(let t=ws;t<we-.1&&chosen.length<n;t+=st){if(chosen.every(c=>Math.abs(c.t-t)>=st*.7))chosen.push({t,s:0})}}
+ for(const div of [2]){if(chosen.length>=n)break;const st=beat/div;for(let jj=0,t=gT(0);t<we-.1&&chosen.length<n;jj+=4/div,t=gT(jj)){if(chosen.every(c=>Math.abs(c.t-t)>=st*.7))chosen.push({t,s:0})}}
  chosen.sort((a,b)=>a.t-b.t);chosen.forEach(c=>{if(c.s)c.t=snapAttack(x,sr,c.t)});chosen.sort((a,b)=>a.t-b.t);
  const maxLen=Math.max(.6,beat*3),slices=chosen.map((c,i)=>{const nx=i<chosen.length-1?chosen[i+1].t-.003:we,t1=Math.min(nx,c.t+maxLen);return{i:i+1,t0:c.t,t1:Math.max(c.t+.12,t1),s:c.s,pad:i+5}});
  /* a short list of display peaks */
  const B=900,pk=new Float32Array(B*2),span=Math.floor(x.length/B);for(let b=0;b<B;b++){let mn=0,mx=0;for(let i=b*span;i<(b+1)*span;i+=4){const v=x[i];if(v<mn)mn=v;if(v>mx)mx=v}pk[b*2]=mn;pk[b*2+1]=mx}
- return{bpm:Math.round(bpm*10)/10,bpmX:bpm,exact,beat,bar,bars,ws,we,slices,peaks:pk,dur,sr,grid:ph}}
+ return{gm:G.gm,swing:G.swing,groove:G,bpm:Math.round(bpm*10)/10,bpmX:bpm,exact,beat,bar,bars,ws,we,slices,peaks:pk,dur,sr,grid:ph}}
 
 /* ---------- playing a slice ---------- */
 function playSlice(ctx,buf,sl,when,gain){const s=ctx.createBufferSource();s.buffer=buf;const g=ctx.createGain(),t=when||ctx.currentTime+.01,d=Math.max(.05,sl.t1-sl.t0);
@@ -158,7 +177,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
   const bp=parseFloat($('#sbBpm').value);try{buf=orig;const o1={bpm:bp>40&&bp<220?bp:0,hint:nameBpm(fname)};R=chop(buf,Z.n,o1);let slowNote='';
   /* a sample faster than the limit is slowed to it (whole sample, like slowing the record), then pitched back up if asked */
   if(Z.slow&&R.bpmX>Z.slowTo+.5){const from=R.bpmX,rate=Z.slowTo/from,drop=-12*Math.log2(rate),up=Z.up===-1?drop:Z.up===-2?drop/2:Math.min(Z.up,drop);msg('Slowing the sample from '+R.bpm+' to '+Z.slowTo+' BPM...');await new Promise(r=>setTimeout(r,30));
-   buf=await slowBuf(orig,rate,up);R=chop(buf,Z.n,{hint:from*rate});slowNote=' (slowed from '+(Math.round(from*10)/10)+' BPM, '+(up>0?'pitched back up '+up.toFixed(1)+' of '+drop.toFixed(1)+' semitones':'pitch down '+drop.toFixed(1)+' semitones')+')'}selected=-1;paint();Z.last={bpm:R.bpm,chops:R.slices.length,name:fname};api.save();if(window.__s2bAfter)window.__s2bAfter();msg('Done: '+R.bpm+' BPM'+slowNote+', '+R.bars+' bars, '+R.slices.length+' chops'+(R.slices.length<Z.n?' (the sample only had that many clear hits)':'')+'. Click a pad to hear a chop.')}catch(err){console.warn(err);msg('Could not chop this sample: '+(err&&err.message||err))}};
+   buf=await slowBuf(orig,rate,up);R=chop(buf,Z.n,{hint:from*rate});slowNote=' (slowed from '+(Math.round(from*10)/10)+' BPM, '+(up>0?'pitched back up '+up.toFixed(1)+' of '+drop.toFixed(1)+' semitones':'pitch down '+drop.toFixed(1)+' semitones')+')'}selected=-1;paint();Z.last={bpm:R.bpm,chops:R.slices.length,name:fname};api.save();if(window.__s2bAfter)window.__s2bAfter();msg('Done: '+R.bpm+' BPM'+slowNote+', groove '+R.swing+'% swing, '+R.bars+' bars, '+R.slices.length+' chops'+(R.slices.length<Z.n?' (the sample only had that many clear hits)':'')+'. Click a pad to hear a chop.')}catch(err){console.warn(err);msg('Could not chop this sample: '+(err&&err.message||err))}};
  $('#sbAll').onclick=()=>{if(playing==='all'){stop();return}if(!R)return;stop();const a=api.ctx(),t0=a.currentTime+.05;let t=t0;R.slices.forEach(s=>{srcs.push(playSlice(a,buf,s,t));t+=(s.t1-s.t0)+.04});playing='all';paint();setTimeout(()=>{if(playing==='all'){playing=false;paint()}},(t-t0+.3)*1000)};
  $('#sbLoop').onclick=()=>{if(playing==='loop'){stop();return}if(!R)return;stop();const a=api.ctx(),s=a.createBufferSource();s.buffer=buf;s.connect(a.destination);s.start(a.currentTime+.05,R.ws,R.we-R.ws);srcs.push(s);playing='loop';paint();setTimeout(()=>{if(playing==='loop'){playing=false;paint()}},(R.we-R.ws+.3)*1000)};
  const D=()=>window.MZMpcDrums;let sel=0,vsrc=null,KEY=null,cache=new Map(),order=null,busy=false;
@@ -214,7 +233,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
   box.innerHTML=h;box.querySelectorAll('[data-ro]').forEach(c=>c.onchange=()=>{const i=+c.dataset.ro,k=mk.roIds.indexOf(i);if(c.checked&&k<0)mk.roIds.push(i);if(!c.checked&&k>=0)mk.roIds.splice(k,1);api.save()});
   $('#mkRoMsg').textContent=CH?(CH.uniform?'Chord check: this sample keeps the same chord through its bars, so every order is allowed.':'Chord check: this sample changes chords between bars, so with the automatic check on only the orders inside one bar are used.'):'Chord check unavailable: all selected orders will be used.'};
  const roSet=ids=>{mk.roIds=ids.slice();api.save();paintRo()};$('#mkRoPick').onclick=()=>roSet([1,5,6,10,15,20]);$('#mkRoAll').onclick=()=>roSet([...Array(20)].map((_,i)=>i+1));$('#mkRoNone').onclick=()=>roSet([]);
- const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=20');await D().loadPack();KEY=D().keyOf(buf,R.ws,R.we);try{CH=D().chordUniform(buf,R)}catch(e){CH=null}if(Z.last&&KEY)Z.last.key=KEY.name.replace(' minor','m').replace(' major','');api.thumbs&&api.thumbs();cache=new Map();sel=0;freshOrder();paintV();paintRo()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
+ const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=21');await D().loadPack();KEY=D().keyOf(buf,R.ws,R.we);try{CH=D().chordUniform(buf,R)}catch(e){CH=null}if(Z.last&&KEY)Z.last.key=KEY.name.replace(' minor','m').replace(' major','');api.thumbs&&api.thumbs();cache=new Map();sel=0;freshOrder();paintV();paintRo()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
  window.__s2bAfter=afterChop;
  return{chop:()=>R,buf:()=>buf,stop,after:afterChop,key:()=>KEY,dev:{renderVar,playVar,makeEp}}}
 window.MZMpcSample={slowBuf,chop,tempoOf,nameBpm,fluxOf,pickPeaks,playSlice,mount,padIdx,PAD_NAMES};
