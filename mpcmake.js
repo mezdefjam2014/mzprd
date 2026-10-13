@@ -32,7 +32,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  chops.forEach(c=>{wheelEv.forEach(()=>{});for(let k=0;k<9;k++)click(c.t0+.03+k*.06,.05,1100);c.btns.forEach(b=>click(b[1],.13,b[0]==='enter'?2400:1800));E.vChop(G,buf,c.slice,c.aud,c.len,.9)});
  const evOf=(allowed,limit)=>pl.events.filter(e=>e.t<limit&&allowed.has(e.lane));
  const sched=(off,list)=>{for(const e of list){const tt=off+e.t;
-  if(e.lane==='kick'){E.vKick(G,tt,e.vel*(trap?.9:.95));addHit(tt,15,e.vel)}else if(e.lane==='snare'){E.vSnare(G,tt,e.vel);addHit(tt,e.vel>=.95?14:13,e.vel)}else if(e.lane==='hat'){E.vHat(G,tt,e.vel,false);addHit(tt,12,e.vel)}else if(e.lane==='open'){E.vHat(G,tt,e.vel,true);addHit(tt,12,e.vel)}
+  if(e.lane==='kick'){E.vKick(G,tt,e.vel*(trap?.9:.95));addHit(tt,15,e.vel)}else if(e.lane==='snare'){E.vSnare(G,tt,e.vel);addHit(tt,dna.stem!==undefined?13:(e.vel>=.95?14:13),e.vel)}else if(e.lane==='hat'){E.vHat(G,tt,e.vel,false);addHit(tt,12,e.vel)}else if(e.lane==='open'){E.vHat(G,tt,e.vel,true);addHit(tt,12,e.vel)}
   else if(e.lane==='b808')E.v808(G,tt,e.vel,e.len,e.freq,e.slideFrom);
   else if(e.lane==='chop'){const s=sl[e.n];E.vChop(G,buf,s,tt,e.len,e.vel);addHit(tt,padIdx(s.pad),e.vel)}}};
  const loopSample=(off,len)=>{const L=Math.min(Rr.we-Rr.ws,len);let u=off;while(u<off+len-.05){const d=Math.min(L,off+len-u);playSample(u,Rr.ws,d,.8,true);u+=L}};
