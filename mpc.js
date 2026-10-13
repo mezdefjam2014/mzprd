@@ -83,12 +83,6 @@ function pressAt(S,pad,T){const a=S.per[pad];if(!a||!a.length)return 0;let lo=0,
 
 /* ---------- drawing (a pure function of time, so preview and export match) ---------- */
 function fitFont(c,txt,font,max,w){let s=max;c.font=font(s);while(s>8&&c.measureText(txt).width>w){s-=1;c.font=font(s)}return s}
-/* the 16:9 desk photos print "5" on the bottom-middle keypad key; the real MPC60 has "." there. Paint it right once, when the photo loads
-   (copy the blank panel beside it over the "5", then a dot in the colour of the other key labels) */
-function fixKeypad(img){try{if(!img||img.naturalWidth!==2000||img.naturalHeight!==1131)return img;const k=document.createElement('canvas');k.width=2000;k.height=1131;const g=k.getContext('2d');g.drawImage(img,0,0);
- const p=g.getImageData(1108,693,5,6).data;let best=[200,200,200],bl=0;for(let i=0;i<p.length;i+=4){const l=p[i]+p[i+1]+p[i+2];if(l>bl){bl=l;best=[p[i],p[i+1],p[i+2]]}}
- g.putImageData(g.getImageData(1144,691,10,10),1155,691);g.putImageData(g.getImageData(1144,691,2,10),1165,691);g.fillStyle='rgba('+best.join(',')+',.9)';g.beginPath();g.arc(1159.6,697.2,1.25,0,7);g.fill();
- k.naturalWidth=2000;k.naturalHeight=1131;return k}catch(e){return img}}
 function px1(img,x,y){const cv=px1.cv||(px1.cv=document.createElement('canvas'));cv.width=cv.height=1;const q=cv.getContext('2d');q.drawImage(img,Math.round(x)-1,Math.round(y)-1,3,3,0,0,1,1);const d=q.getImageData(0,0,1,1).data;return 'rgb('+d[0]+','+d[1]+','+d[2]+')'}
 function sampleColors(){try{if(IMG){PH.btnPlate=px1(IMG,700,712);PH.faderPlate=px1(IMG,197,700)}if(DESKS.h)DK.faderPlate=px1(DESKS.h,DK.faderPt[0],DK.faderPt[1]);if(DESKS.v)DKV.faderPlate=px1(DESKS.v,DKV.faderPt[0],DKV.faderPt[1])}catch(e){}}
 const PCOL=new Map();
@@ -160,14 +154,14 @@ function dropV(){if(S&&S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}if(TP){TP._v
 const trackAt=(X,T)=>{let k=0;for(let i=0;i<X.tracks.length;i++)if(T>=X.tracks[i].start)k=i;return k};
 const SKINS=[['orig','The original (aged cream)'],['2','Black with red slashes'],['3','Synthwave sunset'],['4','Rosewood']];
 const SKINIMG={};
-async function loadSkin(id,fmt){if(id==='orig')return;const k=(fmt==='v'||fmt==='c')?'v':'h';SKINIMG[id]=SKINIMG[id]||{};if(!SKINIMG[id][k])SKINIMG[id][k]=k==='h'?fixKeypad(await loadImg('mpc/desk_'+k+'_s'+id+'.webp?v=2')):await loadImg('mpc/desk_'+k+'_s'+id+'.webp?v=2')}
+async function loadSkin(id,fmt){if(id==='orig')return;const k=(fmt==='v'||fmt==='c')?'v':'h';SKINIMG[id]=SKINIMG[id]||{};if(!SKINIMG[id][k])SKINIMG[id][k]=await loadImg('mpc/desk_'+k+'_s'+id+'.webp?v=2')}
 let STUDIO=null;
 /* the white-studio photo, its cutout and the desk backgrounds for thumbnails: only loaded when something asks for them */
 function ensureStudio(){if(STUDIO)return STUDIO;return STUDIO=(async()=>{IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');DESKBG.h=await loadImg('mpc/bg_h.webp?v=1');DESKBG.v=await loadImg('mpc/bg_v.webp?v=1');if(IMG&&CUT)WARM={cut:warmVer(CUT),photo:warmVer(IMG)};sampleColors()})()}
 const SCN={};
 async function ensureScene(fmt){fmt=fmt||ST.fmt;const tall=fmt==='v'||fmt==='c';
  if(ST.scene==='white'){await ensureStudio();return}
- if(!tall){if(!DESKS.h)DESKS.h=fixKeypad(await loadImg('mpc/desk_nocan.webp?v=1'));if(!DESKS.h0&&(ST.can||{}).id==='orig'&&(!ST.skin||ST.skin==='orig'))DESKS.h0=fixKeypad(await loadImg('mpc/desk.webp?v=2'));if(!DESKS.h)DESKS.h=DESKS.h0}
+ if(!tall){if(!DESKS.h)DESKS.h=await loadImg('mpc/desk_nocan.webp?v=1');if(!DESKS.h0&&(ST.can||{}).id==='orig'&&(!ST.skin||ST.skin==='orig'))DESKS.h0=await loadImg('mpc/desk.webp?v=2');if(!DESKS.h)DESKS.h=DESKS.h0}
  else if(!DESKS.v)DESKS.v=await loadImg('mpc/desk_v.webp?v=2');
  await loadSkin(ST.skin||'orig',fmt);
  const c=ST.can||{};if(!tall&&c.id!=='orig'&&c.id!=='none'&&!CANS.length)await loadCans();
@@ -229,27 +223,7 @@ function prepHands(r,l){if(!r||!l)return;const mk=(img,warm)=>{const cv=document
  const one=(img)=>{const sl=sil(img);return{norm:mk(img,false),warm:mk(img,true),sil:sl,silB:blurs(sl),sh:{}}};
  HANDS={r:one(r),l:one(l)}}
 const btnC=(G,k)=>{const r=G.btn&&G.btn[k];return r?[r[0]+r[2]/2,r[1]+r[3]*.55]:null};
-function handHits(Sx,G){const ck='_hh'+(G&&G.id||'');if(Sx[ck])return Sx[ck];const GG=G&&G.pad?G:DK,o={l:[],r:[]},last={l:-9,r:-9},lp={l:-1,r:-1};
- /* Who plays what: a hand keeps its own side (left = columns 1-2, right = columns 3-4) and may reach one column over the middle. Two hits at the same moment on neighbouring pads are played by one hand with two fingers (the fingertip lands between the pads), never two hands on one pad. A hit that no free hand can reach is left out.
-    The hands never cross: the left hand always stays left of where the right hand is (and the other way round), with a gap so the fingers never land on top of each other. */
- const reach=(k,col)=>k==='l'?col<=2:col>=1,busy=(k,h)=>h.t-last[k]<(lp[k]===h.pad?.085:.115);
- const gap=GG.pad.px*.6,cx={l:null,r:null},ok=(k,x)=>{const ox=k==='l'?cx.r:cx.l;return ox==null||(k==='l'?x<ox-gap:x>ox+gap)};
- const take=(k,h,hh,x)=>{last[k]=h.t;lp[k]=h.pad;o[k].push(hh);cx[k]=x};
- /* the mixing moves: the hand holds the fader (or the knob) and moves it; that hand is busy until it lets go */
- const F=GG.fader,u=GG.u||1,fpos=v=>[F.hx+F.hw/2,F.hy+F.hh/2-v*26*u],side=x=>x<GG.pad.x0+GG.pad.px*2?'l':'r';
- (Sx.hits||[]).slice().sort((a,b)=>a.t-b.t).forEach(h=>{let key,hh;if(h.fader||h.knob){if(!F)return;const m=h.fader||h.knob,p0=h.fader?fpos(m.from):[GG.vol[0],GG.vol[1]],p1=h.fader?fpos(m.to):[GG.vol[0]+GG.vol[2]*.25,GG.vol[1]];key=side(p0[0]);
-   const L=o[key];while(L.length&&L[L.length-1].t>h.t-.35)L.pop();o[key].push({t:h.t,pad:-1,v:h.v,pos:p0,pos2:p1,hold2:m.d});last[key]=h.t+m.d;lp[key]=-1;cx[key]=p1[0];return}
-  if(h.btn){const pc=btnC(GG,h.btn);if(!pc)return;hh={t:h.t,pad:-1,v:h.v,pos:pc};if(!busy('r',h))take('r',h,hh,pc[0]);return}
-  key=(h.pad%4)<2?'l':'r';hh={t:h.t,pad:h.pad,v:h.v};const x=hpos(GG,hh)[0];
-  if(!busy(key,h)&&ok(key,x))return take(key,h,hh,x);
-  const L=o[key],pv=L[L.length-1];
-  if(busy(key,h)&&pv&&pv.pad>=12&&h.pad>=12&&h.t-pv.t<.03&&pv.pad!==h.pad&&Math.abs((pv.pad%4)-(h.pad%4))<=1&&Math.abs(Math.floor(pv.pad/4)-Math.floor(h.pad/4))<=1){const a=hpos(GG,pv),b=hpos(GG,hh),mx=(a[0]+b[0])/2;if(ok(key,mx)){pv.pos=[mx,(a[1]+b[1])/2];pv.v=Math.max(pv.v,h.v);cx[key]=mx;return}}
-  const other=key==='l'?'r':'l',chop=h.pad<12;
-  /* a chop must always be played on a pad (it is the sound the viewer is following): the other hand may reach any column for it, and if both hands are busy it replaces a hi-hat tap, never a kick or a snare */
-  if((chop||reach(other,h.pad%4))&&!busy(other,h)&&ok(other,x))return take(other,h,hh,x);
-  if(!chop)return;
-  for(const k of [key,other]){const Lk=o[k],pk=Lk[Lk.length-1];if(pk&&pk.pad===12&&h.t-pk.t<.115&&ok(k,x)){Lk.pop();const pp=Lk[Lk.length-1];last[k]=pp?pp.t:-9;lp[k]=pp?pp.pad:-1;return take(k,h,hh,x)}}});
- return Sx[ck]=o}
+function handHits(Sx,G){const ck='_hh'+(G&&G.id||'');if(Sx[ck])return Sx[ck];const o={l:[],r:[]},last={l:-9,r:-9};(Sx.hits||[]).forEach(h=>{let key,hh=h;if(h.btn){const pc=btnC(G||{},h.btn);if(!pc)return;key='r';hh={t:h.t,pad:-1,v:h.v,pos:pc}}else key=(h.pad%4)<2?'l':'r';if(h.t-last[key]<.115)return;last[key]=h.t;o[key].push(hh)});return Sx[ck]=o}
 const hpos=(G,h)=>h.pos||padC(G,h.pad);
 const padC=(G,i)=>[G.pad.x0+(i%4)*G.pad.px+G.pad.w/2,G.pad.y0+Math.floor(i/4)*G.pad.py+G.pad.h*.58];
 /* Hand motion model. Everything is a smooth physical curve of time (no random shake):
@@ -260,20 +234,15 @@ const padC=(G,i)=>[G.pad.x0+(i%4)*G.pad.px+G.pad.w/2,G.pad.y0+Math.floor(i/4)*G.
    - at the end of the beat the hand just rests, floating with a slow breathing sway */
 const spring=u=>{if(u<=0)return 0;if(u>=1)return 1;const z=.8,w=9.5,wd=w*Math.sqrt(1-z*z);return 1-Math.exp(-z*w*u)*(Math.cos(wd*u)+(z*w/wd)*Math.sin(wd*u))};
 function handPose(list,T,G,key){let i=0;while(i<list.length&&list[i].t<=T)i++;const prev=i>0?list[i-1]:null,next=i<list.length?list[i]:null,restY=G.pad.y0+G.pad.py*3+G.pad.h+G.pad.py*1.7;let A,B,tA,tB;
- /* holding the fader or knob: the finger stays on it and moves with it */
- if(prev&&prev.hold2&&T<prev.t+prev.hold2){const u=clamp((T-prev.t)/prev.hold2,0,1),s=u*u*(3-2*u);return{x:prev.pos[0]+(prev.pos2[0]-prev.pos[0])*s,y:prev.pos[1]+(prev.pos2[1]-prev.pos[1])*s,hover:0,contact:.35}}
- if(next){B=hpos(G,next);tB=next.t;if(prev){A=prev.hold2?prev.pos2:hpos(G,prev);tA=prev.t+(prev.hold2||0)}else{A=[B[0]+(key==='r'?30:-30),restY];tA=tB-1.5}}else{A=hpos(G,prev);tA=prev.t;B=A;tB=tA+9}
+ if(next){B=hpos(G,next);tB=next.t;if(prev){A=hpos(G,prev);tA=prev.t}else{A=[B[0]+(key==='r'?30:-30),restY];tA=tB-1.5}}else{A=hpos(G,prev);tA=prev.t;B=A;tB=tA+9}
  const gap=tB-tA,v=(prev?prev.v:.7);
- /* a button press: the finger stays on that key for a moment before it moves on, so the key that lights up is the key the finger is on */
- const hold=(prev&&prev.pad<0&&next)?Math.min(.12,gap*.55):0;
  /* where the hand is */
- const travel=Math.max(.07,gap-hold-.12),e=spring((T-tA-hold-.015)/travel),x=A[0]+(B[0]-A[0])*e,y=A[1]+(B[1]-A[1])*e;
+ const travel=Math.max(.07,gap-.12),e=spring((T-tA-.015)/travel),x=A[0]+(B[0]-A[0])*e,y=A[1]+(B[1]-A[1])*e;
  /* how high it is: springs up after the hit, falls onto the next one */
  const Hmax=clamp((.22+.62*Math.min(1,gap/.5))*(.62+.38*v),.12,.95),dt=T-tA,tau=.05;
  let h=prev?Hmax*(1-(1+dt/tau)*Math.exp(-dt/tau))+Hmax*.1*Math.exp(-dt/.03)*Math.abs(Math.sin(dt*52)):Hmax;
  if(next){const dd=clamp(.06+.1*Hmax,.07,.16),ts=tB-dd;if(T>ts){const q=clamp((T-ts)/dd,0,1);h=Math.min(h,(prev?Hmax:Hmax)*(1-Math.pow(q,2.3)))}}
  else{h=Math.min(h,.5)+clamp((T-tA-.35)/1.6,0,1)*.12}
- if(hold>0&&dt<hold)h=Math.min(h,clamp(dt/hold,0,1)*.2);
  h=clamp(h,0,1);
  /* a tiny slow sway, stronger while it is in the air */
  const sw=.5+.5*h,sx=1.1*Math.sin(T*.8+(key==='r'?1:3))*sw,sy=1.3*Math.sin(T*.63+(key==='r'?2:.5))*sw;
@@ -384,23 +353,16 @@ function gradeFx(c,W,H){const g=(ST.cam||{}).grade;if(!g||g==='0')return;c.save(
  else if(g==='cold'){fill('multiply','rgb(214,228,248)');fill('overlay','rgb(90,150,255)',.10);fill('screen','rgb(30,50,90)',.06);vig(.12)}
  else if(g==='faded'){fill('screen','rgb(52,50,70)',.2);fill('multiply','rgb(252,242,226)');fill('saturation','rgb(128,128,128)',.32);fill('soft-light','rgb(255,210,160)',.2);vig(.14)}
  c.restore()}
-/* optional camera cuts in the Sample to Beat episode: wide desk, pad close-up, screen close-up and the drum row, switched every 2 bars, always wide when a new layer starts */
-const CUTSEQ=['wide','pads','lcd','drums','pads','lcd'];
-function cutShot(M,T,G){const starts=[M.flipT].concat(M.layers.map(l=>l.t),[M.fullT]);let si=0;while(si+1<starts.length&&starts[si+1]<=T)si++;const unit=(si===starts.length-1?M.loopLen:M.segLen)/2,u0=Math.floor((T-starts[si])/unit);
- const name=u=>u<=0?'wide':CUTSEQ[(si*2+u)%CUTSEQ.length],P=G.pad,L=G.lcd,pos={pads:{z:1.65,px:P.x0+1.5*P.px+P.w/2,py:P.y0+1.5*P.py+P.h/2},drums:{z:2.05,px:P.x0+1.5*P.px+P.w/2,py:P.y0+3*P.py+P.h/2},lcd:{z:2.3,px:L.x+L.w/2+L.w*.12,py:L.y+L.h/2+L.h*.9},wide:null};
- const a=pos[name(u0-1)],b=pos[name(u0)],q=clamp((T-starts[si]-u0*unit)/.24,0,1),e=q*q*(3-2*q);return{a:u0===0?null:a,b,e}}
 function frame(c,W,H,fmt,T,X){
  LAMPFL=lampLevel(T);const cu=fmt==='c';if(cu)fmt='v';const OV=!cu&&!X.long;
  const v=fmt==='v',E=ST.eng,sc0=v?.87*W/848:.6*W/848,k=trackAt(X,T),tr=X.tracks[k],Sx=tr.S,lt=T-tr.start,la=lt+(tr.off||0),tape=X.kind==='tape',last=X.tracks[X.tracks.length-1],lastEnd=last.start+last.dur,t0=X.make?X.make.T0:X.tracks[0].start;
  const dx=(1.3*Math.sin(T*.31)+.7*Math.sin(T*.77+1.3))*W/1920,dy=(1.1*Math.sin(T*.27+.8)+.6*Math.sin(T*.69+2.1))*W/1920,zs=(1+.0028*Math.sin(T*.21+.4))*(E.hook?1+.2*(1-ease(T/.8)):1)*(ST.cam&&ST.cam.rack?1+.014*(1-ease((T-.15)/1.8)):1);
- let nz=1,ny=0;if(ST.cam&&ST.cam.nod&&X.make){const kl=Sx.per&&Sx.per[15];if(kl&&kl.length){let a=0,b=kl.length;while(a<b){const m=(a+b)>>1;if(kl[m].t<=T)a=m+1;else b=m}const kk=a>0?kl[a-1]:null;if(kk&&T-kk.t<.5){const q=Math.exp(-(T-kk.t)/.085)*(1-Math.exp(-(T-kk.t)/.012))*Math.min(1,kk.v||.8);nz=1+.0065*q;ny=2.4*q*W/1920}}}
- c.save();c.fillStyle='#fff';c.fillRect(0,0,W,H);c.translate(W/2+dx,H/2+dy+ny);c.scale(zs*nz,zs*nz);c.translate(-W/2,-H/2);
+ c.save();c.fillStyle='#fff';c.fillRect(0,0,W,H);c.translate(W/2+dx,H/2+dy);c.scale(zs,zs);c.translate(-W/2,-H/2);
  const SC=sceneOf(fmt),intro=tape&&T<t0;let sc=sc0,cx=W/2,cy=v?H*.5:H*.495,ox=cx-PH.cx*sc,oy=cy-PH.cy*sc;
  if(SC){sc=Math.max(W/SC.G.W,H/SC.G.H)*1.025;ox=(W-SC.G.W*sc)/2;oy=(H-SC.G.H*sc)/2}else ground(c,W+80,H+80,ox,oy,sc);
  if(cu){const G0=SC?SC.G:PH,pcx=G0.pad.x0+1.5*G0.pad.px+G0.pad.w/2,pcy=G0.pad.y0+1.5*G0.pad.py+G0.pad.h/2,zoom=(SC?1.78:1.55)*(1+.04*Math.sin(T*.23)),sc2=(SC?sc:sc0)*zoom;sc=sc2;ox=W/2-pcx*sc+Math.sin(T*.19)*6;oy=H*.47-pcy*sc+Math.cos(T*.16)*5}
-if(!cu&&ST.cam&&ST.cam.cuts&&X.make&&T>=X.make.flipT&&T<X.make.endMusic+.3){const G=SC?SC.G:PH,s=cutShot(X.make,T,G),tf=p=>p?{sc:sc*p.z,ox:W/2-p.px*sc*p.z,oy:H*.47-p.py*sc*p.z}:{sc,ox,oy},A=tf(s.a),B=tf(s.b),m=(x,y)=>x+(y-x)*s.e;let ns=m(A.sc,B.sc),nx=m(A.ox,B.ox),ny=m(A.oy,B.oy);if(SC){nx=clamp(nx,W-G.W*ns,0);ny=clamp(ny,H-G.H*ns,0)}sc=ns;ox=nx;oy=ny}
  const fx={vol:(.21*ease((T-.15)/2.4))+.012*Math.sin(T*.6),con:.05*Math.sin(T*.4),fader:Math.max(0,26*(.5+.5*Math.sin(T*.29-.6))),btn:{play:0,start:pulse(T,t0-.42,t0-.12),rec:pulse(T,t0-.42,t0-.12),over:0,stop:pulse(T,lastEnd-.08,lastEnd+.2)}};
- if(X.make){for(const e of Sx.btnEv){const q=pulse(T,e.t-.04,e.t+.11);if(q>(fx.btn[e.k]||0))fx.btn[e.k]=q}fx.wheel=X.make.wheelAngle(T);const fv=X.make.faderAt&&X.make.faderAt(T),kv=X.make.knobAt&&X.make.knobAt(T);if(fv!=null)fx.fader=fv*26;if(kv!=null)fx.vol=kv}
+ if(X.make){for(const e of Sx.btnEv){const q=pulse(T,e.t-.05,e.t+.16);if(q>(fx.btn[e.k]||0))fx.btn[e.k]=q}fx.wheel=X.make.wheelAngle(T)}
  machine(c,ox,oy,sc,Sx,{lcd:X.make&&!((X.intro>0)&&T<X.intro)?X.make.lcdAt(T):null,boot:(X.intro>0&&T<X.intro)?T:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,run:la>=-.02&&T<lastEnd,trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
 {c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC?SC.G:PH;
   if(SC&&Gs.id==='deskh')drawCan(c,Gs,Sx);
@@ -481,8 +443,6 @@ function html(){return`<div class="mg"><div>
  <details class="sec grp" id="g_cam"><summary>3. CAMERA AND LIGHT <small id="s_cam"></small></summary><div class="in">
   <label>LAMP LIGHT (DESK SCENES)</label><select id="mLamp"><option value="0">Steady (no change)</option><option value="1">Gentle</option><option value="2">Real (it sags and flickers now and then)</option><option value="3">Dramatic</option></select>
   <label>DEPTH OF FIELD (BLURRED BACKGROUND, LIKE A REAL LENS)</label><select id="mDof"><option value="0">Off (everything sharp)</option><option value="1">Soft</option><option value="2">Strong</option></select>
-  <label class="chk"><input type="checkbox" id="mCuts"> CAMERA CUTS (WIDE DESK, PAD CLOSE-UP, SCREEN CLOSE-UP AND THE DRUM ROW, SWITCHED EVERY 2 BARS; ONLY IN THE SAMPLE TO BEAT EPISODE)</label>
-  <label class="chk"><input type="checkbox" id="mNod"> CAMERA NODS ON THE BEAT (A SMALL PUSH-IN AND DIP ON EVERY KICK, ONLY IN THE SAMPLE TO BEAT EPISODE)</label>
   <label class="chk"><input type="checkbox" id="mRack"> FOCUS PULL AT THE START (FOCUS SLIDES FROM THE LAMP TO THE PADS)</label>
   <label>COLOR GRADE</label><select id="mGrade"><option value="0">None (as is)</option><option value="warm">Warm film</option><option value="teal">Teal and orange</option><option value="cold">Cold studio</option><option value="faded">Faded 90s</option></select>
  </div></details>
@@ -703,15 +663,13 @@ function ensureYT(){if(window.MZMpcYT&&window.MZMpcGen&&STUDIO!==null)return Pro
 function paintPanels(){for(const k in PNL){const d=root&&$q(PNL[k][0]);if(d&&d.open&&dirty[k]){dirty[k]=0;ensureYT().then(()=>{try{PNL[k][1]()}catch(e){console.warn(e)}})}}}
 const mark=(...ks)=>{ks.forEach(k=>dirty[k]=1);paintPanels()};
 function ytRender(){mark('yt')}function thRender(){mark('th')}function genRender(){mark('gen')}
-/* Sample to Beat switched on: the thumbnails follow the sample episode (sample name, its tempo and key, SAMPLE FLIP); switched off: back to the selected beat as before */
-function s2bInfo(){const z=ST.s2b;if(!z||!z.on)return null;const raw=(EP&&z.useEp&&EP.make)?{name:EP.make.name,bpm:EP.make.bpm,key:EP.make.key}:(z.last?{name:z.last.name,bpm:z.last.bpm,key:z.last.key||''}:null);if(!raw||!raw.name)return null;const nm=String(raw.name).replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').replace(/\s*\d+(\.\d+)?\s*bpm.*$/i,'').replace(/\s+/g,' ').trim()||'SAMPLE';return{title:nm,bpm:Number(raw.bpm)||0,key:raw.key||''}}
-function thRenderNow(){const el=$q('#mTH');if(!el||!YT())return;const s2=s2bInfo(),b=s2?{title:s2.title}:ST.tape.on?{title:ST.tape.title}:beats.find(x=>String(x.id)===String(ST.beat));if(!b){el.innerHTML='<div class="msg">Pick a beat first.</div>';return}
+function thRenderNow(){const el=$q('#mTH');if(!el||!YT())return;const b=ST.tape.on?{title:ST.tape.title}:beats.find(x=>String(x.id)===String(ST.beat));if(!b){el.innerHTML='<div class="msg">Pick a beat first.</div>';return}
  const T=ST.th,v=T.fmt==='v',W=v?1080:1280,H=v?1920:720,PALS=YT().PAL;
  el.innerHTML=`<div class="two"><div><label>FORMAT</label><select id="mThF"><option value="h"${v?'':' selected'}>16:9 THUMBNAILS (1280x720)</option><option value="v"${v?' selected':''}>9:16 SHORTS COVERS (1080x1920)</option></select></div><div><label>BACKGROUND</label><select id="mThD"><option value=""${T.bgm===''||T.bgm==null?' selected':''}>Mostly the desk</option><option value="desk"${T.bgm==='desk'?' selected':''}>Only the desk</option><option value="color"${T.bgm==='color'?' selected':''}>Only color backgrounds</option></select></div><div><label>HAND ON THE PADS</label><select id="mThH"><option value=""${T.hands===''||T.hands==null?' selected':''}>Some with, some without</option><option value="yes"${T.hands==='yes'?' selected':''}>Always a hand</option><option value="no"${T.hands==='no'?' selected':''}>Never (clean machine)</option></select></div><div><label>COLOR (COLOR BACKGROUNDS)</label><select id="mThP"><option value="">Mixed</option>${PALS.map((p,i)=>`<option value="${i}"${String(T.pal)===String(i)?' selected':''}>${p.n}</option>`).join('')}</select></div></div>
  <div class="two" style="margin-top:8px"><button class="btn" id="mThN">NEW SET OF 12</button><button class="btn" id="mThA">DOWNLOAD ALL 12</button></div>
  <div class="msg">Text on the picture stays at 5 words or fewer so it reads on a phone: the artist, TYPE BEAT and the beat name. Click a thumbnail to download it.</div>
  <div id="mThG" style="display:grid;grid-template-columns:repeat(${v?4:2},1fr);gap:8px"></div>`;
- const g=el.querySelector('#mThG'),X=s2?{title:s2.title,big:'SAMPLE FLIP',extra:'CHOP + FLIP',bpm:s2.bpm,key:s2.key,artist:ST.artist}:ST.tape.on?{title:ST.tape.title,big:'BEAT TAPE',extra:(TP?TP.tracks.length:ST.tape.ids.length)+' BEATS',bpm:0,key:'',artist:ST.artist}:{title:b.title,bpm:Number(b.bpm)||0,key:b.musical_key||'',artist:ST.artist},tok=++thTok;
+ const g=el.querySelector('#mThG'),X=ST.tape.on?{title:ST.tape.title,big:'BEAT TAPE',extra:(TP?TP.tracks.length:ST.tape.ids.length)+' BEATS',bpm:0,key:'',artist:ST.artist}:{title:b.title,bpm:Number(b.bpm)||0,key:b.musical_key||'',artist:ST.artist},tok=++thTok;
  const fonts=document.fonts?Promise.all(["40px Anton","600 30px Oswald","30px VT323"].map(f=>document.fonts.load(f).catch(()=>{}))):Promise.resolve();
  const opt=i=>({pal:T.pal===''?null:+T.pal,desk:T.bgm==='desk'?true:T.bgm==='color'?false:null,hands:T.hands==='yes'?true:T.hands==='no'?false:null}),fname=i=>(b.title||'beat').replace(/[^\w -]+/g,'')+' - MPC thumb '+(i+1)+(v?' 9x16':'')+'.jpg';
  /* previews are drawn at half size (a quarter of the work); the full size picture is only drawn when you download it */
@@ -734,7 +692,7 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();mark('yt','th','gen')};for(const k in PNL){$q(PNL[k][0]).addEventListener('toggle',paintPanels)}
  $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};
- const CM=ST.cam;$q('#mDof').value=CM.dof;$q('#mRack').checked=!!CM.rack;$q('#mNod').checked=false;CM.nod=false;/* removed in the strip-down (kept in code, hidden) */$q('#mNod').closest('label').style.display='none';$q('#mCuts').checked=!!CM.cuts;$q('#mCuts').onchange=e=>{CM.cuts=e.target.checked;save();drawNow()};$q('#mNod').onchange=e=>{CM.nod=e.target.checked;save();drawNow()};$q('#mGrade').value=CM.grade;
+ const CM=ST.cam;$q('#mDof').value=CM.dof;$q('#mRack').checked=!!CM.rack;$q('#mGrade').value=CM.grade;
  $q('#mDof').onchange=e=>{CM.dof=e.target.value;save();drawNow()};$q('#mRack').onchange=e=>{CM.rack=e.target.checked;save();drawNow()};$q('#mGrade').onchange=e=>{CM.grade=e.target.value;save();drawNow()};
  $q('#mIntro').checked=!!ST.intro;$q('#mIntro').onchange=e=>{ST.intro=e.target.checked;save();stopPlay();if(S&&S.buf){S.tl=tlOne(S);dropV()}if(TP){TP=null;$q('#mTpMsg').textContent='The intro changed. Press BUILD THE TAPE again.';mark('yt','th','gen')}drawNow()};
  const CN=ST.can;$q('#mCan').value=String(CN.id);const canUi=()=>{$q('#mCanSet').style.display=(CN.id==='orig'||CN.id==='none')?'none':'block';$q('#mCanSv').textContent=CN.size;$q('#mCanRv').textContent=CN.rot};
@@ -748,7 +706,7 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  $q('#mFh').onclick=async()=>{ST.fmt='h';save();await ensureScene('h');size();drawNow()};$q('#mFv').onclick=async()=>{ST.fmt='v';save();await ensureScene('v');size();drawNow()};
  $q('#mPlay').onclick=play;$q('#mScrub').oninput=()=>{if(PV.playing)stopPlay();drawNow()};
  const T=ST.tape;$q('#mSens').value=String(ST.sens==null?1:ST.sens);$q('#mNudge').value=String(ST.nudge||0);$q('#mNudgeV').textContent=String(ST.nudge||0);const relay=()=>{save();for(const id in CACHE){}if(S&&S.raw){applyKit();S._hh=null;if(S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}}if(TP){TP.tracks.forEach(t=>{const L=layout(t.S.raw,t.S.kit);t.S.hits=L.hits;t.S.per=L.per;t.S._hh=null});TP._v=null;TP._h=null;TP._c=null}drawNow()};$q('#mSens').onchange=e=>{ST.sens=+e.target.value;relay()};$q('#mNudge').oninput=e=>{ST.nudge=+e.target.value;$q('#mNudgeV').textContent=String(ST.nudge);relay()};$q('#mTpOn').checked=!!T.on;$q('#mTpT').value=T.title;$q('#mTpL').value=String(T.len);$q('#mTpX').value=String(T.xf);$q('#mTpBox').style.display=T.on?'block':'none';tpList();
- const mountS2B=async()=>{if(mountS2B.done)return;mountS2B.done=1;try{await loadS('mpcsample.js?v=42');window.__s2b=MZMpcSample.mount($q('#mS2B'),{ST,save:()=>{save();summ()},esc,ctx:ctxA,loadS,cpy,dlf,ensureScene:()=>ensureScene(ST.fmt),setEp:x=>{EP=x;if(ST.s2b)ST.s2b.useEp=!!x;thRender();stopPlay();dropV();if(x){const cv=$q('#mScrub');if(cv)cv.value='0'}drawNow();summ()},hasEp:()=>!!EP,thumbs:()=>thRender()});summ()}catch(e){mountS2B.done=0;$q('#mS2B').innerHTML='<div class="msg">The sample chopper did not load. Refresh the page.</div>'}};
+ const mountS2B=async()=>{if(mountS2B.done)return;mountS2B.done=1;try{await loadS('mpcsample.js?v=11');window.__s2b=MZMpcSample.mount($q('#mS2B'),{ST,save:()=>{save();summ()},esc,ctx:ctxA,loadS,cpy,dlf,ensureScene:()=>ensureScene(ST.fmt),setEp:x=>{EP=x;if(ST.s2b)ST.s2b.useEp=!!x;stopPlay();dropV();if(x){const cv=$q('#mScrub');if(cv)cv.value='0'}drawNow();summ()},hasEp:()=>!!EP});summ()}catch(e){mountS2B.done=0;$q('#mS2B').innerHTML='<div class="msg">The sample chopper did not load. Refresh the page.</div>'}};
  root.querySelectorAll('details.grp').forEach(d=>{d.open=!!ST.open[d.id];if(d.id==='g_s2b'){d.addEventListener('toggle',()=>{if(d.open)mountS2B()});if(d.open)mountS2B()}d.addEventListener('toggle',()=>{ST.open[d.id]=d.open?1:0;save()})});$q('#mOpenAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=true);$q('#mCloseAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=false);
  $q('#mRight').addEventListener('change',()=>setTimeout(summ,0));$q('#mRight').addEventListener('input',()=>setTimeout(summ,0));summ();
  $q('#mTpOn').onchange=e=>{T.on=e.target.checked;save();$q('#mTpBox').style.display=T.on?'block':'none';stopPlay();ytRender();thRender();drawNow()};
@@ -771,5 +729,5 @@ window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root
   ST=load();if(!ST.th)ST.th={seed:1,pal:'',fmt:'h'};if(!ST.yt.v)ST.yt.v=0;if(!ST.tape)ST.tape=defaults().tape;if(!ST.eng)ST.eng=defaults().eng;if(!ST.smoke)ST.smoke=defaults().smoke;if(!ST.hands)ST.hands=defaults().hands;if(!ST.gen)ST.gen=defaults().gen;if(!ST.can)ST.can=defaults().can;if(!ST.cam)ST.cam=defaults().cam;if(!ST.open)ST.open={g_beat:1};S=null;root.innerHTML=html();wire();await ensureScene(ST.fmt);size();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
 };
 window.mpcClose=function(){if(root)root.classList.remove('on');stopPlay()};
-window.__mpc={hh:(Sx,G)=>handHits(Sx,G||DK),lamp:T=>lampLevel(T),hand:(Sx,key,T)=>handAt(handHits(Sx,DK)[key],T,DK,key),xf:XF,st:()=>ST,s:()=>S,tp:()=>TP,x:X,frame,analyze,PH,pv:()=>PV,buildTape};window.MZMpc={machine,PH,fitFont,mmss,clamp,img:()=>IMG,cut:()=>CUT,bg:k=>DESKBG[k],warm:()=>WARM,handsReady:()=>!!HANDS,hand:(c,key,padIdx,hover,lampPos)=>{if(!HANDS)return;const p=padC(PH,padIdx);drawOneHand(c,PH,key,{x:p[0],y:p[1],hover},true,0,lampPos)}};
+window.__mpc={lamp:T=>lampLevel(T),hand:(Sx,key,T)=>handAt(handHits(Sx,DK)[key],T,DK,key),xf:XF,st:()=>ST,s:()=>S,tp:()=>TP,x:X,frame,analyze,PH,pv:()=>PV,buildTape};window.MZMpc={machine,PH,fitFont,mmss,clamp,img:()=>IMG,cut:()=>CUT,bg:k=>DESKBG[k],warm:()=>WARM,handsReady:()=>!!HANDS,hand:(c,key,padIdx,hover,lampPos)=>{if(!HANDS)return;const p=padC(PH,padIdx);drawOneHand(c,PH,key,{x:p[0],y:p[1],hover},true,0,lampPos)}};
 })();
