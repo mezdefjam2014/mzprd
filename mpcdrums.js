@@ -44,7 +44,7 @@ function keyOf(buf,ws,we){const sr=buf.sampleRate,L=buf.getChannelData(0),a=Math
 const COUNT=0,HALF=0;   /* the pattern list comes from mpc/patterns.json (made by tools/stems_to_pattern.py) */
 function dnaOf(id){id=clamp(Math.round(id),1,Math.max(1,PAT.length));
  if(PAT.length){const si=id-1,p=PAT[si],r=mul(id*7919+5),kits=KITS.filter(k=>k.style==='ec'),kit=KITS.indexOf(kits[si%kits.length]),mr=r();
-  return{id,style:'ec',stem:si,bb:{s:0,stem:1},kit,kick:0,snare:0,hat:0,fill:0,swing:50,late:0,mode:mr<.4?'loop':mr<.8?'flip':'sparse',steps:Math.floor(r()*STEPSETS.length),hum:3,seed:id*131+7,alt:false,bassSeed:0,reverse:false,kitName:p.name}}
+  return{id,style:'ec',stem:si,bb:{s:0,stem:1},kit,kick:0,snare:0,hat:0,fill:0,swing:50,late:0,mode:mr<.4?'loop':mr<.8?'flip':'sparse',steps:Math.floor(r()*STEPSETS.length),hum:0,seed:id*131+7,alt:false,bassSeed:0,reverse:false,kitName:p.name}}
 
  if(id>HALF){const j=id-HALF-1,r=mul(id*7919+97),si=j%BB.length,S=BB[si],kits=KITS.filter(k=>k.style==='ec'),kit=KITS.indexOf(kits[Math.floor(j/BB.length+j*.37)%kits.length]),mr=r();
   const bb={s:si,k:Math.floor(j/BB.length)%S.kick.length,g:Math.floor(r()*S.gh.length),h:Math.floor(r()*S.hat.length),f:r()<.55?Math.floor(r()*BBFILL.length):-1};
@@ -58,14 +58,14 @@ function dnaOf(id){id=clamp(Math.round(id),1,Math.max(1,PAT.length));
 function parseLane(str,bar,lane,out,step,sw,jit,r,velMul){for(let s=0;s<16;s++){const c=str[s];if(c==='.'||!c)continue;const base=(bar*16+s)*step+((s%2)?(2*sw/100-1)*step:0),vel=({x:.78,X:1,g:.34,o:.8,r:.8,t:.78}[c]||.8)*(velMul||1)*(1-.06*r());
   const add=(dt,v,kind)=>out.push({t:Math.max(0,base+dt+(r()-.5)*jit*.002),lane:kind||lane,vel:clamp(v,.1,1),bar,step:s});
   if(c==='r'){add(0,vel);add(step*.5,vel*.8)}else if(c==='t'){add(0,vel*.8);add(step/3,vel*.9);add(step*2/3,vel)}else if(c==='o')add(0,vel,'open');else add(0,vel)}}
-function plan(dna,Rr,keyInfo){const bpm=Rr.bpm,step=60/bpm/4,r=mul(dna.seed),kit=KITS[dna.kit],trap=dna.style==='trap',PP=P[dna.pool||dna.style],ev=[],jit=dna.hum;
+function plan(dna,Rr,keyInfo){const bpm=Rr.bpmX||Rr.bpm,step=60/bpm/4,r=mul(dna.seed),kit=KITS[dna.kit],trap=dna.style==='trap',PP=P[dna.pool||dna.style],ev=[],jit=dna.hum,rr=dna.stem!==undefined?(()=>.5):r;   /* your beats: no swing, no random timing or loudness, so the loop is exact */
  const kickBars=[],snareBars=[],hatBars=[];
  const BBB=dna.bb?bbBars(dna):null;
  for(let b=0;b<4;b++){let k=PP.kick[dna.kick]||'',s=PP.snare[dna.snare]||'',h=PP.hat[dna.hat]||'';
   if(BBB){}else if(b===3){const f=PP.fill[dna.fill];k=f.k;s=f.s;h=f.h}else if(b===1&&dna.alt){const q=k.split('');const i=q.indexOf('x',3);if(i>0&&i<15&&q[i+1]==='.'){q[i]='.';q[i+1]='x'}k=q.join('')}
   if(BBB){k=BBB[b].k;s=BBB[b].s;h=BBB[b].h}
   kickBars.push(k);snareBars.push(s);hatBars.push(h);
-  parseLane(k,b,'kick',ev,step,dna.swing,jit,r,trap?.6:dna.bb?.92:1);const n0=ev.length;parseLane(s,b,'snare',ev,step,dna.swing,jit,r,1);if(dna.late)for(let q=n0;q<ev.length;q++)ev[q].t+=dna.late;parseLane(h,b,'hat',ev,step,dna.swing,jit,r,dna.bb?(dna.stem!==undefined?1:BB[dna.bb.s].hg):1)}
+  parseLane(k,b,'kick',ev,step,dna.swing,jit,rr,trap?.6:dna.bb?.92:1);const n0=ev.length;parseLane(s,b,'snare',ev,step,dna.swing,jit,rr,1);if(dna.late)for(let q=n0;q<ev.length;q++)ev[q].t+=dna.late;parseLane(h,b,'hat',ev,step,dna.swing,jit,rr,dna.bb?(dna.stem!==undefined?1:BB[dna.bb.s].hg):1)}
  /* the 808 follows the kicks (trap only) */
  if(trap){const key=keyInfo||{pc:9,mode:'minor'},midi=28+((key.pc-4+12)%12),scale=key.mode==='major'?MAJOR:MINOR,rb=mul(dna.bassSeed),kicks=ev.filter(e=>e.lane==='kick').sort((a,b)=>a.t-b.t);let prev=null;
   kicks.forEach((k,i)=>{const nxt=i<kicks.length-1?kicks[i+1].t:4*16*step,semi=i===0?0:pick(rb,scale),m=midi+semi,f=440*Math.pow(2,(m-69)/12),len=Math.min(kit.b.len,Math.max(.14,nxt-k.t-.01)),slide=prev!==null&&rb()<.22?prev:0;
@@ -146,7 +146,7 @@ async function render(buf,Rr,P_,opt){opt=opt||{};await loadPack(P_.dna);const lo
  if(G.crackle)G.crackle.start(0);
  const sample=P_.chopMode==='loop';
  for(let l=0;l<loops;l++){const off=l*P_.loopLen;
-  if(sample){const len=Math.min(P_.loopLen,Math.max(.5,Rr.we-Rr.ws)),s=ctx.createBufferSource();s.buffer=buf;const g=ctx.createGain();g.gain.setValueAtTime(.0001,off);g.gain.linearRampToValueAtTime(.8,off+.01);g.gain.setValueAtTime(.8,off+P_.loopLen-.03);g.gain.linearRampToValueAtTime(.0001,off+P_.loopLen);s.connect(g);g.connect(G.chopBus);s.start(off,Rr.ws,Math.min(len,P_.loopLen));
+  if(sample){const len=Math.min(P_.loopLen,Math.max(.5,Rr.we-Rr.ws)),s=ctx.createBufferSource();s.buffer=buf;const g=ctx.createGain();g.gain.setValueAtTime(.0001,off);g.gain.linearRampToValueAtTime(.8,off+.002);g.gain.setValueAtTime(.8,off+P_.loopLen-.002);g.gain.linearRampToValueAtTime(.0001,off+P_.loopLen);s.connect(g);g.connect(G.chopBus);s.start(off,Rr.ws,Math.min(len,P_.loopLen));
    /* a short sample is repeated to fill the 4 bars */
    if(len<P_.loopLen-.05){let t2=off+len;while(t2<off+P_.loopLen-.05){const s2=ctx.createBufferSource();s2.buffer=buf;const g2=ctx.createGain();g2.gain.value=.8;s2.connect(g2);g2.connect(G.chopBus);s2.start(t2,Rr.ws,Math.min(len,off+P_.loopLen-t2));t2+=len}}}
   for(const e of P_.events){const t=off+e.t;if(e.lane==='loop')continue;

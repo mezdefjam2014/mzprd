@@ -41,7 +41,10 @@ function snapAttack(x,sr,t){let i=Math.floor(t*sr);const a=Math.max(1,i-Math.flo
  return Math.max(0,z/sr-.001)}
 /* ---------- chopping ---------- */
 function chop(buf,n,opt){opt=opt||{};const sr=buf.sampleRate,x=mono(buf),{fl,F,fps}=fluxOf(x,sr),dur=buf.duration;
- const bpm=opt.bpm||tempoOf(fl,fps),beat=60/bpm,bar=beat*4,ph=gridPhase(fl,fps,bpm),peaks=pickPeaks(fl,fps).map(p=>({t:(p.f*HOP+WIN*.28)/sr+.004,s:p.s}));
+ const bpm0=opt.bpm||tempoOf(fl,fps);let bpm=bpm0,exact=false;
+ /* a producer loop is a whole number of bars: if the file length fits 1, 2, 4, 8... bars at about this tempo, use the exact tempo so the loop is sample-perfect */
+ if(!opt.bpm){let bk=0,be=9;for(let k=1;k<=128;k++){const e=Math.abs(k*240/dur-bpm0)/bpm0;if(e<be){be=e;bk=k}}if(bk&&be<.012){bpm=bk*240/dur;exact=true}}
+ const beat=60/bpm,bar=beat*4,ph=exact?0:gridPhase(fl,fps,bpm),peaks=pickPeaks(fl,fps).map(p=>({t:(p.f*HOP+WIN*.28)/sr+.004,s:p.s}));
  /* the best 4 bars (or fewer if the sample is short): the window with the most musical activity, starting on the grid */
  const bars=dur>=bar*4+.5?4:dur>=bar*2+.4?2:1,len=bar*bars;let ws=0,wv=-1;for(let t=ph;t+len<=dur+.01;t+=bar){let s=0;for(const p of peaks)if(p.t>=t&&p.t<t+len)s+=p.s;if(s>wv){wv=s;ws=t}}
  if(wv<0)ws=0;const we=Math.min(dur,ws+len);
@@ -58,7 +61,7 @@ function chop(buf,n,opt){opt=opt||{};const sr=buf.sampleRate,x=mono(buf),{fl,F,f
  const maxLen=Math.max(.6,beat*3),slices=chosen.map((c,i)=>{const nx=i<chosen.length-1?chosen[i+1].t-.003:we,t1=Math.min(nx,c.t+maxLen);return{i:i+1,t0:c.t,t1:Math.max(c.t+.12,t1),s:c.s,pad:i+5}});
  /* a short list of display peaks */
  const B=900,pk=new Float32Array(B*2),span=Math.floor(x.length/B);for(let b=0;b<B;b++){let mn=0,mx=0;for(let i=b*span;i<(b+1)*span;i+=4){const v=x[i];if(v<mn)mn=v;if(v>mx)mx=v}pk[b*2]=mn;pk[b*2+1]=mx}
- return{bpm,beat,bar,bars,ws,we,slices,peaks:pk,dur,sr,grid:ph}}
+ return{bpm:Math.round(bpm*10)/10,bpmX:bpm,exact,beat,bar,bars,ws,we,slices,peaks:pk,dur,sr,grid:ph}}
 
 /* ---------- playing a slice ---------- */
 function playSlice(ctx,buf,sl,when,gain){const s=ctx.createBufferSource();s.buffer=buf;const g=ctx.createGain(),t=when||ctx.currentTime+.01,d=Math.max(.05,sl.t1-sl.t0);
@@ -150,7 +153,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
  [['#mkOv','ov'],['#mkBtn','btn'],['#mkHb','hb'],['#mkTb','tb']].forEach(([id,k])=>$(id).onchange=e=>{mk[k]=e.target.checked?1:0;api.save()});$('#mkLb').onchange=e=>{mk.lb=+e.target.value;api.save()};
  let epBusy=false;
  async function makeEp(i){if(!R||!buf){mmsg('Chop a sample first.');return}if(epBusy)return;if(!i)i=sel;if(!i){mmsg('Choose a beat: press VIDEO on one in the list.');return}epBusy=true;vstop();stop();sel=i;mmsg('Building the episode for beat #'+i+'...');await new Promise(r=>setTimeout(r,40));
-  try{if(!window.MZMpcMake)await api.loadS('mpcmake.js?v=4');const d=D(),dna=d.dnaOf(i);await api.ensureScene();
+  try{if(!window.MZMpcMake)await api.loadS('mpcmake.js?v=5');const d=D(),dna=d.dnaOf(i);await api.ensureScene();
    const X=await window.MZMpcMake.build(buf,R,dna,KEY,{buttons:!!mk.btn,handsBtn:!!mk.hb,overlay:!!mk.ov,layerBars:mk.lb,intro:ST.intro?3.4:0,name:fname||'SAMPLE',typeBeat:!!mk.tb});
    Z.typeBeat=!!mk.tb;api.setEp(X);const P=window.MZMpcMake.pack(X,ST,{});
    const bits=[['TITLES',P.titles.map((t,j)=>'<div class="it"><b>'+esc(t)+'</b><small style="color:#8e8e94">'+t.length+'/100</small><button data-ct="'+j+'">COPY</button></div>').join('')],['DESCRIPTION','<textarea rows="12" id="mkD" style="font:500 12px/1.5 monospace">'+esc(P.desc)+'</textarea><button class="btn" id="mkCd" style="width:100%;margin-top:4px">COPY DESCRIPTION</button>'],['TAGS','<textarea rows="2" id="mkT" style="font:500 12px/1.5 monospace">'+esc(P.tags)+'</textarea><button class="btn" id="mkCt" style="width:100%;margin-top:4px">COPY TAGS</button>'],['PINNED COMMENT','<div class="it"><b>'+esc(P.pinned[0])+'</b><button data-cp="0">COPY</button></div><div class="it"><b>'+esc(P.pinned[1])+'</b><button data-cp="1">COPY</button></div><div class="it"><b>'+esc(P.pinned[2])+'</b><button data-cp="2">COPY</button></div>']];
@@ -161,7 +164,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
    const M=X.make;mmsg('Episode ready: beat #'+i+' ('+M.style.toUpperCase().replace('EC','EAST COAST')+', '+M.kit+'), '+Math.floor(M.total/60)+':'+String(Math.round(M.total%60)).padStart(2,'0')+' long. Press PLAY on the left to watch it, or RENDER 16:9 / 9:16.')}
   catch(err){console.warn(err);mmsg('Could not build the episode: '+(err&&err.message||err))}epBusy=false}
  $('#mkGo').onclick=()=>makeEp(sel);$('#mkBack').onclick=()=>{api.setEp(null);mmsg('Back to the normal video.')};mset();
- const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=9');await D().loadPack();KEY=D().keyOf(buf,R.ws,R.we);cache=new Map();sel=0;paintV()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
+ const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=10');await D().loadPack();KEY=D().keyOf(buf,R.ws,R.we);cache=new Map();sel=0;paintV()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
  window.__s2bAfter=afterChop;
  return{chop:()=>R,buf:()=>buf,stop,after:afterChop,key:()=>KEY,dev:{renderVar,playVar,makeEp}}}
 window.MZMpcSample={chop,tempoOf,fluxOf,pickPeaks,playSlice,mount,padIdx,PAD_NAMES};
