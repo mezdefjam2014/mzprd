@@ -29,8 +29,8 @@ const DKV={id:'deskv',W:1131,H:2000,u:1.2,sampled:true,glow:true,lamp:[800,140,1
  vol:[238,742,22],con:[541,737,10],fader:{x:158,y:1214,w:28,h:44,slot:[167,1214,12,38],hx:161,hy:1216,hw:21,hh:39},faderPt:[200,1242],
  smoke:{x:908,y:1564},label:{cx:699,cy:1887,ang:.33,w:205,h:117}};
 DK.bulb=[190,120];DKV.bulb=[772,150];DK.cone={apex:[-163,13],a0:.024,a1:1.017,len:2700};DKV.cone={apex:[772,150],a0:1.34,a1:2.42,len:2300};
-Object.assign(DK.btn,{power:[629,360,30,19],soft1:[1271,570,36,16],soft2:[1318,570,38,16],soft3:[1371,570,35,16],soft4:[1418,570,38,16],sounds:[1418,615,38,16],enter:[1190,705,39,15],k0:[1092,704,37,16],kdot:[1141,704,38,16],k1:[1095,659,34,16],k2:[1140,659,39,16],k3:[1190,660,39,15],k4:[1091,615,38,16],k5:[1140,615,39,16],k6:[1190,616,39,15],k7:[1096,570,33,16],k8:[1140,570,39,16],k9:[1190,571,39,15]});
-Object.assign(DKV.btn,{power:[188,741,26,16],soft1:[759,936,34,16],soft2:[803,936,34,16],soft3:[847,936,35,16],soft4:[892,936,35,16],sounds:[892,977,35,16],enter:[688,1061,34,15],k0:[599,1061,34,15],kdot:[643,1060,35,16],k1:[599,1019,34,15],k2:[643,1018,35,16],k3:[688,1018,34,16],k4:[599,977,34,16],k5:[643,977,35,15],k6:[688,977,34,15],k7:[599,935,34,16],k8:[643,935,35,16],k9:[688,935,34,16]});
+Object.assign(DK.btn,{power:[1498,326,32,20],soft1:[1271,570,36,16],soft2:[1318,570,38,16],soft3:[1371,570,35,16],soft4:[1418,570,38,16],sounds:[1418,615,38,16],enter:[1190,705,39,15],k0:[1092,704,37,16],kdot:[1141,704,38,16],k1:[1095,659,34,16],k2:[1140,659,39,16],k3:[1190,660,39,15],k4:[1091,615,38,16],k5:[1140,615,39,16],k6:[1190,616,39,15],k7:[1096,570,33,16],k8:[1140,570,39,16],k9:[1190,571,39,15]});
+Object.assign(DKV.btn,{power:[934,690,28,18],soft1:[759,936,34,16],soft2:[803,936,34,16],soft3:[847,936,35,16],soft4:[892,936,35,16],sounds:[892,977,35,16],enter:[688,1061,34,15],k0:[599,1061,34,15],kdot:[643,1060,35,16],k1:[599,1019,34,15],k2:[643,1018,35,16],k3:[688,1018,34,16],k4:[599,977,34,16],k5:[643,977,35,15],k6:[688,977,34,15],k7:[599,935,34,16],k8:[643,935,35,16],k9:[688,935,34,16]});
 DK.wheel=[1160,822,35];DKV.wheel=[660,1170,31];
 const GEO={deskh:DK,deskv:DKV};
 /* pad order on the MPC60 II, top row first */
@@ -171,16 +171,6 @@ function machine(c,ox,oy,sc,S,o){
  const led=(x,y,on,col)=>{c.fillStyle=on?col:'rgba(40,10,10,.9)';c.fillRect(x-4*u,y-2*u,8*u,3.4*u);if(on){const r=c.createRadialGradient(x,y,1,x,y,14*u);r.addColorStop(0,'rgba(255,60,40,.75)');r.addColorStop(1,'rgba(255,60,40,0)');c.fillStyle=r;c.fillRect(x-16*u,y-16*u,32*u,32*u)}};
  const ph=((lt%(bl*2))+bl*2)%(bl*2);
  led(G.leds.play[0],G.leds.play[1],run,'#ff3a24');led(G.leds.rec[0],G.leds.rec[1],run,'#ff3a24');led(G.leds.over[0],G.leds.over[1],run&&ph<bl*.5,'#ff3a24');
- if(o.power!=null&&G.btn&&G.btn.power)powerSwitch(c,G,u,o.power);
- c.restore()}
-/* a rocker power switch with a POWER label and a small green light: the rocker tips to the lit "I" side when the hand presses it (o.power 0 = off, 1 = on) */
-function powerSwitch(c,G,u,p){const r=G.btn.power,x=r[0],y=r[1],w=r[2],h=r[3],pl=4*u;c.save();
- c.fillStyle='#070708';c.beginPath();c.roundRect?c.roundRect(x-pl*.5,y-pl*.5,w+pl,h+pl,3*u):c.rect(x-pl*.5,y-pl*.5,w+pl,h+pl);c.fill();c.strokeStyle='rgba(255,255,255,.14)';c.lineWidth=.8*u;c.stroke();
- const hw=w/2,onSide=p>.5,drawHalf=(hx,up)=>{const g=c.createLinearGradient(0,y,0,y+h);if(up){g.addColorStop(0,'#e4e2dc');g.addColorStop(1,'#a9a69d')}else{g.addColorStop(0,'#3a3a3d');g.addColorStop(1,'#1d1d20')}c.fillStyle=g;const yy=up?y:y+h*.12,hh=up?h:h*.88;c.beginPath();c.roundRect?c.roundRect(hx+.6*u,yy,hw-1.2*u,hh,2*u):c.rect(hx+.6*u,yy,hw-1.2*u,hh);c.fill()};
- drawHalf(x,!onSide);drawHalf(x+hw,onSide);
- c.fillStyle=onSide?'#262628':'#c9c7c0';c.font='700 '+Math.round(h*.45)+'px Montserrat,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('O',x+hw/2,y+h*.52);c.fillStyle=onSide?'#262628':'#6b6b6e';c.fillText('I',x+hw*1.5,y+h*.52);
- c.fillStyle='rgba(235,230,215,.85)';c.font='700 '+Math.round(h*.34)+'px Montserrat,sans-serif';c.fillText('POWER',x+w/2,y-h*.42);
- const lx=x+w+pl+4*u,ly=y+h/2;c.fillStyle=onSide?'#3dff5a':'#102614';c.beginPath();c.arc(lx,ly,2.4*u,0,6.2832);c.fill();if(onSide){const rg=c.createRadialGradient(lx,ly,1,lx,ly,12*u);rg.addColorStop(0,'rgba(61,255,90,.55)');rg.addColorStop(1,'rgba(61,255,90,0)');c.fillStyle=rg;c.fillRect(lx-12*u,ly-12*u,24*u,24*u)}
  c.restore()}
 /* the start of every video: the unit is dark, a hand switches it on (the screen boots and types the beat name), then the hand presses PLAY START and the beat begins */
 const INTRO=4.2,PW=.6,startOn=()=>!!(ST&&ST.start!==false),leadOf=()=>startOn()?INTRO:LEAD;
@@ -285,7 +275,7 @@ function handHits(Sx,G){const ck='_hh'+(G&&G.id||'');if(Sx[ck])return Sx[ck];con
  /* who plays what: kick and snare are always tapped (they never give way); a hi-hat tap gives way to them; a hand keeps its own side (left = columns 1-2, right = columns 3-4) and may reach one column across; a hand taps at most about 8 times a second */
  const pr=p=>p<0?0:(p===K.kick||K.sn.includes(p))?0:p===K.hat?3:1,reach=(k,col,p)=>pr(p)===1?true:(k==='l'?col<=2:col>=1),busy=(k,h)=>h.t-last[k]<(lp[k]===h.pad?.085:.115);
  const list=(Sx.pre||[]).concat(Sx.hits||[]).slice().sort((a,b)=>a.t-b.t||pr(a.btn?-1:a.pad)-pr(b.btn?-1:b.pad));
- list.forEach(h=>{let key,hh;if(h.btn){const pc=btnC(GG,h.btn);if(!pc)return;key=(h.btn==='power'&&pc[0]<GG.pad.x0+1.5*GG.pad.px)?'l':'r';hh={t:h.t,pad:-1,v:h.v,pos:pc}}else{key=(h.pad%4)<2?'l':'r';hh={t:h.t,pad:h.pad,v:h.v}}
+ list.forEach(h=>{let key,hh;if(h.btn){const pc=btnC(GG,h.btn);if(!pc)return;key='r';hh={t:h.t,pad:-1,v:h.v,pos:pc}}else{key=(h.pad%4)<2?'l':'r';hh={t:h.t,pad:h.pad,v:h.v}}
   if(busy(key,h)){const other=key==='l'?'r':'l',L=o[key],pv=L[L.length-1];
    if(!h.btn&&pv&&pv.pad>=0&&pr(h.pad)<pr(pv.pad)){L.pop();const pp=L[L.length-1];last[key]=pp?pp.t:-9;lp[key]=pp?pp.pad:-1}   /* a kick or snare takes the place of any lighter tap, a chop takes the place of a hat */
    else if(!h.btn&&reach(other,h.pad%4,h.pad)&&!busy(other,h))key=other;
@@ -454,7 +444,7 @@ function frame(c,W,H,fmt,T,X){
  if(cu){const G0=SC?SC.G:PH,pcx=G0.pad.x0+1.5*G0.pad.px+G0.pad.w/2,pcy=G0.pad.y0+1.5*G0.pad.py+G0.pad.h/2,zoom=(SC?1.78:1.55)*(1+.04*Math.sin(T*.23)),sc2=(SC?sc:sc0)*zoom;sc=sc2;ox=W/2-pcx*sc+Math.sin(T*.19)*6;oy=H*.47-pcy*sc+Math.cos(T*.16)*5}
  const fx={vol:(.21*ease((T-.15)/2.4))+.012*Math.sin(T*.6),con:.05*Math.sin(T*.4),fader:Math.max(0,26*(.5+.5*Math.sin(T*.29-.6))),btn:{play:0,start:pulse(T,t0-.42,t0-.12),rec:pulse(T,t0-.42,t0-.12),over:0,stop:X.make?0:pulse(T,lastEnd-.08,lastEnd+.2)}};
  if(X.make){for(const e of Sx.btnEv){const q=pulse(T,e.t-.05,e.t+.16);if(q>(fx.btn[e.k]||0))fx.btn[e.k]=q}fx.wheel=X.make.wheelAngle(T)}
- machine(c,ox,oy,sc,Sx,{lcd:X.make&&!((X.intro>0)&&T<X.intro)?X.make.lcdAt(T):null,boot:(X.intro>0&&T<X.intro&&T>=PW)?T-PW:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,power:(X.make&&X.make.pdAt&&X.make.pdAt(T+.1)>=0)?0:(X.intro>0?ease((T-PW)/.12):1),pdown:(X.intro>0&&T<PW)?5:(X.make&&X.make.pdAt?X.make.pdAt(T):-1),run:la>=-.02&&T<(X.make&&X.make.stopT?X.make.stopT:lastEnd),trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
+ machine(c,ox,oy,sc,Sx,{lcd:X.make&&!((X.intro>0)&&T<X.intro)?X.make.lcdAt(T):null,boot:(X.intro>0&&T<X.intro&&T>=PW)?T-PW:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,pdown:(X.intro>0&&T<PW)?5:(X.make&&X.make.pdAt?X.make.pdAt(T):-1),run:la>=-.02&&T<(X.make&&X.make.stopT?X.make.stopT:lastEnd),trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
 {c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC?SC.G:PH;
   if(SC&&Gs.id==='deskh')drawCan(c,Gs,Sx);
   if(ST.hands&&ST.hands.on)drawHands(c,Gs,Sx,la,!!SC);
