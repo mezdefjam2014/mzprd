@@ -228,8 +228,13 @@ function handHits(Sx,G){const ck='_hh'+(G&&G.id||'');if(Sx[ck])return Sx[ck];con
  const reach=(k,col)=>k==='l'?col<=2:col>=1,busy=(k,h)=>h.t-last[k]<(lp[k]===h.pad?.085:.115);
  (Sx.hits||[]).slice().sort((a,b)=>a.t-b.t).forEach(h=>{let key,hh;if(h.btn){const pc=btnC(GG,h.btn);if(!pc)return;key='r';hh={t:h.t,pad:-1,v:h.v,pos:pc}}else{key=(h.pad%4)<2?'l':'r';hh={t:h.t,pad:h.pad,v:h.v}}
   if(busy(key,h)){const L=o[key],pv=L[L.length-1];
-   if(pv&&pv.pad>=0&&h.pad>=0&&h.t-pv.t<.03&&pv.pad!==h.pad&&Math.abs((pv.pad%4)-(h.pad%4))<=1&&Math.abs(Math.floor(pv.pad/4)-Math.floor(h.pad/4))<=1){const a=hpos(GG,pv),b=hpos(GG,hh);pv.pos=[(a[0]+b[0])/2,(a[1]+b[1])/2];pv.v=Math.max(pv.v,h.v);return}
-   const other=key==='l'?'r':'l';if(h.btn||!reach(other,h.pad%4)||busy(other,h))return;key=other}
+   if(pv&&pv.pad>=12&&h.pad>=12&&h.t-pv.t<.03&&pv.pad!==h.pad&&Math.abs((pv.pad%4)-(h.pad%4))<=1&&Math.abs(Math.floor(pv.pad/4)-Math.floor(h.pad/4))<=1){const a=hpos(GG,pv),b=hpos(GG,hh);pv.pos=[(a[0]+b[0])/2,(a[1]+b[1])/2];pv.v=Math.max(pv.v,h.v);return}
+   const other=key==='l'?'r':'l',chop=!h.btn&&h.pad<12;
+   /* a chop must always be played on a pad (it is the sound the viewer is following): the other hand may reach any column for it, and if both hands are busy it replaces a hi-hat tap, never a kick or a snare */
+   if(h.btn||!(chop||reach(other,h.pad%4)))return;
+   if(!busy(other,h)){key=other}
+   else if(chop){let k2=null;for(const k of [key,other]){const Lk=o[k],pk=Lk[Lk.length-1];if(pk&&pk.pad===12&&h.t-pk.t<.115){k2=k;break}}if(!k2)return;key=k2;const Lk=o[key];Lk.pop();const pp=Lk[Lk.length-1];last[key]=pp?pp.t:-9;lp[key]=pp?pp.pad:-1}
+   else return}
   last[key]=h.t;lp[key]=h.pad;o[key].push(hh)});return Sx[ck]=o}
 const hpos=(G,h)=>h.pos||padC(G,h.pad);
 const padC=(G,i)=>[G.pad.x0+(i%4)*G.pad.px+G.pad.w/2,G.pad.y0+Math.floor(i/4)*G.pad.py+G.pad.h*.58];
@@ -724,7 +729,7 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  $q('#mFh').onclick=async()=>{ST.fmt='h';save();await ensureScene('h');size();drawNow()};$q('#mFv').onclick=async()=>{ST.fmt='v';save();await ensureScene('v');size();drawNow()};
  $q('#mPlay').onclick=play;$q('#mScrub').oninput=()=>{if(PV.playing)stopPlay();drawNow()};
  const T=ST.tape;$q('#mSens').value=String(ST.sens==null?1:ST.sens);$q('#mNudge').value=String(ST.nudge||0);$q('#mNudgeV').textContent=String(ST.nudge||0);const relay=()=>{save();for(const id in CACHE){}if(S&&S.raw){applyKit();S._hh=null;if(S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}}if(TP){TP.tracks.forEach(t=>{const L=layout(t.S.raw,t.S.kit);t.S.hits=L.hits;t.S.per=L.per;t.S._hh=null});TP._v=null;TP._h=null;TP._c=null}drawNow()};$q('#mSens').onchange=e=>{ST.sens=+e.target.value;relay()};$q('#mNudge').oninput=e=>{ST.nudge=+e.target.value;$q('#mNudgeV').textContent=String(ST.nudge);relay()};$q('#mTpOn').checked=!!T.on;$q('#mTpT').value=T.title;$q('#mTpL').value=String(T.len);$q('#mTpX').value=String(T.xf);$q('#mTpBox').style.display=T.on?'block':'none';tpList();
- const mountS2B=async()=>{if(mountS2B.done)return;mountS2B.done=1;try{await loadS('mpcsample.js?v=24');window.__s2b=MZMpcSample.mount($q('#mS2B'),{ST,save:()=>{save();summ()},esc,ctx:ctxA,loadS,cpy,dlf,ensureScene:()=>ensureScene(ST.fmt),setEp:x=>{EP=x;if(ST.s2b)ST.s2b.useEp=!!x;thRender();stopPlay();dropV();if(x){const cv=$q('#mScrub');if(cv)cv.value='0'}drawNow();summ()},hasEp:()=>!!EP,thumbs:()=>thRender()});summ()}catch(e){mountS2B.done=0;$q('#mS2B').innerHTML='<div class="msg">The sample chopper did not load. Refresh the page.</div>'}};
+ const mountS2B=async()=>{if(mountS2B.done)return;mountS2B.done=1;try{await loadS('mpcsample.js?v=26');window.__s2b=MZMpcSample.mount($q('#mS2B'),{ST,save:()=>{save();summ()},esc,ctx:ctxA,loadS,cpy,dlf,ensureScene:()=>ensureScene(ST.fmt),setEp:x=>{EP=x;if(ST.s2b)ST.s2b.useEp=!!x;thRender();stopPlay();dropV();if(x){const cv=$q('#mScrub');if(cv)cv.value='0'}drawNow();summ()},hasEp:()=>!!EP,thumbs:()=>thRender()});summ()}catch(e){mountS2B.done=0;$q('#mS2B').innerHTML='<div class="msg">The sample chopper did not load. Refresh the page.</div>'}};
  root.querySelectorAll('details.grp').forEach(d=>{d.open=!!ST.open[d.id];if(d.id==='g_s2b'){d.addEventListener('toggle',()=>{if(d.open)mountS2B()});if(d.open)mountS2B()}d.addEventListener('toggle',()=>{ST.open[d.id]=d.open?1:0;save()})});$q('#mOpenAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=true);$q('#mCloseAll').onclick=()=>root.querySelectorAll('details.grp').forEach(d=>d.open=false);
  $q('#mRight').addEventListener('change',()=>setTimeout(summ,0));$q('#mRight').addEventListener('input',()=>setTimeout(summ,0));summ();
  $q('#mTpOn').onchange=e=>{T.on=e.target.checked;save();$q('#mTpBox').style.display=T.on?'block':'none';stopPlay();ytRender();thRender();drawNow()};
