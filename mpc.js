@@ -355,13 +355,37 @@ function gradeFx(c,W,H){const g=(ST.cam||{}).grade;if(!g||g==='0')return;c.save(
  else if(g==='cold'){fill('multiply','rgb(214,228,248)');fill('overlay','rgb(90,150,255)',.10);fill('screen','rgb(30,50,90)',.06);vig(.12)}
  else if(g==='faded'){fill('screen','rgb(52,50,70)',.2);fill('multiply','rgb(252,242,226)');fill('saturation','rgb(128,128,128)',.32);fill('soft-light','rgb(255,210,160)',.2);vig(.14)}
  c.restore()}
+/* ---------- camera moves (tick the ones you want, they apply live in every video and in the Sample to Beat episode) ----------
+   push = a very slow push-in over the whole video; pan = a slow drift between the pads, the screen and the buttons; nod = a small push-in and dip on every kick;
+   cuts = wide desk / pad close-up / screen close-up / drum row, switched every 2 bars; whip = a quick punch-in that settles on every section change; tilt = a slow gentle tilt.
+   Everything is a pure function of time, so the preview and the export match. The target is kept inside the picture so no edge ever shows. */
+const CAMMV=[['push','SLOW PUSH-IN (A VERY SLOW ZOOM TOWARD THE PADS OVER THE WHOLE VIDEO)'],['pan','PAN BETWEEN POINTS (A SLOW DRIFT FROM THE PADS TO THE SCREEN TO THE BUTTONS)'],['nod','KICK NOD (A SMALL PUSH-IN AND DIP ON EVERY KICK)'],['cuts','CUT SHOTS (WIDE DESK, PAD CLOSE-UP, SCREEN CLOSE-UP, DRUM ROW, SWITCHED EVERY 2 BARS)'],['whip','PUNCH-IN ON EVERY SECTION CHANGE (A QUICK ZOOM THAT SETTLES)'],['tilt','SLOW TILT (A GENTLE ROCKING ANGLE ON A LONG BEAT)']];
+const camAny=m=>!!m&&CAMMV.some(([k])=>m[k]);
+function camMoves(M,T,X,Sx,la,G,sc,ox,oy,W,H,t0,lastEnd){const lerp=(a,b,q)=>a+(b-a)*q;let z=1,tx=W/2,ty=H/2,rot=0;
+ const P=G.pad,L=G.lcd,toPx=(gx,gy)=>[ox+gx*sc,oy+gy*sc],pads=toPx(P.x0+1.5*P.px+P.w/2,P.y0+1.5*P.py+P.h/2),drums=toPx(P.x0+1.5*P.px+P.w/2,P.y0+3*P.py+P.h/2),lcd=toPx(L.x+L.w/2+L.w*.12,L.y+L.h/2+L.h*.9),btns=G.btn&&G.btn.stop?toPx(G.btn.stop[0]+G.btn.stop[2]/2,G.btn.stop[1]-40):pads;
+ const bl=60/((Sx&&Sx.bpm)||90),mk=X.make,span=Math.max(10,lastEnd-t0),off=(Sx&&Sx.off)||0;
+ if(M.push)z*=1+.07*ease((T-t0)/span);
+ if(M.cuts){const seq=['wide','pads','lcd','drums','pads','lcd'],ZS={pads:1.65,drums:2.05,lcd:2.3},PT={pads,drums,lcd};let st=off,unit=8*bl,i0=0,cutsOn=true;
+  if(mk&&mk.flipT!=null){if(T<mk.flipT)cutsOn=false;else{const starts=[mk.flipT].concat(mk.layers.map(l=>l.t),[mk.fullT]);let si=0;while(si+1<starts.length&&starts[si+1]<=T)si++;st=starts[si];unit=(si===starts.length-1?mk.loopLen:mk.segLen)/2;i0=si*2}}
+  else{st=off;if(la<off)cutsOn=false}
+  if(cutsOn){const rel=mk&&mk.flipT!=null?T-st:la-st,u0=Math.floor(rel/unit),nm=u=>u<=0?'wide':seq[(((i0+u)%seq.length)+seq.length)%seq.length],q=ease((rel-u0*unit)/.24),a=nm(u0-1),b=nm(u0),ZA=a==='wide'?1:ZS[a],ZB=b==='wide'?1:ZS[b],PA=a==='wide'?[W/2,H/2]:PT[a],PB=b==='wide'?[W/2,H/2]:PT[b];
+   z*=lerp(ZA,ZB,q);tx=lerp(PA[0],PB[0],q);ty=lerp(PA[1],PB[1],q)}}
+ else if(M.pan){const pts=[pads,lcd,btns,drums],per=7,rel=Math.max(0,T-t0),k=Math.floor(rel/per),p=rel-k*per,q=ease(clamp((p-4.4)/2.6,0,1)),A=pts[k%4],B=pts[(k+1)%4];z*=1.22;tx=lerp(A[0],B[0],q);ty=lerp(A[1],B[1],q)}
+ if(M.nod){let q=0;const arr=mk?mk.lanes&&mk.lanes.kick:(()=>{const K=KITS[Sx.kit]||KITS[0];return Sx.per&&Sx.per[K.kick]})(),tt=mk?T:la;if(arr&&arr.length){let lo=0,hi=arr.length;while(lo<hi){const m=(lo+hi)>>1;if(arr[m].t<=tt)lo=m+1;else hi=m}if(lo>0){const h=arr[lo-1],dt=tt-h.t;if(dt<.5)q=Math.exp(-dt/.085)*(1-Math.exp(-dt/.012))*Math.min(1,h.v||.8)}}z*=1+.0065*q;ty-=2.4*q*W/1920}
+ if(M.whip){let ev=null;if(mk&&mk.flipT!=null){const evs=[mk.flipT].concat(mk.layers.map(l=>l.t),[mk.fullT]);for(const e of evs)if(T>=e)ev=T-e}else if(la>=off){const bar8=32*bl;ev=(la-off)%bar8}
+  if(ev!=null&&ev<1.2)z*=1+.09*Math.exp(-ev/.26)*ease(ev/.035)}
+ if(M.tilt){rot=.0105*Math.sin(T*.285)+.004*Math.sin(T*.71+1);z*=1.014}
+ const hw=W/(2*z),hh=H/(2*z);tx=clamp(tx,hw,W-hw);ty=clamp(ty,hh,H-hh);return{z,tx,ty,rot}}
 function frame(c,W,H,fmt,T,X){
  LAMPFL=lampLevel(T);const cu=fmt==='c';if(cu)fmt='v';const OV=!cu&&!X.long;
  const v=fmt==='v',E=ST.eng,sc0=v?.87*W/848:.6*W/848,k=trackAt(X,T),tr=X.tracks[k],Sx=tr.S,lt=T-tr.start,la=lt+(tr.off||0),tape=X.kind==='tape',last=X.tracks[X.tracks.length-1],lastEnd=last.start+last.dur,t0=X.make?X.make.T0:X.tracks[0].start;
  const dx=(1.3*Math.sin(T*.31)+.7*Math.sin(T*.77+1.3))*W/1920,dy=(1.1*Math.sin(T*.27+.8)+.6*Math.sin(T*.69+2.1))*W/1920,zs=(1+.0028*Math.sin(T*.21+.4))*(E.hook?1+.2*(1-ease(T/.8)):1)*(ST.cam&&ST.cam.rack?1+.014*(1-ease((T-.15)/1.8)):1);
  c.save();c.fillStyle='#fff';c.fillRect(0,0,W,H);c.translate(W/2+dx,H/2+dy);c.scale(zs,zs);c.translate(-W/2,-H/2);
  const SC=sceneOf(fmt),intro=tape&&T<t0;let sc=sc0,cx=W/2,cy=v?H*.5:H*.495,ox=cx-PH.cx*sc,oy=cy-PH.cy*sc;
- if(SC){sc=Math.max(W/SC.G.W,H/SC.G.H)*1.025;ox=(W-SC.G.W*sc)/2;oy=(H-SC.G.H*sc)/2}else ground(c,W+80,H+80,ox,oy,sc);
+ if(SC){sc=Math.max(W/SC.G.W,H/SC.G.H)*1.025;ox=(W-SC.G.W*sc)/2;oy=(H-SC.G.H*sc)/2}
+ /* camera moves: everything drawn from here on (ground, desk, machine, hands) moves with the camera */
+ if(!cu&&camAny(ST.cam&&ST.cam.moves)){const m=camMoves(ST.cam.moves,T,X,Sx,la,SC?SC.G:PH,sc,ox,oy,W,H,t0,lastEnd);c.translate(W/2,H/2);c.rotate(m.rot);c.scale(m.z,m.z);c.translate(-m.tx,-m.ty)}
+ if(!SC)ground(c,W+80,H+80,ox,oy,sc);
  if(cu){const G0=SC?SC.G:PH,pcx=G0.pad.x0+1.5*G0.pad.px+G0.pad.w/2,pcy=G0.pad.y0+1.5*G0.pad.py+G0.pad.h/2,zoom=(SC?1.78:1.55)*(1+.04*Math.sin(T*.23)),sc2=(SC?sc:sc0)*zoom;sc=sc2;ox=W/2-pcx*sc+Math.sin(T*.19)*6;oy=H*.47-pcy*sc+Math.cos(T*.16)*5}
  const fx={vol:(.21*ease((T-.15)/2.4))+.012*Math.sin(T*.6),con:.05*Math.sin(T*.4),fader:Math.max(0,26*(.5+.5*Math.sin(T*.29-.6))),btn:{play:0,start:pulse(T,t0-.42,t0-.12),rec:pulse(T,t0-.42,t0-.12),over:0,stop:X.make?0:pulse(T,lastEnd-.08,lastEnd+.2)}};
  if(X.make){for(const e of Sx.btnEv){const q=pulse(T,e.t-.05,e.t+.16);if(q>(fx.btn[e.k]||0))fx.btn[e.k]=q}fx.wheel=X.make.wheelAngle(T)}
@@ -454,6 +478,7 @@ function html(){return`<div class="mg"><div>
  <details class="sec grp" id="g_cam"><summary>3. CAMERA AND LIGHT <small id="s_cam"></small></summary><div class="in">
   <label>LAMP LIGHT (DESK SCENES)</label><select id="mLamp"><option value="0">Steady (no change)</option><option value="1">Gentle</option><option value="2">Real (it sags and flickers now and then)</option><option value="3">Dramatic</option></select>
   <label>DEPTH OF FIELD (BLURRED BACKGROUND, LIKE A REAL LENS)</label><select id="mDof"><option value="0">Off (everything sharp)</option><option value="1">Soft</option><option value="2">Strong</option></select>
+  <details id="mCamMv" style="margin:8px 0;border:1px solid #2a2a30;padding:6px 10px"><summary style="cursor:pointer;font:700 10px Montserrat;letter-spacing:.2em;color:#c9a14a">CAMERA MOVES (CLICK THE ONES YOU WANT)</summary><div id="mCamMvList" style="margin-top:6px"></div></details>
   <label class="chk"><input type="checkbox" id="mRack"> FOCUS PULL AT THE START (FOCUS SLIDES FROM THE LAMP TO THE PADS)</label>
   <label>COLOR GRADE</label><select id="mGrade"><option value="0">None (as is)</option><option value="warm">Warm film</option><option value="teal">Teal and orange</option><option value="cold">Cold studio</option><option value="faded">Faded 90s</option></select>
  </div></details>
@@ -694,7 +719,7 @@ function thRenderNow(){const el=$q('#mTH');if(!el||!YT())return;const b=ST.tape.
  el.querySelector('#mThF').onchange=e=>{T.fmt=e.target.value;save();thRender()};el.querySelector('#mThH').onchange=e=>{T.hands=e.target.value;save();thRender()};el.querySelector('#mThD').onchange=e=>{T.bgm=e.target.value;save();thRender()};el.querySelector('#mThP').onchange=e=>{T.pal=e.target.value;save();thRender()};el.querySelector('#mThN').onclick=()=>{T.seed++;save();thRender()}}
 
 const SUM={scene:()=>(ST.scene==='white'?'White studio':'Desk / '+((SKINS.find(k=>k[0]===(ST.skin||'orig'))||[0,'Original'])[1]).replace(/^The /,''))+(ST.res==='4k'?' / 4K':''),
- cam:()=>{const t=[];if(ST.lamp!=null&&+ST.lamp!==2)t.push('lamp '+['steady','gentle','real','dramatic'][ST.lamp]);const m=ST.cam||{};if(m.dof&&m.dof!=='0')t.push('DOF '+(m.dof==='2'?'strong':'soft'));if(m.rack)t.push('focus pull');if(m.grade&&m.grade!=='0')t.push({warm:'warm film',teal:'teal+orange',cold:'cold',faded:'faded 90s'}[m.grade]);return t.join(' / ')||'lamp real'},
+ cam:()=>{const t=[];if(ST.lamp!=null&&+ST.lamp!==2)t.push('lamp '+['steady','gentle','real','dramatic'][ST.lamp]);const m=ST.cam||{};if(m.dof&&m.dof!=='0')t.push('DOF '+(m.dof==='2'?'strong':'soft'));if(m.rack)t.push('focus pull');if(m.moves&&camAny(m.moves)){const n=CAMMV.filter(([k])=>m.moves[k]).length;t.push(n+(n===1?' camera move':' camera moves'))}if(m.grade&&m.grade!=='0')t.push({warm:'warm film',teal:'teal+orange',cold:'cold',faded:'faded 90s'}[m.grade]);return t.join(' / ')||'lamp real'},
  extras:()=>{const t=[];if(ST.intro)t.push('intro');if(ST.hands&&ST.hands.on)t.push('hands');if(ST.smoke&&ST.smoke.on)t.push('smoke');return t.join(' / ')||'none'},
  hits:()=>['clear hits','balanced','every hit'][ST.sens==null?1:ST.sens]+((ST.nudge||0)?' / '+ST.nudge+' ms':''),
  watch:()=>{const E=ST.eng,t=[];if(E.hook)t.push('hook');if(E.sub)t.push('subscribe');if(E.loop)t.push('loop');if(E.meters!==false)t.push('meters');if(E.note)t.push('note');if(E.q)t.push('question');return t.join(' / ')||'none'},
@@ -704,7 +729,7 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();mark('yt','th','gen')};for(const k in PNL){$q(PNL[k][0]).addEventListener('toggle',paintPanels)}
  $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};
- const CM=ST.cam;$q('#mDof').value=CM.dof;$q('#mRack').checked=!!CM.rack;$q('#mGrade').value=CM.grade;
+ const CM=ST.cam;CM.moves=CM.moves||{};{const box=$q('#mCamMvList');box.innerHTML=CAMMV.map(([k,t])=>'<label class="chk" style="font-size:11px"><input type="checkbox" data-mv="'+k+'"'+(CM.moves[k]?' checked':'')+'> '+t+'</label>').join('');box.querySelectorAll('[data-mv]').forEach(c=>c.onchange=()=>{CM.moves[c.dataset.mv]=c.checked;save();drawNow();summ()})}$q('#mDof').value=CM.dof;$q('#mRack').checked=!!CM.rack;$q('#mGrade').value=CM.grade;
  $q('#mDof').onchange=e=>{CM.dof=e.target.value;save();drawNow()};$q('#mRack').onchange=e=>{CM.rack=e.target.checked;save();drawNow()};$q('#mGrade').onchange=e=>{CM.grade=e.target.value;save();drawNow()};
  $q('#mIntro').checked=!!ST.intro;$q('#mIntro').onchange=e=>{ST.intro=e.target.checked;save();stopPlay();if(S&&S.buf){S.tl=tlOne(S);dropV()}if(TP){TP=null;$q('#mTpMsg').textContent='The intro changed. Press BUILD THE TAPE again.';mark('yt','th','gen')}drawNow()};
  const CN=ST.can;$q('#mCan').value=String(CN.id);const canUi=()=>{$q('#mCanSet').style.display=(CN.id==='orig'||CN.id==='none')?'none':'block';$q('#mCanSv').textContent=CN.size;$q('#mCanRv').textContent=CN.rot};
