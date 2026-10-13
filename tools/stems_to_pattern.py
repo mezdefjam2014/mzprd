@@ -23,11 +23,21 @@ def onsets(x, gap, rel=.22):
             while j > 0 and d[j - 1] > d[i] * .25: j -= 1
             out.append(j * hop); last = i
     return out, env
+def kind_of(n):
+    n = n.lower()
+    if 'kick' in n: return 'kick'
+    if 'snare' in n or 'sanre' in n or n.startswith('good snare'): return 'snare'
+    if any(w in n for w in ('crash', 'cym', 'cybal', 'crsh', 'chime', 'shaker', 'shake', 'perc', 'tom', 'cong', 'chant', 'fx', 'hook', '808', 'low hit', 'shh', 'bell')): return None
+    if n.strip(' .wav') in ('clap', 'claps', 'clap praise'): return 'clap'
+    if any(w in n for w in ('hat', 'chh', 'hi', 'chi')): return 'hat'
+    return None
 stems = {}
 for p in glob.glob(os.path.join(src, '*.wav')):
-    n = os.path.basename(p).lower()
-    k = 'kick' if 'kick' in n else 'snare' if 'snare' in n else 'hat' if 'hat' in n else None
-    if k: stems.setdefault(k, []).append((n, load(p)))
+    k = kind_of(os.path.basename(p))
+    if k: stems.setdefault(k, []).append((os.path.basename(p).lower(), load(p)))
+if 'snare' not in stems and 'clap' in stems: stems['snare'] = stems.pop('clap')   # a clap-only backbeat plays as the snare layer
+stems.pop('clap', None)
+if not stems: print('no kick/snare/hat stems found'); sys.exit(2)
 hits = {}
 for k, lst in stems.items():
     hits[k] = []
@@ -38,23 +48,34 @@ for k, lst in stems.items():
 # tempo + grid from the hats (or all hits): the step length that best fits every onset
 allt = np.array([h[0] / SR for k in hits for h in hits[k]])
 best = None
-for bpm in ([float(sys.argv[2])] if len(sys.argv) > 2 and sys.argv[2] != 'auto' else np.arange(60, 200, .5)):
+import re as _r0
+hint = float(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2] not in ('auto',) else None
+if hint is None:
+    m = _r0.search(r'(\d+(?:\.\d+)?)\s*(?:kkj\s*)?(?:\.\.)?\s*(?:bpm|m bpm|_?bpm)', os.path.basename(os.path.normpath(src)), _r0.I) or _r0.search(r'(\d+(?:\.\d+)?)', os.path.basename(os.path.normpath(src)).split('_', 1)[-1])
+    if m and 60 <= float(m.group(1)) <= 200: hint = float(m.group(1))
+    elif m and 120 < float(m.group(1)) <= 200: hint = float(m.group(1)) / 2
+for bpm in (np.arange(hint * .94, hint * 1.06, .25) if hint else np.arange(60, 200, .5)):
     st = 60 / bpm / 4
     for off in np.arange(0, st, .002):
         q = (allt - off) / st; err = np.abs(q - np.round(q)).mean()
         if best is None or err < best[0] - 1e-6: best = (err, bpm, off)
 err, bpm, off = best; st = 60 / bpm / 4
-n = max(len(x) for lst in stems.values() for _, x in lst); steps = int(round((n / SR - off) / st))
+n = max(len(x) for lst in stems.values() for _, x in lst); n = min(n, int(SR * 60 / bpm * 16 * 1.02)) if False else n; steps = int(round((n / SR - off) / st))
 bars = min(4, max(1, steps // 16)); print('bpm', bpm, 'grid offset', round(off, 4), 'fit err', round(err, 3), 'bars', bars)
 NAME = sys.argv[3] if len(sys.argv) > 3 else os.path.basename(os.path.normpath(src))
 import re as _re; SLUG = _re.sub(r'[^a-z0-9]+', '-', NAME.lower()).strip('-')
 os.makedirs(os.path.join(OUT, 'stems'), exist_ok=True)
 pat = {'name': NAME, 'pack': 'stems/' + SLUG, 'bpm': float(bpm), 'bars': bars, 'lanes': {}}
+stp = {k: [int(round((h[0] / SR - off) / st)) for h in hits[k]] for k in hits}
+def sc(sh):   # where is the bar line? snare on 2 and 4 (steps 4 and 12), kick on 1 (step 0)
+    return sum(2 for x in stp.get('snare', []) if (x + sh) % 16 in (4, 12)) + sum(1 for x in stp.get('kick', []) if (x + sh) % 16 == 0) - sum(2 for x in stp.get('snare', []) if (x + sh) % 16 in (0, 8))
+SH = max(range(16), key=lambda z: (sc(z), -z)); print('bar line shift', SH)
 for k in hits:
     grid = [['.'] * 16 for _ in range(bars)]; pk = max([h[1] for h in hits[k]] or [1])
     for i, a, *_ in hits[k]:
-        s = int(round((i / SR - off) / st)); b, c = divmod(s, 16)
-        if 0 <= b < bars:
+        s = int(round((i / SR - off) / st)) + SH; b, c = divmod(s, 16)
+        b %= bars
+        if True:
             v = a / pk; grid[b][c] = 'X' if v >= .85 else 'x' if v >= .5 else 'g'
     pat['lanes'][k] = [''.join(g) for g in grid]
     print(k); [print('  ', g) for g in pat['lanes'][k]]
