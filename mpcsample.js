@@ -114,7 +114,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
   <div class="msg">Use samples you own, made yourself, or have cleared. A sample from someone else's record can get your video claimed by YouTube.</div>
  </div>`;
  const $=s=>el.querySelector(s),box=$('#sbBox');
- const show=()=>{box.style.display=Z.on?'block':'none'};$('#sbOn').checked=!!Z.on;show();$('#sbOn').onchange=e=>{Z.on=e.target.checked;show();api.save()};
+ const show=()=>{box.style.display=Z.on?'block':'none'};$('#sbOn').checked=!!Z.on;show();$('#sbOn').onchange=e=>{Z.on=e.target.checked;show();api.save();api.thumbs&&api.thumbs()};
  $('#sbN').value=String(Z.n);$('#sbN').onchange=e=>{Z.n=+e.target.value;api.save()};$('#sbSrc').value=Z.src||'';$('#sbSrc').oninput=e=>{Z.src=e.target.value;api.save()};
  const msg=t=>{$('#sbMsg').textContent=t};
  $('#sbFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;stop();msg('Reading '+f.name+'...');try{const ab=await f.arrayBuffer();buf=await api.ctx().decodeAudioData(ab);fname=f.name.replace(/\.[^.]+$/,'');R=null;msg('Loaded "'+fname+'" ('+buf.duration.toFixed(1)+' seconds). Press CHOP IT.')}catch(err){buf=null;msg('That file could not be read. Try an MP3 or WAV.')}};
@@ -191,7 +191,7 @@ function mount(el,api){const ST=api.ST,esc=api.esc;ST.s2b=ST.s2b||{on:false,n:12
   for(let c=0;c<B.numberOfChannels;c++){const d=B.getChannelData(c).slice(a,b),f=Math.min(d.length,Math.floor(sr*.25));for(let q=0;q<f;q++)d[d.length-1-q]*=q/f;o.copyToChannel(d,c)}
   api.dlf(D().wav(o),(fname||'sample').replace(/\.[^.]+$/,'')+' - beat '+lastEpId+' - full beat.wav');mmsg('Downloaded the full beat ('+Math.round(o.duration)+' s).')};
  $('#mkGo').onclick=()=>makeEp(sel);$('#mkBack').onclick=()=>{api.setEp(null);mmsg('Back to the normal video.')};mset();
- const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=25');await D().loadPatterns();KEY=D().keyOf(buf,R.ws,R.we);try{CH=D().chordUniform(buf,R)}catch(e){CH=null}fitC=new Map();sel=0;paintV();paintProg()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
+ const afterChop=async()=>{try{if(!D())await api.loadS('mpcdrums.js?v=25');await D().loadPatterns();KEY=D().keyOf(buf,R.ws,R.we);if(Z.last&&KEY)Z.last.key=KEY.name;api.thumbs&&api.thumbs();try{CH=D().chordUniform(buf,R)}catch(e){CH=null}fitC=new Map();sel=0;paintV();paintProg()}catch(e){console.warn(e);$('#sbVMsg').textContent='The drums did not load. Refresh the page.'}};
  window.__s2bAfter=afterChop;
  return{chop:()=>R,buf:()=>buf,stop,after:afterChop,key:()=>KEY,dev:{fit,fitInfo,playVar,makeEp,loopOpts}}}
 window.MZMpcSample={chop,tempoOf,fluxOf,pickPeaks,playSlice,mount,padIdx,PAD_NAMES};
