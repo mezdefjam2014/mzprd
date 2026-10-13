@@ -22,7 +22,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
   else{c.btns=[];c.tEnter=t+.6;c.aud=t+.75}
   c.btns.forEach(b=>{btnEv.push({t:b[1],k:b[0]});if(opt.handsBtn)hits.push({t:b[1],pad:-1,btn:b[0],v:.8})});
   addHit(c.aud,padIdx(s.pad),.9);c.end=c.aud+c.len+.3;t=c.end;chops.push(c)});
- const flipT=t+.15,fullLoops=Math.max(2,Math.ceil(90/loopLen)),layerT=layers.map((l,k)=>flipT+segLen*(k+1)),fullT=flipT+segLen*(layers.length+1),endMusic=fullT+loopLen*fullLoops,TAIL=1.4,total=endMusic+TAIL;
+ const PG=.5,flipT=t+.15+PG,fullLoops=Math.max(2,Math.ceil(90/loopLen)),layerT=layers.map((l,k)=>flipT+(segLen+PG)*(k+1)),fullT=flipT+(segLen+PG)*(layers.length+1),endMusic=fullT+loopLen*fullLoops,TAIL=1.4,total=endMusic+TAIL;
  /* ---- the audio, from the same plan ---- */
  const sr=44100,ctx=new OfflineAudioContext(2,Math.ceil(total*sr),sr),G=E.setup(ctx,dna,kit);if(G.crackle)G.crackle.start(0);
  const click=(tt,v,f)=>{const n=E.noiseAt(G,tt,.03),hp=ctx.createBiquadFilter(),g=ctx.createGain();hp.type='highpass';hp.frequency.value=f||1800;g.gain.setValueAtTime(.0001,tt);g.gain.linearRampToValueAtTime(v,tt+.001);g.gain.exponentialRampToValueAtTime(.0001,tt+.02);n.connect(hp);hp.connect(g);g.connect(ctx.destination)};
@@ -45,7 +45,8 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  const all=new Set(['chop','kick','snare','hat','open','b808']);for(let q=0;q<fullLoops;q++){const off=fullT+q*loopLen;if(isLoop)loopSample(off,loopLen);sched(off,evOf(all,loopLen))}
  /* the hand presses PLAY whenever the music starts (the sample, the chops, each new drum layer, the full beat) and STOP at the end */
  if(opt.buttons){const press=(k,tt)=>{btnEv.push({t:tt,k});if(opt.handsBtn)hits.push({t:tt,pad:-1,btn:k,v:.8});click(tt,.13,1800)};
-  press('play',sample.t-.04);layers.forEach((l,k)=>press('play',layerT[k]-.04));press('play',flipT-.04);press('play',fullT-.04);press('stop',endMusic+.05)}
+  const lead=PG-.08;   /* press PLAY, the hand lifts away, and the music starts a beat later so the first kick is tapped */
+  press('play',sample.t-.3);press('play',flipT-lead);layers.forEach((l,k)=>press('play',layerT[k]-lead));press('play',fullT-lead);press('stop',endMusic+.05)}
  const out=await ctx.startRendering();let pk=0;for(let c=0;c<2;c++){const d=out.getChannelData(c);for(let i=0;i<d.length;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}}const gk=pk>.0001?.92/pk:1;for(let c=0;c<2;c++){const d=out.getChannelData(c);for(let i=0;i<d.length;i++)d[i]*=gk}
  hits.sort((a,b)=>a.t-b.t);const per=PAD_NAMES.map(()=>[]);hits.forEach(h=>{if(h.pad>=0)per[h.pad].push({t:h.t,v:clamp(h.v,.4,1)})});
  /* ---- what the video needs ---- */
