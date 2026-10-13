@@ -88,6 +88,9 @@ function plan(dna,Rr,keyInfo){const bpm=Rr.bpmX||Rr.bpm,step=60/bpm/4,r=mul(dna.
     else{const alt=barItems((sb+1)%nb);play(b,alt.length?alt:it,.9)}continue}                          /* a different phrase */
    if(b===3){if(v3===0){const top=it.slice().sort((x,y)=>y.s-x.s)[0],head=it.filter(z=>z.w<10);play(b,head,.92);[12,13,14,15].forEach((w,i)=>put(b,{n:top.n,w,len:top.len},w+1,.7+.1*i,1))}   /* stutter turnaround */
     else if(v3===1)play(b,it.filter(z=>z.w<12),.9);else play(b,it,.9)}}}
+ /* every chop must end where the next one starts (or at the loop end), so variations never overlap or run into the next loop */
+ {const cs=chops.filter(c=>c.lane==='chop').sort((a,b)=>a.t-b.t),LL=64*step;for(let i=cs.length-2;i>=0;i--)if(cs[i+1].t-cs[i].t<.05){chops.splice(chops.indexOf(cs[i]),1);cs.splice(i,1)}   /* two slices under 50 ms apart would flam: keep the later one */
+  cs.forEach((c,i)=>{const nx=i<cs.length-1?cs[i+1].t:LL;c.len=Math.max(.04,Math.min(c.len,nx-c.t-.002))})}
  return{events:ev.concat(chops).sort((a,b)=>a.t-b.t),bpm,step,loopLen:64*step,dna,kit:dna.kit,key:keyInfo||null,chopMode:CM}}
 
 /* ================= the user's drum pack ================= */
