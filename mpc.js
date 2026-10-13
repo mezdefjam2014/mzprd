@@ -511,6 +511,7 @@ function html(){return`<div class="mg"><div>
   <label>TIMING NUDGE: <span id="mNudgeV">0</span> MS (MOVE THE PAD HITS EARLIER OR LATER)</label><input type="range" id="mNudge" min="-80" max="80" step="1" value="0" style="width:100%;accent-color:var(--red)">
   <div class="msg">The kick is the bottom right pad (BASS), snares are SNARE 1 and 2, hats are HIHAT, and chops and melody hits land on the toms, rides, crashes and percs.</div>
   <details class="sec sub2"><summary>WHAT THE TOOL HEARD</summary><div class="in msg" id="mMap"></div></details>
+  <button class="btn" id="mLearnAll" type="button">LEARN ALL BEATS (SAVED IN THIS BROWSER)</button><div class="msg" id="mLearnMsg">Each beat is learned and saved the first time it is opened, so its taps are the same every time.</div>
  </div></details>
  <details class="sec grp" id="g_watch"><summary>6. KEEP THEM WATCHING <small id="s_watch"></small></summary><div class="in">
   <label class="chk"><input type="checkbox" id="mEhk"> BIG HOOK LINE AT THE START (SLAMS ON SCREEN, THE MPC PUNCHES IN)</label>
@@ -547,7 +548,20 @@ function html(){return`<div class="mg"><div>
 function applyKit(){const id=ST.beat,k=ST.kits&&ST.kits[id]!=null&&ST.kits[id]!==''?+ST.kits[id]:kitFor(id);S.kit=k;const L=layout(S.raw,k);S.hits=L.hits;S.per=L.per;
  const tot=S.per.map((x,i)=>x.length?PAD_NAMES[i]+' '+x.length:'').filter(Boolean);const m=root&&$q('#mMap');if(m)m.textContent='Kit: '+KITS[k].n+'. '+(tot.join(' / ')||'Nothing was found.');const ks=root&&$q('#mKit');if(ks)ks.value=(ST.kits&&ST.kits[id]!=null&&ST.kits[id]!=='')?String(ST.kits[id]):''}
 const CACHE={};
-async function loadBeat(b){if(CACHE[b.id])return CACHE[b.id];const r=await fetch(pubU(b.preview_path));if(!r.ok)throw new Error('The preview of "'+b.title+'" did not load ('+r.status+').');const buf=await ctxA().decodeAudioData(await r.arrayBuffer());const raw=window.MZMpcDetect?await MZMpcDetect.analyze(buf):await analyze(buf);return CACHE[b.id]={buf,raw}}
+/* LEARNED BEATS: what the tool heard in a beat (kicks, snares, hats, samples) is saved in this browser the first time the beat is opened,
+   so every later load uses exactly the same taps. A new or replaced preview is learned again by itself. */
+const LDB=(()=>{let P=null;const db=()=>P||(P=new Promise((ok,no)=>{try{const q=indexedDB.open('mzprd-mpc',1);q.onupgradeneeded=()=>q.result.createObjectStore('learn');q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)}catch(e){no(e)}}));
+ const run=(m,f)=>db().then(d=>new Promise((ok,no)=>{const t=d.transaction('learn',m),r=f(t.objectStore('learn'));t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>no(t.error)})).catch(()=>null);
+ return{get:k=>run('readonly',o=>o.get(k)),put:(k,v)=>run('readwrite',o=>o.put(v,k))}})();
+const learnKey=b=>'v1|'+b.id+'|'+b.preview_path;
+async function fetchBuf(b){const r=await fetch(pubU(b.preview_path));if(!r.ok)throw new Error('The preview of "'+b.title+'" did not load ('+r.status+').');return ctxA().decodeAudioData(await r.arrayBuffer())}
+const hear=buf=>window.MZMpcDetect?MZMpcDetect.analyze(buf):analyze(buf);
+async function loadBeat(b){if(CACHE[b.id])return CACHE[b.id];const buf=await fetchBuf(b);let raw=await LDB.get(learnKey(b));if(!raw){raw=await hear(buf);LDB.put(learnKey(b),raw)}return CACHE[b.id]={buf,raw}}
+/* learn every beat on the site now (the ones already learned are skipped) */
+async function learnAll(){const m=$q('#mLearnMsg'),bt=$q('#mLearnAll');bt.disabled=true;let n=0,done=0;
+ for(let i=0;i<beats.length;i++){const b=beats[i];if(!b.preview_path)continue;m.textContent='Learning beat '+(i+1)+' of '+beats.length+': '+b.title+'...';
+  try{if(await LDB.get(learnKey(b))){done++;continue}const raw=await hear(await fetchBuf(b));await LDB.put(learnKey(b),raw);n++}catch(e){console.warn(e)}}
+ m.textContent='Done. '+n+' beat'+(n===1?'':'s')+' learned now, '+done+' already learned. New beats learn themselves the first time you open them.';bt.disabled=false}
 const kitOf=id=>ST.kits&&ST.kits[id]!=null&&ST.kits[id]!==''&&KITS[+ST.kits[id]]?+ST.kits[id]:kitFor(id);
 function mkS(b,len,kit){const C=CACHE[b.id],Sx={title:b.title,bpm:Number(b.bpm)||0,key:b.musical_key||'',lcd:'',raw:C.raw,buf:C.buf,off:C.raw.off||0,kit,dur:len?Math.min(C.buf.duration,len):C.buf.duration};const L=layout(C.raw,kit);Sx.hits=L.hits;Sx.per=L.per;return Sx}
 let TP=null;
@@ -742,7 +756,7 @@ const SUM={scene:()=>(ST.scene==='white'?'White studio':'Desk / '+((SKINS.find(k
  watch:()=>{const E=ST.eng,t=[];if(E.hook)t.push('hook');if(E.sub)t.push('subscribe');if(E.loop)t.push('loop');if(E.note)t.push('note');if(E.q)t.push('question');return t.join(' / ')||'none'},
  beat:()=>{const b=beats.find(x=>String(x.id)===String(ST.beat));return b?b.title:'pick a beat'}};
 function summ(){if(!root)return;const sb=root.querySelector('#s_s2b');if(sb)sb.textContent=(ST.s2b&&ST.s2b.on)?(ST.s2b.last?ST.s2b.last.chops+' chops / '+ST.s2b.last.bpm+' BPM':'ON'):'optional series: chop a sample';for(const k in SUM){const e=root.querySelector('#s_'+k);if(e)e.textContent=SUM[k]()}const t=root.querySelector('#s_tape');if(t)t.textContent=ST.tape.on?(ST.tape.ids.length+' beats / ON'):'several beats in one video'}
-function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);
+function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);$q('#mLearnAll').onclick=()=>learnAll();
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();mark('yt','th','gen')};for(const k in PNL){$q(PNL[k][0]).addEventListener('toggle',paintPanels)}
  $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};
