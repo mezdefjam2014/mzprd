@@ -97,12 +97,25 @@ function roOrder(id,b,sb,items,cx){const m=items.length;if(!m)return items;const
   case 19:{const top=items.slice().sort((x,y)=>y.s-x.s).slice(0,3);return keep(items.filter(z=>top.includes(z)))}
   case 20:{if(b===3||cx.nb<2)return items;return keep(B(cx.perm[b]))}
  }return items}
+/* optional drum variations (switches in the Sample to Beat panel, all off by default). Each beat gets its own fixed version, picked from its number:
+   no randomness while playing, so the loop stays exact, and every beat keeps its own sounds */
+let VAR={hat:0,kick:0,fill:0,ghost:0};function setVar(v){VAR=Object.assign({hat:0,kick:0,fill:0,ghost:0},v||{})}
+function varyBar(dna,b,k,s,h){const id=dna.id||1,on=(str,i,c)=>{const q=str.split('');if(q[i]==='.'||!q[i]){q[i]=c}return q.join('')},hasHat=x=>/[^.]/.test(x||'');
+ /* hats: the hi-hat RHYTHM of another beat (only when this beat has its own hat sound) */
+ if(VAR.hat&&hasHat(h)){const others=PAT.map((p,i)=>i).filter(i=>i!==dna.stem&&PAT[i].lanes.hat&&PAT[i].lanes.hat.some(hasHat));if(others.length){const o=PAT[others[(id*37+11)%others.length]].lanes.hat;h=o[b%o.length]||h}}
+ /* kick: an extra kick in the last bar of each 4 */
+ if(VAR.kick&&b===3){const c=[[14,10,6,3],[10,7,14,3],[7,14,11,3],[3,11,14,7]][id%4];let n=0;for(const i of c){if(n<1+(id%2)&&k[i]==='.'&&k[i-1]!=='X'&&k[i-1]!=='x'){k=on(k,i,'x');n++}}}
+ /* fill: a short snare run into the next loop */
+ if(VAR.fill&&b===3){const f=[[13,15],[14,15],[12,13,14,15],[11,14,15]][(id>>2)%4];f.forEach((i,j)=>{s=on(s,i,j===f.length-1?'X':'x')})}
+ /* ghost snares: soft notes between the backbeats */
+ if(VAR.ghost){for(const i of [[7],[10],[7,15],[3,11]][(id>>1)%4])if(!(VAR.fill&&b===3&&i>=11))s=on(s,i,'g')}
+ return[k,s,h]}
 function plan(dna,Rr,keyInfo){const bpm=Rr.bpmX||Rr.bpm,step=60/bpm/4,r=mul(dna.seed),kit=KITS[dna.kit],trap=dna.style==='trap',PP=P[dna.pool||dna.style],ev=[],jit=dna.hum,rr=dna.stem!==undefined?(()=>.5):r;   /* your beats: no swing, no random timing or loudness, so the loop is exact */
  const kickBars=[],snareBars=[],hatBars=[];
  const BBB=dna.bb?bbBars(dna):null;
  for(let b=0;b<4;b++){let k=PP.kick[dna.kick]||'',s=PP.snare[dna.snare]||'',h=PP.hat[dna.hat]||'';
   if(BBB){}else if(b===3){const f=PP.fill[dna.fill];k=f.k;s=f.s;h=f.h}else if(b===1&&dna.alt){const q=k.split('');const i=q.indexOf('x',3);if(i>0&&i<15&&q[i+1]==='.'){q[i]='.';q[i+1]='x'}k=q.join('')}
-  if(BBB){k=BBB[b].k;s=BBB[b].s;h=BBB[b].h}
+  if(BBB){k=BBB[b].k;s=BBB[b].s;h=BBB[b].h;[k,s,h]=varyBar(dna,b,k,s,h)}
   kickBars.push(k);snareBars.push(s);hatBars.push(h);
   parseLane(k,b,'kick',ev,step,dna.swing,jit,rr,trap?.6:dna.bb?.92:1);const n0=ev.length;parseLane(s,b,'snare',ev,step,dna.swing,jit,rr,1);if(dna.late)for(let q=n0;q<ev.length;q++)ev[q].t+=dna.late;parseLane(h,b,'hat',ev,step,dna.swing,jit,rr,dna.bb?(dna.stem!==undefined?1:BB[dna.bb.s].hg):1)}
  /* the 808 follows the kicks (trap only) */
@@ -203,5 +216,5 @@ async function render(buf,Rr,P_,opt){opt=opt||{};await loadPack(P_.dna);const lo
  return out}
 function wav(buf){const n=buf.length,ch=buf.numberOfChannels,a=new DataView(new ArrayBuffer(44+n*ch*2)),w=(o,s)=>{for(let i=0;i<s.length;i++)a.setUint8(o+i,s.charCodeAt(i))};w(0,'RIFF');a.setUint32(4,36+n*ch*2,true);w(8,'WAVE');w(12,'fmt ');a.setUint32(16,16,true);a.setUint16(20,1,true);a.setUint16(22,ch,true);a.setUint32(24,buf.sampleRate,true);a.setUint32(28,buf.sampleRate*ch*2,true);a.setUint16(32,ch*2,true);a.setUint16(34,16,true);w(36,'data');a.setUint32(40,n*ch*2,true);
  const d=[];for(let c=0;c<ch;c++)d.push(buf.getChannelData(c));let o=44;for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const v=Math.max(-1,Math.min(1,d[c][i]));a.setInt16(o,v<0?v*32768:v*32767,true);o+=2}return new Blob([a.buffer],{type:'audio/wav'})}
-window.MZMpcDrums={RO,RO_SAFE,chordUniform,KITS,P,get COUNT(){return PAT.length},HALF,dnaOf,plan,render,keyOf,wav,STEPSETS,loadPack,soundsOf,pack:()=>PACK,engine:{setup,vKick,vSnare,vHat,v808,vChop,noiseAt,KITS}};
+window.MZMpcDrums={setVar,pat:()=>PAT,RO,RO_SAFE,chordUniform,KITS,P,get COUNT(){return PAT.length},HALF,dnaOf,plan,render,keyOf,wav,STEPSETS,loadPack,soundsOf,pack:()=>PACK,engine:{setup,vKick,vSnare,vHat,v808,vChop,noiseAt,KITS}};
 })();
