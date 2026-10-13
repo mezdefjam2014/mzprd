@@ -35,7 +35,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  chops.forEach(c=>{for(let k=0;k<9;k++)click(c.t0+.03+k*.06,.05,1100);c.btns.forEach(b=>click(b[1],.13,b[0]==='enter'?2400:1800));E.vChop(G,buf,c.slice,c.aud,c.len,.9)});
  const evOf=(P,allowed,limit)=>P.events.filter(e=>e.t<limit&&allowed.has(e.lane));
  const sched=(off,list)=>{for(const e of list){const tt=off+e.t;
-  if(e.lane==='kick'){E.vKick(G,tt,e.vel);addHit(tt,15,e.vel)}else if(e.lane==='snare'){E.vSnare(G,tt,e.vel);addHit(tt,14,e.vel)}else if(e.lane==='hat'){E.vHat(G,tt,e.vel);addHit(tt,12,e.vel)}
+  if(e.lane==='kick'){E.vKick(G,tt,e.vel);addHit(tt,13,e.vel)}else if(e.lane==='snare'){E.vSnare(G,tt,e.vel);addHit(tt,15,e.vel)}else if(e.lane==='hat'){E.vHat(G,tt,e.vel);addHit(tt,12,e.vel)}
   else if(e.lane==='chop'){const s=sl[e.n];E.vEvent(G,buf,Rr,e,tt);if(!e.grace)addHit(tt,padIdx(s.pad),e.vel)}}};
  /* step 3: the chops alone (the original phrase) */
  sched(flipT,evOf(LP.plans[0],new Set(['chop']),segLen));
@@ -61,7 +61,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  const chapters=[['0:00','Intro'],[mmss(sample.t),'The sample'],[mmss(chopStart),'Chopping it on the pads'],[mmss(flipT),'Playing the chops']].concat(layers.map((l,k)=>[mmss(layerT[k]),'Adding the '+l[1].toLowerCase()])).concat([[mmss(fullT),'The full beat']]);
  const waveBins=(()=>{const B=Rr.peaks.length/2,a=Math.floor(Rr.ws/Rr.dur*B),b=Math.max(a+2,Math.ceil(Rr.we/Rr.dur*B));return{a,b,B}})();
  /* the hits per lane (for the on-screen meters) and where we are in the loop (for the bar counter) */
- const lanes={kick:[],snare:[],hat:[],chop:[]};hits.forEach(h=>{if(h.pad<0)return;const k=h.pad===15?'kick':h.pad===14?'snare':h.pad===12?'hat':h.pad<12?'chop':null;if(k)lanes[k].push({t:h.t,v:clamp(h.v,.4,1)})});Object.values(lanes).forEach(a=>a.sort((x,y)=>x.t-y.t));
+ const lanes={kick:[],snare:[],hat:[],chop:[]};hits.forEach(h=>{if(h.pad<0)return;const k=h.pad===13?'kick':h.pad===15?'snare':h.pad===12?'hat':h.pad<12?'chop':null;if(k)lanes[k].push({t:h.t,v:clamp(h.v,.4,1)})});Object.values(lanes).forEach(a=>a.sort((x,y)=>x.t-y.t));
  const barAt=T=>{if(T<flipT||T>=endMusic)return null;const starts=[flipT].concat(layerT,[fullT]);let si=0;while(si+1<starts.length&&starts[si+1]<=T)si++;const full=si===starts.length-1,len=full?loopLen:segLen,rel=T-starts[si],inLoop=full?rel%loopLen:rel%segLen;return{bar:Math.min(4,Math.floor(inLoop/bar)+1),loop:full?Math.floor(rel/loopLen)+1:0,loops:fullLoops}};
  const M={lanes,barAt,T0,sample,chops,flipT,segLen,layers:layers.map((l,k)=>({k:l[0],name:l[1],t:layerT[k]})),fullT,endMusic,loopLen,stopT,pdAt:T=>T<pdT?-1:T-pdT,total,name:opt.name,bpm:Rr.bpm,key:key?key.name:'',style:'ec',kit:dna.name,id:dna.id,mode:'flip',progNames:LP.plans.map(P=>P.progName),chapters,lcdAt,wheelAngle,phase,overlayOn:opt.overlay,wave:waveBins,R:Rr,opt};
  const Sx={title:opt.name,bpm:Rr.bpm,key:(key?key.name:'').replace(' minor','m').replace(' major',''),lcd:'',buf:out,off:flipT,kit:0,dur:total,hits,per,btnEv,wheelEv,raw:null};
