@@ -55,7 +55,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
   for(let q=0;q<fullLoops;q++){const off=O.full+q*loopLen,P=flipPlan(q);if(isLoop&&P===pl)loopSample(off,loopLen);let evs=P.events.filter(e=>e.t<loopLen&&all.has(e.lane));
    /* optional drop and rebuild: every other loop the hats leave in bar 3, then everything but the chops leaves in bar 4 behind a rising snare roll, and the next loop slams back in */
    if(opt.drops&&q%2===1&&q<fullLoops-1){evs=evs.filter(e=>e.bar===3?e.lane==='chop':e.bar===2?(e.lane!=='hat'&&e.lane!=='open'):true);
-    [12,13,14,15].forEach((s,i)=>evs.push({t:(3*16+s)*step,lane:'snare',vel:.45+.17*i,bar:3,step:s}));if(dropsOut)dropsOut.push({a:off+2*bar,b:off+4*bar})}
+    [12,13,14,15].forEach((s,i)=>evs.push({t:(3*16+s)*step+(Rr.gm&&Rr.gm.length?Rr.gm[(3*16+s)%Rr.gm.length]:0),lane:'snare',vel:.45+.17*i,bar:3,step:s}));if(dropsOut)dropsOut.push({a:off+2*bar,b:off+4*bar})}
    sched(off,evs)}};
  musicPass(ctx,G,{flip:flipT,layers:layerT,full:fullT},addHit,drops);
  /* optional: the mixing shown on the MPC. The build-up plays with rough levels (sample a little loud, kick a little soft); in the first loop of the full beat
@@ -63,7 +63,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  const mixEv=[];if(opt.mixShow&&G.mix){const M_=G.mix,L=loopLen,a0=fullT+.35,d=Math.min(2.4,L*.28),db=x=>Math.pow(10,x/20);
   const ramp=(node,startDb,t,dd)=>{const v=node.gain.value;node.gain.setValueAtTime(v*db(startDb),0);node.gain.setValueAtTime(v*db(startDb),t);node.gain.linearRampToValueAtTime(v,t+dd)};
   const e1={k:'fader',lab:'SAMPLE',t:a0,d,from:.72,to:.48,db:-4},e2={k:'fader',lab:'KICK',t:a0+L*.42,d,from:.4,to:.7,db:4},e3={k:'knob',lab:'MASTER',t:a0+L*.78,d:Math.min(1.4,L*.15),from:.2,to:.3};
-  ramp(M_.smp,4,e1.t,e1.d);ramp(M_.kB,-4,e2.t,e2.d);
+  ramp(M_.smp,4,e1.t,e1.d);ramp(M_.kB,-4,e2.t,e2.d);ramp(G.bus,-1.5,e3.t,e3.d);
   mixEv.push(e1,e2,e3);mixEv.forEach(e=>hits.push({t:e.t,pad:-1,v:.6,[e.k]:{d:e.d,from:e.from,to:e.to}}))}
  const mixWin=mixEv.length?{a:mixEv[0].t-1.2,b:mixEv[2].t+mixEv[2].d+1}:null;
  const faderAt=T=>{if(!mixWin||T<mixWin.a||T>mixWin.b)return null;const fs=mixEv.filter(e=>e.k==='fader');let cur=fs[0];for(const e of fs)if(T>=e.t-.6)cur=e;const u=clamp((T-cur.t)/cur.d,0,1),s=u*u*(3-2*u);return cur.from+(cur.to-cur.from)*s};
