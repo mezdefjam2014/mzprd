@@ -148,8 +148,24 @@ function machine(c,ox,oy,sc,S,o){
  c.restore()}
 /* the start of every video: the unit is dark, a hand switches it on (the screen boots and types the beat name), then the hand presses PLAY START and the beat begins */
 const INTRO=4.2,PW=.6,startOn=()=>!!(ST&&ST.start!==false),leadOf=()=>startOn()?INTRO:LEAD;
+/* BUILD-UP (beat store videos): the beat arrives in layers over its first bars (melody, then kick, snare, hats) and the pads are tapped as each layer arrives; then it plays on as the normal beat */
+/* the beat's own grid, found from where its kicks and snares really fall (the beat store has no tempo for most beats): tempo, and the start of bar 1 (snare on 2 and 4). Used by the build-up, the meters and the camera. */
+function beatGrid(raw,hint){if(!raw)return null;const hs=[...(raw.kick||[]).map(h=>({t:h.t,w:1})),...(raw.snare||[]).map(h=>({t:h.t,w:1.2}))];if(hs.length<6)return null;
+ const prior=b=>Math.exp(-Math.pow(Math.log(b/92)/.45,2));let best=null;const cands=hint?[hint]:(()=>{const a=[];for(let b=62;b<=140;b+=.25)a.push(b);return a})();
+ for(const bpm of cands){const st=60/bpm/4,pen=1+.7*(1-prior(bpm));for(let off=0;off<st;off+=st/24){let e=0,wt=0;for(const h of hs){const q=(h.t-off)/st;e+=Math.abs(q-Math.round(q))*h.w;wt+=h.w}e=e/wt*pen;if(!best||e<best.e)best={e,bpm,off,st}}}
+ const sn=(raw.snare||[]).map(h=>Math.round((h.t-best.off)/best.st)),kk=(raw.kick||[]).map(h=>Math.round((h.t-best.off)/best.st));let sh=0,sb=-1e9;
+ for(let z=0;z<16;z++){let sc=0;sn.forEach(x=>{const m=(((x+z)%16)+16)%16;if(m===4||m===12)sc+=2;else if(m===0||m===8)sc-=2});kk.forEach(x=>{if((((x+z)%16)+16)%16===0)sc+=1});if(sc>sb){sb=sc;sh=z}}
+ let s0=(16-sh)%16,t0=best.off+s0*best.st;while(t0>raw.snare[0].t+.01&&t0-16*best.st>=0)t0-=16*best.st;return{bpm:best.bpm,t0:Math.max(0,t0),err:best.e}}
+const bpmOf=Sx=>Sx.bpm||(Sx.grid&&Sx.grid.bpm)||90;
+const buildOn=()=>!!(ST&&ST.build!==false),buildBars=()=>+((ST&&ST.buildBars)||4);
+const buildTimes=Sx=>{const bar=240/bpmOf(Sx),q=buildBars()/4,t0=Sx.grid?Sx.grid.t0:(Sx.off||0);return{bar,q,t0,tK:t0+q*bar,tS:t0+2*q*bar,tHh:t0+3*q*bar}};
+async function applyBuild(Sx){if(!Sx||!Sx.raw||!Sx.buf)return;if(!buildOn()){if(Sx.buf0){Sx.buf=Sx.buf0;Sx.built=null}return}const key=buildBars()+'|'+bpmOf(Sx)+'|'+(Sx.grid?Sx.grid.t0:(Sx.off||0));if(Sx.built===key)return;
+ if(!window.MZMpcBuild)await loadS('mpcbuild.js?v=1');const t=buildTimes(Sx);Sx.buf0=Sx.buf0||Sx.buf;const r=await MZMpcBuild.build(Sx.buf0,{t0:t.t0,bar:t.bar,q:t.q});Sx.buf=r.buf;Sx.built=key}
+function gate(Sx){if(!Sx||!Sx.hits)return;if(!Sx.hitsFull){Sx.hitsFull=Sx.hits;Sx.perFull=Sx.per}Object.keys(Sx).forEach(k=>{if(k.startsWith('_hh'))delete Sx[k]});
+ if(!buildOn()||!Sx.raw){Sx.hits=Sx.hitsFull;Sx.per=Sx.perFull;return}const K=KITS[Sx.kit]||KITS[0],t=buildTimes(Sx),lane=p=>p===K.kick?t.tK:K.sn.includes(p)?t.tS:p===K.hat?t.tHh:K.mid.includes(p)?t.tS:K.hi.includes(p)?t.tHh:0;
+ Sx.hits=Sx.hitsFull.filter(h=>h.t>=lane(h.pad)-.02);const per=PAD_NAMES.map(()=>[]);Sx.hits.forEach(h=>per[h.pad].push(h));Sx.per=per}
 const preHits=L=>[{t:PW-L,pad:-1,btn:'power',v:.8},{t:-.27,pad:-1,btn:'start',v:.8}];
-const tlOne=Sx=>{const L=leadOf();Object.keys(Sx).forEach(k=>{if(k.startsWith('_hh'))delete Sx[k]});Sx.pre=startOn()?preHits(L):null;return{kind:'one',tracks:[{S:Sx,start:L,dur:Sx.dur}],total:L+Sx.dur+TAIL,lead:L,title:Sx.title,intro:startOn()?INTRO:0}};
+const tlOne=Sx=>{const L=leadOf();Object.keys(Sx).forEach(k=>{if(k.startsWith('_hh'))delete Sx[k]});Sx.pre=startOn()?preHits(L):null;gate(Sx);return{kind:'one',tracks:[{S:Sx,start:L,dur:Sx.dur}],total:L+Sx.dur+TAIL,lead:L,title:Sx.title,intro:startOn()?INTRO:0}};
 function derive(X,fmt,cu){const E=ST.eng,sub=E.sub&&!cu,loop=E.loop&&X.kind==='one'&&fmt==='v';if(!sub&&!loop)return X;let tracks,total;
  if(loop){const Sx=X.tracks[0].S,xf=Math.min(3.8,Sx.dur*.3),lead=.12;
   const A={S:Sx,start:lead,off:xf,dur:Sx.dur-xf,fi:.04,fo:xf},B={S:Sx,start:lead+Sx.dur-2*xf,off:0,dur:xf,fi:xf,fo:0};tracks=[A,B];total=A.start+A.dur}
@@ -367,7 +383,7 @@ const CAMMV=[['push','SLOW PUSH-IN (A VERY SLOW ZOOM TOWARD THE PADS OVER THE WH
 const camAny=m=>!!m&&CAMMV.some(([k])=>m[k]);
 function camMoves(M,T,X,Sx,la,G,sc,ox,oy,W,H,t0,lastEnd){const lerp=(a,b,q)=>a+(b-a)*q;let z=1,tx=W/2,ty=H/2,rot=0;
  const P=G.pad,L=G.lcd,toPx=(gx,gy)=>[ox+gx*sc,oy+gy*sc],pads=toPx(P.x0+1.5*P.px+P.w/2,P.y0+1.5*P.py+P.h/2),drums=toPx(P.x0+1.5*P.px+P.w/2,P.y0+3*P.py+P.h/2),lcd=toPx(L.x+L.w/2+L.w*.12,L.y+L.h/2+L.h*.9),btns=G.btn&&G.btn.stop?toPx(G.btn.stop[0]+G.btn.stop[2]/2,G.btn.stop[1]-40):pads;
- const bl=60/((Sx&&Sx.bpm)||90),mk=X.make,span=Math.max(10,lastEnd-t0),off=(Sx&&Sx.off)||0;
+ const bl=60/(Sx?bpmOf(Sx):90),mk=X.make,span=Math.max(10,lastEnd-t0),off=(Sx&&(Sx.grid?Sx.grid.t0:Sx.off))||0;
  if(M.push)z*=1+.07*ease((T-t0)/span);
  if(M.cuts){const seq=['wide','pads','lcd','drums','pads','lcd'],ZS={pads:1.65,drums:2.05,lcd:2.3},PT={pads,drums,lcd};let st=off,unit=8*bl,i0=0,cutsOn=true;
   if(mk&&mk.flipT!=null){if(T<mk.flipT)cutsOn=false;else{const starts=[mk.flipT].concat(mk.layers.map(l=>l.t),[mk.fullT]);let si=0;while(si+1<starts.length&&starts[si+1]<=T)si++;st=starts[si];unit=(si===starts.length-1?mk.loopLen:mk.segLen)/2;i0=si*2}}
@@ -419,7 +435,7 @@ function meters(c,W,H,v,Sx,la){const K=KITS[Sx.kit]||KITS[0],per=Sx.per;if(!per)
  const LN=[['KICK',[K.kick]],['SNARE',K.sn],['HATS',[K.hat]],['PADS',other]],mw=W*(v?.105:.042),mg=W*(v?.02:.008),mh=H*(v?.07:.09),mx0=W*(v?.045:.03),my=H-mh-H*(v?.07:.075),seg=8,sh=mh/seg;
  c.save();LN.forEach(([nm,pads],i)=>{const x=mx0+i*(mw+mg),L=lv(pads),on=Math.round(L*seg);for(let s=0;s<seg;s++){const y=my+mh-(s+1)*sh,lit=s<on,hue=s<5?'232,185,74':s<7?'255,150,60':'255,74,58';c.fillStyle=lit?'rgba('+hue+',.95)':'rgba(255,255,255,.1)';if(lit){c.shadowColor='rgba('+hue+',.8)';c.shadowBlur=sh*.9}c.fillRect(x,y+sh*.14,mw,sh*.72);c.shadowBlur=0}
   c.font='700 '+Math.max(11,Math.round(H*(v?.0125:.018)))+'px Oswald, sans-serif';c.textAlign='center';c.textBaseline='alphabetic';c.fillStyle=L>.2?'#e8b94a':'rgba(255,255,255,.55)';c.fillText(nm,x+mw/2,my+mh+H*(v?.016:.024))});
- const bl=60/(Sx.bpm||90),n=Math.floor(Math.max(0,la-(Sx.off||0))/bl);c.font='700 '+Math.max(13,Math.round(H*(v?.016:.024)))+'px Oswald, sans-serif';c.textAlign='left';c.fillStyle='rgba(255,255,255,.88)';c.fillText('BAR '+(Math.floor(n/4)+1),mx0,my-H*(v?.014:.02));c.restore()}
+ const bl=60/bpmOf(Sx),n=Math.floor(Math.max(0,la-(Sx.grid?Sx.grid.t0:(Sx.off||0)))/bl);c.font='700 '+Math.max(13,Math.round(H*(v?.016:.024)))+'px Oswald, sans-serif';c.textAlign='left';c.fillStyle='rgba(255,255,255,.88)';c.fillText('BAR '+(Math.floor(n/4)+1),mx0,my-H*(v?.014:.02));c.restore()}
 function text(c,W,H,v,S){const ink='#111';c.save();c.fillStyle=ink;c.textBaseline='alphabetic';
  if(v){c.textAlign='center';const t=(S.title||'').toUpperCase(),f=s=>'700 '+s+'px Anton, Oswald, sans-serif',s=fitFont(c,t,f,150,W*.86);c.font=f(s);c.fillText(t,W/2,H*.2);c.font='600 44px Oswald, sans-serif';c.fillStyle='#666';c.fillText(S.sub?S.sub.toUpperCase():([S.bpm?S.bpm+' BPM':'',S.key||'','PROD. MZPRD'].filter(Boolean)).join('   /   '),W/2,H*.2+70);
   c.font='600 40px Oswald, sans-serif';c.fillStyle=ink;c.fillText('MZPRD.COM',W/2,H*.9)}
@@ -487,6 +503,8 @@ function html(){return`<div class="mg"><div>
   <label>COLOR GRADE</label><select id="mGrade"><option value="0">None (as is)</option><option value="warm">Warm film</option><option value="teal">Teal and orange</option><option value="cold">Cold studio</option><option value="faded">Faded 90s</option></select>
  </div></details>
  <details class="sec grp" id="g_extras"><summary>4. DESK EXTRAS <small id="s_extras"></small></summary><div class="in">
+  <label class="chk"><input type="checkbox" id="mBuild"> BUILD THE BEAT UP AT THE START (IT ARRIVES IN LAYERS: MELODY, THEN KICK, SNARE AND HATS, AND THE PADS ARE TAPPED AS EACH LAYER ARRIVES; THEN IT PLAYS ON AS NORMAL. BEAT STORE VIDEOS ONLY)</label>
+  <select id="mBuildBars"><option value="4">Layers arrive over the first 4 bars</option><option value="8">Layers arrive over the first 8 bars</option></select>
   <label class="chk"><input type="checkbox" id="mIntro"> START OF THE VIDEO: A HAND SWITCHES THE UNIT ON (THE SCREEN BOOTS AND TYPES THE BEAT NAME), THEN PRESSES PLAY START AND GETS TO WORK (ABOUT 4 SECONDS)</label>
   <div class="msg" id="mIntroN" style="margin-top:0">The intro is not used in the looping 9:16 version.</div>
   <label class="chk"><input type="checkbox" id="mHands"> HANDS TAPPING THE PADS (YOUR OWN HANDS, THEY STRIKE EVERY HIT)</label>
@@ -535,17 +553,15 @@ function html(){return`<div class="mg"><div>
 </div></div></div>`}
 
 function applyKit(){const id=ST.beat;ST.kits=ST.kits||{};if(ST.kits[id]==null||ST.kits[id]==='')ST.kits[id]=kitFor(id);   /* pad memory: the layout a beat was made with is kept for that beat */
- const k=+ST.kits[id];S.kit=k;const L=layout(S.raw,k);S.hits=L.hits;S.per=L.per;
+ const k=+ST.kits[id];S.hitsFull=null;S.kit=k;const L=layout(S.raw,k);S.hits=L.hits;S.per=L.per;gate(S);
  const tot=S.per.map((x,i)=>x.length?PAD_NAMES[i]+' '+x.length:'').filter(Boolean);const m=root&&$q('#mMap');if(m)m.textContent='Kit: '+KITS[k].n+'. '+(tot.join(' / ')||'Nothing was found.');const ks=root&&$q('#mKit');if(ks)ks.value=(ST.kits&&ST.kits[id]!=null&&ST.kits[id]!=='')?String(ST.kits[id]):''}
 const CACHE={};
 async function loadBeat(b){if(CACHE[b.id])return CACHE[b.id];const r=await fetch(pubU(b.preview_path));if(!r.ok)throw new Error('The preview of "'+b.title+'" did not load ('+r.status+').');const buf=await ctxA().decodeAudioData(await r.arrayBuffer());const raw=window.MZMpcDetect?await MZMpcDetect.analyze(buf):await analyze(buf);return CACHE[b.id]={buf,raw}}
 const kitOf=id=>ST.kits&&ST.kits[id]!=null&&ST.kits[id]!==''?+ST.kits[id]:kitFor(id);
-function mkS(b,len,kit){const C=CACHE[b.id],Sx={title:b.title,bpm:Number(b.bpm)||0,key:b.musical_key||'',lcd:'',raw:C.raw,buf:C.buf,off:C.raw.off||0,kit,dur:len?Math.min(C.buf.duration,len):C.buf.duration};const L=layout(C.raw,kit);Sx.hits=L.hits;Sx.per=L.per;return Sx}
+function mkS(b,len,kit){const C=CACHE[b.id],Sx={title:b.title,bpm:Number(b.bpm)||0,key:b.musical_key||'',lcd:'',raw:C.raw,buf:C.buf,off:C.raw.off||0,kit,dur:len?Math.min(C.buf.duration,len):C.buf.duration};Sx.grid=beatGrid(C.raw,Number(b.bpm)||0);const L=layout(C.raw,kit);Sx.hits=L.hits;Sx.per=L.per;return Sx}
 let TP=null;
 let EP=null;
 const X=()=>(ST.s2b&&ST.s2b.useEp&&EP)?EP:(ST.tape.on?TP:(S&&S.tl));
-function applyKit(){const id=ST.beat,k=kitOf(id),L=layout(S.raw,k);S.kit=k;S.hits=L.hits;S.per=L.per;
- const tot=S.per.map((x,i)=>x.length?PAD_NAMES[i]+' '+x.length:'').filter(Boolean);const m=root&&$q('#mMap');if(m)m.textContent='Kit: '+KITS[k].n+'. '+(tot.join(' / ')||'Nothing was found.');const ks=root&&$q('#mKit');if(ks)ks.value=(ST.kits&&ST.kits[id]!=null&&ST.kits[id]!=='')?String(ST.kits[id]):''}
 async function pick(id){ST.beat=id;if(EP){EP=null;if(ST.s2b)ST.s2b.useEp=false}save();stopPlay();const b=beats.find(x=>String(x.id)===String(id));if(!b)return;
  S=null;drawNow();$q('#mMsg').textContent='Loading "'+b.title+'" and listening for the hits...';$q('#mInfo').textContent='';
  try{await loadBeat(b);if(String(ST.beat)!==String(id))return;S=mkS(b,ST.len,kitOf(id));S.lcd=ST.lcd.trim();S.tl=tlOne(S);applyKit();
@@ -556,14 +572,14 @@ function drawNow(){const cv=$q('#mCv'),Xt=XF(ST.fmt);if(!cv||!sceneOK(ST.fmt))re
  const T=PV.playing?(AC.currentTime-PV.t0):parseFloat($q('#mScrub').value)/1000*Xt.total;frame(cv.getContext('2d'),cv.width,cv.height,ST.fmt,T,Xt);$q('#mTime').textContent=mmss(clamp(T,0,Xt.total))+' / '+mmss(Xt.total)}
 function stopPlay(){PV.playing=false;PV.loading=false;cancelAnimationFrame(PV.raf);try{PV.src&&PV.src.stop()}catch(e){}PV.src=null;if(root)$q('#mPlay').textContent='PLAY'}
 /* the whole sound of the video in one buffer: lead-in, every beat with its blend, the fade out */
-async function mixAudio(Xt,sr){if(Xt.mix&&Xt.mixSr===sr)return Xt.mix;const oa=new OfflineAudioContext(2,Math.ceil(Xt.total*sr),sr);
+async function mixAudio(Xt,sr){if(Xt.mix&&Xt.mixSr===sr)return Xt.mix;const t0s=Xt.tracks[0];if(t0s&&t0s.S&&t0s.S.raw&&!Xt.make)await applyBuild(t0s.S);const oa=new OfflineAudioContext(2,Math.ceil(Xt.total*sr),sr);
  Xt.tracks.forEach((tr,i)=>{const src=oa.createBufferSource();src.buffer=tr.S.buf;src.loop=tr.S.buf.duration<tr.dur+(tr.off||0);const g=oa.createGain();src.connect(g);g.connect(oa.destination);const last=i===Xt.tracks.length-1,fin=tr.fi!=null?tr.fi:(i===0?.04:(Xt.xf||1.2)),fout=tr.fo!=null?tr.fo:(last?1.3:(Xt.xf||1.2)),s0=tr.start,e0=tr.start+tr.dur;
   g.gain.setValueAtTime(.0001,s0);g.gain.linearRampToValueAtTime(1,s0+Math.max(.01,fin));if(fout>0){g.gain.setValueAtTime(1,Math.max(s0+fin,e0-fout));g.gain.linearRampToValueAtTime(.0001,e0)}else g.gain.setValueAtTime(1,e0);src.start(s0,tr.off||0,tr.dur)});
  if(Xt.sub){const at=Xt.subT0,tone=(t,f0,f1,d,v)=>{const o=oa.createOscillator(),g=oa.createGain();o.type='sine';o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+d);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(oa.destination);o.start(t);o.stop(t+d+.05)};
   tone(at+1.55,560,240,.07,.1);[1320,1980,2640].forEach((f,i)=>tone(at+1.72,f,f,1.3-i*.25,.045/(i+1)))}
- if(Xt.intro>0){const o1=oa.createOscillator(),g1=oa.createGain();o1.type='sine';o1.frequency.setValueAtTime(95,.32);o1.frequency.exponentialRampToValueAtTime(38,.55);g1.gain.setValueAtTime(.0001,.32);g1.gain.linearRampToValueAtTime(.26,.335);g1.gain.exponentialRampToValueAtTime(.0001,.6);o1.connect(g1);g1.connect(oa.destination);o1.start(.32);o1.stop(.65);
-  const nb=oa.createBuffer(1,Math.ceil(sr*.12),sr),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;for(let k=0;k<7;k++){const s1=oa.createBufferSource();s1.buffer=nb;const bp=oa.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1500+k%3*500;bp.Q.value=3;const g2=oa.createGain();g2.gain.value=.05;s1.connect(bp);bp.connect(g2);g2.connect(oa.destination);s1.start(1.05+k*.17)}
-  const bp2=(t,f,d,v)=>{const o=oa.createOscillator(),g=oa.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(oa.destination);o.start(t);o.stop(t+d+.02)};bp2(2.32,1760,.07,.035);const nm=String(Xt.title||'').length;for(let i=0;i<Math.min(nm,18);i++)bp2(2.4+i*.07,1300+(i%3)*90,.02,.02);bp2(Math.min(3.2,2.45+Math.min(nm,18)*.07+.1),2093,.09,.035)}
+ if(Xt.intro>0){const o1=oa.createOscillator(),g1=oa.createGain();o1.type='sine';o1.frequency.setValueAtTime(95,PW+.02);o1.frequency.exponentialRampToValueAtTime(38,PW+.25);g1.gain.setValueAtTime(.0001,PW+.02);g1.gain.linearRampToValueAtTime(.26,PW+.035);g1.gain.exponentialRampToValueAtTime(.0001,PW+.3);o1.connect(g1);g1.connect(oa.destination);o1.start(PW+.02);o1.stop(PW+.35);
+  const nb=oa.createBuffer(1,Math.ceil(sr*.12),sr),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;for(let k=0;k<7;k++){const s1=oa.createBufferSource();s1.buffer=nb;const bp=oa.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1500+k%3*500;bp.Q.value=3;const g2=oa.createGain();g2.gain.value=.05;s1.connect(bp);bp.connect(g2);g2.connect(oa.destination);s1.start(PW+1.05+k*.17)}const clk=(t,f,v)=>{const s=oa.createBufferSource();s.buffer=nb;const hp=oa.createBiquadFilter();hp.type='highpass';hp.frequency.value=f;const g=oa.createGain();g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.001);g.gain.exponentialRampToValueAtTime(.0001,t+.025);s.connect(hp);hp.connect(g);g.connect(oa.destination);s.start(t)};clk(PW,700,.12);clk(Xt.make?Xt.make.T0-.27:Xt.intro-.27,1800,.13);
+  const bp2=(t,f,d,v)=>{const o=oa.createOscillator(),g=oa.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(oa.destination);o.start(t);o.stop(t+d+.02)};bp2(PW+2.32,1760,.07,.035);const nm=String(Xt.title||'').length;for(let i=0;i<Math.min(nm,18);i++)bp2(PW+2.4+i*.07,1300+(i%3)*90,.02,.02);bp2(PW+Math.min(3.2,2.45+Math.min(nm,18)*.07+.1),2093,.09,.035)}
  const ab=await oa.startRendering();Xt.mix=ab;Xt.mixSr=sr;return ab}
 async function play(){if(PV.playing||PV.loading){stopPlay();drawNow();return}await ensureScene(ST.fmt);const Xt=XF(ST.fmt);if(!Xt){$q('#mMsg').textContent=ST.tape.on?'Build the tape first (right side, section 3).':'Pick a beat first.';return}
  PV.loading=true;$q('#mPlay').textContent='LOADING...';const my=++PV.tok||(PV.tok=1);
@@ -645,7 +661,7 @@ function tpDirty(){TP=null;stopPlay();save();tpList();$q('#mTpMsg').textContent=
 async function buildTape(){const T=ST.tape,ids=T.ids.filter(beatById),msg=t=>{$q('#mTpMsg').textContent=t};if(ids.length<2){msg('Add at least 2 beats.');return}
  stopPlay();TP=null;const btn=$q('#mTpBuild');btn.disabled=true;
  try{const bs=ids.map(beatById);for(let i=0;i<bs.length;i++){msg('Listening to beat '+(i+1)+' of '+bs.length+': '+bs[i].title+'...');await loadBeat(bs[i])}
-  const lead=startOn()?INTRO:1.6,xf=+T.xf||1.2,tracks=[];let t=lead;bs.forEach(b=>{const Sx=mkS(b,+T.len||0,kitOf(b.id));if(tracks.length===0)Sx.pre=startOn()?preHits(lead):null;tracks.push({S:Sx,start:t,dur:Sx.dur,b});t=t+Sx.dur-xf});
+  const lead=startOn()?INTRO:1.6,xf=+T.xf||1.2,tracks=[];let t=lead;bs.forEach(b=>{const Sx=mkS(b,+T.len||0,kitOf(b.id));if(tracks.length===0){Sx.pre=startOn()?preHits(lead):null;gate(Sx)}tracks.push({S:Sx,start:t,dur:Sx.dur,b});t=t+Sx.dur-xf});
   const last=tracks[tracks.length-1];TP={kind:'tape',tracks,lead,xf,title:T.title,intro:startOn()?INTRO:0,total:last.start+last.dur+TAIL};
   msg('The tape is ready: '+tracks.length+' beats, '+mmss(TP.total)+' long. Press PLAY on the left, or render it.');$q('#mMsg').textContent='Tape ready ('+mmss(TP.total)+').';mark('yt','th','gen');if(window.__lpShow)__lpShow();drawNow()}
  catch(e){msg('Could not build the tape: '+(e&&e.message||e))}finally{btn.disabled=false}}
@@ -739,6 +755,7 @@ function wire(){const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a 
  $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};
  const CM=ST.cam;CM.moves=CM.moves||{};{const box=$q('#mCamMvList');box.innerHTML=CAMMV.map(([k,t])=>'<label class="chk" style="font-size:11px"><input type="checkbox" data-mv="'+k+'"'+(CM.moves[k]?' checked':'')+'> '+t+'</label>').join('');box.querySelectorAll('[data-mv]').forEach(c=>c.onchange=()=>{CM.moves[c.dataset.mv]=c.checked;save();drawNow();summ()})}$q('#mDof').value=CM.dof;$q('#mRack').checked=!!CM.rack;$q('#mGrade').value=CM.grade;
  $q('#mDof').onchange=e=>{CM.dof=e.target.value;save();drawNow()};$q('#mRack').onchange=e=>{CM.rack=e.target.checked;save();drawNow()};$q('#mGrade').onchange=e=>{CM.grade=e.target.value;save();drawNow()};
+ $q('#mBuild').checked=buildOn();$q('#mBuildBars').value=String(buildBars());{const rb=()=>{stopPlay();if(S&&S.raw){S.built=null;S.hitsFull=null;applyKit();S.tl=tlOne(S);dropV()}if(TP){TP=null;$q('#mTpMsg').textContent='The build-up changed. Press BUILD THE TAPE again.'}save();drawNow()};$q('#mBuild').onchange=e=>{ST.build=e.target.checked;rb()};$q('#mBuildBars').onchange=e=>{ST.buildBars=+e.target.value;rb()}}
  $q('#mIntro').checked=startOn();$q('#mIntro').onchange=e=>{ST.start=e.target.checked;save();stopPlay();if(S&&S.buf){S.tl=tlOne(S);dropV()}if(TP){TP=null;$q('#mTpMsg').textContent='The intro changed. Press BUILD THE TAPE again.';mark('yt','th','gen')}drawNow()};
  const CN=ST.can;$q('#mCan').value=String(CN.id);const canUi=()=>{$q('#mCanSet').style.display=(CN.id==='orig'||CN.id==='none')?'none':'block';$q('#mCanSv').textContent=CN.size;$q('#mCanRv').textContent=CN.rot};
  $q('#mCanS').value=String(CN.size);$q('#mCanR').value=String(CN.rot);$q('#mCanX').value=String(CN.x);$q('#mCanY').value=String(CN.y);canUi();

@@ -43,7 +43,6 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  layers.forEach((l,k)=>{const allowed=new Set(['chop']);for(let j=0;j<=k;j++)allowed.add(layers[j][0]);sched(layerT[k],evOf(LP.plans[0],allowed,segLen))});
  /* step 5: everything, loop after loop; every loop plays a different chop pattern (loop 1 and every 4th loop are the original phrase) */
  const all=new Set(['chop','kick','snare','hat']);for(let q=0;q<fullLoops;q++)sched(fullT+q*loopLen,evOf(LP.plans[q],all,loopLen));
- if(opt.intro>0&&opt.buttons){click(.6,.12,700);click(T0-.27,.13,1800)}
  /* STOP, then the power goes: a relay click, then a low thump that falls away */
  if(opt.buttons){btnEv.push({t:stopT,k:'stop'});if(opt.handsBtn)hits.push({t:stopT,pad:-1,btn:'stop',v:.8});click(stopT,.14,1800)}
  {click(pdT+.42,.2,500);const o=ctx.createOscillator(),g=ctx.createGain(),t1=pdT+.45;o.type='sine';o.frequency.setValueAtTime(78,t1);o.frequency.exponentialRampToValueAtTime(24,t1+.5);g.gain.setValueAtTime(.0001,t1);g.gain.linearRampToValueAtTime(.16,t1+.012);g.gain.exponentialRampToValueAtTime(.0001,t1+.55);o.connect(g);g.connect(ctx.destination);o.start(t1);o.stop(t1+.6)}
