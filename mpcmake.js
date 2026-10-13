@@ -24,7 +24,7 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
   else{c.btns=[];c.tEnter=t+.6;c.aud=t+.75}
   c.btns.forEach(b=>{btnEv.push({t:b[1],k:b[0]});if(opt.handsBtn)hits.push({t:b[1],pad:-1,btn:b[0],v:.8})});
   addHit(c.aud,padIdx(s.pad),.9);c.end=c.aud+c.len+.3;t=c.end;chops.push(c)});
- const flipT=t+.15,layerT=layers.map((l,k)=>flipT+segLen*(k+1)),fullT=flipT+segLen*(layers.length+1),endMusic=fullT+loopLen*fullLoops,TAIL=1.4,total=endMusic+TAIL;
+ const flipT=t+.15,layerT=layers.map((l,k)=>flipT+segLen*(k+1)),fullT=flipT+segLen*(layers.length+1),endMusic=fullT+loopLen*fullLoops,TAIL=3.8,total=endMusic+TAIL,stopT=endMusic+.05,pdT=endMusic+1.0;   /* the hand presses STOP, then the unit powers down */
  /* ---- the audio, from the same plan ---- */
  const sr=44100,ctx=new OfflineAudioContext(2,Math.ceil(total*sr),sr),G=E.setup(ctx,dna);
  const click=(tt,v,f)=>{const n=E.noiseAt(G,tt,.03),hp=ctx.createBiquadFilter(),g=ctx.createGain();hp.type='highpass';hp.frequency.value=f||1800;g.gain.setValueAtTime(.0001,tt);g.gain.linearRampToValueAtTime(v,tt+.001);g.gain.exponentialRampToValueAtTime(.0001,tt+.02);n.connect(hp);hp.connect(g);g.connect(ctx.destination)};
@@ -34,13 +34,16 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
  const evOf=(P,allowed,limit)=>P.events.filter(e=>e.t<limit&&allowed.has(e.lane));
  const sched=(off,list)=>{for(const e of list){const tt=off+e.t;
   if(e.lane==='kick'){E.vKick(G,tt,e.vel);addHit(tt,15,e.vel)}else if(e.lane==='snare'){E.vSnare(G,tt,e.vel);addHit(tt,14,e.vel)}else if(e.lane==='hat'){E.vHat(G,tt,e.vel);addHit(tt,12,e.vel)}
-  else if(e.lane==='chop'){const s=sl[e.n];E.vChop(G,buf,s,tt,e.len,e.vel);addHit(tt,padIdx(s.pad),e.vel)}}};
+  else if(e.lane==='chop'){const s=sl[e.n];E.vEvent(G,buf,Rr,e,tt);if(!e.grace)addHit(tt,padIdx(s.pad),e.vel)}}};
  /* step 3: the chops alone (the original phrase) */
  sched(flipT,evOf(LP.plans[0],new Set(['chop']),segLen));
  /* step 4: the drums, one layer at a time */
  layers.forEach((l,k)=>{const allowed=new Set(['chop']);for(let j=0;j<=k;j++)allowed.add(layers[j][0]);sched(layerT[k],evOf(LP.plans[0],allowed,segLen))});
  /* step 5: everything, loop after loop; every loop plays a different chop pattern (loop 1 and every 4th loop are the original phrase) */
  const all=new Set(['chop','kick','snare','hat']);for(let q=0;q<fullLoops;q++)sched(fullT+q*loopLen,evOf(LP.plans[q],all,loopLen));
+ /* STOP, then the power goes: a relay click, then a low thump that falls away */
+ if(opt.buttons){btnEv.push({t:stopT,k:'stop'});if(opt.handsBtn)hits.push({t:stopT,pad:-1,btn:'stop',v:.8});click(stopT,.14,1800)}
+ {click(pdT+.42,.2,500);const o=ctx.createOscillator(),g=ctx.createGain(),t1=pdT+.45;o.type='sine';o.frequency.setValueAtTime(78,t1);o.frequency.exponentialRampToValueAtTime(24,t1+.5);g.gain.setValueAtTime(.0001,t1);g.gain.linearRampToValueAtTime(.16,t1+.012);g.gain.exponentialRampToValueAtTime(.0001,t1+.55);o.connect(g);g.connect(ctx.destination);o.start(t1);o.stop(t1+.6)}
  const out=D.peakNorm(await ctx.startRendering(),.9);
  hits.sort((a,b)=>a.t-b.t);const per=PAD_NAMES.map(()=>[]);hits.forEach(h=>{if(h.pad>=0)per[h.pad].push({t:h.t,v:clamp(h.v,.4,1)})});
  /* ---- what the video needs ---- */
@@ -49,12 +52,13 @@ async function build(buf,Rr,dna,key,opt){opt=Object.assign({buttons:true,handsBt
   if(T<flipT){const c=chops.find(q=>T>=q.t0&&T<q.end);if(!c)return null;const s=c.slice;
    if(T<c.tEnter)return['TRIM  CHOP '+(c.i+1)+'/'+N,'START '+s.t0.toFixed(2)+'  END '+s.t1.toFixed(2),opt.buttons?'ASSIGN TO PAD...':'MOVE THE CUT...'];
    return['ASSIGNED  CHOP '+(c.i+1),'PAD '+s.pad+'  '+PAD_NAMES[padIdx(s.pad)],'LENGTH '+(s.t1-s.t0).toFixed(2)+' SEC']}
+  if(T>=pdT+.5)return['','',''];if(T>=pdT)return['POWERING DOWN...','PLEASE WAIT',''];if(T>=stopT)return[opt.name.toUpperCase().slice(0,20),'SEQUENCE STOPPED','READY'];
   return null};
  const wheelAngle=T=>{let a=0;for(const e of wheelEv){if(T>e.t)a+=e.a*ease((T-e.t)/e.d)}return a};
  const phase=T=>T<sample.t+sample.d+.3?0:T<flipT?1:T<layerT[0]?2:T<fullT?3:4;
  const chapters=[['0:00','Intro'],[mmss(sample.t),'The sample'],[mmss(chopStart),'Chopping it on the pads'],[mmss(flipT),'Playing the chops']].concat(layers.map((l,k)=>[mmss(layerT[k]),'Adding the '+l[1].toLowerCase()])).concat([[mmss(fullT),'The full beat']]);
  const waveBins=(()=>{const B=Rr.peaks.length/2,a=Math.floor(Rr.ws/Rr.dur*B),b=Math.max(a+2,Math.ceil(Rr.we/Rr.dur*B));return{a,b,B}})();
- const M={T0,sample,chops,flipT,segLen,layers:layers.map((l,k)=>({k:l[0],name:l[1],t:layerT[k]})),fullT,endMusic,loopLen,total,name:opt.name,bpm:Rr.bpm,key:key?key.name:'',style:'ec',kit:dna.name,id:dna.id,mode:'flip',progNames:LP.plans.map(P=>P.progName),chapters,lcdAt,wheelAngle,phase,overlayOn:opt.overlay,wave:waveBins,R:Rr,opt};
+ const M={T0,sample,chops,flipT,segLen,layers:layers.map((l,k)=>({k:l[0],name:l[1],t:layerT[k]})),fullT,endMusic,loopLen,stopT,pdAt:T=>T<pdT?-1:T-pdT,total,name:opt.name,bpm:Rr.bpm,key:key?key.name:'',style:'ec',kit:dna.name,id:dna.id,mode:'flip',progNames:LP.plans.map(P=>P.progName),chapters,lcdAt,wheelAngle,phase,overlayOn:opt.overlay,wave:waveBins,R:Rr,opt};
  const Sx={title:opt.name,bpm:Rr.bpm,key:(key?key.name:'').replace(' minor','m').replace(' major',''),lcd:'',buf:out,off:flipT,kit:0,dur:total,hits,per,btnEv,wheelEv,raw:null};
  const X={kind:'make',tracks:[{S:Sx,start:0,dur:total}],total,lead:0,title:opt.name,intro:opt.intro,make:M};
  return X}
