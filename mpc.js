@@ -770,6 +770,32 @@ function logoCard(c,W,H,T,X){const cd=X.card,u=Math.min(W,H)/1080,v=H>W,fade=1-e
   c.save();c.globalAlpha=fade*up*.16;c.translate(0,2*(y0+sz)+6*u);c.scale(1,-1);c.beginPath();c.rect(x,y0+sz*.72,sz,sz*.28);c.clip();c.drawImage(cv,x,y0,sz,sz);c.restore()}
  c.restore()}
 const lerp0=(a,b,q)=>a+(b-a)*q;
+/* 13. the beat name on a strip of masking tape stuck on the MPC, in marker */
+function tapeLabel(c,G,Sx){const t=String((Sx&&Sx.title)||'').toUpperCase();if(!t)return;const R=G.id==='deskv'?toV([905,438,300,44]):{x:905,y:438,w:300,h:44};c.save();c.translate(R.x+R.w/2,R.y+R.h/2);c.rotate(-.025);
+ const w=Math.min(R.w*1.25,R.w*.45+t.length*R.h*.42),h=R.h;c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=4;c.shadowOffsetY=2;const g=c.createLinearGradient(0,-h/2,0,h/2);g.addColorStop(0,'rgba(236,224,190,.93)');g.addColorStop(1,'rgba(214,200,160,.93)');c.fillStyle=g;
+ c.beginPath();c.moveTo(-w/2,-h/2);for(let i=0;i<=6;i++)c.lineTo(-w/2+(i%2?3:-1),-h/2+h*i/6);c.lineTo(w/2+(1),h/2);for(let i=6;i>=0;i--)c.lineTo(w/2+(i%2?-3:1),-h/2+h*i/6);c.closePath();c.fill();c.shadowBlur=0;c.shadowOffsetY=0;
+ c.fillStyle='rgba(255,255,255,.12)';c.fillRect(-w/2,-h/2,w,h*.3);c.fillStyle='#16161c';c.textAlign='center';c.textBaseline='middle';const f=q=>'700 '+q+'px "Permanent Marker", Caveat, cursive';let sz=h*.78;c.font=f(sz);while(sz>8&&c.measureText(t).width>w-16){sz--;c.font=f(sz)}c.fillText(t,0,h*.05);c.restore()}
+/* 15. YouTube-style comments popping in at the side (never the same comment twice in a video; some with the grey verified check) */
+function comments(c,W,H,v,T,X,Sx,pack){const CM=window.MZMpcComments;if(!CM)return;const t0=X.tracks[0].start,last=X.tracks[X.tracks.length-1],end=last.start+last.dur;if(T<t0+3||T>end-1)return;
+ const seed=String(X.title||'').split('').reduce((a,ch)=>a*31+ch.charCodeAt(0)|0,7)>>>0,GAP=4.6,LIFE=9,u=Math.min(W,H)/1080,cw=v?W*.86:W*.3,x0=v?W*.07:W*.02,yb=v?H*.86:H*.74,yr=new Date().getFullYear();
+ const k=Math.floor((T-t0-3)/GAP);let y=yb;c.save();
+ for(let i=k;i>=0&&i>k-3;i--){const st=t0+3+i*GAP,a=T-st;if(a>LIFE)continue;const cm=CM.at(pack?'pack':'beat',seed,i,end-t0,yr),al=Math.min(1,a/.35)*Math.min(1,(LIFE-a)/.6),sl=(1-ease(Math.min(1,a/.35)))*30*u;
+  c.font='500 '+Math.round(26*u)+'px Roboto, Arial, sans-serif';const words=cm.txt.split(' '),lines=[];let ln='';for(const wd of words){const tt=ln?ln+' '+wd:wd;if(c.measureText(tt).width>cw-110*u&&ln){lines.push(ln);ln=wd}else ln=tt}lines.push(ln);
+  const h=(66+lines.length*32)*u;y-=h+12*u;c.globalAlpha=al;const bx=x0-sl;c.fillStyle='rgba(15,15,15,.82)';c.beginPath();c.roundRect?c.roundRect(bx,y,cw,h,16*u):c.rect(bx,y,cw,h);c.fill();
+  c.fillStyle='hsl('+cm.hue+',45%,45%)';c.beginPath();c.arc(bx+38*u,y+38*u,22*u,0,6.3);c.fill();c.fillStyle='#fff';c.font='600 '+Math.round(22*u)+'px Roboto, Arial';c.textAlign='center';c.textBaseline='middle';c.fillText(cm.nm.charAt(1).toUpperCase(),bx+38*u,y+39*u);
+  c.textAlign='left';c.textBaseline='alphabetic';c.font='500 '+Math.round(21*u)+'px Roboto, Arial';c.fillStyle='#f1f1f1';c.fillText(cm.nm,bx+74*u,y+34*u);let nx=bx+74*u+c.measureText(cm.nm).width+8*u;
+  if(cm.ver){c.fillStyle='#aaaaaa';c.beginPath();c.arc(nx+9*u,y+27*u,9*u,0,6.3);c.fill();c.strokeStyle='#0f0f0f';c.lineWidth=2.4*u;c.beginPath();c.moveTo(nx+5*u,y+27*u);c.lineTo(nx+8*u,y+30.5*u);c.lineTo(nx+13.5*u,y+23.5*u);c.stroke();nx+=24*u}
+  c.fillStyle='#aaaaaa';c.font='400 '+Math.round(19*u)+'px Roboto, Arial';c.fillText(['just now','1 minute ago','2 minutes ago','5 minutes ago'][i%4],nx+4*u,y+34*u);
+  c.fillStyle='#f1f1f1';c.font='400 '+Math.round(26*u)+'px Roboto, Arial';lines.forEach((l,j)=>c.fillText(l,bx+74*u,y+(66+j*32)*u));
+  c.fillStyle='#aaaaaa';c.font='400 '+Math.round(19*u)+'px Roboto, Arial';c.fillText('👍 '+cm.likes.toLocaleString('en-US')+'    👎    Reply',bx+74*u,y+h-12*u)}
+ c.restore()}
+/* 17. end card: the picture dims and a card shows where to get the beat / pack */
+function endCard(c,W,H,v,T,X,Sx,pack){const D=4.5,a=T-(X.total-D);if(a<0)return;const u=Math.min(W,H)/1080,k=ease(Math.min(1,a/.7));c.save();c.fillStyle='rgba(6,6,8,'+(.78*k)+')';c.fillRect(0,0,W,H);c.globalAlpha=k;
+ const cw=v?W*.84:W*.5,chh=v?H*.32:H*.56,cx=W/2-cw/2,cy=(v?H*.3:H*.1)+(1-k)*40*u;c.fillStyle='#111114';c.strokeStyle='#e8b94a';c.lineWidth=3*u;c.beginPath();c.roundRect?c.roundRect(cx,cy,cw,chh,22*u):c.rect(cx,cy,cw,chh);c.fill();c.stroke();
+ c.textAlign='center';c.textBaseline='middle';c.fillStyle='#e8b94a';c.font='600 '+Math.round(30*u)+'px Oswald, sans-serif';c.fillText(pack?'GET THE PACK':'GET THIS BEAT',W/2,cy+chh*.16);
+ c.fillStyle='#fff';const t=String((X.kind==='tape'?X.title:Sx.title)||'').toUpperCase();let sz=Math.round(86*u);c.font='400 '+sz+'px Anton, Oswald, sans-serif';while(sz>20&&c.measureText(t).width>cw*.88){sz-=2;c.font='400 '+sz+'px Anton, Oswald, sans-serif'}c.fillText(t,W/2,cy+chh*.38);
+ c.fillStyle='#e0242f';const bw=cw*.62,bh=chh*.17,bx=W/2-bw/2,by=cy+chh*.58;c.beginPath();c.roundRect?c.roundRect(bx,by,bw,bh,bh/2):c.rect(bx,by,bw,bh);c.fill();c.fillStyle='#fff';c.font='600 '+Math.round(38*u)+'px Oswald, sans-serif';c.fillText('MZPRD.COM',W/2,by+bh/2+2*u);
+ c.fillStyle='#bdbdc4';c.font='500 '+Math.round(24*u)+'px Oswald, sans-serif';c.fillText(pack?'royalty free  /  link in the description':'lease or buy  /  link in the description',W/2,cy+chh*.88);c.restore()}
 function frame(c,W,H,fmt,T,X){if(X.base){frame(c,W,H,fmt,Math.max(0,T-X.card),X.base);if(T<X.card)logoCard(c,W,H,T,X);return}
  LAMPFL=lampLevel(T);const cu=fmt==='c';if(cu)fmt='v';const OV=!cu&&!X.long;
  const v=fmt==='v',E=ST.eng,sc0=v?.87*W/848:.6*W/848,k=trackAt(X,T),tr=X.tracks[k],Sx=tr.S,lt=T-tr.start,la=lt+(tr.off||0),tape=X.kind==='tape',last=X.tracks[X.tracks.length-1],lastEnd=last.start+last.dur,t0=X.make?X.make.T0:X.tracks[0].start;
@@ -786,6 +812,7 @@ function frame(c,W,H,fmt,T,X){if(X.base){frame(c,W,H,fmt,Math.max(0,T-X.card),X.
  if(SC&&SC.G.deck){fx.btn.stop=0;fx.btn.end=pulse(T,lastEnd-.08,lastEnd+.2)}
  machine(c,ox,oy,sc,Sx,{arm:SC&&SC.G.arm?armAt(SC.G,T,X.intro,t0,lastEnd):null,spin:SC&&SC.G.deck?spinAt(T,X.intro>0?t0-.27:-9,lastEnd):0,lcd:X.make&&!((X.intro>0)&&T<X.intro)?X.make.lcdAt(T):null,boot:(X.intro>0&&T<X.intro&&T>=PW)?T-PW:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,power:(X.make&&X.make.pdAt&&X.make.pdAt(T+.1)>=0)?0:(X.intro>0?ease((T-PW)/.12):1),pdown:(X.intro>0&&T<PW)?5:(X.make&&X.make.pdAt?X.make.pdAt(T):-1),run:la>=-.02&&T<(X.make&&X.make.stopT?X.make.stopT:lastEnd),trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
 {c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC?SC.G:PH;
+  if(SC&&(Gs.id==='deskh'||Gs.id==='deskv')&&ST.eng&&ST.eng.tapelab)tapeLabel(c,Gs,X.kind==='tape'?{title:X.title}:Sx);
   if(SC&&Gs.id==='deskh')drawRProp(c,Gs,Sx,T,la);
   if(SC&&Gs.id==='deskh')drawCan(c,Gs,Sx);
   if(SC&&Gs.id==='deskh')drawProp(c,Gs,Sx,T);
@@ -802,6 +829,8 @@ function frame(c,W,H,fmt,T,X){if(X.base){frame(c,W,H,fmt,Math.max(0,T-X.card),X.
  if(OV&&E.note&&(E.noteText||'').trim()&&T>2.4&&T<7.4)pill(c,E.noteText.trim(),W/2,v?(SC?H*.722:H*.775):H*.95,v?40:28,Math.min(ease((T-2.4)/.4),ease((7.4-T)/.4)));
  if(OV&&E.q&&(E.qText||'').trim()&&X.total>14&&T>X.total-10.5&&T<X.total-.15){const txt=E.qText.trim().toUpperCase(),lines=wrapTwo(txt),size=Math.min(v?100:72,W*.9/Math.max(5,Math.max(...lines.map(l=>l.length)))*1.9),pu=1+.025*Math.sin(T*5);sticker(c,lines,W/2,topY,size*pu,X.total-10.5,T,{fill:'#e0242f',out:Math.min(1,(X.total-.15-T)/.3)})}
  if(OV&&E.meters!==false&&la>=-.02&&T<lastEnd&&!intro)meters(c,W,H,v,Sx,la);
+ if(OV&&E.cmts)comments(c,W,H,v,T,X,Sx,packMode());
+ if(OV&&E.endcard&&!X.loop)endCard(c,W,H,v,T,X,Sx,packMode());
  if(OV&&X.sub)subscribe(c,W,H,T-X.subT0,v?(SC?.905:0):.9,!v);
  if(X.make&&window.MZMpcMake&&!cu)MZMpcMake.overlay(c,W,H,T,X,v);
  if(OV&&ST.text&&!SC)text(c,W,H,v,{title:tape?X.title:Sx.title,bpm:Sx.bpm,key:Sx.key,sub:tape&&!intro?(k+1)+'. '+Sx.title:''})}
@@ -902,6 +931,10 @@ function html(){return`<div class="mg"><div>
   <label class="chk"><input type="checkbox" id="mEhk"> BIG HOOK LINE AT THE START (SLAMS ON SCREEN, THE MPC PUNCHES IN)</label>
   <input type="text" id="mEhkT" maxlength="40" placeholder="Leave empty for an automatic line, or type your own">
   <label class="chk"><input type="checkbox" id="mElogo"> MZPRD LOGO INTRO (SAMPLE PACKS): THE GOLD LOGO SLAMS IN WITH A FLASH, SPARKS AND A SHOCKWAVE, THEN THE PACK COVER GLIDES IN AND IT FADES INTO THE SESSION (WITH THE MZPRD VOICE, ADDS 3.9 SEC)</label>
+  <label class="chk"><input type="checkbox" id="mEtape"> BEAT NAME ON MASKING TAPE, STUCK ON THE MPC (WRITTEN IN MARKER)</label>
+  <label class="chk"><input type="checkbox" id="mEcmts"> LIVE COMMENTS POPPING IN (1000 FOR BEATS, 1000 FOR PACKS, NEVER THE SAME ONE TWICE IN A VIDEO, SOME VERIFIED)</label>
+  <label class="chk"><input type="checkbox" id="mEend"> END CARD (THE PICTURE DIMS AND SHOWS WHERE TO GET THE BEAT OR PACK, LAST 4.5 SEC)</label>
+  <label class="chk"><input type="checkbox" id="mEcrk"> NEEDLE DROP CRACKLE WHEN THE RECORD STARTS (SAMPLE PACKS ONLY)</label>
   <label class="chk"><input type="checkbox" id="mEmet"> BEAT METERS AND A BAR COUNTER (FOUR LED LADDERS BOTTOM LEFT: KICK, SNARE, HATS, PADS, THEY JUMP ON EVERY HIT)</label>
   <label class="chk"><input type="checkbox" id="mEsub"> ANIMATED SUBSCRIBE AT THE END (BOTH FORMATS)</label>
   <label class="chk"><input type="checkbox" id="mEloop"> LOOPING ENDING (9:16, SINGLE BEAT): THE END BLENDS BACK INTO THE START</label>
@@ -980,7 +1013,12 @@ async function mixAudio(Xt,sr){if(Xt.mix&&Xt.mixSr===sr)return Xt.mix;
   /* the MZPRD voice, right after the slam */
   try{if(!VOBUF){const r=await fetch('mpc/intro_vo.mp3?v=1');VOBUF=await new OfflineAudioContext(1,1,sr).decodeAudioData(await r.arrayBuffer())}const vs=oa.createBufferSource();vs.buffer=VOBUF;const vg=oa.createGain();vg.gain.value=1;vs.connect(vg);vg.connect(oa.destination);vs.start(VO_AT)}catch(e){console.warn('intro voice',e)}
   [1318.5,1975.5,2637].forEach((fq,i)=>{const o=oa.createOscillator(),g=oa.createGain(),t=1.3+i*.05;o.type='sine';o.frequency.value=fq;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.025/(i+1),t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+1.4);o.connect(g);g.connect(oa.destination);o.start(t);o.stop(t+1.5)});
-  const ab=await oa.startRendering();Xt.mix=ab;Xt.mixSr=sr;return ab}const oa=new OfflineAudioContext(2,Math.ceil(Xt.total*sr),sr);
+  if(packMode()&&ST.eng&&ST.eng.crk&&Xt.tracks&&Xt.tracks.length){const nb2=oa.createBuffer(1,sr*3,sr),d=nb2.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*.02;for(let n=0;n<sr*3/350;n++){const p=Math.floor(Math.random()*d.length),a=(Math.random()<.15?.9:.35)*(Math.random()<.5?1:-1);for(let j=0;j<24&&p+j<d.length;j++)d[p+j]+=a*Math.exp(-j/4)}
+  const t0=Xt.tracks[0].start,drop=Math.max(0,t0-.3);
+  {const o=oa.createOscillator(),g=oa.createGain();o.type='sine';o.frequency.setValueAtTime(70,drop);o.frequency.exponentialRampToValueAtTime(35,drop+.15);g.gain.setValueAtTime(.0001,drop);g.gain.linearRampToValueAtTime(.35,drop+.004);g.gain.exponentialRampToValueAtTime(.0001,drop+.22);o.connect(g);g.connect(oa.destination);o.start(drop);o.stop(drop+.3)}
+  {const s2=oa.createBufferSource();s2.buffer=nb2;const f=oa.createBiquadFilter();f.type='highpass';f.frequency.value=900;const g=oa.createGain();g.gain.setValueAtTime(.0001,drop);g.gain.linearRampToValueAtTime(1.1,drop+.01);g.gain.exponentialRampToValueAtTime(.25,drop+1.4);s2.connect(f);f.connect(g);g.connect(oa.destination);s2.start(drop);s2.stop(drop+2.9)}
+  {const s3=oa.createBufferSource();s3.buffer=nb2;s3.loop=true;const f=oa.createBiquadFilter();f.type='bandpass';f.frequency.value=2500;f.Q.value=.7;const g=oa.createGain();g.gain.value=.18;s3.connect(f);f.connect(g);g.connect(oa.destination);const end=Xt.tracks[Xt.tracks.length-1];s3.start(drop+.5);s3.stop(end.start+end.dur)}}
+ const ab=await oa.startRendering();Xt.mix=ab;Xt.mixSr=sr;return ab}const oa=new OfflineAudioContext(2,Math.ceil(Xt.total*sr),sr);
  Xt.tracks.forEach((tr,i)=>{const src=oa.createBufferSource();src.buffer=tr.S.buf;src.loop=tr.S.buf.duration<tr.dur+(tr.off||0);const g=oa.createGain();src.connect(g);g.connect(oa.destination);const last=i===Xt.tracks.length-1,fin=tr.fi!=null?tr.fi:(i===0?.04:(Xt.xf||1.2)),fout=tr.fo!=null?tr.fo:(last?1.3:(Xt.xf||1.2)),s0=tr.start,e0=tr.start+tr.dur;
   g.gain.setValueAtTime(.0001,s0);g.gain.linearRampToValueAtTime(1,s0+Math.max(.01,fin));if(fout>0){g.gain.setValueAtTime(1,Math.max(s0+fin,e0-fout));g.gain.linearRampToValueAtTime(.0001,e0)}else g.gain.setValueAtTime(1,e0);src.start(s0,tr.off||0,tr.dur)});
  if(Xt.sub){const at=Xt.subT0,tone=(t,f0,f1,d,v)=>{const o=oa.createOscillator(),g=oa.createGain();o.type='sine';o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+d);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(oa.destination);o.start(t);o.stop(t+d+.05)};
@@ -1125,7 +1163,7 @@ function genRenderNow(){const el=$q('#mGN');if(!el)return;const G=window.MZMpcGe
 let thTok=0;
 const PNL={yt:['#mYTd',()=>ytRenderNow()],th:['#mTHd',()=>thRenderNow()],gen:['#mGnd',()=>genRenderNow()]},dirty={yt:1,th:1,gen:1};
 let YTP=null;
-function ensureYT(){if(window.MZMpcYT&&window.MZMpcGen&&STUDIO!==null)return Promise.resolve();return YTP=YTP||(async()=>{await loadS('mpcyt.js?v=13');await loadS('mpcgen.js?v=5');await loadS('mpcpack.js?v=2');await ensureStudio()})()}
+function ensureYT(){if(window.MZMpcYT&&window.MZMpcGen&&STUDIO!==null)return Promise.resolve();return YTP=YTP||(async()=>{await loadS('mpcyt.js?v=14');await loadS('mpcgen.js?v=5');await loadS('mpcpack.js?v=2');await ensureStudio()})()}
 function paintPanels(){for(const k in PNL){const d=root&&$q(PNL[k][0]);if(d&&d.open&&dirty[k]){dirty[k]=0;ensureYT().then(()=>{try{PNL[k][1]()}catch(e){console.warn(e)}})}}}
 const mark=(...ks)=>{ks.forEach(k=>dirty[k]=1);paintPanels()};
 function ytRender(){mark('yt')}function thRender(){mark('th')}function genRender(){mark('gen')}
@@ -1186,9 +1224,9 @@ function wire(){$q('#mSrcB').onclick=()=>setSrc('beats');$q('#mSrcP').onclick=()
  $q('#mTpT').onchange=e=>{T.title=e.target.value.trim()||'MZPRD BEAT TAPE';if(TP){TP.title=T.title;TP.mix=null}save();ytRender();thRender();drawNow()};
  $q('#mTpL').onchange=e=>{T.len=+e.target.value;tpDirty()};$q('#mTpX').onchange=e=>{T.xf=+e.target.value;tpDirty()};
  $q('#mTpAdd').onclick=()=>{const v=$q('#mTpA').value;if(!v)return;T.ids.push(v);tpDirty()};$q('#mTpBuild').onclick=buildTape;
- const En=ST.eng;$q('#mEhk').checked=!!En.hook;$q('#mEhkT').value=En.hookText;$q('#mEsub').checked=!!En.sub;$q('#mEmet').checked=En.meters!==false;$q('#mElogo').checked=!!En.logo;$q('#mEloop').checked=!!En.loop;$q('#mEnote').checked=!!En.note;$q('#mEnoteT').value=En.noteText;$q('#mEq').checked=!!En.q;$q('#mEqT').value=En.qText;
- const eng=(id,k,box)=>{$q(id).onchange=e=>{En[k]=box?e.target.checked:e.target.value;if(k==='sub'||k==='loop'||k==='logo'){dropV();stopPlay()}save();drawNow()};if(!box)$q(id).oninput=e=>{En[k]=e.target.value;drawNow()}};
- eng('#mEhk','hook',1);eng('#mEhkT','hookText');eng('#mEsub','sub',1);eng('#mEmet','meters',1);eng('#mElogo','logo',1);eng('#mEloop','loop',1);eng('#mEnote','note',1);eng('#mEnoteT','noteText');eng('#mEq','q',1);eng('#mEqT','qText');
+ const En=ST.eng;$q('#mEhk').checked=!!En.hook;$q('#mEhkT').value=En.hookText;$q('#mEsub').checked=!!En.sub;$q('#mEmet').checked=En.meters!==false;$q('#mEtape').checked=!!En.tapelab;$q('#mEcmts').checked=!!En.cmts;$q('#mEend').checked=!!En.endcard;$q('#mEcrk').checked=!!En.crk;$q('#mElogo').checked=!!En.logo;$q('#mEloop').checked=!!En.loop;$q('#mEnote').checked=!!En.note;$q('#mEnoteT').value=En.noteText;$q('#mEq').checked=!!En.q;$q('#mEqT').value=En.qText;
+ const eng=(id,k,box)=>{$q(id).onchange=e=>{En[k]=box?e.target.checked:e.target.value;if(k==='sub'||k==='loop'||k==='logo'||k==='crk'){dropV();stopPlay()}save();drawNow()};if(!box)$q(id).oninput=e=>{En[k]=e.target.value;drawNow()}};
+ eng('#mEhk','hook',1);eng('#mEhkT','hookText');eng('#mEsub','sub',1);eng('#mEmet','meters',1);eng('#mEtape','tapelab',1);eng('#mEcmts','cmts',1);eng('#mEend','endcard',1);eng('#mEcrk','crk',1);eng('#mElogo','logo',1);eng('#mEloop','loop',1);eng('#mEnote','note',1);eng('#mEnoteT','noteText');eng('#mEq','q',1);eng('#mEqT','qText');
  $q('#mRcu').onclick=()=>render(['c']);$q('#mRlp').onclick=renderLoop;
  const lpShow=()=>{const o=$q('#mLpOut'),P=loopPack();if(!P||!ST.beat){o.innerHTML='';return}o.innerHTML='<h4>LOOP VIDEO TITLES AND DESCRIPTION</h4>'+P.titles.map((t,i)=>'<div class="it"><b>'+esc(t)+'</b><button data-lt="'+i+'">COPY</button></div>').join('')+'<button class="btn" id="mLpD" style="width:100%;margin-top:6px">COPY DESCRIPTION</button>';o.querySelectorAll('[data-lt]').forEach(b=>b.onclick=async()=>{b.textContent=(await cpy(P.titles[+b.dataset.lt]))?'COPIED':'FAILED'});$q('#mLpD').onclick=async e=>{e.target.textContent=(await cpy(P.desc))?'COPIED':'FAILED'}};
  $q('#mLpM').onchange=lpShow;window.__lpShow=lpShow;
@@ -1196,7 +1234,7 @@ function wire(){$q('#mSrcB').onclick=()=>setSrc('beats');$q('#mSrcP').onclick=()
 window.MZMpcPackArt={cover:()=>COVERS[ST&&ST.beat]||null,scene:()=>DESKS.ph||null};
 window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the MPC...</div></div>';
-  try{await loadS('mpcdetect.js?v=10');if(!document.querySelector('link[data-mpc]')){await new Promise(res=>{const l=document.createElement('link');l.rel='stylesheet';l.href=FONT_LINK;l.dataset.mpc='1';l.onload=res;l.onerror=res;document.head.appendChild(l);setTimeout(res,5000)})}
+  try{await loadS('mpcdetect.js?v=10');await loadS('mpccomments.js?v=1');if(!document.querySelector('link[data-mpc]')){await new Promise(res=>{const l=document.createElement('link');l.rel='stylesheet';l.href=FONT_LINK;l.dataset.mpc='1';l.onload=res;l.onerror=res;document.head.appendChild(l);setTimeout(res,5000)})}
    await Promise.all(["40px Anton","600 40px Oswald","30px VT323","700 40px Caveat","40px Reenie Beanie"].map(f=>document.fonts.load(f).catch(()=>{})));prepHands(await loadImg('mpc/hand_r.webp'),await loadImg('mpc/hand_l.webp'))}
   catch(e){root.innerHTML='<div class="pn"><div class="msg">The MPC did not load. Refresh the page.</div></div>';return}
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,slug,tags').order('sort_order',{ascending:true}).order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}BEATS0=beats;
