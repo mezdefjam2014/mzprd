@@ -777,17 +777,19 @@ function tapeLabel(c,G,Sx){const t=String((Sx&&Sx.title)||'').toUpperCase();if(!
  c.fillStyle='rgba(255,255,255,.12)';c.fillRect(-w/2,-h/2,w,h*.3);c.fillStyle='#16161c';c.textAlign='center';c.textBaseline='middle';const f=q=>'700 '+q+'px "Permanent Marker", Caveat, cursive';let sz=h*.78;c.font=f(sz);while(sz>8&&c.measureText(t).width>w-16){sz--;c.font=f(sz)}c.fillText(t,0,h*.05);c.restore()}
 /* 15. YouTube-style comments popping in at the side (never the same comment twice in a video; some with the grey verified check) */
 function comments(c,W,H,v,T,X,Sx,pack){const CM=window.MZMpcComments;if(!CM)return;const t0=X.tracks[0].start,last=X.tracks[X.tracks.length-1],end=last.start+last.dur;if(T<t0+3||T>end-1)return;
- const seed=String(X.title||'').split('').reduce((a,ch)=>a*31+ch.charCodeAt(0)|0,7)>>>0,GAP=4.6,LIFE=9,u=Math.min(W,H)/1080,cw=v?W*.86:W*.3,x0=v?W*.07:W*.02,yb=v?H*.86:H*.74,yr=new Date().getFullYear();
+ const seed=String(X.title||'').split('').reduce((a,ch)=>a*31+ch.charCodeAt(0)|0,7)>>>0,GAP=4.6,LIFE=9,yr=new Date().getFullYear(),
+  /* the open part of each desk (nothing important under it): beats 16:9 the wood above the right-hand gadget, packs 16:9 the strip along the top, 9:16 the bottom-left corner */
+  Z=v?{x:.03,y:.975,w:.5,n:2,up:true}:pack?{x:.31,y:.012,w:.38,n:1}:{x:.785,y:.03,w:.2,n:3},u=Math.min(W,H)/1080*(v?.7:.62),cw=W*Z.w,x0=W*Z.x,yb=H*Z.y;
  const k=Math.floor((T-t0-3)/GAP);let y=yb;c.save();
- for(let i=k;i>=0&&i>k-3;i--){const st=t0+3+i*GAP,a=T-st;if(a>LIFE)continue;const cm=CM.at(pack?'pack':'beat',seed,i,end-t0,yr),al=Math.min(1,a/.35)*Math.min(1,(LIFE-a)/.6),sl=(1-ease(Math.min(1,a/.35)))*30*u;
+ for(let i=k;i>=0&&i>k-Z.n;i--){const st=t0+3+i*GAP,a=T-st;if(a>LIFE)continue;const cm=CM.at(pack?'pack':'beat',seed,i,end-t0,yr),al=Math.min(1,a/.35)*Math.min(1,(LIFE-a)/.6),sl=(1-ease(Math.min(1,a/.35)))*30*u;
   c.font='500 '+Math.round(26*u)+'px Roboto, Arial, sans-serif';const words=cm.txt.split(' '),lines=[];let ln='';for(const wd of words){const tt=ln?ln+' '+wd:wd;if(c.measureText(tt).width>cw-110*u&&ln){lines.push(ln);ln=wd}else ln=tt}lines.push(ln);
-  const h=(66+lines.length*32)*u;y-=h+12*u;c.globalAlpha=al;const bx=x0-sl;c.fillStyle='rgba(15,15,15,.82)';c.beginPath();c.roundRect?c.roundRect(bx,y,cw,h,16*u):c.rect(bx,y,cw,h);c.fill();
-  c.fillStyle='hsl('+cm.hue+',45%,45%)';c.beginPath();c.arc(bx+38*u,y+38*u,22*u,0,6.3);c.fill();c.fillStyle='#fff';c.font='600 '+Math.round(22*u)+'px Roboto, Arial';c.textAlign='center';c.textBaseline='middle';c.fillText(cm.nm.charAt(1).toUpperCase(),bx+38*u,y+39*u);
-  c.textAlign='left';c.textBaseline='alphabetic';c.font='500 '+Math.round(21*u)+'px Roboto, Arial';c.fillStyle='#f1f1f1';c.fillText(cm.nm,bx+74*u,y+34*u);let nx=bx+74*u+c.measureText(cm.nm).width+8*u;
-  if(cm.ver){c.fillStyle='#aaaaaa';c.beginPath();c.arc(nx+9*u,y+27*u,9*u,0,6.3);c.fill();c.strokeStyle='#0f0f0f';c.lineWidth=2.4*u;c.beginPath();c.moveTo(nx+5*u,y+27*u);c.lineTo(nx+8*u,y+30.5*u);c.lineTo(nx+13.5*u,y+23.5*u);c.stroke();nx+=24*u}
-  c.fillStyle='#aaaaaa';c.font='400 '+Math.round(19*u)+'px Roboto, Arial';c.fillText(['just now','1 minute ago','2 minutes ago','5 minutes ago'][i%4],nx+4*u,y+34*u);
-  c.fillStyle='#f1f1f1';c.font='400 '+Math.round(26*u)+'px Roboto, Arial';lines.forEach((l,j)=>c.fillText(l,bx+74*u,y+(66+j*32)*u));
-  c.fillStyle='#aaaaaa';c.font='400 '+Math.round(19*u)+'px Roboto, Arial';c.fillText('👍 '+cm.likes.toLocaleString('en-US')+'    👎    Reply',bx+74*u,y+h-12*u)}
+  const h=(66+lines.length*32)*u;let yy;if(Z.up){y-=h+12*u;yy=y}else{yy=y;y+=h+12*u}const y0c=yy;c.globalAlpha=al*.92;const bx=x0-sl;c.fillStyle='rgba(15,15,15,.82)';c.beginPath();c.roundRect?c.roundRect(bx,y0c,cw,h,16*u):c.rect(bx,y0c,cw,h);c.fill();
+  c.fillStyle='hsl('+cm.hue+',45%,45%)';c.beginPath();c.arc(bx+38*u,y0c+38*u,22*u,0,6.3);c.fill();c.fillStyle='#fff';c.font='600 '+Math.round(22*u)+'px Roboto, Arial';c.textAlign='center';c.textBaseline='middle';c.fillText(cm.nm.charAt(1).toUpperCase(),bx+38*u,y0c+39*u);
+  c.textAlign='left';c.textBaseline='alphabetic';c.font='500 '+Math.round(21*u)+'px Roboto, Arial';c.fillStyle='#f1f1f1';c.fillText(cm.nm,bx+74*u,y0c+34*u);let nx=bx+74*u+c.measureText(cm.nm).width+8*u;
+  if(cm.ver){c.fillStyle='#aaaaaa';c.beginPath();c.arc(nx+9*u,y0c+27*u,9*u,0,6.3);c.fill();c.strokeStyle='#0f0f0f';c.lineWidth=2.4*u;c.beginPath();c.moveTo(nx+5*u,y0c+27*u);c.lineTo(nx+8*u,y0c+30.5*u);c.lineTo(nx+13.5*u,y0c+23.5*u);c.stroke();nx+=24*u}
+  c.fillStyle='#aaaaaa';c.font='400 '+Math.round(19*u)+'px Roboto, Arial';c.fillText(['just now','1 minute ago','2 minutes ago','5 minutes ago'][i%4],nx+4*u,y0c+34*u);
+  c.fillStyle='#f1f1f1';c.font='400 '+Math.round(26*u)+'px Roboto, Arial';lines.forEach((l,j)=>c.fillText(l,bx+74*u,y0c+(66+j*32)*u));
+  c.fillStyle='#aaaaaa';c.font='400 '+Math.round(19*u)+'px Roboto, Arial';c.fillText('👍 '+cm.likes.toLocaleString('en-US')+'    👎    Reply',bx+74*u,y0c+h-12*u)}
  c.restore()}
 /* 17. end card: the picture dims and a card shows where to get the beat / pack */
 function endCard(c,W,H,v,T,X,Sx,pack){const D=4.5,a=T-(X.total-D);if(a<0)return;const u=Math.min(W,H)/1080,k=ease(Math.min(1,a/.7));c.save();c.fillStyle='rgba(6,6,8,'+(.78*k)+')';c.fillRect(0,0,W,H);c.globalAlpha=k;
@@ -932,7 +934,7 @@ function html(){return`<div class="mg"><div>
   <input type="text" id="mEhkT" maxlength="40" placeholder="Leave empty for an automatic line, or type your own">
   <label class="chk"><input type="checkbox" id="mElogo"> MZPRD LOGO INTRO (SAMPLE PACKS): THE GOLD LOGO SLAMS IN WITH A FLASH, SPARKS AND A SHOCKWAVE, THEN THE PACK COVER GLIDES IN AND IT FADES INTO THE SESSION (WITH THE MZPRD VOICE, ADDS 3.9 SEC)</label>
   <label class="chk"><input type="checkbox" id="mEtape"> BEAT NAME ON MASKING TAPE, STUCK ON THE MPC (WRITTEN IN MARKER)</label>
-  <label class="chk"><input type="checkbox" id="mEcmts"> LIVE COMMENTS POPPING IN (1000 FOR BEATS, 1000 FOR PACKS, NEVER THE SAME ONE TWICE IN A VIDEO, SOME VERIFIED)</label>
+  <label class="chk"><input type="checkbox" id="mEcmts"> LIVE COMMENTS POPPING IN (2000 FOR BEATS, 2000 FOR PACKS, NEVER THE SAME ONE TWICE IN A VIDEO, SOME VERIFIED)</label>
   <label class="chk"><input type="checkbox" id="mEend"> END CARD (THE PICTURE DIMS AND SHOWS WHERE TO GET THE BEAT OR PACK, LAST 4.5 SEC)</label>
   <label class="chk"><input type="checkbox" id="mEcrk"> NEEDLE DROP CRACKLE WHEN THE RECORD STARTS (SAMPLE PACKS ONLY)</label>
   <label class="chk"><input type="checkbox" id="mEmet"> BEAT METERS AND A BAR COUNTER (FOUR LED LADDERS BOTTOM LEFT: KICK, SNARE, HATS, PADS, THEY JUMP ON EVERY HIT)</label>
@@ -1234,7 +1236,7 @@ function wire(){$q('#mSrcB').onclick=()=>setSrc('beats');$q('#mSrcP').onclick=()
 window.MZMpcPackArt={cover:()=>COVERS[ST&&ST.beat]||null,scene:()=>DESKS.ph||null};
 window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the MPC...</div></div>';
-  try{await loadS('mpcdetect.js?v=10');await loadS('mpccomments.js?v=1');if(!document.querySelector('link[data-mpc]')){await new Promise(res=>{const l=document.createElement('link');l.rel='stylesheet';l.href=FONT_LINK;l.dataset.mpc='1';l.onload=res;l.onerror=res;document.head.appendChild(l);setTimeout(res,5000)})}
+  try{await loadS('mpcdetect.js?v=10');await loadS('mpccomments.js?v=2');if(!document.querySelector('link[data-mpc]')){await new Promise(res=>{const l=document.createElement('link');l.rel='stylesheet';l.href=FONT_LINK;l.dataset.mpc='1';l.onload=res;l.onerror=res;document.head.appendChild(l);setTimeout(res,5000)})}
    await Promise.all(["40px Anton","600 40px Oswald","30px VT323","700 40px Caveat","40px Reenie Beanie"].map(f=>document.fonts.load(f).catch(()=>{})));prepHands(await loadImg('mpc/hand_r.webp'),await loadImg('mpc/hand_l.webp'))}
   catch(e){root.innerHTML='<div class="pn"><div class="msg">The MPC did not load. Refresh the page.</div></div>';return}
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,slug,tags').order('sort_order',{ascending:true}).order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}BEATS0=beats;
