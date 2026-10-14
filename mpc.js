@@ -1125,7 +1125,7 @@ function genRenderNow(){const el=$q('#mGN');if(!el)return;const G=window.MZMpcGe
 let thTok=0;
 const PNL={yt:['#mYTd',()=>ytRenderNow()],th:['#mTHd',()=>thRenderNow()],gen:['#mGnd',()=>genRenderNow()]},dirty={yt:1,th:1,gen:1};
 let YTP=null;
-function ensureYT(){if(window.MZMpcYT&&window.MZMpcGen&&STUDIO!==null)return Promise.resolve();return YTP=YTP||(async()=>{await loadS('mpcyt.js?v=12');await loadS('mpcgen.js?v=4');await loadS('mpcpack.js?v=1');await ensureStudio()})()}
+function ensureYT(){if(window.MZMpcYT&&window.MZMpcGen&&STUDIO!==null)return Promise.resolve();return YTP=YTP||(async()=>{await loadS('mpcyt.js?v=13');await loadS('mpcgen.js?v=5');await loadS('mpcpack.js?v=2');await ensureStudio()})()}
 function paintPanels(){for(const k in PNL){const d=root&&$q(PNL[k][0]);if(d&&d.open&&dirty[k]){dirty[k]=0;ensureYT().then(()=>{try{PNL[k][1]()}catch(e){console.warn(e)}})}}}
 const mark=(...ks)=>{ks.forEach(k=>dirty[k]=1);paintPanels()};
 function ytRender(){mark('yt')}function thRender(){mark('th')}function genRender(){mark('gen')}
