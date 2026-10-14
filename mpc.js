@@ -40,7 +40,7 @@ const PX=430,DKPV={id:'packv',W:636,H:1131,u:1.32,sampled:true,glow:false,rows:3
  pad:{x0:596-PX,y0:505,w:74,h:76,px:91.6,py:100.5},lcd:{x:612-PX,y:389,w:219,h:84},btn:{power:[507-PX,414,36,21],start:[494-PX,790,44,25],end:[495-PX,734,44,25]},vol:[905-PX,407,21],deck:{cx:1400-PX,cy:558,r:344,lab:92},boot:DKP.boot,powLab:DKP.powLab};
 const GEO={deskh:DK,deskv:DKV,packh:DKP,packv:DKPV};
 const PSKINS=[['0','Black (the original)'],['1','Cherry blossom'],['2','8-bit blue'],['3','Street fighter'],['4','Collage (good music)'],['5','Gold 8-bit']];
-const PSK={},TSKINS=[['0','Black (the original)'],['1','Fortnite'],['2','50 Cent'],['3','Kanye portrait'],['4','Gucci monogram'],['5','Resident Evil'],['6','Sonic'],['7','Late Registration'],['8','Christmas'],['9','Mortal Kombat']];
+const PSK={},TSKINS=[['0','Black (the original)'],['1','Fortnite'],['2','50 Cent'],['3','Kanye portrait'],['4','Gucci monogram'],['5','Resident Evil'],['6','Sonic'],['7','Late Registration'],['8','Christmas'],['9','Mortal Kombat'],['10','Pepsi'],['11','Batman'],['12','Joker']];
 /* each pad machine skin has its own screen (measured on its photo) and its own backlight colour */
 const PLCD={'0':[620,395,206,73],'1':[622,390,208,80],'2':[616,397,210,76],'3':[622,412,188,73],'4':[616,393,210,76],'5':[612,396,222,78]};
 const PEM={'0':{fg:'#a9ecff',bg:'rgba(40,110,140,.32)'},'1':{fg:'#c8f3ff',bg:'rgba(60,120,150,.3)'},'2':{fg:'#bfe9ff',bg:'rgba(40,100,160,.32)'},'3':{fg:'#ffd27a',bg:'rgba(150,95,30,.3)'},'4':{fg:'#eef6ff',bg:'rgba(90,105,130,.3)'},'5':{fg:'#ffd889',bg:'rgba(160,115,40,.3)'}};
