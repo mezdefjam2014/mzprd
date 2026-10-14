@@ -979,7 +979,7 @@ function html(){return`<div class="mg"><div>
    <label>TAPE TITLE (SHOWS ON THE SCREEN AT THE START)</label><input type="text" id="mTpT" maxlength="40">
    <div class="two"><div><label>TIME PER BEAT</label><select id="mTpL"><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option><option value="90">90 seconds</option><option value="0">The whole preview</option></select></div>
    <div><label>BLEND BETWEEN BEATS</label><select id="mTpX"><option value="0.6">Short (0.6 s)</option><option value="1.2">Smooth (1.2 s)</option><option value="2">Long (2 s)</option></select></div></div>
-   <label>ADD A BEAT</label><div style="display:grid;grid-template-columns:1fr auto;gap:6px"><select id="mTpA"></select><button class="btn" id="mTpAdd">ADD</button></div>
+   <label id="mTpAddL">ADD A BEAT</label><div style="display:grid;grid-template-columns:1fr auto;gap:6px"><select id="mTpA"></select><button class="btn" id="mTpAdd">ADD</button></div>
    <div id="mTpList"></div>
    <button class="btn big" id="mTpBuild" style="margin-top:8px">BUILD THE TAPE (LISTEN TO EVERY BEAT)</button><div class="msg" id="mTpMsg">Add at least 2 beats, then build the tape. Then preview it and render it with the buttons on the left.</div>
   </div>
@@ -1127,25 +1127,26 @@ function ytOpen(){const d=$q('#mYTd');if(d&&X()){d.open=true}}
 
 /* ---------- beat tape ---------- */
 const beatById=id=>beats.find(b=>String(b.id)===String(id));
+window.tpList=()=>tpList();function tpLabels(){const p=packMode(),l=$q('#mTpAddL');if(l)l.textContent=p?'ADD A SAMPLE PACK':'ADD A BEAT';const sm=$q('#s_tape');if(sm&&!ST.tape.on)sm.textContent=p?'several packs in one video':'several beats in one video'}
 function tpList(){const T=ST.tape,el=$q('#mTpList');T.ids=T.ids.filter(id=>beatById(id));
- el.innerHTML=T.ids.length?T.ids.map((id,i)=>`<div class="it"><span style="color:var(--gold);font-weight:700">${i+1}</span><b>${esc(beatById(id).title)}</b><button data-u="${i}">UP</button><button data-d="${i}">DOWN</button><button data-x="${i}">REMOVE</button></div>`).join(''):'<div class="msg">No beats in the tape yet.</div>';
+ el.innerHTML=T.ids.length?T.ids.map((id,i)=>`<div class="it"><span style="color:var(--gold);font-weight:700">${i+1}</span><b>${esc(beatById(id).title)}</b><button data-u="${i}">UP</button><button data-d="${i}">DOWN</button><button data-x="${i}">REMOVE</button></div>`).join(''):'<div class="msg">'+(packMode()?'No packs in the playlist yet.':'No beats in the tape yet.')+'</div>';
  const mv=(i,j)=>{if(j<0||j>=T.ids.length)return;[T.ids[i],T.ids[j]]=[T.ids[j],T.ids[i]];tpDirty()};
  el.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>mv(+b.dataset.u,+b.dataset.u-1));el.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>mv(+b.dataset.d,+b.dataset.d+1));
  el.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{T.ids.splice(+b.dataset.x,1);tpDirty()});
- const a=$q('#mTpA');a.innerHTML=beats.filter(b=>!T.ids.includes(String(b.id))&&!T.ids.includes(b.id)).map(b=>`<option value="${esc(b.id)}">${esc(b.title)}</option>`).join('')||'<option value="">All beats are in the tape</option>'}
+ const a=$q('#mTpA');a.innerHTML=beats.filter(b=>!T.ids.includes(String(b.id))&&!T.ids.includes(b.id)).map(b=>`<option value="${esc(b.id)}">${esc(b.title)}</option>`).join('')||'<option value="">'+(packMode()?'All packs are in the playlist':'All beats are in the tape')+'</option>'}
 function tpDirty(){TP=null;stopPlay();save();tpList();$q('#mTpMsg').textContent=ST.tape.ids.length>=2?'The list changed. Press BUILD THE TAPE again.':'Add at least 2 beats.';ytRender();thRender();drawNow()}
-async function buildTape(){const T=ST.tape,ids=T.ids.filter(beatById),msg=t=>{$q('#mTpMsg').textContent=t};if(ids.length<2){msg('Add at least 2 beats.');return}
+async function buildTape(){const T=ST.tape,ids=T.ids.filter(beatById),msg=t=>{$q('#mTpMsg').textContent=t};if(ids.length<2){msg(packMode()?'Add at least 2 sample packs.':'Add at least 2 beats.');return}
  stopPlay();TP=null;const btn=$q('#mTpBuild');btn.disabled=true;
  try{const bs=ids.map(beatById);for(let i=0;i<bs.length;i++){msg('Listening to beat '+(i+1)+' of '+bs.length+': '+bs[i].title+'...');await loadBeat(bs[i])}
   const lead=startOn()?INTRO:1.6,xf=+T.xf||1.2,tracks=[];let t=lead;bs.forEach(b=>{const Sx=mkS(b,+T.len||0,kitOf(b.id));if(tracks.length===0)Sx.pre=startOn()?preHits(lead):null;tracks.push({S:Sx,start:t,dur:Sx.dur,b});t=t+Sx.dur-xf});
-  const last=tracks[tracks.length-1];TP={kind:'tape',tracks,lead,xf,title:T.title,intro:startOn()?INTRO:0,total:last.start+last.dur+TAIL};
+  const last=tracks[tracks.length-1];TP={kind:'tape',tracks,lead,xf,title:(packMode()&&/BEAT TAPE/i.test(T.title||'')?String(T.title).replace(/BEAT TAPE/i,'SAMPLE PACKS'):T.title),intro:startOn()?INTRO:0,total:last.start+last.dur+TAIL};
   msg('The tape is ready: '+tracks.length+' beats, '+mmss(TP.total)+' long. Press PLAY on the left, or render it.');$q('#mMsg').textContent='Tape ready ('+mmss(TP.total)+').';mark('yt','th','gen');if(window.__lpShow)__lpShow();drawNow()}
  catch(e){msg('Could not build the tape: '+(e&&e.message||e))}finally{btn.disabled=false}}
 
 /* ---------- YouTube package + thumbnails (the brains are in mpcyt.js) ---------- */
 const YT=()=>window.MZMpcYT;
 const cpy=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}a.remove();return ok}};
-function ytRenderNow(){const el=$q('#mYT');if(!el)return;const b=beats.find(x=>String(x.id)===String(ST.beat)),O=ST.tape.on?(TP&&YT()?YT().buildTape(ST,TP):null):(b&&YT()?(packMode()&&window.MZMpcPack?MZMpcPack.build(ST,b):YT().build(ST,b,S)):null);if(!O){el.innerHTML='<div class="msg">'+(ST.tape.on?'Build the tape first.':'Pick a beat first.')+'</div>';return}
+function ytRenderNow(){const el=$q('#mYT');if(!el)return;const b=beats.find(x=>String(x.id)===String(ST.beat)),O=ST.tape.on?(TP&&YT()?(packMode()&&window.MZMpcPack?MZMpcPack.buildTape(ST,TP):YT().buildTape(ST,TP)):null):(b&&YT()?(packMode()&&window.MZMpcPack?MZMpcPack.build(ST,b):YT().build(ST,b,S)):null);if(!O){el.innerHTML='<div class="msg">'+(ST.tape.on?'Build the tape first.':'Pick a beat first.')+'</div>';return}
  const cc=(n,max,soft)=>`<span style="font:600 10px Montserrat;color:${n>max?'#ff5c5c':soft&&n>soft?'#e8b94a':'#7ad47a'}">${n}/${max}</span>`,pre=ST.yt.mode==='premiere';
  el.innerHTML=`<div class="two"><label class="chk"><input type="radio" name="mym" value="premiere"${pre?' checked':''}> PREMIERE</label><label class="chk"><input type="radio" name="mym" value="straight"${pre?'':' checked'}> STRAIGHT UPLOAD</label></div>${pre?`<label>PREMIERE TIME TEXT</label><input type="text" id="myW" placeholder="Friday at 8:00 PM" value="${esc(ST.yt.when)}">`:''}
  <h4>SMART CHECKS</h4>${O.checks.map(k=>`<div class="it"><span style="color:${k.ok?'#7ad47a':'#e8b94a'};font-weight:700">${k.ok?'OK':'FIX'}</span><b>${esc(k.msg)}</b></div>`).join('')}
@@ -1164,7 +1165,7 @@ function ytRenderNow(){const el=$q('#mYT');if(!el)return;const b=beats.find(x=>S
  el.querySelector('#myA').onclick=async()=>{el.querySelector('#myMsg').textContent=(await cpy(all()))?'Everything copied.':'Copy failed.'};el.querySelector('#myX').onclick=()=>dlf(new Blob([all()],{type:'text/plain'}),((ST.tape.on?ST.tape.title:S&&S.title)||'beat')+' - MPC YouTube package.txt')}
 /* ---------- package generator ---------- */
 let GEN=[],GENOPEN=-1;
-function genInfo(){const G=window.MZMpcGen,T=ST.tape;if(T.on){if(!TP)return null;const mins=Math.max(1,Math.round(TP.total/60));return{tape:true,TP,N:TP.tracks.length,mins,title:TP.title,link:'https://mzprd.com',seedBase:TP.title.length*3+TP.tracks.length}}
+function genInfo(){const G=window.MZMpcGen,T=ST.tape;if(T.on){if(!TP)return null;const mins=Math.max(1,Math.round(TP.total/60));return{tape:true,beat:{title:TP.title,slug:'',id:'tape'},TP,N:TP.tracks.length,mins,title:TP.title,link:'https://mzprd.com',seedBase:TP.title.length*3+TP.tracks.length}}
  const b=beats.find(x=>String(x.id)===String(ST.beat));if(!b||!S)return null;const mins=Math.max(1,Math.round((S.dur||60)/60));return{beat:b,S,title:b.title,bpm:Number(b.bpm)||0,key:b.musical_key||'',mins,link:'https://mzprd.com/'+(packMode()?'pack':'beat')+'/'+(b.slug||b.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''))+'/',seedBase:String(b.id).length*17+b.title.length}}
 function genRenderNow(){const el=$q('#mGN');if(!el)return;const G=window.MZMpcGen;if(!G)return;const g=ST.gen,info=genInfo();
  const opts=Object.entries(G.ANGLES).map(([k,v])=>`<option value="${k}"${g.angle===k?' selected':''}>${v.n} only</option>`).join('');
@@ -1178,7 +1179,7 @@ function genRenderNow(){const el=$q('#mGN');if(!el)return;const G=window.MZMpcGe
  <div class="two" style="margin-top:8px"><button class="btn" id="mGtxt">DOWNLOAD ALL AS .TXT</button><button class="btn" id="mGfav">COPY MY PICKS (TITLES)</button></div><div class="msg" id="mGmsg"></div>`;
  const all=p=>p.title+'\n\nTHUMBNAIL TEXT: '+p.thumb+'\n\nDESCRIPTION\n'+p.desc+'\n\nTAGS\n'+p.tags+'\n\nPINNED COMMENT\n'+p.pin+(p.shorts?'\n\nSHORTS\n'+p.shorts.title+'\n'+p.shorts.desc:'');
  const say=t=>{$q('#mGmsg').textContent=t};
- const run=more=>{const inf=genInfo();if(!inf){say(ST.tape.on?'Build the tape first (section 3).':'Pick a beat first.');return}g.seed=more?(g.seed||1)+1:(g.seed||1);const t0=performance.now();GEN=(packMode()&&!inf.tape&&window.MZMpcPack?MZMpcPack.generate(ST,inf,g.n,g.seed,g.angle?[g.angle]:null,MZMpcGen):MZMpcGen.generate(ST,inf,g.n,g.seed,g.angle?[g.angle]:null,window.MZMpcYT));GENOPEN=-1;save();genRender();say(GEN.length+' packages made in '+Math.round(performance.now()-t0)+' ms. Best score: '+(GEN.length?Math.max(...GEN.map(p=>p.score)):0)+'.')};
+ const run=more=>{const inf=genInfo();if(!inf){say(ST.tape.on?'Build the tape first (section 3).':'Pick a beat first.');return}g.seed=more?(g.seed||1)+1:(g.seed||1);const t0=performance.now();GEN=(packMode()&&window.MZMpcPack?MZMpcPack.generate(ST,inf,g.n,g.seed,g.angle?[g.angle]:null,MZMpcGen):MZMpcGen.generate(ST,inf,g.n,g.seed,g.angle?[g.angle]:null,window.MZMpcYT));GENOPEN=-1;save();genRender();say(GEN.length+' packages made in '+Math.round(performance.now()-t0)+' ms. Best score: '+(GEN.length?Math.max(...GEN.map(p=>p.score)):0)+'.')};
  $q('#mGgo').onclick=()=>run(false);$q('#mGmore').onclick=()=>run(true);$q('#mGc').onchange=e=>{g.n=+e.target.value;save()};$q('#mGa').onchange=e=>{g.angle=e.target.value;save()};
  el.querySelectorAll('[name=mgs]').forEach(r=>r.onchange=()=>{g.sort=r.value;save();genRender()});el.querySelectorAll('[name=mgf]').forEach(r=>r.onchange=()=>{g.show=r.value;save();genRender()});
  el.querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>{const t=GEN[+b.dataset.fav].title,i=g.fav.indexOf(t);if(i>=0)g.fav.splice(i,1);else g.fav.push(t);save();genRender()});
@@ -1193,7 +1194,7 @@ function genRenderNow(){const el=$q('#mGN');if(!el)return;const G=window.MZMpcGe
 let thTok=0;
 const PNL={yt:['#mYTd',()=>ytRenderNow()],th:['#mTHd',()=>thRenderNow()],gen:['#mGnd',()=>genRenderNow()]},dirty={yt:1,th:1,gen:1};
 let YTP=null;
-function ensureYT(){if(window.MZMpcYT&&window.MZMpcGen&&STUDIO!==null)return Promise.resolve();return YTP=YTP||(async()=>{await loadS('mpcyt.js?v=14');await loadS('mpcgen.js?v=5');await loadS('mpcpack.js?v=2');await ensureStudio()})()}
+function ensureYT(){if(window.MZMpcYT&&window.MZMpcGen&&STUDIO!==null)return Promise.resolve();return YTP=YTP||(async()=>{await loadS('mpcyt.js?v=14');await loadS('mpcgen.js?v=5');await loadS('mpcpack.js?v=3');await ensureStudio()})()}
 function paintPanels(){for(const k in PNL){const d=root&&$q(PNL[k][0]);if(d&&d.open&&dirty[k]){dirty[k]=0;ensureYT().then(()=>{try{PNL[k][1]()}catch(e){console.warn(e)}})}}}
 const mark=(...ks)=>{ks.forEach(k=>dirty[k]=1);paintPanels()};
 function ytRender(){mark('yt')}function thRender(){mark('th')}function genRender(){mark('gen')}
@@ -1227,10 +1228,10 @@ const SUM={scene:()=>(ST.scene==='white'?'White studio':'Desk / '+((SKINS.find(k
 function summ(){if(!root)return;for(const k in SUM){const e=root.querySelector('#s_'+k);if(e)e.textContent=SUM[k]()}const t=root.querySelector('#s_tape');if(t)t.textContent=ST.tape.on?(ST.tape.ids.length+' beats / ON'):'several beats in one video'}
 /* BEATS or SAMPLE PACKS: packs play in their own scene (pad controller + turntable); each side remembers its own pick */
 function srcUI(){const p=packMode();$q('#mSrcB').style.background=p?'':'var(--red)';$q('#mSrcP').style.background=p?'var(--red)':'';$q('#mBeatL').textContent=p?'SAMPLE PACK':'BEAT'}
-async function setSrc(m){if((ST.src||'beats')===m)return;stopPlay();ST['pick_'+(ST.src||'beats')]=ST.beat;ST.src=m;beats=m==='packs'?PACKS:BEATS0;ST.beat=ST['pick_'+m]||'';S=null;save();
+async function setSrc(m){if((ST.src||'beats')===m)return;stopPlay();ST['tape_'+(ST.src||'beats')]=ST.tape.ids;ST.tape.ids=ST['tape_'+m]||[];TP=null;ST['pick_'+(ST.src||'beats')]=ST.beat;ST.src=m;beats=m==='packs'?PACKS:BEATS0;ST.beat=ST['pick_'+m]||'';S=null;save();
  const sel=$q('#mBeat');sel.innerHTML='<option value="">'+(m==='packs'?'Choose a sample pack...':'Choose a beat...')+'</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');sel.value=String(ST.beat||'');srcUI();
- await ensureScene(ST.fmt);size();drawNow();GEN=[];mark('yt','th','gen');if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
-function wire(){$q('#mSrcB').onclick=()=>setSrc('beats');$q('#mSrcP').onclick=()=>setSrc('packs');srcUI();const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);$q('#mLearnAll').onclick=()=>learnAll();
+ await ensureScene(ST.fmt);size();drawNow();GEN=[];if(window.tpList)tpList();tpLabels();mark('yt','th','gen');if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
+function wire(){$q('#mSrcB').onclick=()=>setSrc('beats');$q('#mSrcP').onclick=()=>setSrc('packs');srcUI();setTimeout(()=>{try{tpLabels()}catch(e){}},0);const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);$q('#mLearnAll').onclick=()=>learnAll();
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();mark('yt','th','gen')};for(const k in PNL){$q(PNL[k][0]).addEventListener('toggle',paintPanels)}
  $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow();mark('th')};$q('#mProp').value=ST.prop||'floppy';$q('#mProp').onchange=async e=>{ST.prop=e.target.value;await ensureScene(ST.fmt);save();drawNow()};$q('#mIprot').value=String(ST.iprot||0);$q('#mIprotV').textContent=(+ST.iprot||0).toFixed(1);$q('#mIprot').oninput=e=>{ST.iprot=+e.target.value;$q('#mIprotV').textContent=ST.iprot.toFixed(1);save();drawNow()};$q('#mRProp').value=ST.rprop||'floppy';$q('#mRProp').onchange=async e=>{ST.rprop=e.target.value;await ensureScene(ST.fmt);save();drawNow()};$q('#mPSkin').value=ST.pskin||'0';$q('#mPSkin').onchange=async e=>{ST.pskin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};

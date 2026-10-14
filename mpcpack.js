@@ -61,9 +61,9 @@ const POPEN={search:'"{T}" is a {s1l} sample pack: original loops with BPM and k
 function fill(t,c){return t.replace(/\{T\}/g,c.T).replace(/\{s1\}/g,c.s1).replace(/\{s2\}/g,c.s2).replace(/\{s1l\}/g,c.s1.toLowerCase()).replace(/\{k\}/g,c.k).replace(/\{y\}/g,c.y).replace(/\{pr\}/g,c.pr).replace(/\{n\}/g,1+Math.floor(c.r(9)*4))}
 function generate(ST,info,n,seed,only,G){const out=[],seen=new Set(),keys=only&&only.length?only:Object.keys(PT);let g=0;
  while(out.length<n&&g<n*12){const k=g++,angle=keys[k%keys.length],c=ctx(ST,info.beat,seed*53+k),list=PT[angle],title=fill(list[Math.floor(c.r(10)*list.length)],c).slice(0,100);if(seen.has(title.toLowerCase()))continue;seen.add(title.toLowerCase());
-  const base=build(Object.assign({},ST,{yt:Object.assign({},ST.yt,{v:seed*53+k})}),info.beat),open=fill(POPEN[angle],c),L=c.link;
+  const ST2=Object.assign({},ST,{yt:Object.assign({},ST.yt,{v:seed*53+k})}),base=info.tape?buildTape(ST2,info.TP):build(ST2,info.beat),open=info.tape?info.N+' sample packs in one video, every pack linked below.':fill(POPEN[angle],c),L=info.tape?'':c.link;
   let sc=50;if(/sample|loop|kit/i.test(title))sc+=14;if(title.length<=60)sc+=14;else if(title.length<=70)sc+=6;else sc-=8;if(title.includes(c.T))sc+=6;if(angle==='search')sc+=6;if(/\?$/.test(title))sc+=3;
-  out.push({angle,title,score:clamp(sc,0,100),open,pin:base.pinned[k%3],thumb:fill(PTH[angle][Math.floor(c.r(12)*PTH[angle].length)],c).toUpperCase(),ctx:c,desc:[open+' Get it here: '+L].concat(base.desc.split('\n').slice(1)).join('\n'),tags:base.tags,shorts:base.shorts,why:G&&G.ANGLES[angle]?G.ANGLES[angle].why.replace(/type beat/gi,'sample pack').replace(/beat/gi,'pack'):'',angleName:G&&G.ANGLES[angle]?G.ANGLES[angle].n:angle.toUpperCase()})}
+  out.push({angle,title,score:clamp(sc,0,100),open,pin:base.pinned[k%3],thumb:fill(PTH[angle][Math.floor(c.r(12)*PTH[angle].length)],c).toUpperCase(),ctx:c,desc:[open+(L?' Get it here: '+L:'')].concat(base.desc.split('\n').slice(1)).join('\n'),tags:base.tags,shorts:base.shorts,why:G&&G.ANGLES[angle]?G.ANGLES[angle].why.replace(/type beat/gi,'sample pack').replace(/beat/gi,'pack'):'',angleName:G&&G.ANGLES[angle]?G.ANGLES[angle].n:angle.toUpperCase()})}
  return out}
 
 /* ---------- thumbnails for a pack: the cover art big, the pack scene behind, few bold words ---------- */
@@ -87,5 +87,14 @@ function make(c,W,H,seed,X,o){o=o||{};const r=n=>hs(n,seed),v=H>W,Z=window.MZMpc
  c.font='600 '+Math.round((v?34:24))+'px Oswald, sans-serif';c.fillStyle='rgba(255,255,255,.8)';c.fillText('MZPRD.COM',tx,v?H*.94:H*.92);
  c.restore();return{pal:useScene?'SCENE':P.n,bg:useScene?'pack scene':'color',text:words.join(' / ')}}
 
-window.MZMpcPack={build,generate,make};
+/* a playlist of several packs in one video: the description lists every pack with its time and its own link */
+function buildTape(ST,TP){const tr=TP.tracks,N=tr.length,y=new Date().getFullYear(),v=(ST.yt&&ST.yt.v)||0,ts=t=>{t=Math.max(0,Math.floor(t));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')},mins=Math.max(1,Math.round(TP.total/60)),T=TP.title||'Sample Pack Playlist';
+ const tpl=[['SEARCH',`${N} Sample Packs ${y} | ${T}`],['SEARCH',`${N} Vintage Sample Packs (Royalty Free) | ${T}`],['SEARCH',`Boom Bap Sample Pack Bundle ${y} - ${N} Packs`],['SEARCH',`${N} Vinyl Loop Kits for Producers | ${T}`],['VIBE',`${mins} Minutes of Dusty Vinyl Loops | ${N} Packs`],['MPC',`${N} Sample Packs Played Live on Vinyl + Pads`],['CLICK',`Every Sample Pack I Made This Year (${N} Packs)`],['USE',`${N} Packs to Make Your Next Beat Tape`],['HYBRID',`${T} | ${N} Sample Packs ${y} | Royalty Free`]];
+ const sc=t=>{let s=55;if(/sample pack|loop kit|packs/i.test(t))s+=14;if(t.length<=60)s+=12;else if(t.length<=70)s+=6;else s-=6;if(t.includes(String(y)))s+=6;if(/\d/.test(t))s+=4;return Math.min(100,s)};
+ const titles=tpl.map((x,i)=>({k:x[0],t:x[1].slice(0,100),r:hs(i,v*13+N)})).sort((a,b)=>a.r-b.r).map(x=>({k:x.k,t:x.t,s:sc(x.t)}));let best=0;titles.forEach((t,i)=>{if(t.s>titles[best].s)best=i});titles[best].best=true;
+ const list=tr.map((t,i)=>(i===0?'0:00':ts(t.start))+' '+(i+1)+'. '+t.S.title+'\n   Get the pack: '+linkOf(t.b));
+ const desc=[`${T}: ${N} sample packs by MZPRD, played live on vinyl and pads. Every pack is linked below.`,'','PACKS + LINKS (TAP A TIME TO JUMP TO THE PACK)',...list,'','> ALL SAMPLE PACKS AND BEATS: https://mzprd.com','','LICENSE','100% royalty free for your beats and releases. Just no reselling the samples as-is.','','All sounds are original. MZPRD (Meztheprod).','','#samplepack #loopkit #boombap'].join('\n');
+ const tags=['sample pack '+y,'sample packs','boom bap sample pack','vintage sample pack','vinyl samples','loop kit '+y,'royalty free samples','soul samples','sample pack bundle','mzprd',...tr.map(t=>String(t.S.title).toLowerCase()+' sample pack')].filter((x,i,a)=>a.indexOf(x)===i).join(', ').slice(0,450);
+ const L='https://mzprd.com';return{titles,desc,tags,pinned:[`Which pack is your favorite? All ${N} are linked in the description.`,`Drop the timestamp of the loop you'd flip first. Packs: ${L}`],shorts:{title:`${N} sample packs on vinyl + pads`,desc:`${N} sample packs played live. Links: ${L}\n\n#shorts #samplepack`},checks:[{ok:true,msg:'Every pack has its own link and timestamp in the description.'},{ok:titles[best].t.length<=60,msg:'Best title is '+titles[best].t.length+' characters.'}],tips:['Pin the comment and add the playlist to a "Sample Packs" playlist.','Post a Short of the best loop from each pack.'],link:L}}
+window.MZMpcPack={build,buildTape,generate,make};
 })();
