@@ -592,9 +592,9 @@ function frame(c,W,H,fmt,T,X){if(X.base){frame(c,W,H,fmt,Math.max(0,T-X.card),X.
  machine(c,ox,oy,sc,Sx,{arm:SC&&SC.G.arm?armAt(SC.G,T,X.intro,t0,lastEnd):null,spin:SC&&SC.G.deck?spinAt(T,X.intro>0?t0-.27:-9,lastEnd):0,lcd:X.make&&!((X.intro>0)&&T<X.intro)?X.make.lcdAt(T):null,boot:(X.intro>0&&T<X.intro&&T>=PW)?T-PW:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,power:(X.make&&X.make.pdAt&&X.make.pdAt(T+.1)>=0)?0:(X.intro>0?ease((T-PW)/.12):1),pdown:(X.intro>0&&T<PW)?5:(X.make&&X.make.pdAt?X.make.pdAt(T):-1),run:la>=-.02&&T<(X.make&&X.make.stopT?X.make.stopT:lastEnd),trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
 {c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC?SC.G:PH;
   if(SC&&Gs.id==='deskh')drawCan(c,Gs,Sx);
-  if(SC&&(Gs.id==='deskh'||Gs.id==='deskv'))drawProp(c,Gs,Sx,T);
+  if(SC&&Gs.id==='deskh')drawProp(c,Gs,Sx,T);
   if(ST.hands&&ST.hands.on)drawHands(c,Gs,Sx,la,!!SC);
-  if(SC){if(Gs.label&&(!ST.prop||ST.prop==='floppy')){const pr=X.long?1:ease((T-tr.start+.25)/1.1);handwrite(c,Gs.label,Sx.title,'MZPRD'+(Sx.bpm?'  '+Sx.bpm+' BPM':'')+(Sx.key?'  '+Sx.key:''),X.kind==='tape'&&k===0&&T<t0?0:pr)}
+  if(SC){if(Gs.label&&(Gs.id!=='deskh'||!ST.prop||ST.prop==='floppy')){const pr=X.long?1:ease((T-tr.start+.25)/1.1);handwrite(c,Gs.label,Sx.title,'MZPRD'+(Sx.bpm?'  '+Sx.bpm+' BPM':'')+(Sx.key?'  '+Sx.key:''),X.kind==='tape'&&k===0&&T<t0?0:pr)}
    if(Gs.smoke&&ST.smoke&&ST.smoke.on)smoke(c,T,Gs.smoke,ST.smoke.amt||1);dust(c,T,Gs)}
   c.restore()}
  if(SC&&SC.G.lamp){lampFx(c,W,H,ox,oy,sc,SC.G,T)}else if(!SC)sheen(c,ox,oy,sc,T);
@@ -668,7 +668,7 @@ function html(){return`<div class="mg"><div>
  <details class="sec grp" id="g_scene"><summary>2. SCENE <small id="s_scene"></small></summary><div class="in">
   <label>LOOK OF THE VIDEOS</label><select id="mScene"><option value="desk">Desk scene (the worn desk, lamp and floppy disks)</option><option value="white">White studio</option></select>
   <label>MACHINE SKIN (DESK SCENES)</label><select id="mSkin">${SKINS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
-  <label>LEFT DESK ITEM (MPC DESK)</label><select id="mProp">${PROPS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
+  <label>LEFT DESK ITEM (MPC DESK, 16:9 ONLY)</label><select id="mProp">${PROPS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
   <label>PAD MACHINE SKIN (SAMPLE PACKS SCENE)</label><select id="mPSkin">${PSKINS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
   <div class="sub">CAN ON THE DESK (16:9)</div>
   <select id="mCan"><option value="orig">The original Pepsi can (as in the picture)</option><option value="auto">A different can for each beat (automatic)</option>${CAN_NAMES.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('')}<option value="none">No can</option></select>
