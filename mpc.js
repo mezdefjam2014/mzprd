@@ -827,8 +827,18 @@ function endCard(c,W,H,v,T,X,Sx,pack){const D=4.5,a=T-(X.total-D);if(a<0)return;
  c.fillStyle='#e0242f';const bw=cw*.62,bh=chh*.17,bx=W/2-bw/2,by=cy+chh*.58;c.beginPath();c.roundRect?c.roundRect(bx,by,bw,bh,bh/2):c.rect(bx,by,bw,bh);c.fill();c.fillStyle='#fff';c.font='600 '+Math.round(38*u)+'px Oswald, sans-serif';c.fillText('MZPRD.COM',W/2,by+bh/2+2*u);
  c.fillStyle='#bdbdc4';c.font='500 '+Math.round(24*u)+'px Oswald, sans-serif';c.fillText(pack?'royalty free  /  link in the description':'lease or buy  /  link in the description',W/2,cy+chh*.88);c.restore()}
 /* the drop: where the beat gets busiest fastest (most new hits in the next 4 s compared with the 4 s before), between 15% and 70% of the beat */
-function dropOf(Sx){if(Sx._drop!=null)return Sx._drop;const h=(Sx.hits||[]).map(x=>x.t),D=Sx.dur||60,cnt=(a,b)=>{let n=0;for(const t of h)if(t>=a&&t<b)n++;return n};let best=-1e9,bt=Math.min(D*.35,30);
- for(let t=Math.max(6,D*.15);t<D*.7;t+=.25){const sc=cnt(t,t+4)-cnt(t-4,t);if(sc>best){best=sc;bt=t}}const bar=60/(Sx.bpm||90)*4;return Sx._drop=Math.max(4,bt-(bt%.001))}
+/* THE DROP, learned per beat / pack: where the drums come in after a quieter intro, or (if the drums start right away) where the beat gets
+   much louder and busier. Found once from the audio and the hits, saved with the beat's learn file, so every beat (new or existing) knows its own drop. */
+function findDrop(buf,raw){const sr=buf.sampleRate,L=buf.getChannelData(0),R=buf.numberOfChannels>1?buf.getChannelData(1):L,D=buf.duration,hop=Math.floor(sr*.25),en=[];
+ for(let i=0;i+hop<=L.length;i+=hop){let e=0;for(let j=i;j<i+hop;j+=8){const v=(L[j]+R[j])*.5;e+=v*v}en.push(Math.sqrt(e/(hop/8)))}
+ const dr=[...(raw.kick||[]),...(raw.snare||[])].map(h=>h.t).sort((a,b)=>a-b),dens=(a,b)=>{let n=0;for(const t of dr)if(t>=a&&t<b)n++;return n/(b-a)},avg=(a,b)=>{const i0=Math.max(0,Math.floor(a/.25)),i1=Math.min(en.length,Math.floor(b/.25));let s=0;for(let i=i0;i<i1;i++)s+=en[i];return i1>i0?s/(i1-i0):0};
+ const full=dens(0,D)||1;
+ /* 1. drums arriving after an intro */
+ for(let t=3;t<D*.6;t+=.25){if(dens(t-4,t)<full*.3&&dens(t,t+4)>full*.75){let f=dr.find(x=>x>=t-.5);return f!=null?f:t}}
+ /* 2. the biggest rise in loudness and hits */
+ const lim=Math.min(D*.5,70),scs=[];let best=-1e9,bt=Math.min(D*.3,20);for(let t=4;t<lim;t+=.25){const sc=(avg(t,t+3)-avg(t-3,t))/(avg(0,D)||1)*2+(dens(t,t+3)-dens(t-3,t))/full;scs.push([t,sc]);if(sc>best)best=sc}const first=scs.find(x=>x[1]>=best*.7);if(first)bt=first[0];
+ const f=dr.find(x=>x>=bt-.3);return f!=null&&f-bt<1?f:bt}
+function dropOf(Sx){if(Sx._drop!=null)return Sx._drop;if(Sx.raw&&Sx.raw.drop!=null)return Sx._drop=Sx.raw.drop;if(Sx.raw&&Sx.buf){Sx.raw.drop=findDrop(Sx.buf,Sx.raw);return Sx._drop=Sx.raw.drop}return Sx._drop=Math.min((Sx.dur||60)*.3,20)}
 const QS=['Rate this beat 1-10 👇','Who should rap on this? 👇','Would you write to this? 👇','Hard or nah? 👇','What would you name this? 👇'],QSP=['Rate this pack 1-10 👇','Which loop would you flip first? 👇','Would you use these? 👇','Rate the dust 1-10 👇'];
 function hooks(c,W,H,v,T,X,Sx,la,pack){const E=ST.eng,u=Math.min(W,H)/1080;if(X.kind!=='one'||X.loop)return;const dr=dropOf(Sx);
  if(E.q1&&la>=0&&la<3.4){const L=pack?QSP:QS,q=L[String(Sx.title).length%L.length],a=Math.min(1,la/.25)*Math.min(1,(3.4-la)/.4),sc=1+.12*Math.exp(-la*8);c.save();c.globalAlpha=a;c.translate(W/2,v?H*.13:H*.11);c.scale(sc,sc);c.font='800 '+Math.round((v?64:54)*u)+'px Oswald, sans-serif';const w=c.measureText(q).width+70*u,h=96*u;c.fillStyle='rgba(10,10,12,.88)';c.beginPath();c.roundRect?c.roundRect(-w/2,-h/2,w,h,h/2):c.rect(-w/2,-h/2,w,h);c.fill();c.strokeStyle='#e8b94a';c.lineWidth=3*u;c.stroke();c.fillStyle='#fff';c.textAlign='center';c.textBaseline='middle';c.fillText(q,0,3*u);c.restore()}
@@ -1021,11 +1031,11 @@ const LDB=(()=>{let P=null;const db=()=>P||(P=new Promise((ok,no)=>{try{const q=
 const learnKey=b=>'v1|'+b.id+'|'+b.preview_path;
 async function fetchBuf(b){const r=await fetch(pubU(b.preview_path));if(!r.ok)throw new Error('The preview of "'+b.title+'" did not load ('+r.status+').');return ctxA().decodeAudioData(await r.arrayBuffer())}
 const hear=buf=>window.MZMpcDetect?MZMpcDetect.analyze(buf):analyze(buf);
-async function loadBeat(b){if(CACHE[b.id])return CACHE[b.id];const buf=await fetchBuf(b);let raw=await LDB.get(learnKey(b));if(!raw){raw=await hear(buf);LDB.put(learnKey(b),raw)}return CACHE[b.id]={buf,raw}}
+async function loadBeat(b){if(CACHE[b.id])return CACHE[b.id];const buf=await fetchBuf(b);let raw=await LDB.get(learnKey(b));if(!raw){raw=await hear(buf);raw.drop=findDrop(buf,raw);raw.dv=2;LDB.put(learnKey(b),raw)}else if(raw.drop==null||raw.dv!==2){raw.dv=2;raw.drop=findDrop(buf,raw);LDB.put(learnKey(b),raw)}return CACHE[b.id]={buf,raw}}
 /* learn every beat on the site now (the ones already learned are skipped) */
 async function learnAll(){const m=$q('#mLearnMsg'),bt=$q('#mLearnAll');bt.disabled=true;let n=0,done=0;
  for(let i=0;i<beats.length;i++){const b=beats[i];if(!b.preview_path)continue;m.textContent='Learning beat '+(i+1)+' of '+beats.length+': '+b.title+'...';
-  try{if(await LDB.get(learnKey(b))){done++;continue}const raw=await hear(await fetchBuf(b));await LDB.put(learnKey(b),raw);n++}catch(e){console.warn(e)}}
+  try{const old=await LDB.get(learnKey(b));if(old&&old.drop!=null&&old.dv===2){done++;continue}const buf=await fetchBuf(b),raw=old||await hear(buf);raw.drop=findDrop(buf,raw);raw.dv=2;await LDB.put(learnKey(b),raw);n++}catch(e){console.warn(e)}}
  m.textContent='Done. '+n+' beat'+(n===1?'':'s')+' learned now, '+done+' already learned. New beats learn themselves the first time you open them.';bt.disabled=false}
 const kitOf=id=>ST.kits&&ST.kits[id]!=null&&ST.kits[id]!==''&&KITS[+ST.kits[id]]?+ST.kits[id]:kitFor(id);
 function mkS(b,len,kit){const C=CACHE[b.id],Sx={title:b.title,bpm:Number(b.bpm)||0,key:b.musical_key||'',lcd:'',raw:C.raw,buf:C.buf,off:C.raw.off||0,kit,dur:len?Math.min(C.buf.duration,len):C.buf.duration};const L=layout(C.raw,kit);Sx.hits=L.hits;Sx.per=L.per;return Sx}
