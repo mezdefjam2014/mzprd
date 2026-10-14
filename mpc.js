@@ -33,14 +33,26 @@ Object.assign(DK.btn,{power:[1345,195,30,19],soft1:[1271,570,36,16],soft2:[1318,
 Object.assign(DKV.btn,{power:[790,598,26,16],soft1:[759,936,34,16],soft2:[803,936,34,16],soft3:[847,936,35,16],soft4:[892,936,35,16],sounds:[892,977,35,16],enter:[688,1061,34,15],k0:[599,1061,34,15],kdot:[643,1060,35,16],k1:[599,1019,34,15],k2:[643,1018,35,16],k3:[688,1018,34,16],k4:[599,977,34,16],k5:[643,977,35,15],k6:[688,977,34,15],k7:[599,935,34,16],k8:[643,935,35,16],k9:[688,935,34,16]});
 DK.wheel=[1160,822,35];DKV.wheel=[660,1170,31];
 /* the SAMPLE PACKS scene (2000 x 1131): an MPD218 pad controller (12 pads, 3 rows) and a Technics SL-1200 turntable with a spinning record */
-const DKP={id:'packh',W:2000,H:1131,u:1.32,sampled:true,glow:true,rows:3,lamp:DK.lamp,bulb:DK.bulb,cone:DK.cone,pad:{x0:596,y0:505,w:74,h:76,px:91.6,py:100.5},lcd:{x:612,y:389,w:219,h:84},
+const DKP={id:'packh',W:2000,H:1131,u:1.32,sampled:true,glow:false,rows:3,lamp:DK.lamp,bulb:DK.bulb,cone:DK.cone,pad:{x0:596,y0:505,w:74,h:76,px:91.6,py:100.5},lcd:{x:612,y:389,w:219,h:84},
  btn:{power:[507,414,36,21],start:[1046,838,98,68],end:[1046,838,98,68],stop:[495,734,44,25],play:[494,790,44,25]},vol:[905,407,21],deck:{cx:1400,cy:558,r:344,lab:92,strobe:[1100,735]},arm:{x:1700,y:350,pv:[1800,363],tip:[1743,753]},boot:['AKAI MPD218','12 PADS  V1.0'],powLab:'rgba(225,222,212,.82)'};
 /* 9:16 shows the pad controller (a crop of the same photo) */
-const PX=430,DKPV={id:'packv',W:636,H:1131,u:1.32,sampled:true,glow:true,rows:3,lamp:[DK.lamp[0]-PX,DK.lamp[1],DK.lamp[2]],bulb:[DK.bulb[0]-PX,DK.bulb[1]],cone:{apex:[DK.cone.apex[0]-PX,DK.cone.apex[1]],a0:DK.cone.a0,a1:DK.cone.a1,len:DK.cone.len},
+const PX=430,DKPV={id:'packv',W:636,H:1131,u:1.32,sampled:true,glow:false,rows:3,lamp:[DK.lamp[0]-PX,DK.lamp[1],DK.lamp[2]],bulb:[DK.bulb[0]-PX,DK.bulb[1]],cone:{apex:[DK.cone.apex[0]-PX,DK.cone.apex[1]],a0:DK.cone.a0,a1:DK.cone.a1,len:DK.cone.len},
  pad:{x0:596-PX,y0:505,w:74,h:76,px:91.6,py:100.5},lcd:{x:612-PX,y:389,w:219,h:84},btn:{power:[507-PX,414,36,21],start:[494-PX,790,44,25],end:[495-PX,734,44,25]},vol:[905-PX,407,21],deck:{cx:1400-PX,cy:558,r:344,lab:92},boot:DKP.boot,powLab:DKP.powLab};
 const GEO={deskh:DK,deskv:DKV,packh:DKP,packv:DKPV};
 const PSKINS=[['0','Black (the original)'],['1','Cherry blossom'],['2','8-bit blue'],['3','Street fighter'],['4','Collage (good music)'],['5','Gold 8-bit']];
 const PSK={};
+/* each pad machine skin has its own screen (measured on its photo) and its own backlight colour */
+const PLCD={'0':[620,395,206,73],'1':[622,390,208,80],'2':[616,397,210,76],'3':[622,412,188,73],'4':[616,393,210,76],'5':[612,396,222,78]};
+const PEM={'0':{fg:'#a9ecff',bg:'rgba(40,110,140,.32)'},'1':{fg:'#c8f3ff',bg:'rgba(60,120,150,.3)'},'2':{fg:'#bfe9ff',bg:'rgba(40,100,160,.32)'},'3':{fg:'#ffd27a',bg:'rgba(150,95,30,.3)'},'4':{fg:'#eef6ff',bg:'rgba(90,105,130,.3)'},'5':{fg:'#ffd889',bg:'rgba(160,115,40,.3)'}};
+function setPackLcd(k){const r=PLCD[k]||PLCD['0'];DKP.lcd={x:r[0],y:r[1],w:r[2],h:r[3]};DKPV.lcd={x:r[0]-PX,y:r[1],w:r[2],h:r[3]};DKP.emit=DKPV.emit=PEM[k]||PEM['0']}
+/* a backlit screen: the screen is drawn off to the side, then laid on the photo's own glass as light (a soft backlight and glowing characters) */
+let EMC=null;
+function emitCtx(G){const k=3,L0=G.lcd,w=Math.ceil(L0.w*k),h=Math.ceil(L0.h*k);if(!EMC)EMC=document.createElement('canvas');if(EMC.width!==w||EMC.height!==h){EMC.width=w;EMC.height=h}const x=EMC.getContext('2d');x.setTransform(1,0,0,1,0,0);x.globalCompositeOperation='source-over';x.clearRect(0,0,w,h);x.setTransform(k,0,0,k,-L0.x*k,-L0.y*k);return{x,cv:EMC}}
+function emitDraw(c,G,EM,lit){if(!(lit>.01))return;const L0=G.lcd,E=G.emit,x=EM.x,w=EM.cv.width,h=EM.cv.height;c.save();
+ c.globalCompositeOperation='screen';c.globalAlpha=lit;c.fillStyle=E.bg;c.fillRect(L0.x,L0.y,L0.w,L0.h);
+ const g=c.createRadialGradient(L0.x+L0.w/2,L0.y+L0.h/2,2,L0.x+L0.w/2,L0.y+L0.h/2,L0.w*.62);g.addColorStop(0,'rgba(255,255,255,.07)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(L0.x,L0.y,L0.w,L0.h);
+ x.setTransform(1,0,0,1,0,0);x.globalCompositeOperation='source-in';x.fillStyle=E.fg;x.fillRect(0,0,w,h);x.globalCompositeOperation='source-over';
+ c.globalCompositeOperation='lighter';c.shadowColor=E.fg;c.shadowBlur=5*(G.u||1);c.globalAlpha=.55*lit;c.drawImage(EM.cv,L0.x,L0.y,L0.w,L0.h);c.shadowBlur=0;c.globalAlpha=.85*lit;c.drawImage(EM.cv,L0.x,L0.y,L0.w,L0.h);c.restore()}
 const packMode=()=>!!(ST&&ST.src==='packs');
 /* the record's angle: it spins up when START is pressed and brakes to a stop at the end (33 1/3 RPM) */
 const spinAt=(T,ts,te)=>{const w=3.4907,ru=.45,rd=1.1;let e=0;if(T>ts){const a=Math.min(T,te)-ts;e=a<ru?a*a/(2*ru):ru/2+(a-ru)}if(T>te&&te>ts){const b=Math.min(T-te,rd);e+=b-b*b/(2*rd)}return e*w};
@@ -164,9 +176,10 @@ function machine(c,ox,oy,sc,S,o){
   if(p>0){c.fillStyle='rgba(0,0,0,'+(.3*p).toFixed(3)+')';c.fillRect(px,py,w,2.2*u);c.fillRect(px,py,2.2*u,h)}c.restore();
   if(p>0){c.strokeStyle='rgba(20,20,22,'+(.45*p).toFixed(3)+')';c.lineWidth=1.2*u;c.strokeRect(px+.6*u,py+.6*u,w-1.2*u,h-1.2*u)}}
  /* the screen: green and on */
+ const cM=c,EM=G.emit?emitCtx(G):null;if(EM)c=EM.x;
  const L0=G.lcd,s1=L0.h/54,L={x:0,y:0,w:L0.w/s1,h:54},lt=o.lt,run=o.run,bl=60/(S.bpm||90);
  c.save();c.translate(L0.x,L0.y);c.scale(s1,s1);c.beginPath();c.rect(L.x,L.y,L.w,L.h);c.clip();
- const LG=lcdGlass(L.w);c.drawImage(LG.base,L.x,L.y,L.w,L.h);
+ const LG=lcdGlass(L.w);if(!EM)c.drawImage(LG.base,L.x,L.y,L.w,L.h);
  c.fillStyle='#1c3a12';c.textBaseline='middle';c.textAlign='left';
  const pad2=n=>String(n).padStart(2,'0'),f=q=>q+"px VT323,monospace";
  const l1=(o.lcd?o.lcd[0]:(o.head||S.lcd||S.title||'BEAT')).toUpperCase(),sz=fitFont(c,l1,f,23,L.w-16);c.font=f(sz);c.fillText(l1,L.x+8,L.y+11);
@@ -181,14 +194,14 @@ function machine(c,ox,oy,sc,S,o){
  c.fillStyle='rgba(28,58,18,.25)';c.fillRect(L.x+8,L.y+47,L.w-16,3);c.fillStyle='#1c3a12';c.fillRect(L.x+8,L.y+47,(L.w-16)*clamp(lt/Math.max(1,S.dur),0,1),3);
 
  const bt=o.boot==null?-1:o.boot,sbv=bt<0?1:bt<.45?0:bt<.95?((bt-.45)/.5)*(.5+.5*Math.sin(bt*140)):1;
- if(bt>=0){c.drawImage(LG.base,L.x,L.y,L.w,L.h);c.fillStyle='rgba(6,14,4,'+(.93*(1-sbv)).toFixed(3)+')';c.fillRect(L.x,L.y,L.w,L.h);
+ if(bt>=0){if(!EM){c.drawImage(LG.base,L.x,L.y,L.w,L.h);c.fillStyle='rgba(6,14,4,'+(.93*(1-sbv)).toFixed(3)+')';c.fillRect(L.x,L.y,L.w,L.h)}else c.clearRect(L.x,L.y,L.w,L.h);
   if(sbv>.6&&bt>=1.0){c.fillStyle='#1c3a12';c.textAlign='left';c.textBaseline='middle';
    if(bt<2.4){c.font=f(20);c.fillText(G.boot?G.boot[0]:'AKAI PROFESSIONAL MPC60 II',L.x+8,L.y+12);c.font=f(15);c.fillText(G.boot?G.boot[1]:'SOFTWARE V3.10   16 PADS',L.x+8,L.y+27);c.fillText('LOADING FROM DISK'+'...'.slice(0,1+Math.floor(bt*4)%3),L.x+8,L.y+40);c.fillStyle='rgba(28,58,18,.25)';c.fillRect(L.x+8,L.y+47,L.w-16,3);c.fillStyle='#1c3a12';c.fillRect(L.x+8,L.y+47,(L.w-16)*clamp((bt-1)/1.3,0,1),3)}
    else{const nm=(S.lcd||S.title||'BEAT').toUpperCase(),n=Math.min(nm.length,Math.floor((bt-2.4)/.07)),shown=nm.slice(0,n)+(Math.floor(bt*5)%2&&n<nm.length?'_':'');const sz2=fitFont(c,nm,f,23,L.w-16);c.font=f(sz2);c.fillText(shown,L.x+8,L.y+12);c.font=f(15);c.fillText(n>=nm.length?'READY':'LOADING BEAT',L.x+8,L.y+27);if(S.bpm)c.fillText('BPM '+S.bpm,L.x+8,L.y+40)}}}
  /* power down (the Sample to Beat episode): the picture holds for a moment, then collapses to a bright line and goes dark */
- const pd=o.pdown==null?-1:o.pdown;let pk=0;if(pd>=0){pk=clamp((pd-.45)/.5,0,1);c.fillStyle='rgba(6,14,4,'+(.95*pk).toFixed(3)+')';c.fillRect(L.x,L.y,L.w,L.h);if(pk>0&&pk<1){const hh=Math.max(1,L.h*(1-pk)*.1);c.fillStyle='rgba(190,255,180,'+(.55*(1-pk)).toFixed(3)+')';c.fillRect(L.x+L.w*.12*pk,L.y+L.h/2-hh/2,L.w*(1-.24*pk),hh)}}
- c.drawImage(LG.scan,L.x,L.y,L.w,L.h);
- c.restore();c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=1;c.strokeRect(L0.x+.5,L0.y+.5,L0.w-1,L0.h-1);
+ const pd=o.pdown==null?-1:o.pdown;let pk=0;if(pd>=0){pk=clamp((pd-.45)/.5,0,1);if(!EM){c.fillStyle='rgba(6,14,4,'+(.95*pk).toFixed(3)+')';c.fillRect(L.x,L.y,L.w,L.h)}if(pk>0&&pk<1){const hh=Math.max(1,L.h*(1-pk)*.1);c.fillStyle='rgba(190,255,180,'+(.55*(1-pk)).toFixed(3)+')';c.fillRect(L.x+L.w*.12*pk,L.y+L.h/2-hh/2,L.w*(1-.24*pk),hh)}}
+ if(!EM)c.drawImage(LG.scan,L.x,L.y,L.w,L.h);
+ c.restore();if(EM){c=cM;emitDraw(c,G,EM,(bt>=0?sbv:1)*(1-pk))}else{c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=1;c.strokeRect(L0.x+.5,L0.y+.5,L0.w-1,L0.h-1)}
  /* a lit screen throws a little green light on the case */
  if(G.glow){c.save();c.globalCompositeOperation='lighter';const rg=c.createRadialGradient(L0.x+L0.w/2,L0.y+L0.h/2,10,L0.x+L0.w/2,L0.y+L0.h/2,L0.w*.95);rg.addColorStop(0,'rgba(110,255,110,'+((run?.2:.1)*sbv*(1-pk)).toFixed(3)+')');rg.addColorStop(1,'rgba(110,255,110,0)');c.fillStyle=rg;c.fillRect(L0.x-L0.w,L0.y-L0.h*3,L0.w*3,L0.h*8);c.restore()}
  /* lights */
@@ -226,7 +239,7 @@ let STUDIO=null;
 function ensureStudio(){if(STUDIO)return STUDIO;return STUDIO=(async()=>{IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');DESKBG.h=await loadImg('mpc/bg_h.webp?v=1');DESKBG.v=await loadImg('mpc/bg_v.webp?v=1');if(IMG&&CUT)WARM={cut:warmVer(CUT),photo:warmVer(IMG)};sampleColors()})()}
 const SCN={};
 async function ensureScene(fmt){fmt=fmt||ST.fmt;const tall=fmt==='v'||fmt==='c';
- if(packMode()){const k=ST.pskin||'0';if(!PSK[k]){const im=await loadImg(k==='0'?'mpc/pack_h_noarm.webp?v=1':'mpc/pack_h_s'+k+'.webp?v=1');const cv=document.createElement('canvas');cv.width=DKPV.W;cv.height=DKPV.H;cv.getContext('2d').drawImage(im,-PX,0);PSK[k]={h:im,v:cv}}DESKS.ph=PSK[k].h;DESKS.pv=PSK[k].v;if(!DESKS.arm)DESKS.arm=await loadImg('mpc/pack_arm.webp?v=1');return}
+ if(packMode()){const k=ST.pskin||'0';if(!PSK[k]){const im=await loadImg(k==='0'?'mpc/pack_h_noarm.webp?v=1':'mpc/pack_h_s'+k+'.webp?v=2');const cv=document.createElement('canvas');cv.width=DKPV.W;cv.height=DKPV.H;cv.getContext('2d').drawImage(im,-PX,0);PSK[k]={h:im,v:cv}}DESKS.ph=PSK[k].h;DESKS.pv=PSK[k].v;setPackLcd(k);if(!DESKS.arm)DESKS.arm=await loadImg('mpc/pack_arm.webp?v=1');return}
  if(ST.scene==='white'){await ensureStudio();return}
  if(!tall){if(!DESKS.h)DESKS.h=await loadImg('mpc/desk_nocan.webp?v=1');if(!DESKS.h0&&(ST.can||{}).id==='orig'&&(!ST.skin||ST.skin==='orig'))DESKS.h0=await loadImg('mpc/desk.webp?v=2');if(!DESKS.h)DESKS.h=DESKS.h0}
  else if(!DESKS.v)DESKS.v=await loadImg('mpc/desk_v.webp?v=2');
