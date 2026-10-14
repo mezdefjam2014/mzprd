@@ -232,9 +232,17 @@ const XF=fmt=>{const b=X();if(!b)return null;const k=fmt==='v'?'_v':fmt==='c'?'_
  if(!(packMode()&&ST.eng&&ST.eng.logo&&fmt!=='c'&&!d.loop&&b.kind==='one'))return d;if(!d._card)d._card={kind:d.kind,tracks:d.tracks,lead:d.lead,title:d.title,intro:d.intro,card:CARD,base:d,total:d.total+CARD,coverId:ST.beat};return d._card};
 function dropV(){if(S&&S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}if(TP){TP._v=null;TP._h=null;TP._c=null}}
 const trackAt=(X,T)=>{let k=0;for(let i=0;i<X.tracks.length;i++)if(T>=X.tracks[i].start)k=i;return k};
-const SKINS=[['orig','The original (aged cream)'],['2','Black with red slashes'],['3','Synthwave sunset'],['4','Rosewood']];
+const SKINS=[['orig','The original (aged cream)'],['g1','Vice City'],['g2','8-bit legend (Kanye)'],['g3','Call of Duty camo'],['g4','Arcade invaders'],['g5','Street Fighter II'],['g6','007 GoldenEye'],['g7','YouTube Gaming']];
+/* each MPC skin's own screen (measured on its photo, 16:9 desk coordinates): blue screens glow (backlit text), the green one keeps the classic LCD */
+const SKLCD={g1:[1180,308,304,60],g2:[1178,268,290,106],g3:[1184,307,276,66],g4:[1167,307,271,66],g5:[1194,302,286,66],g6:[1167,302,301,66],g7:[1167,307,271,63]};
+const SKEM={fg:'#eaf3ff',bg:'rgba(70,120,255,.22)'};
+const DKL0={lcd:DK.lcd,glow:DK.glow},DKVL0={lcd:DKV.lcd,glow:DKV.glow};
+/* 9:16 desk: the same machine, scaled (from the pad grid) */
+const toV=r=>{const sx=75.3/83.7,sy=76.8/82.3;return{x:r[0]*sx+258-712*sx,y:r[1]*sy+935.5-570*sy,w:r[2]*sx,h:r[3]*sy}};
+function applySkinLcd(){const id=ST.skin||'orig',r=SKLCD[id];if(!r){DK.lcd=DKL0.lcd;DK.glow=DKL0.glow;DKV.lcd=DKVL0.lcd;DKV.glow=DKVL0.glow;DK.emit=DKV.emit=null;return}
+ DK.lcd={x:r[0],y:r[1],w:r[2],h:r[3]};DKV.lcd=toV(r);const em=id==='g3'?null:SKEM;DK.emit=DKV.emit=em;DK.glow=DKV.glow=!em}
 const SKINIMG={};
-async function loadSkin(id,fmt){if(id==='orig')return;const k=(fmt==='v'||fmt==='c')?'v':'h';SKINIMG[id]=SKINIMG[id]||{};if(!SKINIMG[id][k])SKINIMG[id][k]=await loadImg('mpc/desk_'+k+'_s'+id+'.webp?v=2')}
+async function loadSkin(id,fmt){if(!SKINS.some(k=>k[0]===id)){ST.skin='orig';id='orig'}applySkinLcd();if(id==='orig')return;const k=(fmt==='v'||fmt==='c')?'v':'h';SKINIMG[id]=SKINIMG[id]||{};if(!SKINIMG[id][k])SKINIMG[id][k]=await loadImg('mpc/desk_'+k+'_s'+id+'.webp?v=1')}
 let STUDIO=null;
 /* the white-studio photo, its cutout and the desk backgrounds for thumbnails: only loaded when something asks for them */
 function ensureStudio(){if(STUDIO)return STUDIO;return STUDIO=(async()=>{IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');DESKBG.h=await loadImg('mpc/bg_h.webp?v=1');DESKBG.v=await loadImg('mpc/bg_v.webp?v=1');if(IMG&&CUT)WARM={cut:warmVer(CUT),photo:warmVer(IMG)};sampleColors()})()}
