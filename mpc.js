@@ -1077,7 +1077,7 @@ async function buildTape(){const T=ST.tape,ids=T.ids.filter(beatById),msg=t=>{$q
 /* ---------- YouTube package + thumbnails (the brains are in mpcyt.js) ---------- */
 const YT=()=>window.MZMpcYT;
 const cpy=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}a.remove();return ok}};
-function ytRenderNow(){const el=$q('#mYT');if(!el)return;const b=beats.find(x=>String(x.id)===String(ST.beat)),O=ST.tape.on?(TP&&YT()?YT().buildTape(ST,TP):null):(b&&YT()?YT().build(ST,b,S):null);if(!O){el.innerHTML='<div class="msg">'+(ST.tape.on?'Build the tape first.':'Pick a beat first.')+'</div>';return}
+function ytRenderNow(){const el=$q('#mYT');if(!el)return;const b=beats.find(x=>String(x.id)===String(ST.beat)),O=ST.tape.on?(TP&&YT()?YT().buildTape(ST,TP):null):(b&&YT()?(packMode()&&window.MZMpcPack?MZMpcPack.build(ST,b):YT().build(ST,b,S)):null);if(!O){el.innerHTML='<div class="msg">'+(ST.tape.on?'Build the tape first.':'Pick a beat first.')+'</div>';return}
  const cc=(n,max,soft)=>`<span style="font:600 10px Montserrat;color:${n>max?'#ff5c5c':soft&&n>soft?'#e8b94a':'#7ad47a'}">${n}/${max}</span>`,pre=ST.yt.mode==='premiere';
  el.innerHTML=`<div class="two"><label class="chk"><input type="radio" name="mym" value="premiere"${pre?' checked':''}> PREMIERE</label><label class="chk"><input type="radio" name="mym" value="straight"${pre?'':' checked'}> STRAIGHT UPLOAD</label></div>${pre?`<label>PREMIERE TIME TEXT</label><input type="text" id="myW" placeholder="Friday at 8:00 PM" value="${esc(ST.yt.when)}">`:''}
  <h4>SMART CHECKS</h4>${O.checks.map(k=>`<div class="it"><span style="color:${k.ok?'#7ad47a':'#e8b94a'};font-weight:700">${k.ok?'OK':'FIX'}</span><b>${esc(k.msg)}</b></div>`).join('')}
@@ -1097,7 +1097,7 @@ function ytRenderNow(){const el=$q('#mYT');if(!el)return;const b=beats.find(x=>S
 /* ---------- package generator ---------- */
 let GEN=[],GENOPEN=-1;
 function genInfo(){const G=window.MZMpcGen,T=ST.tape;if(T.on){if(!TP)return null;const mins=Math.max(1,Math.round(TP.total/60));return{tape:true,TP,N:TP.tracks.length,mins,title:TP.title,link:'https://mzprd.com',seedBase:TP.title.length*3+TP.tracks.length}}
- const b=beats.find(x=>String(x.id)===String(ST.beat));if(!b||!S)return null;const mins=Math.max(1,Math.round((S.dur||60)/60));return{beat:b,S,title:b.title,bpm:Number(b.bpm)||0,key:b.musical_key||'',mins,link:'https://mzprd.com/beat/'+(b.slug||b.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''))+'/',seedBase:String(b.id).length*17+b.title.length}}
+ const b=beats.find(x=>String(x.id)===String(ST.beat));if(!b||!S)return null;const mins=Math.max(1,Math.round((S.dur||60)/60));return{beat:b,S,title:b.title,bpm:Number(b.bpm)||0,key:b.musical_key||'',mins,link:'https://mzprd.com/'+(packMode()?'pack':'beat')+'/'+(b.slug||b.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''))+'/',seedBase:String(b.id).length*17+b.title.length}}
 function genRenderNow(){const el=$q('#mGN');if(!el)return;const G=window.MZMpcGen;if(!G)return;const g=ST.gen,info=genInfo();
  const opts=Object.entries(G.ANGLES).map(([k,v])=>`<option value="${k}"${g.angle===k?' selected':''}>${v.n} only</option>`).join('');
  const view=GEN.filter(p=>g.show==='fav'?g.fav.includes(p.title):true).slice().sort((a,b)=>g.sort==='order'?0:b.score-a.score);
@@ -1110,7 +1110,7 @@ function genRenderNow(){const el=$q('#mGN');if(!el)return;const G=window.MZMpcGe
  <div class="two" style="margin-top:8px"><button class="btn" id="mGtxt">DOWNLOAD ALL AS .TXT</button><button class="btn" id="mGfav">COPY MY PICKS (TITLES)</button></div><div class="msg" id="mGmsg"></div>`;
  const all=p=>p.title+'\n\nTHUMBNAIL TEXT: '+p.thumb+'\n\nDESCRIPTION\n'+p.desc+'\n\nTAGS\n'+p.tags+'\n\nPINNED COMMENT\n'+p.pin+(p.shorts?'\n\nSHORTS\n'+p.shorts.title+'\n'+p.shorts.desc:'');
  const say=t=>{$q('#mGmsg').textContent=t};
- const run=more=>{const inf=genInfo();if(!inf){say(ST.tape.on?'Build the tape first (section 3).':'Pick a beat first.');return}g.seed=more?(g.seed||1)+1:(g.seed||1);const t0=performance.now();GEN=window.MZMpcGen.generate(ST,inf,g.n,g.seed,g.angle?[g.angle]:null,window.MZMpcYT);GENOPEN=-1;save();genRender();say(GEN.length+' packages made in '+Math.round(performance.now()-t0)+' ms. Best score: '+(GEN.length?Math.max(...GEN.map(p=>p.score)):0)+'.')};
+ const run=more=>{const inf=genInfo();if(!inf){say(ST.tape.on?'Build the tape first (section 3).':'Pick a beat first.');return}g.seed=more?(g.seed||1)+1:(g.seed||1);const t0=performance.now();GEN=(packMode()&&!inf.tape&&window.MZMpcPack?MZMpcPack.generate(ST,inf,g.n,g.seed,g.angle?[g.angle]:null,MZMpcGen):MZMpcGen.generate(ST,inf,g.n,g.seed,g.angle?[g.angle]:null,window.MZMpcYT));GENOPEN=-1;save();genRender();say(GEN.length+' packages made in '+Math.round(performance.now()-t0)+' ms. Best score: '+(GEN.length?Math.max(...GEN.map(p=>p.score)):0)+'.')};
  $q('#mGgo').onclick=()=>run(false);$q('#mGmore').onclick=()=>run(true);$q('#mGc').onchange=e=>{g.n=+e.target.value;save()};$q('#mGa').onchange=e=>{g.angle=e.target.value;save()};
  el.querySelectorAll('[name=mgs]').forEach(r=>r.onchange=()=>{g.sort=r.value;save();genRender()});el.querySelectorAll('[name=mgf]').forEach(r=>r.onchange=()=>{g.show=r.value;save();genRender()});
  el.querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>{const t=GEN[+b.dataset.fav].title,i=g.fav.indexOf(t);if(i>=0)g.fav.splice(i,1);else g.fav.push(t);save();genRender()});
@@ -1125,7 +1125,7 @@ function genRenderNow(){const el=$q('#mGN');if(!el)return;const G=window.MZMpcGe
 let thTok=0;
 const PNL={yt:['#mYTd',()=>ytRenderNow()],th:['#mTHd',()=>thRenderNow()],gen:['#mGnd',()=>genRenderNow()]},dirty={yt:1,th:1,gen:1};
 let YTP=null;
-function ensureYT(){if(window.MZMpcYT&&window.MZMpcGen&&STUDIO!==null)return Promise.resolve();return YTP=YTP||(async()=>{await loadS('mpcyt.js?v=11');await loadS('mpcgen.js?v=4');await ensureStudio()})()}
+function ensureYT(){if(window.MZMpcYT&&window.MZMpcGen&&STUDIO!==null)return Promise.resolve();return YTP=YTP||(async()=>{await loadS('mpcyt.js?v=11');await loadS('mpcgen.js?v=4');await loadS('mpcpack.js?v=1');await ensureStudio()})()}
 function paintPanels(){for(const k in PNL){const d=root&&$q(PNL[k][0]);if(d&&d.open&&dirty[k]){dirty[k]=0;ensureYT().then(()=>{try{PNL[k][1]()}catch(e){console.warn(e)}})}}}
 const mark=(...ks)=>{ks.forEach(k=>dirty[k]=1);paintPanels()};
 function ytRender(){mark('yt')}function thRender(){mark('th')}function genRender(){mark('gen')}
@@ -1142,9 +1142,9 @@ function thRenderNow(){const el=$q('#mTH');if(!el||!YT())return;const s2=s2bInfo
  const fonts=document.fonts?Promise.all(["40px Anton","600 30px Oswald","30px VT323"].map(f=>document.fonts.load(f).catch(()=>{}))):Promise.resolve();
  const opt=i=>({pal:T.pal===''?null:+T.pal,desk:T.bgm==='desk'?true:T.bgm==='color'?false:null,hands:T.hands==='yes'?true:T.hands==='no'?false:null}),fname=i=>(b.title||'beat').replace(/[^\w -]+/g,'')+' - MPC thumb '+(i+1)+(v?' 9x16':'')+'.jpg';
  /* previews are drawn at half size (a quarter of the work); the full size picture is only drawn when you download it */
- const full=i=>new Promise(res=>{const cv=document.createElement('canvas');cv.width=W;cv.height=H;YT().make(cv.getContext('2d'),W,H,T.seed*100+i+1,X,opt(i));cv.toBlob(res,'image/jpeg',.92)});
+ const full=i=>new Promise(res=>{const cv=document.createElement('canvas');cv.width=W;cv.height=H;(packMode()&&window.MZMpcPack?MZMpcPack.make:YT().make)(cv.getContext('2d'),W,H,T.seed*100+i+1,X,opt(i));cv.toBlob(res,'image/jpeg',.92)});
  const dl=async i=>dlf(await full(i),fname(i));
- fonts.then(()=>{if(tok!==thTok)return;let i=0;const step=()=>{if(tok!==thTok)return;for(let n=0;n<2&&i<12;n++,i++){const k=i,seed=T.seed*100+k+1,cv=document.createElement('canvas');cv.width=Math.round(W/2);cv.height=Math.round(H/2);cv.style.cssText='width:100%;display:block;cursor:pointer;border:1px solid #2a2a2e';const x=cv.getContext('2d');x.scale(.5,.5);const info=YT().make(x,W,H,seed,X,opt(k));
+ fonts.then(()=>{if(tok!==thTok)return;let i=0;const step=()=>{if(tok!==thTok)return;for(let n=0;n<2&&i<12;n++,i++){const k=i,seed=T.seed*100+k+1,cv=document.createElement('canvas');cv.width=Math.round(W/2);cv.height=Math.round(H/2);cv.style.cssText='width:100%;display:block;cursor:pointer;border:1px solid #2a2a2e';const x=cv.getContext('2d');x.scale(.5,.5);const info=(packMode()&&window.MZMpcPack?MZMpcPack.make:YT().make)(x,W,H,seed,X,opt(k));
    const wrap=document.createElement('div');wrap.appendChild(cv);const cap=document.createElement('div');cap.className='msg';cap.style.margin='2px 0 0';cap.textContent=info.pal+' / '+info.bg+' / '+info.text;wrap.appendChild(cap);g.appendChild(wrap);cv.onclick=()=>dl(k)}
    if(i<12)requestAnimationFrame(step)};step();
   el.querySelector('#mThA').onclick=async()=>{for(let k=0;k<12;k++){await dl(k);await new Promise(r=>setTimeout(r,500))}}});
@@ -1161,7 +1161,7 @@ function summ(){if(!root)return;for(const k in SUM){const e=root.querySelector('
 function srcUI(){const p=packMode();$q('#mSrcB').style.background=p?'':'var(--red)';$q('#mSrcP').style.background=p?'var(--red)':'';$q('#mBeatL').textContent=p?'SAMPLE PACK':'BEAT'}
 async function setSrc(m){if((ST.src||'beats')===m)return;stopPlay();ST['pick_'+(ST.src||'beats')]=ST.beat;ST.src=m;beats=m==='packs'?PACKS:BEATS0;ST.beat=ST['pick_'+m]||'';S=null;save();
  const sel=$q('#mBeat');sel.innerHTML='<option value="">'+(m==='packs'?'Choose a sample pack...':'Choose a beat...')+'</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');sel.value=String(ST.beat||'');srcUI();
- await ensureScene(ST.fmt);size();drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
+ await ensureScene(ST.fmt);size();drawNow();GEN=[];mark('yt','th','gen');if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
 function wire(){$q('#mSrcB').onclick=()=>setSrc('beats');$q('#mSrcP').onclick=()=>setSrc('packs');srcUI();const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);$q('#mLearnAll').onclick=()=>learnAll();
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();mark('yt','th','gen')};for(const k in PNL){$q(PNL[k][0]).addEventListener('toggle',paintPanels)}
@@ -1193,6 +1193,7 @@ function wire(){$q('#mSrcB').onclick=()=>setSrc('beats');$q('#mSrcP').onclick=()
  const lpShow=()=>{const o=$q('#mLpOut'),P=loopPack();if(!P||!ST.beat){o.innerHTML='';return}o.innerHTML='<h4>LOOP VIDEO TITLES AND DESCRIPTION</h4>'+P.titles.map((t,i)=>'<div class="it"><b>'+esc(t)+'</b><button data-lt="'+i+'">COPY</button></div>').join('')+'<button class="btn" id="mLpD" style="width:100%;margin-top:6px">COPY DESCRIPTION</button>';o.querySelectorAll('[data-lt]').forEach(b=>b.onclick=async()=>{b.textContent=(await cpy(P.titles[+b.dataset.lt]))?'COPIED':'FAILED'});$q('#mLpD').onclick=async e=>{e.target.textContent=(await cpy(P.desc))?'COPIED':'FAILED'}};
  $q('#mLpM').onchange=lpShow;window.__lpShow=lpShow;
  $q('#mRh').onclick=()=>render(['h']);$q('#mRv').onclick=()=>render(['v']);$q('#mRb').onclick=()=>render(['h','v'])}
+window.MZMpcPackArt={cover:()=>COVERS[ST&&ST.beat]||null,scene:()=>DESKS.ph||null};
 window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root.classList.add('on');
  if(!mounted){root.innerHTML='<div class="pn"><div class="msg">Loading the MPC...</div></div>';
   try{await loadS('mpcdetect.js?v=10');if(!document.querySelector('link[data-mpc]')){await new Promise(res=>{const l=document.createElement('link');l.rel='stylesheet';l.href=FONT_LINK;l.dataset.mpc='1';l.onload=res;l.onerror=res;document.head.appendChild(l);setTimeout(res,5000)})}
