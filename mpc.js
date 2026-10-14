@@ -81,6 +81,46 @@ function armAt(G,T,intro,t0,te){const P=armPlay(G);let a,l=0;const sw=(q)=>ease(
 function drawArm(c,G,img,st){if(!img)return;const A=G.arm;c.save();c.translate(A.pv[0],A.pv[1]);c.rotate(st.a);c.translate(-A.pv[0],-A.pv[1]);
  c.shadowColor='rgba(0,0,0,.55)';c.shadowBlur=5+10*st.l;c.shadowOffsetX=4+10*st.l;c.shadowOffsetY=5+12*st.l;c.drawImage(img,A.x,A.y);c.restore()}
 /* the record: only the vinyl turns (its label, specks and wear); the platter, its strobe dots, the spindle and the light on the vinyl stay put */
+/* LEFT DESK ITEM (MPC desk, 16:9): swap the floppy for a CD (handwritten), a pager (green backlight, the beat name and MZPRD),
+   a Nokia playing snake, or an iPad playing a little retro corridor shooter. The item photos are cut from the same desk shot. */
+const PROPS=[['floppy','Floppy disk (the original)'],['cd','CD with handwriting'],['pager','Pager (green light, beat name)'],['nokia','Nokia playing snake'],['ipad','iPad playing a retro shooter']];
+const PROPIMG={},PROPAT=[60,640];
+const PSCR={pager:[305,866,165,72,-.17],nokia:[296,901,94,80,.4],ipad:[333,940,280,338,-.075]};
+async function loadProp(){const k=ST.prop||'floppy';if(k!=='floppy'&&!PROPIMG[k])PROPIMG[k]=await loadImg('mpc/prop_'+k+'.webp?v=1')}
+let PCV=null;const pcv=(w,h)=>{if(!PCV)PCV=document.createElement('canvas');if(PCV.width!==w||PCV.height!==h){PCV.width=w;PCV.height=h}const x=PCV.getContext('2d');x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,w,h);return x};
+function onScr(c,r,img,a,mode){c.save();c.translate(r[0],r[1]);c.rotate(r[4]);c.globalAlpha=a;if(mode)c.globalCompositeOperation=mode;c.imageSmoothingEnabled=false;c.drawImage(img,-r[2]/2,-r[3]/2,r[2],r[3]);c.restore()}
+function snakeScr(T){const W=16,H=12,x=pcv(W*4,H*4);x.fillStyle='#a3be6c';x.fillRect(0,0,W*4,H*4);x.fillStyle='#1d2a10';
+ const path=[];for(let r=2;r<H-1;r++){if(r%2===0)for(let q=1;q<W-1;q++)path.push([q,r]);else for(let q=W-2;q>=1;q--)path.push([q,r])}for(let r=H-2;r>2;r--)path.push([0,r]);const L=path.length,st=Math.floor(T*6),cyc=Math.floor(st/(L*2)),k=st%(L*2),len=3+Math.floor(k/18),hd=k%L;
+ for(let i=0;i<len;i++){const p=path[((hd-i)%L+L)%L];x.fillRect(p[0]*4,p[1]*4,4,4)}const f=path[(hd+18-(k%18))%L];if(Math.floor(T*4)%2)x.fillRect(f[0]*4+1,f[1]*4+1,2,2);
+ x.font='7px monospace';x.textBaseline='top';x.fillText(String(len*7+cyc).padStart(4,'0'),2,0);x.fillRect(0,7,W*4,1);return PCV}
+const DMAP=['1111111111111111','1000000100000001','1011100101111001','1010000000001001','1010110111101001','1000100000000001','1110101111011111','1000100001000001','1011111001011101','1000000001000001','1111111111111111'];
+function doomScr(T){const W=96,H=72,x=pcv(W,H),id=x.createImageData(W,H),d=id.data;
+ const pts=[[1.5,1.5],[6.5,1.5],[6.5,3.5],[11.5,3.5],[11.5,1.5],[14.5,1.5],[14.5,5.5],[9.5,5.5],[9.5,7.5],[14.5,7.5],[14.5,9.5],[9.5,9.5],[7.5,9.5],[7.5,7.5],[4.5,7.5],[4.5,9.5],[1.5,9.5],[1.5,7.5],[3.5,7.5],[3.5,5.5],[1.5,5.5]],per=2.2,u=(T/per)%pts.length,i0=Math.floor(u),f=u-i0,A=pts[i0],B=pts[(i0+1)%pts.length],C=pts[(i0+2)%pts.length];
+ const e=f*f*(3-2*f),px=A[0]+(B[0]-A[0])*f,py=A[1]+(B[1]-A[1])*f,a1=Math.atan2(B[1]-A[1],B[0]-A[0]),a2=Math.atan2(C[1]-B[1],C[0]-B[0]);let da=a2-a1;while(da>Math.PI)da-=2*Math.PI;while(da<-Math.PI)da+=2*Math.PI;const ang=a1+(f>.6?da*(f-.6)/.4:0);
+ const bob=Math.sin(T*9)*1.2;for(let c=0;c<W;c++){const ra=ang+(c/W-.5)*1.1,dx=Math.cos(ra),dy=Math.sin(ra);let mx=Math.floor(px),my=Math.floor(py);const sx=Math.abs(1/dx),sy=Math.abs(1/dy),stx=dx<0?-1:1,sty=dy<0?-1:1;let tx=(dx<0?px-mx:mx+1-px)*sx,ty=(dy<0?py-my:my+1-py)*sy,side=0;
+  for(let n=0;n<40;n++){if(tx<ty){tx+=sx;mx+=stx;side=0}else{ty+=sy;my+=sty;side=1}if((DMAP[my]||'')[mx]==='1')break}
+  const dist=(side?ty-sy:tx-sx)*Math.cos(ra-ang),hh=Math.min(H*2,(H*.9)/Math.max(.05,dist)),top=(H*.42-hh/2+bob)|0,bot=(H*.42+hh/2+bob)|0,wx=side?px+dist/Math.cos(ra-ang)*dx:py+dist/Math.cos(ra-ang)*dy,tex=Math.floor((wx%1)*8),sh=Math.max(.18,1-dist/9)*(side?.75:1);
+  for(let r=0;r<H;r++){const o=(r*W+c)*4;let R,G,Bc;if(r<top){R=40;G=36;Bc=44}else if(r>bot){const fl=Math.max(.15,1-(H-r)/H*1.5);R=70*fl;G=58*fl;Bc=40*fl}else{const v=((r-top)/(bot-top+1)*8)|0,brick=((v%4===0)||((tex+(v>>2)*4)%8===0))?.6:1;R=150*sh*brick;G=98*sh*brick;Bc=58*sh*brick}d[o]=R;d[o+1]=G;d[o+2]=Bc;d[o+3]=255}}
+ x.putImageData(id,0,0);
+ const fire=(Math.floor(T*1.6)%3===0)&&((T*1.6)%1<.18),gb=Math.sin(T*9)*2,gy=H-22+Math.abs(gb);if(fire){x.fillStyle='#ffd04a';x.beginPath();x.arc(W/2,gy-2,6,0,6.3);x.fill();x.fillStyle='#fff6b0';x.beginPath();x.arc(W/2,gy-2,3,0,6.3);x.fill()}
+ x.fillStyle='#55555c';x.fillRect(W/2-5+gb,gy,10,14);x.fillStyle='#2b2b30';x.fillRect(W/2-2+gb,gy-3,4,6);x.fillStyle='#c08a5a';x.fillRect(W/2-8+gb,gy+8,16,8);
+ x.fillStyle='#3a3a3a';x.fillRect(0,H-9,W,9);x.fillStyle='#c62020';x.font='bold 7px monospace';x.textBaseline='top';x.fillText('50',3,H-8);x.fillText('100%',30,H-8);x.fillText('0%',70,H-8);return PCV}
+function pagerScr(T,Sx){const W=96,H=34,x=pcv(W,H);x.fillStyle='#7dff7a';x.fillRect(0,0,W,H);const g=x.createRadialGradient(W/2,H/2,2,W/2,H/2,W*.6);g.addColorStop(0,'rgba(255,255,255,.25)');g.addColorStop(1,'rgba(0,60,0,.25)');x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.fillStyle='#0d2a0c';x.font='13px VT323, monospace';x.textBaseline='top';const t=String((Sx&&Sx.title)||'BEAT').toUpperCase()+'   ',tw=x.measureText(t).width;let off=0;if(tw>W-6)off=(T*22)%tw;x.save();x.beginPath();x.rect(2,0,W-4,H);x.clip();x.fillText(t+t,3-off,3);x.restore();x.fillText('MZPRD',3,18);
+ x.font='9px VT323, monospace';const mm=Math.floor(T/60),ss=Math.floor(T%60);x.fillText(String(10+mm%2)+':'+String(ss).padStart(2,'0'),W-26,20);return PCV}
+function drawProp(c,G,Sx,T){const k=ST.prop||'floppy',im=PROPIMG[k];if(k==='floppy'||!im)return;const v=G.id==='deskv';c.save();
+ if(v){if(!PVPATCH)PVPATCH=DESKS.vpatch;if(PVPATCH)c.drawImage(PVPATCH,500,1640);const t=tightProp(k,im);c.translate(713,1830);c.scale(.9,.9);c.translate(-330,-930);c.save();c.shadowColor='rgba(0,0,0,.55)';c.shadowBlur=18;c.shadowOffsetX=6;c.shadowOffsetY=10;c.drawImage(t,PROPAT[0],PROPAT[1]);c.restore()}
+ else c.drawImage(im,PROPAT[0],PROPAT[1]);
+ const r=PSCR[k];if(k==='cd'){c.save();c.translate(324,927);c.rotate(-.35);c.fillStyle='rgba(20,20,40,.85)';c.textAlign='center';c.textBaseline='middle';c.font='700 34px Caveat, cursive';c.fillText('MZPRD',0,-78);const t=String((Sx&&Sx.title)||'').slice(0,18);c.font='700 26px Caveat, cursive';c.fillText(t,0,78);c.font='600 18px Caveat, cursive';c.fillText('beats  '+(Sx&&Sx.bpm?Sx.bpm+' bpm':'vol. 1'),0,104);c.restore()}
+ else if(k==='pager'){onScr(c,r,pagerScr(T,Sx),.92);c.save();c.globalCompositeOperation='lighter';c.translate(r[0],r[1]);const g=c.createRadialGradient(0,0,5,0,0,r[2]*.8);g.addColorStop(0,'rgba(90,255,90,.22)');g.addColorStop(1,'rgba(90,255,90,0)');c.fillStyle=g;c.fillRect(-r[2],-r[2],2*r[2],2*r[2]);c.restore()}
+ else if(k==='nokia')onScr(c,r,snakeScr(T),.88);
+ else if(k==='ipad'){onScr(c,r,doomScr(T),1);c.save();c.globalCompositeOperation='lighter';c.globalAlpha=.25;onScr(c,r,PCV,1);c.restore();c.save();c.translate(r[0],r[1]);c.rotate(r[4]);const g=c.createLinearGradient(-r[2]/2,-r[3]/2,r[2]/2,r[3]/2);g.addColorStop(0,'rgba(255,255,255,.12)');g.addColorStop(.4,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(-r[2]/2,-r[3]/2,r[2],r[3]);c.restore()}
+ c.restore()}
+/* 9:16: the floppy there is painted out and the item (cut tight from its photo) sits in its place */
+const PVF={def:[713,1820,.05]},PQ={cd:null,pager:[[164,840],[447,808],[463,1005],[175,1021]],nokia:[[223,803],[308,765],[468,1048],[367,1085]],ipad:[[105,781],[457,691],[516,1101],[191,1131]]};
+let PVPATCH=null;const PTIGHT={};
+function tightProp(k,im){if(PTIGHT[k])return PTIGHT[k];const cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const x=cv.getContext('2d');x.drawImage(im,0,0);x.globalCompositeOperation='destination-in';x.fillStyle='#000';x.beginPath();
+ if(k==='cd')x.arc(324-PROPAT[0],927-PROPAT[1],152,0,6.2832);else PQ[k].forEach((p,i)=>i?x.lineTo(p[0]-PROPAT[0],p[1]-PROPAT[1]):x.moveTo(p[0]-PROPAT[0],p[1]-PROPAT[1]));x.closePath();x.fill();return PTIGHT[k]=cv}
 function deck(c,G,SRC,ang,S,pw){const D=G.deck,u=G.u||1,V=vinylOf(SRC,D,D.vr||D.r-28),VR=V.VR;
  c.save();c.beginPath();c.arc(D.cx,D.cy,VR,0,6.2832);c.clip();c.drawImage(V.A,D.cx-VR,D.cy-VR);c.translate(D.cx,D.cy);c.rotate(ang);c.drawImage(V.sp,-VR,-VR);c.restore();
  const R=D.lab,t=String((S&&S.title)||'SAMPLE PACK').toUpperCase(),hue=hashStr(t)%360;c.save();c.translate(D.cx,D.cy);c.rotate(ang);
@@ -252,7 +292,7 @@ async function ensureScene(fmt){fmt=fmt||ST.fmt;const tall=fmt==='v'||fmt==='c';
  if(ST.scene==='white'){await ensureStudio();return}
  if(!tall){if(!DESKS.h)DESKS.h=await loadImg('mpc/desk_nocan.webp?v=1');if(!DESKS.h0&&(ST.can||{}).id==='orig'&&(!ST.skin||ST.skin==='orig'))DESKS.h0=await loadImg('mpc/desk.webp?v=2');if(!DESKS.h)DESKS.h=DESKS.h0}
  else if(!DESKS.v)DESKS.v=await loadImg('mpc/desk_v.webp?v=2');
- await loadSkin(ST.skin||'orig',fmt);
+ await loadSkin(ST.skin||'orig',fmt);await loadProp();if(tall&&!DESKS.vpatch)DESKS.vpatch=await loadImg('mpc/desk_v_nofloppy.webp?v=1');
  const c=ST.can||{};if(!tall&&c.id!=='orig'&&c.id!=='none'&&!CANS.length)await loadCans();
  if(!tall&&c.id==='orig'&&ST.skin&&ST.skin!=='orig'&&!CANS.length)await loadCans();
  sampleColors()}
@@ -524,8 +564,9 @@ function frame(c,W,H,fmt,T,X){if(X.base){frame(c,W,H,fmt,Math.max(0,T-X.card),X.
  machine(c,ox,oy,sc,Sx,{arm:SC&&SC.G.arm?armAt(SC.G,T,X.intro,t0,lastEnd):null,spin:SC&&SC.G.deck?spinAt(T,X.intro>0?t0-.27:-9,lastEnd):0,lcd:X.make&&!((X.intro>0)&&T<X.intro)?X.make.lcdAt(T):null,boot:(X.intro>0&&T<X.intro&&T>=PW)?T-PW:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,power:(X.make&&X.make.pdAt&&X.make.pdAt(T+.1)>=0)?0:(X.intro>0?ease((T-PW)/.12):1),pdown:(X.intro>0&&T<PW)?5:(X.make&&X.make.pdAt?X.make.pdAt(T):-1),run:la>=-.02&&T<(X.make&&X.make.stopT?X.make.stopT:lastEnd),trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
 {c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC?SC.G:PH;
   if(SC&&Gs.id==='deskh')drawCan(c,Gs,Sx);
+  if(SC&&(Gs.id==='deskh'||Gs.id==='deskv'))drawProp(c,Gs,Sx,T);
   if(ST.hands&&ST.hands.on)drawHands(c,Gs,Sx,la,!!SC);
-  if(SC){if(Gs.label){const pr=X.long?1:ease((T-tr.start+.25)/1.1);handwrite(c,Gs.label,Sx.title,'MZPRD'+(Sx.bpm?'  '+Sx.bpm+' BPM':'')+(Sx.key?'  '+Sx.key:''),X.kind==='tape'&&k===0&&T<t0?0:pr)}
+  if(SC){if(Gs.label&&(!ST.prop||ST.prop==='floppy')){const pr=X.long?1:ease((T-tr.start+.25)/1.1);handwrite(c,Gs.label,Sx.title,'MZPRD'+(Sx.bpm?'  '+Sx.bpm+' BPM':'')+(Sx.key?'  '+Sx.key:''),X.kind==='tape'&&k===0&&T<t0?0:pr)}
    if(Gs.smoke&&ST.smoke&&ST.smoke.on)smoke(c,T,Gs.smoke,ST.smoke.amt||1);dust(c,T,Gs)}
   c.restore()}
  if(SC&&SC.G.lamp){lampFx(c,W,H,ox,oy,sc,SC.G,T)}else if(!SC)sheen(c,ox,oy,sc,T);
@@ -599,6 +640,7 @@ function html(){return`<div class="mg"><div>
  <details class="sec grp" id="g_scene"><summary>2. SCENE <small id="s_scene"></small></summary><div class="in">
   <label>LOOK OF THE VIDEOS</label><select id="mScene"><option value="desk">Desk scene (the worn desk, lamp and floppy disks)</option><option value="white">White studio</option></select>
   <label>MACHINE SKIN (DESK SCENES)</label><select id="mSkin">${SKINS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
+  <label>LEFT DESK ITEM (MPC DESK)</label><select id="mProp">${PROPS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
   <label>PAD MACHINE SKIN (SAMPLE PACKS SCENE)</label><select id="mPSkin">${PSKINS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
   <div class="sub">CAN ON THE DESK (16:9)</div>
   <select id="mCan"><option value="orig">The original Pepsi can (as in the picture)</option><option value="auto">A different can for each beat (automatic)</option>${CAN_NAMES.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('')}<option value="none">No can</option></select>
@@ -899,7 +941,7 @@ async function setSrc(m){if((ST.src||'beats')===m)return;stopPlay();ST['pick_'+(
 function wire(){$q('#mSrcB').onclick=()=>setSrc('beats');$q('#mSrcP').onclick=()=>setSrc('packs');srcUI();const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);$q('#mLearnAll').onclick=()=>learnAll();
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();mark('yt','th','gen')};for(const k in PNL){$q(PNL[k][0]).addEventListener('toggle',paintPanels)}
- $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};$q('#mPSkin').value=ST.pskin||'0';$q('#mPSkin').onchange=async e=>{ST.pskin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};
+ $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};$q('#mProp').value=ST.prop||'floppy';$q('#mProp').onchange=async e=>{ST.prop=e.target.value;await ensureScene(ST.fmt);save();drawNow()};$q('#mPSkin').value=ST.pskin||'0';$q('#mPSkin').onchange=async e=>{ST.pskin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};
  const CM=ST.cam;CM.moves=CM.moves||{};{const box=$q('#mCamMvList');if(box){box.innerHTML=CAMMV.map(([k,t])=>'<label class="chk" style="font-size:11px"><input type="checkbox" data-mv="'+k+'"'+(CM.moves[k]?' checked':'')+'> '+t+'</label>').join('');box.querySelectorAll('[data-mv]').forEach(c=>c.onchange=()=>{CM.moves[c.dataset.mv]=c.checked;save();drawNow();summ()})}}$q('#mDof').value=CM.dof;$q('#mRack').checked=!!CM.rack;$q('#mGrade').value=CM.grade;
  $q('#mDof').onchange=e=>{CM.dof=e.target.value;save();drawNow()};$q('#mRack').onchange=e=>{CM.rack=e.target.checked;save();drawNow()};$q('#mGrade').onchange=e=>{CM.grade=e.target.value;save();drawNow()};
  $q('#mIntro').checked=startOn();$q('#mIntro').onchange=e=>{ST.start=e.target.checked;save();stopPlay();if(S&&S.buf){S.tl=tlOne(S);dropV()}if(TP){TP=null;$q('#mTpMsg').textContent='The intro changed. Press BUILD THE TAPE again.';mark('yt','th','gen')}drawNow()};
