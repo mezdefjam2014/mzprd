@@ -188,7 +188,7 @@ function tightProp(k,im){if(PTIGHT[k])return PTIGHT[k];const cv=document.createE
    a Sidekick (a long text thread), a mini display (master meters and knobs) or an iPhone (scrolling a photo feed). Each screen is fitted to its measured corners. */
 const RPROPS=[['floppy','Floppy disk (the original)'],['gameboy','Game Boy playing a level'],['bberry','BlackBerry with missed calls'],['sidekick','Sidekick texting'],['mini','Mini display (master meters)'],['iphone','iPhone scrolling a photo feed']];
 const RPAT=[1620,560],RPIMG={};
-const RSQ={gameboy:[[1828,660],[1956,672],[1948,792],[1808,770]],bberry:[[1767,712],[1946,684],[1962,793],[1786,822]],sidekick:[[1794,660],[1990,726],[1984,816],[1757,778]],mini:[[1768,744],[1971,774],[1958,931],[1749,893]],iphone:[[1729,681],[1900,654],[1994,992],[1822,1031]]};
+const RSQ={gameboy:[[1828,660],[1956,672],[1948,792],[1808,770]],bberry:[[1767,712],[1946,684],[1962,793],[1786,822]],sidekick:[[1794,660],[1990,726],[1984,816],[1757,778]],mini:[[1768,744],[1971,774],[1958,931],[1749,893]],iphone:[[1719.6,689.4],[1888.6,652.0],[2003.1,983.6],[1833.8,1033.0]]};
 const IGSRC=['can_01','can_03','can_05','can_07','can_09','can_11','desk_h_sg1','desk_h_sg3','desk_h_sg5','desk_h_sg7','pack_h_s1','pack_h_s2','pack_h_s3','pack_h_s4','pack_h_s5','desk','pack_h_noarm'];
 async function loadRProp(){const k=ST.rprop||'floppy';if(k!=='floppy'&&!RPIMG[k])RPIMG[k]=await loadImg('mpc/rprop_'+k+'.webp?v=2');if(k==='iphone'&&!RPIMG.ig){RPIMG.ig=[];for(const n of IGSRC){const im=await loadImg('mpc/'+n+'.webp?v=1');if(im)RPIMG.ig.push(im)}}}
 const rnd=n=>{let a=(n*2654435761)>>>0;a^=a>>>15;a=Math.imul(a,2246822519)>>>0;a^=a>>>13;return(a>>>0)/4294967296};
