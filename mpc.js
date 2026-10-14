@@ -118,13 +118,20 @@ function pagerScr(T,Sx){const[cv,x]=scv('pg',120,30);x.fillStyle='#fff';x.fillRe
  const t=String((Sx&&Sx.title)||'BEAT').toUpperCase();x.font='12px VT323, monospace';x.textBaseline='top';const tw=x.measureText(t+'    ').width;let off=tw>112?(T*20)%tw:0;x.save();x.beginPath();x.rect(3,0,114,15);x.clip();x.fillText(t+'    '+t,4-off,1);x.restore();
  x.fillText('MZPRD',4,15);const sec=Math.floor(T),cl='10:'+String(24+Math.floor(sec/60)).padStart(2,'0');lcdText(x,cl,86,18,1.6);if(Math.floor(T*1.5)%2)x.fillRect(110,2,6,4);return cv}
 /* iPad: a sharp little first-person corridor shooter (portrait, as the iPad lies on the desk) */
-const DMAP=['1111111111111111','1000000100000001','1011100101111001','1010000000001001','1010110111101001','1000100000000001','1110101111011111','1000100001000001','1011111001011101','1000000001000001','1111111111111111'];
+let DMAP=null;
 const DPTS=[[1.5,1.5],[6.5,1.5],[6.5,3.5],[11.5,3.5],[11.5,1.5],[14.5,1.5],[14.5,5.5],[9.5,5.5],[9.5,7.5],[14.5,7.5],[14.5,9.5],[7.5,9.5],[7.5,7.5],[4.5,7.5],[4.5,9.5],[1.5,9.5],[1.5,7.5],[3.5,7.5],[3.5,5.5],[1.5,5.5]],DPER=2.4,DPLAY=(DPTS.length-1)*DPER;
 const DMON=[[5,1.5],[10,3.5],[14.5,4],[12,7.5],[9,9.5],[4.5,8.6],[2.5,7.5]];
 function dcam(t){const u=clamp(t/DPER,0,DPTS.length-1.001),i0=Math.floor(u),f=u-i0,A=DPTS[i0],B=DPTS[i0+1],C=DPTS[Math.min(i0+2,DPTS.length-1)];const px=A[0]+(B[0]-A[0])*f,py=A[1]+(B[1]-A[1])*f,a1=Math.atan2(B[1]-A[1],B[0]-A[0]),a2=Math.atan2(C[1]-B[1],C[0]-B[0]);let da=a2-a1;while(da>Math.PI)da-=2*Math.PI;while(da<-Math.PI)da+=2*Math.PI;return{px,py,ang:a1+(f>.55&&C!==B?da*ease((f-.55)/.45):0)}}
+function dmap(){if(DMAP)return DMAP;const g=[...Array(11)].map(()=>Array(16).fill('1'));const carve=(x,y)=>{if(y>0&&y<10&&x>0&&x<15)g[y][x]='0'};
+ for(let i=0;i+1<DPTS.length;i++){const A=DPTS[i],B=DPTS[i+1];let x=Math.floor(A[0]),y=Math.floor(A[1]);const bx=Math.floor(B[0]),by=Math.floor(B[1]);carve(x,y);while(x!==bx||y!==by){x+=Math.sign(bx-x);y+=Math.sign(by-y);carve(x,y)}}
+ [[3,2],[9,2],[12,5],[11,8],[5,10-2]].forEach(p=>carve(p[0],p[1]));return DMAP=g.map(r=>r.join(''))}
 let DKILL=null;function dkills(){if(DKILL)return DKILL;DKILL=DMON.map(m=>{for(let t=0;t<DPLAY;t+=.05){const c=dcam(t),dx=m[0]-c.px,dy=m[1]-c.py,d=Math.hypot(dx,dy);let a=Math.atan2(dy,dx)-c.ang;while(a>Math.PI)a-=2*Math.PI;while(a<-Math.PI)a+=2*Math.PI;if(d<2.1&&Math.abs(a)<.35)return t}return DPLAY-2});return DKILL}
 /* iPad: a whole little shooter on loop: title menu, the level (monsters that are shot and fall), LEVEL COMPLETE with the stats counting up, back to the menu */
-function doomScr(T){const W=180,H=240,[cv,x]=scv('ip',W,H),MENU=4.5,DONE=5,cyc=MENU+DPLAY+DONE,t=T%cyc;x.imageSmoothingEnabled=true;
+const BAY=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
+function bit8(src){const w=60,h=80,[cv,x]=scv('ip8',w,h);x.imageSmoothingEnabled=true;x.drawImage(src,0,0,w,h);const id=x.getImageData(0,0,w,h),d=id.data;
+ for(let y=0;y<h;y++)for(let q=0;q<w;q++){const o=(y*w+q)*4,t=(BAY[(y&3)*4+(q&3)]/16-.5)*48;for(let c=0;c<3;c++){const v=d[o+c]+t;d[o+c]=Math.max(0,Math.min(255,Math.round(v/64)*64))}}x.putImageData(id,0,0);return cv}
+function doomScr(T){return bit8(doomFull(T))}
+function doomFull(T){const W=180,H=240,[cv,x]=scv('ip',W,H),MENU=4.5,DONE=5,cyc=MENU+DPLAY+DONE,t=T%cyc;x.imageSmoothingEnabled=true;
  const title=(y)=>{x.textAlign='center';x.textBaseline='middle';x.font='900 30px Anton, Oswald, sans-serif';x.lineWidth=4;x.strokeStyle='#300';x.strokeText('HELLGATE',W/2,y);const g=x.createLinearGradient(0,y-16,0,y+16);g.addColorStop(0,'#ffd36a');g.addColorStop(.5,'#e2541c');g.addColorStop(1,'#7a1208');x.fillStyle=g;x.fillText('HELLGATE',W/2,y)};
  if(t<MENU){const bg=x.createRadialGradient(W/2,H*.4,10,W/2,H*.4,H*.8);bg.addColorStop(0,'#5a1408');bg.addColorStop(1,'#0c0202');x.fillStyle=bg;x.fillRect(0,0,W,H);
   for(let i=0;i<40;i++){const fx=(i*37%W),fy=H-((t*40+i*53)%H);x.fillStyle='rgba(255,'+(90+i*3%80)+',30,'+(.25+(i%5)*.1)+')';x.fillRect(fx,fy,2,2)}
@@ -137,7 +144,7 @@ function doomScr(T){const W=180,H=240,[cv,x]=scv('ip',W,H),MENU=4.5,DONE=5,cyc=M
  const lt=t-MENU,id=x.createImageData(W,H),d=id.data,VH=H-30,cam=dcam(lt),px=cam.px,py=cam.py,ang=cam.ang,K=dkills(),zb=new Float32Array(W);
  const fire=K.some(k=>lt>k-.35&&lt<k+.05&&((lt-k+.35)%.2)<.07),fl=fire?1.35:1,bob=Math.sin(lt*8)*2;
  for(let c2=0;c2<W;c2++){const cm=(c2/W-.5)*1.15,ra=ang+Math.atan(cm),dx=Math.cos(ra),dy=Math.sin(ra);let mx=Math.floor(px),my=Math.floor(py);const sx=Math.abs(1/dx),sy=Math.abs(1/dy),stx=dx<0?-1:1,sty=dy<0?-1:1;let tx=(dx<0?px-mx:mx+1-px)*sx,ty=(dy<0?py-my:my+1-py)*sy,side=0;
-  for(let n=0;n<48;n++){if(tx<ty){tx+=sx;mx+=stx;side=0}else{ty+=sy;my+=sty;side=1}if((DMAP[my]||'')[mx]==='1')break}
+  for(let n=0;n<48;n++){if(tx<ty){tx+=sx;mx+=stx;side=0}else{ty+=sy;my+=sty;side=1}if((dmap()[my]||'')[mx]!=='0')break}
   const rd=side?ty-sy:tx-sx,dist=rd*Math.cos(ra-ang);zb[c2]=dist;const hh=VH*.95/Math.max(.08,dist),mid=VH*.47+bob,top=mid-hh/2,bot=mid+hh/2,hx=side?px+rd*dx:py+rd*dy,wu=hx-Math.floor(hx),fog=Math.max(.12,1-dist/8)*(side?.72:1)*fl;
   for(let r=0;r<VH;r++){const o=(r*W+c2)*4;let R,G,Bc;
    if(r<top){const k2=.35+.65*(1-r/mid);R=28*k2;G=24*k2;Bc=30*k2}
@@ -169,7 +176,7 @@ function drawProp(c,G,Sx,T){const k=ST.prop||'floppy',im=PROPIMG[k];if(k==='flop
   else{c.globalCompositeOperation='screen';c.fillStyle='rgba(60,80,10,.18)';c.fill()}
   c.globalCompositeOperation='multiply';c.globalAlpha=.86;warp(c,k==='pager'?pagerScr(T,Sx):snakeScr(T),q,4);c.restore();
   if(k==='pager'){c.save();c.globalCompositeOperation='lighter';const cx=(q[0][0]+q[2][0])/2,cy=(q[0][1]+q[2][1])/2,g=c.createRadialGradient(cx,cy,10,cx,cy,140);g.addColorStop(0,'rgba(90,255,90,.12)');g.addColorStop(1,'rgba(90,255,90,0)');c.fillStyle=g;c.fillRect(cx-140,cy-140,280,280);c.restore()}}
- else if(k==='ipad'){c.save();quadPath(c,q);c.clip();c.fillStyle='#000';c.fill();warp(c,doomScr(T),q,8);const gl=PROPIMG.glass;if(gl){c.globalCompositeOperation='screen';c.globalAlpha=.8;c.drawImage(gl,PROPAT[0],PROPAT[1])}c.globalCompositeOperation='source-over';c.globalAlpha=1;const ig=c.createLinearGradient(q[0][0],q[0][1],q[2][0],q[2][1]);ig.addColorStop(0,'rgba(255,255,255,.06)');ig.addColorStop(.5,'rgba(255,255,255,0)');ig.addColorStop(1,'rgba(0,0,0,.12)');c.fillStyle=ig;c.fill();
+ else if(k==='ipad'){c.save();quadPath(c,q);c.clip();c.fillStyle='#000';c.fill();c.imageSmoothingEnabled=false;warp(c,doomScr(T),q,8);c.imageSmoothingEnabled=true;const gl=PROPIMG.glass;if(gl){c.globalCompositeOperation='screen';c.globalAlpha=.8;c.drawImage(gl,PROPAT[0],PROPAT[1])}c.globalCompositeOperation='source-over';c.globalAlpha=1;const ig=c.createLinearGradient(q[0][0],q[0][1],q[2][0],q[2][1]);ig.addColorStop(0,'rgba(255,255,255,.06)');ig.addColorStop(.5,'rgba(255,255,255,0)');ig.addColorStop(1,'rgba(0,0,0,.12)');c.fillStyle=ig;c.fill();
   c.lineWidth=4;c.strokeStyle='rgba(0,0,0,.45)';quadPath(c,q);c.stroke();c.restore();c.save();c.globalCompositeOperation='lighter';const cx=(q[0][0]+q[2][0])/2,cy=(q[0][1]+q[2][1])/2,g=c.createRadialGradient(cx,cy,60,cx,cy,230);g.addColorStop(0,'rgba(255,170,90,.06)');g.addColorStop(1,'rgba(255,170,90,0)');c.fillStyle=g;c.fillRect(cx-230,cy-230,460,460);c.restore()}
  c.restore()}
 /* 9:16: the floppy there is painted out and the item (cut tight from its photo) sits in its place */
