@@ -779,7 +779,7 @@ function tapeLabel(c,G,Sx){const t=String((Sx&&Sx.title)||'').toUpperCase();if(!
 function comments(c,W,H,v,T,X,Sx,pack){const CM=window.MZMpcComments;if(!CM)return;const t0=X.tracks[0].start,last=X.tracks[X.tracks.length-1],end=last.start+last.dur;if(T<t0+3||T>end-1)return;
  const seed=String(X.title||'').split('').reduce((a,ch)=>a*31+ch.charCodeAt(0)|0,7)>>>0,GAP=4.6,LIFE=9,yr=new Date().getFullYear(),
   /* the open part of each desk (nothing important under it): beats 16:9 the wood above the right-hand gadget, packs 16:9 the strip along the top, 9:16 the bottom-left corner */
-  Z=v?{x:.03,y:.975,w:.5,n:2,up:true}:pack?{x:.31,y:.012,w:.38,n:1}:{x:.785,y:.03,w:.2,n:3},u=Math.min(W,H)/1080*(v?.7:.62),cw=W*Z.w,x0=W*Z.x,yb=H*Z.y;
+  Z=v?{x:.03,y:.975,w:.5,n:2,up:true}:pack?{x:.31,y:.012,w:.38,n:1}:{x:.006,y:.38,w:.21,n:2},u=Math.min(W,H)/1080*(v?.7:.62),cw=W*Z.w,x0=W*Z.x,yb=H*Z.y;
  const k=Math.floor((T-t0-3)/GAP);let y=yb;c.save();
  for(let i=k;i>=0&&i>k-Z.n;i--){const st=t0+3+i*GAP,a=T-st;if(a>LIFE)continue;const cm=CM.at(pack?'pack':'beat',seed,i,end-t0,yr),al=Math.min(1,a/.35)*Math.min(1,(LIFE-a)/.6),sl=(1-ease(Math.min(1,a/.35)))*30*u;
   c.font='500 '+Math.round(26*u)+'px Roboto, Arial, sans-serif';const words=cm.txt.split(' '),lines=[];let ln='';for(const wd of words){const tt=ln?ln+' '+wd:wd;if(c.measureText(tt).width>cw-110*u&&ln){lines.push(ln);ln=wd}else ln=tt}lines.push(ln);
