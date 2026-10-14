@@ -85,36 +85,64 @@ function drawArm(c,G,img,st){if(!img)return;const A=G.arm;c.save();c.translate(A
    a Nokia playing snake, or an iPad playing a little retro corridor shooter. The item photos are cut from the same desk shot. */
 const PROPS=[['floppy','Floppy disk (the original)'],['cd','CD with handwriting'],['pager','Pager (green light, beat name)'],['nokia','Nokia playing snake'],['ipad','iPad playing a retro shooter']];
 const PROPIMG={},PROPAT=[60,640];
-const PSCR={pager:[305,866,165,72,-.17],nokia:[296,901,94,80,.4],ipad:[333,940,280,338,-.075]};
-async function loadProp(){const k=ST.prop||'floppy';if(k!=='floppy'&&!PROPIMG[k])PROPIMG[k]=await loadImg('mpc/prop_'+k+'.webp?v=1')}
-let PCV=null;const pcv=(w,h)=>{if(!PCV)PCV=document.createElement('canvas');if(PCV.width!==w||PCV.height!==h){PCV.width=w;PCV.height=h}const x=PCV.getContext('2d');x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,w,h);return x};
-function onScr(c,r,img,a,mode){c.save();c.translate(r[0],r[1]);c.rotate(r[4]);c.globalAlpha=a;if(mode)c.globalCompositeOperation=mode;c.imageSmoothingEnabled=false;c.drawImage(img,-r[2]/2,-r[3]/2,r[2],r[3]);c.restore()}
-function snakeScr(T){const W=16,H=12,x=pcv(W*4,H*4);x.fillStyle='#a3be6c';x.fillRect(0,0,W*4,H*4);x.fillStyle='#1d2a10';
- const path=[];for(let r=2;r<H-1;r++){if(r%2===0)for(let q=1;q<W-1;q++)path.push([q,r]);else for(let q=W-2;q>=1;q--)path.push([q,r])}for(let r=H-2;r>2;r--)path.push([0,r]);const L=path.length,st=Math.floor(T*6),cyc=Math.floor(st/(L*2)),k=st%(L*2),len=3+Math.floor(k/18),hd=k%L;
- for(let i=0;i<len;i++){const p=path[((hd-i)%L+L)%L];x.fillRect(p[0]*4,p[1]*4,4,4)}const f=path[(hd+18-(k%18))%L];if(Math.floor(T*4)%2)x.fillRect(f[0]*4+1,f[1]*4+1,2,2);
- x.font='7px monospace';x.textBaseline='top';x.fillText(String(len*7+cyc).padStart(4,'0'),2,0);x.fillRect(0,7,W*4,1);return PCV}
+/* each screen's 4 corners on the photo (top-left, top-right, bottom-right, bottom-left), measured on close-ups */
+const PSQ={pager:[[217,884],[396,832],[401,876],[231,930]],nokia:[[265,882],[355,845],[380,904],[291,940]],ipad:[[157,817],[400,747],[498,1040],[237,1112]]};
+async function loadProp(){const k=ST.prop||'floppy';if(k!=='floppy'&&!PROPIMG[k])PROPIMG[k]=await loadImg('mpc/prop_'+k+'.webp?v=2');if(k==='ipad'&&!PROPIMG.glass)PROPIMG.glass=await loadImg('mpc/prop_ipad_glass.webp?v=2')}
+/* draw a picture onto a 4-corner screen (perspective-style: a fine mesh of triangles), clipped to the screen */
+function quadPath(c,q){c.beginPath();q.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath()}
+function warp(c,img,q,N){const W=img.width,H=img.height,P=(u,v)=>[(q[0][0]*(1-u)+q[1][0]*u)*(1-v)+(q[3][0]*(1-u)+q[2][0]*u)*v,(q[0][1]*(1-u)+q[1][1]*u)*(1-v)+(q[3][1]*(1-u)+q[2][1]*u)*v];
+ const tri=(s0,s1,s2,d0,d1,d2)=>{c.save();const cx=(d0[0]+d1[0]+d2[0])/3,cy=(d0[1]+d1[1]+d2[1])/3,ex=p=>[p[0]+(p[0]-cx)*.04,p[1]+(p[1]-cy)*.04];const e0=ex(d0),e1=ex(d1),e2=ex(d2);c.beginPath();c.moveTo(e0[0],e0[1]);c.lineTo(e1[0],e1[1]);c.lineTo(e2[0],e2[1]);c.closePath();c.clip();
+  const x1=s1[0]-s0[0],y1=s1[1]-s0[1],x2=s2[0]-s0[0],y2=s2[1]-s0[1],u1=d1[0]-d0[0],v1=d1[1]-d0[1],u2=d2[0]-d0[0],v2=d2[1]-d0[1],det=x1*y2-x2*y1;if(!det){c.restore();return}
+  const A=(u1*y2-u2*y1)/det,B=(v1*y2-v2*y1)/det,C=(u2*x1-u1*x2)/det,D=(v2*x1-v1*x2)/det;c.transform(A,B,C,D,d0[0]-A*s0[0]-C*s0[1],d0[1]-B*s0[0]-D*s0[1]);c.drawImage(img,0,0);c.restore()};
+ for(let j=0;j<N;j++)for(let i=0;i<N;i++){const u0=i/N,u1=(i+1)/N,v0=j/N,v1=(j+1)/N,a=P(u0,v0),b=P(u1,v0),cc=P(u1,v1),d=P(u0,v1),sa=[u0*W,v0*H],sb=[u1*W,v0*H],sc=[u1*W,v1*H],sd=[u0*W,v1*H];tri(sa,sb,sc,a,b,cc);tri(sa,sc,sd,a,cc,d)}}
+const SCV={};const scv=(k,w,h)=>{let cv=SCV[k];if(!cv){cv=SCV[k]=document.createElement('canvas');cv.width=w;cv.height=h}const x=cv.getContext('2d');x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,w,h);x.imageSmoothingEnabled=false;return[cv,x]};
+/* tiny 3x5 pixel font for the phone and pager LCDs */
+const F35={'0':'7555 7','1':'2622 7','2':'7174 7','3':'7171 7','4':'5571 1','5':'7471 7','6':'7475 7','7':'7111 1','8':'7575 7','9':'7571 7',':':'0202 0',' ':'0000 0','-':'0070 0','.':'0000 2'};
+function lcdText(x,str,px,py,sz){str=String(str).toUpperCase();let cx=px;for(const ch of str){const g=F35[ch];if(g){const rows=g.replace(' ','');for(let r=0;r<5;r++){const bits=parseInt(rows[r],10);for(let b=0;b<3;b++)if(bits&(4>>b))x.fillRect(cx+b*sz,py+r*sz,sz,sz)}cx+=4*sz}else{x.font=(7*sz)+'px VT323, monospace';x.textBaseline='top';x.fillText(ch,cx,py-sz);cx+=x.measureText(ch).width+sz*.5}}return cx}
+/* Nokia 3310: the real 84x48 screen, classic Snake with a border, score and food, the dots in dark LCD ink */
+function snakeScr(T){const[cv,x]=scv('nk',84,48);x.fillStyle='#fff';x.fillRect(0,0,84,48);x.fillStyle='#1b2412';
+ const CW=20,CH=9,ox=2,oy=9;x.fillRect(0,7,84,1);x.fillRect(0,7,1,41);x.fillRect(83,7,1,41);x.fillRect(0,47,84,1);
+ const path=[];for(let r=0;r<CH;r++){if(r%2===0)for(let q=1;q<CW;q++)path.push([q,r]);else for(let q=CW-1;q>=1;q--)path.push([q,r])}for(let r=CH-1;r>0;r--)path.push([0,r]);path.push([0,0]);
+ const L=path.length,st=Math.floor(T*7),k=st%(L*2),len=4+Math.floor(k/14),hd=k%L,score=Math.floor(k/14)*7;
+ for(let i=0;i<len;i++){const p=path[((hd-i)%L+L)%L];x.fillRect(ox+p[0]*4,oy+p[1]*4,3,3)}const hp=path[hd];x.clearRect(ox+hp[0]*4+1,oy+hp[1]*4+1,1,1);
+ const f=path[(hd+14-(k%14))%L];if(Math.floor(T*3)%2===0){x.fillRect(ox+f[0]*4+1,oy+f[1]*4,1,1);x.fillRect(ox+f[0]*4,oy+f[1]*4+1,3,1);x.fillRect(ox+f[0]*4+1,oy+f[1]*4+2,1,1)}
+ lcdText(x,String(score).padStart(4,'0'),2,1,1);return cv}
+/* pager: the beat name scrolling across the top line, MZPRD and a clock below, in segment-style LCD ink */
+function pagerScr(T,Sx){const[cv,x]=scv('pg',120,30);x.fillStyle='#fff';x.fillRect(0,0,120,30);x.fillStyle='#14200f';
+ const t=String((Sx&&Sx.title)||'BEAT').toUpperCase();x.font='12px VT323, monospace';x.textBaseline='top';const tw=x.measureText(t+'    ').width;let off=tw>112?(T*20)%tw:0;x.save();x.beginPath();x.rect(3,0,114,15);x.clip();x.fillText(t+'    '+t,4-off,1);x.restore();
+ x.fillText('MZPRD',4,15);const sec=Math.floor(T),cl='10:'+String(24+Math.floor(sec/60)).padStart(2,'0');lcdText(x,cl,86,18,1.6);if(Math.floor(T*1.5)%2)x.fillRect(110,2,6,4);return cv}
+/* iPad: a sharp little first-person corridor shooter (portrait, as the iPad lies on the desk) */
 const DMAP=['1111111111111111','1000000100000001','1011100101111001','1010000000001001','1010110111101001','1000100000000001','1110101111011111','1000100001000001','1011111001011101','1000000001000001','1111111111111111'];
-function doomScr(T){const W=96,H=72,x=pcv(W,H),id=x.createImageData(W,H),d=id.data;
- const pts=[[1.5,1.5],[6.5,1.5],[6.5,3.5],[11.5,3.5],[11.5,1.5],[14.5,1.5],[14.5,5.5],[9.5,5.5],[9.5,7.5],[14.5,7.5],[14.5,9.5],[9.5,9.5],[7.5,9.5],[7.5,7.5],[4.5,7.5],[4.5,9.5],[1.5,9.5],[1.5,7.5],[3.5,7.5],[3.5,5.5],[1.5,5.5]],per=2.2,u=(T/per)%pts.length,i0=Math.floor(u),f=u-i0,A=pts[i0],B=pts[(i0+1)%pts.length],C=pts[(i0+2)%pts.length];
- const e=f*f*(3-2*f),px=A[0]+(B[0]-A[0])*f,py=A[1]+(B[1]-A[1])*f,a1=Math.atan2(B[1]-A[1],B[0]-A[0]),a2=Math.atan2(C[1]-B[1],C[0]-B[0]);let da=a2-a1;while(da>Math.PI)da-=2*Math.PI;while(da<-Math.PI)da+=2*Math.PI;const ang=a1+(f>.6?da*(f-.6)/.4:0);
- const bob=Math.sin(T*9)*1.2;for(let c=0;c<W;c++){const ra=ang+(c/W-.5)*1.1,dx=Math.cos(ra),dy=Math.sin(ra);let mx=Math.floor(px),my=Math.floor(py);const sx=Math.abs(1/dx),sy=Math.abs(1/dy),stx=dx<0?-1:1,sty=dy<0?-1:1;let tx=(dx<0?px-mx:mx+1-px)*sx,ty=(dy<0?py-my:my+1-py)*sy,side=0;
-  for(let n=0;n<40;n++){if(tx<ty){tx+=sx;mx+=stx;side=0}else{ty+=sy;my+=sty;side=1}if((DMAP[my]||'')[mx]==='1')break}
-  const dist=(side?ty-sy:tx-sx)*Math.cos(ra-ang),hh=Math.min(H*2,(H*.9)/Math.max(.05,dist)),top=(H*.42-hh/2+bob)|0,bot=(H*.42+hh/2+bob)|0,wx=side?px+dist/Math.cos(ra-ang)*dx:py+dist/Math.cos(ra-ang)*dy,tex=Math.floor((wx%1)*8),sh=Math.max(.18,1-dist/9)*(side?.75:1);
-  for(let r=0;r<H;r++){const o=(r*W+c)*4;let R,G,Bc;if(r<top){R=40;G=36;Bc=44}else if(r>bot){const fl=Math.max(.15,1-(H-r)/H*1.5);R=70*fl;G=58*fl;Bc=40*fl}else{const v=((r-top)/(bot-top+1)*8)|0,brick=((v%4===0)||((tex+(v>>2)*4)%8===0))?.6:1;R=150*sh*brick;G=98*sh*brick;Bc=58*sh*brick}d[o]=R;d[o+1]=G;d[o+2]=Bc;d[o+3]=255}}
- x.putImageData(id,0,0);
- const fire=(Math.floor(T*1.6)%3===0)&&((T*1.6)%1<.18),gb=Math.sin(T*9)*2,gy=H-22+Math.abs(gb);if(fire){x.fillStyle='#ffd04a';x.beginPath();x.arc(W/2,gy-2,6,0,6.3);x.fill();x.fillStyle='#fff6b0';x.beginPath();x.arc(W/2,gy-2,3,0,6.3);x.fill()}
- x.fillStyle='#55555c';x.fillRect(W/2-5+gb,gy,10,14);x.fillStyle='#2b2b30';x.fillRect(W/2-2+gb,gy-3,4,6);x.fillStyle='#c08a5a';x.fillRect(W/2-8+gb,gy+8,16,8);
- x.fillStyle='#3a3a3a';x.fillRect(0,H-9,W,9);x.fillStyle='#c62020';x.font='bold 7px monospace';x.textBaseline='top';x.fillText('50',3,H-8);x.fillText('100%',30,H-8);x.fillText('0%',70,H-8);return PCV}
-function pagerScr(T,Sx){const W=96,H=34,x=pcv(W,H);x.fillStyle='#7dff7a';x.fillRect(0,0,W,H);const g=x.createRadialGradient(W/2,H/2,2,W/2,H/2,W*.6);g.addColorStop(0,'rgba(255,255,255,.25)');g.addColorStop(1,'rgba(0,60,0,.25)');x.fillStyle=g;x.fillRect(0,0,W,H);
- x.fillStyle='#0d2a0c';x.font='13px VT323, monospace';x.textBaseline='top';const t=String((Sx&&Sx.title)||'BEAT').toUpperCase()+'   ',tw=x.measureText(t).width;let off=0;if(tw>W-6)off=(T*22)%tw;x.save();x.beginPath();x.rect(2,0,W-4,H);x.clip();x.fillText(t+t,3-off,3);x.restore();x.fillText('MZPRD',3,18);
- x.font='9px VT323, monospace';const mm=Math.floor(T/60),ss=Math.floor(T%60);x.fillText(String(10+mm%2)+':'+String(ss).padStart(2,'0'),W-26,20);return PCV}
+function doomScr(T){const W=180,H=240,[cv,x]=scv('ip',W,H),id=x.createImageData(W,H),d=id.data,VH=H-30;
+ const pts=[[1.5,1.5],[6.5,1.5],[6.5,3.5],[11.5,3.5],[11.5,1.5],[14.5,1.5],[14.5,5.5],[9.5,5.5],[9.5,7.5],[14.5,7.5],[14.5,9.5],[7.5,9.5],[7.5,7.5],[4.5,7.5],[4.5,9.5],[1.5,9.5],[1.5,7.5],[3.5,7.5],[3.5,5.5],[1.5,5.5]],per=2.4,u=(T/per)%pts.length,i0=Math.floor(u),f=u-i0,A=pts[i0],B=pts[(i0+1)%pts.length],C=pts[(i0+2)%pts.length];
+ const px=A[0]+(B[0]-A[0])*f,py=A[1]+(B[1]-A[1])*f,a1=Math.atan2(B[1]-A[1],B[0]-A[0]),a2=Math.atan2(C[1]-B[1],C[0]-B[0]);let da=a2-a1;while(da>Math.PI)da-=2*Math.PI;while(da<-Math.PI)da+=2*Math.PI;const ang=a1+(f>.55?da*ease((f-.55)/.45):0);
+ const fire=(T*1.4)%1<.1,fl=fire?1.35:1,bob=Math.sin(T*8)*2;
+ for(let c2=0;c2<W;c2++){const cam=(c2/W-.5)*1.15,ra=ang+Math.atan(cam),dx=Math.cos(ra),dy=Math.sin(ra);let mx=Math.floor(px),my=Math.floor(py);const sx=Math.abs(1/dx),sy=Math.abs(1/dy),stx=dx<0?-1:1,sty=dy<0?-1:1;let tx=(dx<0?px-mx:mx+1-px)*sx,ty=(dy<0?py-my:my+1-py)*sy,side=0;
+  for(let n=0;n<48;n++){if(tx<ty){tx+=sx;mx+=stx;side=0}else{ty+=sy;my+=sty;side=1}if((DMAP[my]||'')[mx]==='1')break}
+  const rd=side?ty-sy:tx-sx,dist=rd*Math.cos(ra-ang),hh=VH*.95/Math.max(.08,dist),mid=VH*.47+bob,top=mid-hh/2,bot=mid+hh/2,hx=side?px+rd*dx:py+rd*dy,wu=hx-Math.floor(hx),fog=Math.max(.12,1-dist/8)*(side?.72:1)*fl;
+  for(let r=0;r<VH;r++){const o=(r*W+c2)*4;let R,G,Bc;
+   if(r<top){const k2=.35+.65*(1-r/mid);R=28*k2;G=24*k2;Bc=30*k2}
+   else if(r>bot){const rr=(VH*.47)/Math.max(1,r-mid+.01),fx=px+dx*rr/Math.cos(ra-ang),fy=py+dy*rr/Math.cos(ra-ang),ck=((Math.floor(fx*2)+Math.floor(fy*2))&1)?.85:1,k2=Math.max(.1,1-rr/7)*fl;R=88*k2*ck;G=70*k2*ck;Bc=52*k2*ck}
+   else{const v=(r-top)/(bot-top),row=Math.floor(v*8),bx=(wu*4+(row%2)*.5)%1,mortar=(v*8%1<.1)||(bx<.06),n=((Math.sin((Math.floor(wu*16)+row*7+mx*13+my*7)*12.9)*43758)%1+1)%1*.18+.82;
+    R=mortar?60*fog:150*fog*n;G=mortar?52*fog:84*fog*n;Bc=mortar?46*fog:52*fog*n}
+   d[o]=R;d[o+1]=G;d[o+2]=Bc;d[o+3]=255}}
+ x.putImageData(id,0,0);x.imageSmoothingEnabled=true;
+ const gx=W/2+Math.sin(T*4)*4,gy=VH-46+Math.abs(Math.sin(T*8))*3;if(fire){const g=x.createRadialGradient(gx,gy-6,1,gx,gy-6,26);g.addColorStop(0,'rgba(255,250,200,1)');g.addColorStop(.4,'rgba(255,170,40,.9)');g.addColorStop(1,'rgba(255,120,0,0)');x.fillStyle=g;x.fillRect(gx-30,gy-36,60,60)}
+ const gg=x.createLinearGradient(gx-14,0,gx+14,0);gg.addColorStop(0,'#3a3a40');gg.addColorStop(.5,'#8a8a92');gg.addColorStop(1,'#2a2a2e');x.fillStyle=gg;x.fillRect(gx-9,gy,18,40);x.fillStyle='#1c1c20';x.fillRect(gx-4,gy-4,8,8);x.fillStyle='#b77a52';x.beginPath();x.ellipse(gx,gy+42,22,12,0,0,6.3);x.fill();
+ const hb=x.createLinearGradient(0,VH,0,H);hb.addColorStop(0,'#5b5b5f');hb.addColorStop(1,'#2e2e32');x.fillStyle=hb;x.fillRect(0,VH,W,30);x.fillStyle='#202024';x.fillRect(0,VH,W,2);
+ x.fillStyle='#d21e1e';x.font='bold 15px Oswald, sans-serif';x.textBaseline='middle';x.fillText('50',10,VH+16);x.fillText('100%',58,VH+16);x.fillText('0%',138,VH+16);x.fillStyle='#e8c070';x.fillRect(110,VH+8,16,16);return cv}
 function drawProp(c,G,Sx,T){const k=ST.prop||'floppy',im=PROPIMG[k];if(k==='floppy'||!im)return;const v=G.id==='deskv';c.save();
  if(v){if(!PVPATCH)PVPATCH=DESKS.vpatch;if(PVPATCH)c.drawImage(PVPATCH,500,1640);const t=tightProp(k,im);c.translate(713,1830);c.scale(.9,.9);c.translate(-330,-930);c.save();c.shadowColor='rgba(0,0,0,.55)';c.shadowBlur=18;c.shadowOffsetX=6;c.shadowOffsetY=10;c.drawImage(t,PROPAT[0],PROPAT[1]);c.restore()}
  else c.drawImage(im,PROPAT[0],PROPAT[1]);
- const r=PSCR[k];if(k==='cd'){c.save();c.translate(324,927);c.rotate(-.35);c.fillStyle='rgba(20,20,40,.85)';c.textAlign='center';c.textBaseline='middle';c.font='700 34px Caveat, cursive';c.fillText('MZPRD',0,-78);const t=String((Sx&&Sx.title)||'').slice(0,18);c.font='700 26px Caveat, cursive';c.fillText(t,0,78);c.font='600 18px Caveat, cursive';c.fillText('beats  '+(Sx&&Sx.bpm?Sx.bpm+' bpm':'vol. 1'),0,104);c.restore()}
- else if(k==='pager'){onScr(c,r,pagerScr(T,Sx),.92);c.save();c.globalCompositeOperation='lighter';c.translate(r[0],r[1]);const g=c.createRadialGradient(0,0,5,0,0,r[2]*.8);g.addColorStop(0,'rgba(90,255,90,.22)');g.addColorStop(1,'rgba(90,255,90,0)');c.fillStyle=g;c.fillRect(-r[2],-r[2],2*r[2],2*r[2]);c.restore()}
- else if(k==='nokia')onScr(c,r,snakeScr(T),.88);
- else if(k==='ipad'){onScr(c,r,doomScr(T),1);c.save();c.globalCompositeOperation='lighter';c.globalAlpha=.25;onScr(c,r,PCV,1);c.restore();c.save();c.translate(r[0],r[1]);c.rotate(r[4]);const g=c.createLinearGradient(-r[2]/2,-r[3]/2,r[2]/2,r[3]/2);g.addColorStop(0,'rgba(255,255,255,.12)');g.addColorStop(.4,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(-r[2]/2,-r[3]/2,r[2],r[3]);c.restore()}
+ const q=PSQ[k];if(k==='cd'){c.save();c.globalCompositeOperation='multiply';c.fillStyle='rgba(28,30,58,.88)';const arc=(t,r,mid,sz,dir)=>{c.font='700 '+sz+'px Caveat, cursive';const w=c.measureText(t).width,span=w/r;let an=mid-dir*span/2;for(const ch of t){const cw=c.measureText(ch).width,a2=an+dir*cw/(2*r);c.save();c.translate(324+Math.cos(a2)*r,927+Math.sin(a2)*r);c.rotate(a2+dir*Math.PI/2);c.textAlign='center';c.textBaseline='middle';c.fillText(ch,0,0);c.restore();an+=dir*cw/r}};
+  arc('MZPRD',108,-1.9,30,1);arc(String((Sx&&Sx.title)||'beats').slice(0,22),104,1.25,24,-1);c.font='600 17px Caveat, cursive';c.textAlign='center';c.save();c.translate(324,927);c.rotate(-.3);c.fillText(Sx&&Sx.bpm?Sx.bpm+' bpm':'master',0,-58);c.restore();c.restore()}
+ else if(k==='pager'||k==='nokia'){c.save();quadPath(c,q);c.clip();
+  if(k==='pager'){c.globalCompositeOperation='multiply';c.fillStyle='rgba(150,255,140,1)';c.fill();c.globalCompositeOperation='screen';c.fillStyle='rgba(60,170,50,.35)';c.fill()}
+  else{c.globalCompositeOperation='screen';c.fillStyle='rgba(60,80,10,.18)';c.fill()}
+  c.globalCompositeOperation='multiply';c.globalAlpha=.86;warp(c,k==='pager'?pagerScr(T,Sx):snakeScr(T),q,4);c.restore();
+  if(k==='pager'){c.save();c.globalCompositeOperation='lighter';const cx=(q[0][0]+q[2][0])/2,cy=(q[0][1]+q[2][1])/2,g=c.createRadialGradient(cx,cy,10,cx,cy,140);g.addColorStop(0,'rgba(90,255,90,.12)');g.addColorStop(1,'rgba(90,255,90,0)');c.fillStyle=g;c.fillRect(cx-140,cy-140,280,280);c.restore()}}
+ else if(k==='ipad'){c.save();quadPath(c,q);c.clip();c.fillStyle='#000';c.fill();warp(c,doomScr(T),q,8);const gl=PROPIMG.glass;if(gl){c.globalCompositeOperation='screen';c.globalAlpha=.8;c.drawImage(gl,PROPAT[0],PROPAT[1])}c.globalCompositeOperation='source-over';c.globalAlpha=1;const ig=c.createLinearGradient(q[0][0],q[0][1],q[2][0],q[2][1]);ig.addColorStop(0,'rgba(255,255,255,.06)');ig.addColorStop(.5,'rgba(255,255,255,0)');ig.addColorStop(1,'rgba(0,0,0,.12)');c.fillStyle=ig;c.fill();
+  c.lineWidth=4;c.strokeStyle='rgba(0,0,0,.45)';quadPath(c,q);c.stroke();c.restore();c.save();c.globalCompositeOperation='lighter';const cx=(q[0][0]+q[2][0])/2,cy=(q[0][1]+q[2][1])/2,g=c.createRadialGradient(cx,cy,60,cx,cy,230);g.addColorStop(0,'rgba(255,170,90,.06)');g.addColorStop(1,'rgba(255,170,90,0)');c.fillStyle=g;c.fillRect(cx-230,cy-230,460,460);c.restore()}
  c.restore()}
 /* 9:16: the floppy there is painted out and the item (cut tight from its photo) sits in its place */
 const PVF={def:[713,1820,.05]},PQ={cd:null,pager:[[164,840],[447,808],[463,1005],[175,1021]],nokia:[[223,803],[308,765],[468,1048],[367,1085]],ipad:[[105,781],[457,691],[516,1101],[191,1131]]};
