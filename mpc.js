@@ -937,6 +937,7 @@ function html(){return`<div class="mg"><div>
  <div style="display:flex;justify-content:space-between;align-items:center"><h3>SETTINGS</h3><div style="display:flex;gap:6px"><button class="btn" id="mOpenAll">OPEN ALL</button><button class="btn" id="mCloseAll">CLOSE ALL</button></div></div>
  <details class="sec grp" id="g_beat"><summary>1. THE BEAT <small id="s_beat">pick a beat</small></summary><div class="in">
   <div style="display:flex;gap:6px;margin-bottom:8px"><button class="btn" type="button" id="mSrcB" style="flex:1">BEATS</button><button class="btn" type="button" id="mSrcP" style="flex:1">SAMPLE PACKS</button></div>
+  <button class="btn big" id="mLearnAll" type="button" style="width:100%;margin-bottom:4px">LEARN ALL BEATS + PACKS (SAVED IN THIS BROWSER)</button><div class="msg" id="mLearnMsg" style="margin-bottom:8px">Learns every beat and pack (hits, pads and the drop) once, so they load the same every time.</div>
   <label id="mBeatL">BEAT</label><select id="mBeat"></select>
   <div id="mInfo" class="msg"></div>
   <label>SOUNDS LIKE (ARTIST, OPTIONAL: USED IN THE TITLES)</label><input type="text" id="mArt" placeholder="e.g. Lil Baby">
@@ -979,7 +980,6 @@ function html(){return`<div class="mg"><div>
   <label>TIMING NUDGE: <span id="mNudgeV">0</span> MS (MOVE THE PAD HITS EARLIER OR LATER)</label><input type="range" id="mNudge" min="-80" max="80" step="1" value="0" style="width:100%;accent-color:var(--red)">
   <div class="msg">The kick is the bottom right pad (BASS), snares are SNARE 1 and 2, hats are HIHAT, and chops and melody hits land on the toms, rides, crashes and percs.</div>
   <details class="sec sub2"><summary>WHAT THE TOOL HEARD</summary><div class="in msg" id="mMap"></div></details>
-  <button class="btn" id="mLearnAll" type="button">LEARN ALL BEATS (SAVED IN THIS BROWSER)</button><div class="msg" id="mLearnMsg">Each beat is learned and saved the first time it is opened, so its taps are the same every time.</div>
  </div></details>
  <details class="sec grp" id="g_watch"><summary>6. KEEP THEM WATCHING <small id="s_watch"></small></summary><div class="in">
   <label class="chk"><input type="checkbox" id="mEhk"> BIG HOOK LINE AT THE START (SLAMS ON SCREEN, THE MPC PUNCHES IN)</label>
@@ -1035,7 +1035,7 @@ const hear=buf=>window.MZMpcDetect?MZMpcDetect.analyze(buf):analyze(buf);
 async function loadBeat(b){if(CACHE[b.id])return CACHE[b.id];const buf=await fetchBuf(b);let raw=await LDB.get(learnKey(b));if(!raw){raw=await hear(buf);raw.drop=findDrop(buf,raw);raw.dv=2;LDB.put(learnKey(b),raw)}else if(raw.drop==null||raw.dv!==2){raw.dv=2;raw.drop=findDrop(buf,raw);LDB.put(learnKey(b),raw)}return CACHE[b.id]={buf,raw}}
 /* learn every beat on the site now (the ones already learned are skipped) */
 async function learnAll(){const m=$q('#mLearnMsg'),bt=$q('#mLearnAll');bt.disabled=true;let n=0,done=0;
- for(let i=0;i<beats.length;i++){const b=beats[i];if(!b.preview_path)continue;m.textContent='Learning beat '+(i+1)+' of '+beats.length+': '+b.title+'...';
+ const ALL=[...BEATS0,...PACKS];for(let i=0;i<ALL.length;i++){const b=ALL[i];if(!b.preview_path)continue;m.textContent='Learning '+(i+1)+' of '+ALL.length+': '+b.title+'...';
   try{const old=await LDB.get(learnKey(b));if(old&&old.drop!=null&&old.dv===2){done++;continue}const buf=await fetchBuf(b),raw=old||await hear(buf);raw.drop=findDrop(buf,raw);raw.dv=2;await LDB.put(learnKey(b),raw);n++}catch(e){console.warn(e)}}
  m.textContent='Done. '+n+' beat'+(n===1?'':'s')+' learned now, '+done+' already learned. New beats learn themselves the first time you open them.';bt.disabled=false}
 const kitOf=id=>ST.kits&&ST.kits[id]!=null&&ST.kits[id]!==''&&KITS[+ST.kits[id]]?+ST.kits[id]:kitFor(id);
