@@ -98,6 +98,13 @@ const DESKP=[{n:'DESK',bg:'#000',bg2:'#222',acc:'#ffd23f',ink:'#ffffff',dark:'#0
 function make(c,W,H,seed,X,o){o=o||{};const r=n=>hs(n,seed),bgk=H>W?'v':'h',wantDesk=o.desk===true||(o.desk==null&&r(30)<.7),deskOk=wantDesk&&!!M().bg(bgk),P=deskOk?DESKP[Math.floor(r(36)*3)]:(o.pal!=null?PAL[o.pal%PAL.length]:PAL[Math.floor(r(1)*PAL.length)]),B=deskOk?'desk':(o.bg!=null?BGS[o.bg%BGS.length]:BGS[Math.floor(r(2)*BGS.length)]),
   li=o.layout!=null?o.layout:Math.floor(r(3)*(H>W?8:LAYOUTS)),tx=o.tx!=null?TXS[o.tx%TXS.length]:TXS[Math.floor(r(4)*TXS.length)],Ly=layoutOf(li,W,H),v=H>W,Z=M(),S0={title:X.title,bpm:X.bpm,key:X.key,dur:30,lcd:X.title};
  c.save();c.clearRect(0,0,W,H);let DB=null;if(deskOk)DB=deskBg(c,W,H,r,bgk);else bg(c,W,H,B,P,r(5));
+ /* the MPC skin picked in the scene section: the thumbnail shows that machine (its own photo, pads pressed, the beat on its screen) */
+ const SKN=Z.skinScene&&Z.skinScene(bgk);
+ if(SKN){const G=SKN.G,im=SKN.img,v2=H>W,mx=G.pad.x0+1.5*G.pad.px,my=v2?G.pad.y0:G.pad.y0-20,sk=v2?Math.max(W/G.W,H/G.H)*(1.05+r(37)*.2):(W/1250)*(1+r(37)*.35),tcx=v2?W/2:W*(Ly.cx<.5?.36:.64),tcy=v2?H*(Ly.t==='bottom'?.38:.62):H*.5;
+  let ox=tcx-mx*sk,oy=tcy-my*sk;ox=Math.min(0,Math.max(W-G.W*sk,ox));oy=Math.min(0,Math.max(H-G.H*sk,oy));
+  const pr=new Set();for(let i=0;i<4+Math.floor(r(6)*4);i++)pr.add(Math.floor(r(10+i)*16));
+  Z.machine(c,ox,oy,sk,{title:X.title,bpm:X.bpm,key:X.key,dur:30,lcd:X.title},{img:im,geo:G,src:im,lt:4,run:true,press:i=>pr.has(i)?.7+.3*hs(i,seed):0});
+  const vg=c.createRadialGradient(W/2,H/2,Math.min(W,H)*.3,W/2,H/2,Math.max(W,H)*.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.55)');c.fillStyle=vg;c.fillRect(0,0,W,H)}
  /* the MPC */
  const sc=Ly.w*W/850,pressed=new Set();const np=4+Math.floor(r(6)*4);for(let i=0;i<np;i++)pressed.add(Math.floor(r(10+i)*16));
  c.save();c.beginPath();c.rect(0,0,W,H);c.clip();
@@ -112,8 +119,8 @@ function make(c,W,H,seed,X,o){o=o||{};const r=n=>hs(n,seed),bgk=H>W?'v':'h',want
    if(Z.handsReady()&&(o.hands===true?true:o.hands===false?false:r(40)<.5)&&pressed.size){const pads=[...pressed],pi=pads[Math.floor(r(41)*pads.length)],key=(pi%4)<2?'l':'r';c.save();c.translate(ox,oy);c.scale(sc,sc);Z.hand(c,key,pi,.22+.3*r(42),DB.flip?[1500,-300]:[-250,-250]);c.restore()}}
   c.restore()};
  let cx=Ly.cx*W,cy=Ly.cy*H;if(Ly.zoom){cx=W*.33;cy=H*.64}
- if(Ly.two)place(cx+W*.12,cy-H*.05,.18,.5);
- place(cx,cy,Ly.rot,1);c.restore();
+ if(!SKN){if(Ly.two)place(cx+W*.12,cy-H*.05,.18,.5);
+ place(cx,cy,Ly.rot,1)}c.restore();
  /* the words: at most 5 on the picture (artist line + TYPE BEAT + the beat name) */
  const AR=artistsOf(X.artist),line1=AR.length?AR.join(' X ').toUpperCase():'',title=String(X.title||'').toUpperCase(),big=X.big||'TYPE BEAT';
  let bx,by,bw,al='center';const t=Ly.t;
