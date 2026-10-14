@@ -39,6 +39,8 @@ const DKP={id:'packh',W:2000,H:1131,u:1.32,sampled:true,glow:true,rows:3,lamp:DK
 const PX=430,DKPV={id:'packv',W:636,H:1131,u:1.32,sampled:true,glow:true,rows:3,lamp:[DK.lamp[0]-PX,DK.lamp[1],DK.lamp[2]],bulb:[DK.bulb[0]-PX,DK.bulb[1]],cone:{apex:[DK.cone.apex[0]-PX,DK.cone.apex[1]],a0:DK.cone.a0,a1:DK.cone.a1,len:DK.cone.len},
  pad:{x0:596-PX,y0:505,w:74,h:76,px:91.6,py:100.5},lcd:{x:612-PX,y:389,w:219,h:84},btn:{power:[507-PX,414,36,21],start:[494-PX,790,44,25],end:[495-PX,734,44,25]},vol:[905-PX,407,21],deck:{cx:1400-PX,cy:558,r:344,lab:92},boot:DKP.boot,powLab:DKP.powLab};
 const GEO={deskh:DK,deskv:DKV,packh:DKP,packv:DKPV};
+const PSKINS=[['0','Black (the original)'],['1','Cherry blossom'],['2','8-bit blue'],['3','Street fighter'],['4','Collage (good music)'],['5','Gold 8-bit']];
+const PSK={};
 const packMode=()=>!!(ST&&ST.src==='packs');
 /* the record's angle: it spins up when START is pressed and brakes to a stop at the end (33 1/3 RPM) */
 const spinAt=(T,ts,te)=>{const w=3.4907,ru=.45,rd=1.1;let e=0;if(T>ts){const a=Math.min(T,te)-ts;e=a<ru?a*a/(2*ru):ru/2+(a-ru)}if(T>te&&te>ts){const b=Math.min(T-te,rd);e+=b-b*b/(2*rd)}return e*w};
@@ -135,7 +137,7 @@ function fitFont(c,txt,font,max,w){let s=max;c.font=font(s);while(s>8&&c.measure
 function px1(img,x,y){const cv=px1.cv||(px1.cv=document.createElement('canvas'));cv.width=cv.height=1;const q=cv.getContext('2d');q.drawImage(img,Math.round(x)-1,Math.round(y)-1,3,3,0,0,1,1);const d=q.getImageData(0,0,1,1).data;return 'rgb('+d[0]+','+d[1]+','+d[2]+')'}
 function sampleColors(){try{if(IMG){PH.btnPlate=px1(IMG,700,712);PH.faderPlate=px1(IMG,197,700)}if(DESKS.h)DK.faderPlate=px1(DESKS.h,DK.faderPt[0],DK.faderPt[1]);if(DESKS.v)DKV.faderPlate=px1(DESKS.v,DKV.faderPt[0],DKV.faderPt[1])}catch(e){}}
 const PCOL=new Map();
-function plateCol(G,src,i){if(!G.sampled)return G.plate||PH.plate;const key=G.id+i;if(PCOL.has(key))return PCOL.get(key);const P=G.pad,col=i%4,row=Math.floor(i/4);let c;try{c=px1(src,P.x0+col*P.px-(P.px-P.w)/2,P.y0+row*P.py+P.h/2)}catch(e){c='#777'}PCOL.set(key,c);return c}
+function plateCol(G,src,i){if(!G.sampled)return G.plate||PH.plate;const key=G.id+i+(src&&src.src||'');if(PCOL.has(key))return PCOL.get(key);const P=G.pad,col=i%4,row=Math.floor(i/4);let c;try{c=px1(src,P.x0+col*P.px-(P.px-P.w)/2,P.y0+row*P.py+P.h/2)}catch(e){c='#777'}PCOL.set(key,c);return c}
 function knob(c,src,cx,cy,r,ang){if(!ang)return;c.save();c.beginPath();c.arc(cx,cy,r,0,6.2832);c.clip();c.translate(cx,cy);c.rotate(ang);c.drawImage(src,cx-r,cy-r,2*r,2*r,-r,-r,2*r,2*r);c.restore();c.strokeStyle='rgba(0,0,0,.25)';c.lineWidth=.8;c.beginPath();c.arc(cx,cy,r,0,6.2832);c.stroke()}
 function fader(c,G,src,off){const F=G.fader;if(off<.3)return;c.fillStyle=G.faderPlate||PH.faderPlate;c.fillRect(F.x,F.y,F.w,F.h);c.fillStyle='#0b0b0d';c.fillRect(F.slot[0],F.slot[1],F.slot[2],F.slot[3]);c.drawImage(src,F.hx,F.hy,F.hw,F.hh,F.hx,F.hy-off,F.hw,F.hh)}
 function button(c,src,G,r,p){if(!(p>0))return;const u=G.u||1,x=r[0],y=r[1],w=r[2],h=r[3];c.fillStyle='#202023';c.fillRect(x+1,y+1,w-2,h-2);const k=1-.07*p,bw=(w-2)*k,bh=(h-2)*k,bx=x+1+(w-2-bw)/2,by=y+1+(h-2-bh)/2+1.6*u*p;
@@ -224,7 +226,7 @@ let STUDIO=null;
 function ensureStudio(){if(STUDIO)return STUDIO;return STUDIO=(async()=>{IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');DESKBG.h=await loadImg('mpc/bg_h.webp?v=1');DESKBG.v=await loadImg('mpc/bg_v.webp?v=1');if(IMG&&CUT)WARM={cut:warmVer(CUT),photo:warmVer(IMG)};sampleColors()})()}
 const SCN={};
 async function ensureScene(fmt){fmt=fmt||ST.fmt;const tall=fmt==='v'||fmt==='c';
- if(packMode()){if(!DESKS.ph)DESKS.ph=await loadImg('mpc/pack_h_noarm.webp?v=1');if(!DESKS.arm)DESKS.arm=await loadImg('mpc/pack_arm.webp?v=1');if(!DESKS.pv&&DESKS.ph){const cv=document.createElement('canvas');cv.width=DKPV.W;cv.height=DKPV.H;cv.getContext('2d').drawImage(DESKS.ph,-PX,0);DESKS.pv=cv}return}
+ if(packMode()){const k=ST.pskin||'0';if(!PSK[k]){const im=await loadImg(k==='0'?'mpc/pack_h_noarm.webp?v=1':'mpc/pack_h_s'+k+'.webp?v=1');const cv=document.createElement('canvas');cv.width=DKPV.W;cv.height=DKPV.H;cv.getContext('2d').drawImage(im,-PX,0);PSK[k]={h:im,v:cv}}DESKS.ph=PSK[k].h;DESKS.pv=PSK[k].v;if(!DESKS.arm)DESKS.arm=await loadImg('mpc/pack_arm.webp?v=1');return}
  if(ST.scene==='white'){await ensureStudio();return}
  if(!tall){if(!DESKS.h)DESKS.h=await loadImg('mpc/desk_nocan.webp?v=1');if(!DESKS.h0&&(ST.can||{}).id==='orig'&&(!ST.skin||ST.skin==='orig'))DESKS.h0=await loadImg('mpc/desk.webp?v=2');if(!DESKS.h)DESKS.h=DESKS.h0}
  else if(!DESKS.v)DESKS.v=await loadImg('mpc/desk_v.webp?v=2');
@@ -540,6 +542,7 @@ function html(){return`<div class="mg"><div>
  <details class="sec grp" id="g_scene"><summary>2. SCENE <small id="s_scene"></small></summary><div class="in">
   <label>LOOK OF THE VIDEOS</label><select id="mScene"><option value="desk">Desk scene (the worn desk, lamp and floppy disks)</option><option value="white">White studio</option></select>
   <label>MACHINE SKIN (DESK SCENES)</label><select id="mSkin">${SKINS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
+  <label>PAD MACHINE SKIN (SAMPLE PACKS SCENE)</label><select id="mPSkin">${PSKINS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
   <div class="sub">CAN ON THE DESK (16:9)</div>
   <select id="mCan"><option value="orig">The original Pepsi can (as in the picture)</option><option value="auto">A different can for each beat (automatic)</option>${CAN_NAMES.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('')}<option value="none">No can</option></select>
   <details class="sec sub2" id="mCanSet"><summary>CAN SIZE, TILT AND POSITION</summary><div class="in"><label>SIZE: <span id="mCanSv">100</span>%</label><input type="range" id="mCanS" min="50" max="170" step="1" style="width:100%;accent-color:var(--red)">
@@ -823,7 +826,7 @@ async function setSrc(m){if((ST.src||'beats')===m)return;stopPlay();ST['pick_'+(
 function wire(){$q('#mSrcB').onclick=()=>setSrc('beats');$q('#mSrcP').onclick=()=>setSrc('packs');srcUI();const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);$q('#mLearnAll').onclick=()=>learnAll();
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();mark('yt','th','gen')};for(const k in PNL){$q(PNL[k][0]).addEventListener('toggle',paintPanels)}
- $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};
+ $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};$q('#mPSkin').value=ST.pskin||'0';$q('#mPSkin').onchange=async e=>{ST.pskin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};
  const CM=ST.cam;CM.moves=CM.moves||{};{const box=$q('#mCamMvList');if(box){box.innerHTML=CAMMV.map(([k,t])=>'<label class="chk" style="font-size:11px"><input type="checkbox" data-mv="'+k+'"'+(CM.moves[k]?' checked':'')+'> '+t+'</label>').join('');box.querySelectorAll('[data-mv]').forEach(c=>c.onchange=()=>{CM.moves[c.dataset.mv]=c.checked;save();drawNow();summ()})}}$q('#mDof').value=CM.dof;$q('#mRack').checked=!!CM.rack;$q('#mGrade').value=CM.grade;
  $q('#mDof').onchange=e=>{CM.dof=e.target.value;save();drawNow()};$q('#mRack').onchange=e=>{CM.rack=e.target.checked;save();drawNow()};$q('#mGrade').onchange=e=>{CM.grade=e.target.value;save();drawNow()};
  $q('#mIntro').checked=startOn();$q('#mIntro').onchange=e=>{ST.start=e.target.checked;save();stopPlay();if(S&&S.buf){S.tl=tlOne(S);dropV()}if(TP){TP=null;$q('#mTpMsg').textContent='The intro changed. Press BUILD THE TAPE again.';mark('yt','th','gen')}drawNow()};
