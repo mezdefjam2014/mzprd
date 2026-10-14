@@ -34,7 +34,7 @@ Object.assign(DKV.btn,{power:[790,598,26,16],soft1:[759,936,34,16],soft2:[803,93
 DK.wheel=[1160,822,35];DKV.wheel=[660,1170,31];
 /* the SAMPLE PACKS scene (2000 x 1131): an MPD218 pad controller (12 pads, 3 rows) and a Technics SL-1200 turntable with a spinning record */
 const DKP={id:'packh',W:2000,H:1131,u:1.32,sampled:true,glow:true,rows:3,lamp:DK.lamp,bulb:DK.bulb,cone:DK.cone,pad:{x0:596,y0:505,w:74,h:76,px:91.6,py:100.5},lcd:{x:612,y:389,w:219,h:84},
- btn:{power:[507,414,36,21],start:[1046,838,98,68],end:[1046,838,98,68],stop:[495,734,44,25],play:[494,790,44,25]},vol:[905,407,21],deck:{cx:1400,cy:558,r:344,lab:92,strobe:[1100,735]},boot:['AKAI MPD218','12 PADS  V1.0'],powLab:'rgba(225,222,212,.82)'};
+ btn:{power:[507,414,36,21],start:[1046,838,98,68],end:[1046,838,98,68],stop:[495,734,44,25],play:[494,790,44,25]},vol:[905,407,21],deck:{cx:1400,cy:558,r:344,lab:92,strobe:[1100,735]},arm:{x:1700,y:350,pv:[1800,363],tip:[1743,753]},boot:['AKAI MPD218','12 PADS  V1.0'],powLab:'rgba(225,222,212,.82)'};
 /* 9:16 shows the pad controller (a crop of the same photo) */
 const PX=430,DKPV={id:'packv',W:636,H:1131,u:1.32,sampled:true,glow:true,rows:3,lamp:[DK.lamp[0]-PX,DK.lamp[1],DK.lamp[2]],bulb:[DK.bulb[0]-PX,DK.bulb[1]],cone:{apex:[DK.cone.apex[0]-PX,DK.cone.apex[1]],a0:DK.cone.a0,a1:DK.cone.a1,len:DK.cone.len},
  pad:{x0:596-PX,y0:505,w:74,h:76,px:91.6,py:100.5},lcd:{x:612-PX,y:389,w:219,h:84},btn:{power:[507-PX,414,36,21],start:[494-PX,790,44,25],end:[495-PX,734,44,25]},vol:[905-PX,407,21],deck:{cx:1400-PX,cy:558,r:344,lab:92},boot:DKP.boot,powLab:DKP.powLab};
@@ -54,6 +54,18 @@ function vinylOf(SRC,D,VR){const key=(SRC.src||SRC.width)+'|'+D.cx;if(VYL.has(ke
  for(let i=0;i<70;i++){const r=D.lab+8+rn()*(VR-D.lab-14),t=rn()*6.2832,px=VR+Math.cos(t)*r,py=VR+Math.sin(t)*r;y2.fillStyle='rgba(235,225,205,'+(.08+rn()*.22).toFixed(3)+')';y2.beginPath();y2.arc(px,py,.6+rn()*1.3,0,6.2832);y2.fill()}
  for(let i=0;i<5;i++){const r=D.lab+20+rn()*(VR-D.lab-40),t0=rn()*6.2832;y2.strokeStyle='rgba(220,210,190,'+(.05+rn()*.06).toFixed(3)+')';y2.lineWidth=.8;y2.beginPath();y2.arc(VR,VR,r,t0,t0+.25+rn()*.5);y2.stroke()}
  const o={A:mk(A),H:mk(H),sp,VR};VYL.set(key,o);return o}
+/* the tone arm (cut out of the photo) swings on its pivot: at rest it sits on its rest; during the boot it lifts and swings over the record,
+   it drops onto the first groove as the record starts, creeps inward while it plays, and lifts back to its rest at the end */
+let ARMA=null;
+function armPlay(G){if(ARMA!=null)return ARMA;const A=G.arm,D=G.deck,rot=(p,a)=>{const dx=p[0]-A.pv[0],dy=p[1]-A.pv[1],c=Math.cos(a),s=Math.sin(a);return[A.pv[0]+dx*c-dy*s,A.pv[1]+dx*s+dy*c]},dist=a=>{const q=rot(A.tip,a);return Math.hypot(q[0]-D.cx,q[1]-D.cy)};
+ const at=r=>{let lo=0,hi=.9;for(let i=0;i<40;i++){const m=(lo+hi)/2;if(dist(m)>r)lo=m;else hi=m}return(lo+hi)/2};return ARMA={a0:at(D.r-40),a1:at(D.r-110)}}
+function armAt(G,T,intro,t0,te){const P=armPlay(G);let a,l=0;const sw=(q)=>ease(clamp(q,0,1));
+ if(intro>0&&T<t0){const q=sw((T-2.3)/1);a=P.a0*q;l=T<t0-.3?sw((T-2.1)/.25):1-sw((T-(t0-.3))/.3)}
+ else if(T<=te+.1){a=P.a0+(P.a1-P.a0)*clamp((T-t0)/Math.max(1,te-t0),0,1);l=0}
+ else{const q=(T-te-.1);l=q<.25?sw(q/.25):1-sw((q-1.15)/.3);a=(P.a0+(P.a1-P.a0))*(1-sw((q-.2)/1))}
+ return{a,l}}
+function drawArm(c,G,img,st){if(!img)return;const A=G.arm;c.save();c.translate(A.pv[0],A.pv[1]);c.rotate(st.a);c.translate(-A.pv[0],-A.pv[1]);
+ c.shadowColor='rgba(0,0,0,.55)';c.shadowBlur=5+10*st.l;c.shadowOffsetX=4+10*st.l;c.shadowOffsetY=5+12*st.l;c.drawImage(img,A.x,A.y);c.restore()}
 /* the record: only the vinyl turns (its label, specks and wear); the platter, its strobe dots, the spindle and the light on the vinyl stay put */
 function deck(c,G,SRC,ang,S,pw){const D=G.deck,u=G.u||1,V=vinylOf(SRC,D,D.vr||D.r-28),VR=V.VR;
  c.save();c.beginPath();c.arc(D.cx,D.cy,VR,0,6.2832);c.clip();c.drawImage(V.A,D.cx-VR,D.cy-VR);c.translate(D.cx,D.cy);c.rotate(ang);c.drawImage(V.sp,-VR,-VR);c.restore();
@@ -140,7 +152,7 @@ function machine(c,ox,oy,sc,S,o){
  c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.drawImage(o.img,ox,oy,G.W*sc,G.H*sc);
  c.save();c.translate(ox,oy);c.scale(sc,sc);
  const P=G.pad;
- if(G.deck)deck(c,G,SRC,o.spin||0,S,o.power==null?1:o.power);
+ if(G.deck)deck(c,G,SRC,o.spin||0,S,o.power==null?1:o.power);if(G.arm&&o.arm)drawArm(c,G,DESKS.arm,o.arm);
  if(o.fx){knob(c,SRC,G.vol[0],G.vol[1],G.vol[2],o.fx.vol);if(G.con)knob(c,SRC,G.con[0],G.con[1],G.con[2],o.fx.con);if(G.fader)fader(c,G,SRC,o.fx.fader*u);for(const k in G.btn)button(c,SRC,G,G.btn[k],o.fx.btn[k]||0);if(G.wheel&&o.fx.wheel!=null)wheelMark(c,G.wheel,o.fx.wheel)}
  for(let i=0;i<(G.rows||4)*4;i++){const col=i%4,row=Math.floor(i/4),x=P.x0+col*P.px,y=P.y0+row*P.py,p=o.press(i);if(!(p>.004))continue;
   c.fillStyle=plateCol(G,SRC,i);c.fillRect(x-3*u,y-3*u,P.w+6*u,P.h+6*u);
@@ -212,7 +224,7 @@ let STUDIO=null;
 function ensureStudio(){if(STUDIO)return STUDIO;return STUDIO=(async()=>{IMG=await loadImg('mpc/mpc60.webp');CUT=await loadImg('mpc/mpc60_cut.webp');DESKBG.h=await loadImg('mpc/bg_h.webp?v=1');DESKBG.v=await loadImg('mpc/bg_v.webp?v=1');if(IMG&&CUT)WARM={cut:warmVer(CUT),photo:warmVer(IMG)};sampleColors()})()}
 const SCN={};
 async function ensureScene(fmt){fmt=fmt||ST.fmt;const tall=fmt==='v'||fmt==='c';
- if(packMode()){if(!DESKS.ph)DESKS.ph=await loadImg('mpc/pack_h.webp?v=1');if(!DESKS.pv&&DESKS.ph){const cv=document.createElement('canvas');cv.width=DKPV.W;cv.height=DKPV.H;cv.getContext('2d').drawImage(DESKS.ph,-PX,0);DESKS.pv=cv}return}
+ if(packMode()){if(!DESKS.ph)DESKS.ph=await loadImg('mpc/pack_h_noarm.webp?v=1');if(!DESKS.arm)DESKS.arm=await loadImg('mpc/pack_arm.webp?v=1');if(!DESKS.pv&&DESKS.ph){const cv=document.createElement('canvas');cv.width=DKPV.W;cv.height=DKPV.H;cv.getContext('2d').drawImage(DESKS.ph,-PX,0);DESKS.pv=cv}return}
  if(ST.scene==='white'){await ensureStudio();return}
  if(!tall){if(!DESKS.h)DESKS.h=await loadImg('mpc/desk_nocan.webp?v=1');if(!DESKS.h0&&(ST.can||{}).id==='orig'&&(!ST.skin||ST.skin==='orig'))DESKS.h0=await loadImg('mpc/desk.webp?v=2');if(!DESKS.h)DESKS.h=DESKS.h0}
  else if(!DESKS.v)DESKS.v=await loadImg('mpc/desk_v.webp?v=2');
@@ -450,7 +462,7 @@ function frame(c,W,H,fmt,T,X){
  const fx={vol:(.21*ease((T-.15)/2.4))+.012*Math.sin(T*.6),con:.05*Math.sin(T*.4),fader:Math.max(0,26*(.5+.5*Math.sin(T*.29-.6))),btn:{play:0,start:pulse(T,t0-.42,t0-.12),rec:pulse(T,t0-.42,t0-.12),over:0,stop:X.make?0:pulse(T,lastEnd-.08,lastEnd+.2)}};
  if(X.make){for(const e of Sx.btnEv){const q=pulse(T,e.t-.05,e.t+.16);if(q>(fx.btn[e.k]||0))fx.btn[e.k]=q}fx.wheel=X.make.wheelAngle(T)}
  if(SC&&SC.G.deck){fx.btn.stop=0;fx.btn.end=pulse(T,lastEnd-.08,lastEnd+.2)}
- machine(c,ox,oy,sc,Sx,{spin:SC&&SC.G.deck?spinAt(T,X.intro>0?t0-.27:-9,lastEnd):0,lcd:X.make&&!((X.intro>0)&&T<X.intro)?X.make.lcdAt(T):null,boot:(X.intro>0&&T<X.intro&&T>=PW)?T-PW:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,power:(X.make&&X.make.pdAt&&X.make.pdAt(T+.1)>=0)?0:(X.intro>0?ease((T-PW)/.12):1),pdown:(X.intro>0&&T<PW)?5:(X.make&&X.make.pdAt?X.make.pdAt(T):-1),run:la>=-.02&&T<(X.make&&X.make.stopT?X.make.stopT:lastEnd),trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
+ machine(c,ox,oy,sc,Sx,{arm:SC&&SC.G.arm?armAt(SC.G,T,X.intro,t0,lastEnd):null,spin:SC&&SC.G.deck?spinAt(T,X.intro>0?t0-.27:-9,lastEnd):0,lcd:X.make&&!((X.intro>0)&&T<X.intro)?X.make.lcdAt(T):null,boot:(X.intro>0&&T<X.intro&&T>=PW)?T-PW:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,power:(X.make&&X.make.pdAt&&X.make.pdAt(T+.1)>=0)?0:(X.intro>0?ease((T-PW)/.12):1),pdown:(X.intro>0&&T<PW)?5:(X.make&&X.make.pdAt?X.make.pdAt(T):-1),run:la>=-.02&&T<(X.make&&X.make.stopT?X.make.stopT:lastEnd),trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
 {c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC?SC.G:PH;
   if(SC&&Gs.id==='deskh')drawCan(c,Gs,Sx);
   if(ST.hands&&ST.hands.on)drawHands(c,Gs,Sx,la,!!SC);
@@ -465,9 +477,18 @@ function frame(c,W,H,fmt,T,X){
  if(OV&&E.hook&&T<2.9){const txt=(E.hookText||'').trim().toUpperCase()||HOOKS[(String(X.title||'').length*7+3)%HOOKS.length],lines=wrapTwo(txt),size=Math.min(sz,W*.9/Math.max(5,Math.max(...lines.map(l=>l.length)))*1.9);sticker(c,lines,W/2,topY,size,.04,T,{out:(2.9-T)/.3})}
  if(OV&&E.note&&(E.noteText||'').trim()&&T>2.4&&T<7.4)pill(c,E.noteText.trim(),W/2,v?(SC?H*.722:H*.775):H*.95,v?40:28,Math.min(ease((T-2.4)/.4),ease((7.4-T)/.4)));
  if(OV&&E.q&&(E.qText||'').trim()&&X.total>14&&T>X.total-10.5&&T<X.total-.15){const txt=E.qText.trim().toUpperCase(),lines=wrapTwo(txt),size=Math.min(v?100:72,W*.9/Math.max(5,Math.max(...lines.map(l=>l.length)))*1.9),pu=1+.025*Math.sin(T*5);sticker(c,lines,W/2,topY,size*pu,X.total-10.5,T,{fill:'#e0242f',out:Math.min(1,(X.total-.15-T)/.3)})}
+ if(OV&&E.meters!==false&&la>=-.02&&T<lastEnd&&!intro)meters(c,W,H,v,Sx,la);
  if(OV&&X.sub)subscribe(c,W,H,T-X.subT0,v?(SC?.905:0):.9,!v);
  if(X.make&&window.MZMpcMake&&!cu)MZMpcMake.overlay(c,W,H,T,X,v);
  if(OV&&ST.text&&!SC)text(c,W,H,v,{title:tape?X.title:Sx.title,bpm:Sx.bpm,key:Sx.key,sub:tape&&!intro?(k+1)+'. '+Sx.title:''})}
+/* beat meters (beats and sample packs): four LED ladders (KICK, SNARE, HATS, other PADS) that jump on every hit the listener found, and a bar counter */
+function meters(c,W,H,v,Sx,la){const K=KITS[Sx.kit]||KITS[0],per=Sx.per;if(!per)return;
+ const lv=pads=>{let m=0;const tt=la+.006;for(const p of pads){const a=per[p];if(!a||!a.length)continue;let lo=0,hi=a.length;while(lo<hi){const q=(lo+hi)>>1;if(a[q].t<=tt)lo=q+1;else hi=q}if(lo>0){const h=a[lo-1],dt=tt-h.t;if(dt<.9)m=Math.max(m,Math.exp(-dt/.16)*Math.min(1,h.v+.15))}}return m};
+ const other=[];for(let i=0;i<16;i++)if(per[i]&&i!==K.kick&&!K.sn.includes(i)&&i!==K.hat)other.push(i);
+ const LN=[['KICK',[K.kick]],['SNARE',K.sn],['HATS',[K.hat]],['PADS',other]],mw=W*(v?.105:.042),mg=W*(v?.02:.008),mh=H*(v?.07:.09),mx0=W*(v?.045:.03),my=H-mh-H*(v?.07:.075),seg=8,sh=mh/seg;
+ c.save();LN.forEach(([nm,pads],i)=>{const x=mx0+i*(mw+mg),L=lv(pads),on=Math.round(L*seg);for(let s=0;s<seg;s++){const y=my+mh-(s+1)*sh,lit=s<on,hue=s<5?'232,185,74':s<7?'255,150,60':'255,74,58';c.fillStyle=lit?'rgba('+hue+',.95)':'rgba(255,255,255,.1)';if(lit){c.shadowColor='rgba('+hue+',.8)';c.shadowBlur=sh*.9}c.fillRect(x,y+sh*.14,mw,sh*.72);c.shadowBlur=0}
+  c.font='700 '+Math.max(11,Math.round(H*(v?.0125:.018)))+'px Oswald, sans-serif';c.textAlign='center';c.textBaseline='alphabetic';c.fillStyle=L>.2?'#e8b94a':'rgba(255,255,255,.55)';c.fillText(nm,x+mw/2,my+mh+H*(v?.016:.024))});
+ const bl=60/(Sx.bpm||90),n=Math.floor(Math.max(0,la-(Sx.off||0))/bl);c.font='700 '+Math.max(13,Math.round(H*(v?.016:.024)))+'px Oswald, sans-serif';c.textAlign='left';c.fillStyle='rgba(255,255,255,.88)';c.fillText('BAR '+(Math.floor(n/4)+1),mx0,my-H*(v?.014:.02));c.restore()}
 function text(c,W,H,v,S){const ink='#111';c.save();c.fillStyle=ink;c.textBaseline='alphabetic';
  if(v){c.textAlign='center';const t=(S.title||'').toUpperCase(),f=s=>'700 '+s+'px Anton, Oswald, sans-serif',s=fitFont(c,t,f,150,W*.86);c.font=f(s);c.fillText(t,W/2,H*.2);c.font='600 44px Oswald, sans-serif';c.fillStyle='#666';c.fillText(S.sub?S.sub.toUpperCase():([S.bpm?S.bpm+' BPM':'',S.key||'','PROD. MZPRD'].filter(Boolean)).join('   /   '),W/2,H*.2+70);
   c.font='600 40px Oswald, sans-serif';c.fillStyle=ink;c.fillText('MZPRD.COM',W/2,H*.9)}
@@ -554,6 +575,7 @@ function html(){return`<div class="mg"><div>
  <details class="sec grp" id="g_watch"><summary>6. KEEP THEM WATCHING <small id="s_watch"></small></summary><div class="in">
   <label class="chk"><input type="checkbox" id="mEhk"> BIG HOOK LINE AT THE START (SLAMS ON SCREEN, THE MPC PUNCHES IN)</label>
   <input type="text" id="mEhkT" maxlength="40" placeholder="Leave empty for an automatic line, or type your own">
+  <label class="chk"><input type="checkbox" id="mEmet"> BEAT METERS AND A BAR COUNTER (FOUR LED LADDERS BOTTOM LEFT: KICK, SNARE, HATS, PADS, THEY JUMP ON EVERY HIT)</label>
   <label class="chk"><input type="checkbox" id="mEsub"> ANIMATED SUBSCRIBE AT THE END (BOTH FORMATS)</label>
   <label class="chk"><input type="checkbox" id="mEloop"> LOOPING ENDING (9:16, SINGLE BEAT): THE END BLENDS BACK INTO THE START</label>
   <label class="chk"><input type="checkbox" id="mEnote"> PRODUCER'S NOTE AT THE START</label>
@@ -822,9 +844,9 @@ function wire(){$q('#mSrcB').onclick=()=>setSrc('beats');$q('#mSrcP').onclick=()
  $q('#mTpT').onchange=e=>{T.title=e.target.value.trim()||'MZPRD BEAT TAPE';if(TP){TP.title=T.title;TP.mix=null}save();ytRender();thRender();drawNow()};
  $q('#mTpL').onchange=e=>{T.len=+e.target.value;tpDirty()};$q('#mTpX').onchange=e=>{T.xf=+e.target.value;tpDirty()};
  $q('#mTpAdd').onclick=()=>{const v=$q('#mTpA').value;if(!v)return;T.ids.push(v);tpDirty()};$q('#mTpBuild').onclick=buildTape;
- const En=ST.eng;$q('#mEhk').checked=!!En.hook;$q('#mEhkT').value=En.hookText;$q('#mEsub').checked=!!En.sub;$q('#mEloop').checked=!!En.loop;$q('#mEnote').checked=!!En.note;$q('#mEnoteT').value=En.noteText;$q('#mEq').checked=!!En.q;$q('#mEqT').value=En.qText;
+ const En=ST.eng;$q('#mEhk').checked=!!En.hook;$q('#mEhkT').value=En.hookText;$q('#mEsub').checked=!!En.sub;$q('#mEmet').checked=En.meters!==false;$q('#mEloop').checked=!!En.loop;$q('#mEnote').checked=!!En.note;$q('#mEnoteT').value=En.noteText;$q('#mEq').checked=!!En.q;$q('#mEqT').value=En.qText;
  const eng=(id,k,box)=>{$q(id).onchange=e=>{En[k]=box?e.target.checked:e.target.value;if(k==='sub'||k==='loop'){dropV();stopPlay()}save();drawNow()};if(!box)$q(id).oninput=e=>{En[k]=e.target.value;drawNow()}};
- eng('#mEhk','hook',1);eng('#mEhkT','hookText');eng('#mEsub','sub',1);eng('#mEloop','loop',1);eng('#mEnote','note',1);eng('#mEnoteT','noteText');eng('#mEq','q',1);eng('#mEqT','qText');
+ eng('#mEhk','hook',1);eng('#mEhkT','hookText');eng('#mEsub','sub',1);eng('#mEmet','meters',1);eng('#mEloop','loop',1);eng('#mEnote','note',1);eng('#mEnoteT','noteText');eng('#mEq','q',1);eng('#mEqT','qText');
  $q('#mRcu').onclick=()=>render(['c']);$q('#mRlp').onclick=renderLoop;
  const lpShow=()=>{const o=$q('#mLpOut'),P=loopPack();if(!P||!ST.beat){o.innerHTML='';return}o.innerHTML='<h4>LOOP VIDEO TITLES AND DESCRIPTION</h4>'+P.titles.map((t,i)=>'<div class="it"><b>'+esc(t)+'</b><button data-lt="'+i+'">COPY</button></div>').join('')+'<button class="btn" id="mLpD" style="width:100%;margin-top:6px">COPY DESCRIPTION</button>';o.querySelectorAll('[data-lt]').forEach(b=>b.onclick=async()=>{b.textContent=(await cpy(P.titles[+b.dataset.lt]))?'COPIED':'FAILED'});$q('#mLpD').onclick=async e=>{e.target.textContent=(await cpy(P.desc))?'COPIED':'FAILED'}};
  $q('#mLpM').onchange=lpShow;window.__lpShow=lpShow;
