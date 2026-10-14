@@ -184,6 +184,108 @@ const PVF={def:[713,1820,.05]},PQ={cd:null,pager:[[164,840],[447,808],[463,1005]
 let PVPATCH=null;const PTIGHT={};
 function tightProp(k,im){if(PTIGHT[k])return PTIGHT[k];const cv=document.createElement('canvas');cv.width=im.width;cv.height=im.height;const x=cv.getContext('2d');x.drawImage(im,0,0);x.globalCompositeOperation='destination-in';x.fillStyle='#000';x.beginPath();
  if(k==='cd')x.arc(324-PROPAT[0],927-PROPAT[1],152,0,6.2832);else PQ[k].forEach((p,i)=>i?x.lineTo(p[0]-PROPAT[0],p[1]-PROPAT[1]):x.moveTo(p[0]-PROPAT[0],p[1]-PROPAT[1]));x.closePath();x.fill();return PTIGHT[k]=cv}
+/* RIGHT DESK ITEM (MPC desk, 16:9): swap the right floppy for a Game Boy (a platformer level on loop), a BlackBerry (calls coming in and being missed),
+   a Sidekick (a long text thread), a mini display (master meters and knobs) or an iPhone (scrolling a photo feed). Each screen is fitted to its measured corners. */
+const RPROPS=[['floppy','Floppy disk (the original)'],['gameboy','Game Boy playing a level'],['bberry','BlackBerry with missed calls'],['sidekick','Sidekick texting'],['mini','Mini display (master meters)'],['iphone','iPhone scrolling a photo feed']];
+const RPAT=[1620,560],RPIMG={};
+const RSQ={gameboy:[[1828,660],[1956,672],[1948,792],[1808,770]],bberry:[[1772,700],[1940,670],[1962,770],[1795,805]],sidekick:[[1792,656],[1990,697],[1972,810],[1760,765]],mini:[[1763,742],[1973,773],[1960,933],[1743,893]],iphone:[[1737,668],[1890,645],[1990,1008],[1829,1028]]};
+const IGSRC=['can_01','can_03','can_05','can_07','can_09','can_11','desk_h_sg1','desk_h_sg3','desk_h_sg5','desk_h_sg7','pack_h_s1','pack_h_s2','pack_h_s3','pack_h_s4','pack_h_s5','desk','pack_h_noarm'];
+async function loadRProp(){const k=ST.rprop||'floppy';if(k!=='floppy'&&!RPIMG[k])RPIMG[k]=await loadImg('mpc/rprop_'+k+'.webp?v=1');if(k==='iphone'&&!RPIMG.ig){RPIMG.ig=[];for(const n of IGSRC){const im=await loadImg('mpc/'+n+'.webp?v=1');if(im)RPIMG.ig.push(im)}}}
+const rnd=n=>{let a=(n*2654435761)>>>0;a^=a>>>15;a=Math.imul(a,2246822519)>>>0;a^=a>>>13;return(a>>>0)/4294967296};
+
+/* --- Game Boy: one level of a little platformer, on loop (title, the level, flag, COURSE CLEAR), drawn in the Game Boy's 4 shades --- */
+const GBL=(()=>{const ob=[];let x=220;for(let i=0;x<4200;i++){const r=rnd(i+7),t=r<.3?'pipe':r<.55?'goomba':r<.75?'gap':'blocks';ob.push({t,x,h:t==='pipe'?(rnd(i+99)<.5?16:24):0,w:t==='gap'?24:t==='pipe'?16:t==='blocks'?32:8});x+=90+Math.floor(rnd(i+3)*80)}return{ob,end:x+60}})();
+function gbMarioY(px){let y=0;for(const o of GBL.ob){const s=o.x-30,e=o.x+o.w+22;if(px>s&&px<e){const u=(px-s)/(e-s),h=(o.t==='pipe'?o.h+16:o.t==='gap'?22:o.t==='goomba'?20:26);y=Math.max(y,4*h*u*(1-u))}}return y}
+function gbScr(T){const[cv,x]=scv('gb',160,144),C=['#fff','#aaa','#555','#151515'],SP=38,PLAY=GBL.end/SP,cyc=3+PLAY+3+6,t=T%cyc,f=(i)=>x.fillStyle=C[i];f(0);x.fillRect(0,0,160,144);x.font='8px monospace';x.textBaseline='top';
+ const txt=(s,X,Y,c)=>{f(c==null?3:c);x.textAlign='center';x.fillText(s,X,Y)};
+ if(t<3){f(2);x.fillRect(20,24,120,40);f(0);x.fillRect(22,26,116,36);txt('SUPER PLUMBER',80,32);txt('LAND',80,44);if(Math.floor(t*2)%2)txt('PUSH START',80,96);txt('©MZPRD',80,124,2);return cv}
+ if(t>=3+PLAY+3){txt('COURSE CLEAR!',80,54);txt('SCORE '+String(GBL.ob.length*100+1200).padStart(6,'0'),80,74);if(t>cyc-1){f(3);x.globalAlpha=t-(cyc-1);x.fillRect(0,0,160,144);x.globalAlpha=1}return cv}
+ const pt=Math.min(t-3,PLAY),mx=pt*SP,cam=Math.max(0,mx-56),gy=120;
+ /* hills and clouds (slow parallax) */
+ f(1);for(let i=-1;i<6;i++){const hx=i*90-(cam*.4%90);x.beginPath();x.arc(hx,gy,30,Math.PI,0);x.fill()}for(let i=-1;i<5;i++){const cx=i*70-(cam*.2%70);f(1);x.fillRect(cx+10,20+(i%2)*10,26,6);x.fillRect(cx+14,16+(i%2)*10,16,4)}
+ /* ground with gaps */
+ for(let gx=Math.floor(cam/8)*8;gx<cam+168;gx+=8){if(GBL.ob.some(o=>o.t==='gap'&&gx>=o.x&&gx<o.x+o.w))continue;const sx=gx-cam;f(2);x.fillRect(sx,gy,8,24);f(3);x.fillRect(sx,gy,8,1);x.fillRect(sx+7,gy,1,24);x.fillRect(sx,gy+8,8,1)}
+ let coins=0,score=0;
+ for(const o of GBL.ob){const sx=o.x-cam,passed=mx>o.x+o.w;if(passed){score+=100;if(o.t==='blocks')coins++}if(sx<-40||sx>170)continue;
+  if(o.t==='pipe'){f(2);x.fillRect(sx+1,gy-o.h,14,o.h);f(3);x.fillRect(sx,gy-o.h,16,5);x.fillRect(sx+1,gy-o.h+5,1,o.h-5);f(1);x.fillRect(sx+3,gy-o.h+6,2,o.h-6)}
+  else if(o.t==='goomba'){const dead=mx>o.x-4,dt=(mx-(o.x-4))/SP;if(dead&&dt>.6)continue;const wob=Math.floor(T*4)%2;f(3);if(dead){x.fillRect(sx,gy-3,8,3)}else{x.fillRect(sx+1,gy-8,6,5);x.fillRect(sx,gy-5,8,3);f(0);x.fillRect(sx+2,gy-7,1,2);x.fillRect(sx+5,gy-7,1,2);f(3);x.fillRect(sx+(wob?0:5),gy-2,3,2)}}
+  else if(o.t==='blocks'){for(let b=0;b<4;b++){const bx=sx+b*8,q=b===1||b===2,hit=q&&mx>o.x+b*8;f(hit?2:3);x.fillRect(bx,gy-40,8,8);f(hit?1:0);x.fillRect(bx+1,gy-39,6,6);if(q&&!hit){f(3);x.fillText('?',bx+2,gy-40)}}}}
+ /* flag and castle */
+ const fx=GBL.end-cam;if(fx<170){f(3);x.fillRect(fx,gy-64,1,64);x.fillRect(fx-2,gy-66,5,3);const fl=mx>=GBL.end-4?Math.min(48,(pt-PLAY+.01)*30+((mx-GBL.end+4)/SP)*40):0;f(2);x.beginPath();x.moveTo(fx,gy-60+fl);x.lineTo(fx-10,gy-55+fl);x.lineTo(fx,gy-50+fl);x.fill();f(2);x.fillRect(fx+24,gy-32,32,32);f(3);x.fillRect(fx+36,gy-14,8,14);for(let i=0;i<4;i++)x.fillRect(fx+24+i*8,gy-36,5,4)}
+ /* the plumber: runs, jumps over everything, slides down the flag */
+ let my=gbMarioY(mx),sx=mx-cam;if(t-3>PLAY){const q=t-3-PLAY;sx=GBL.end-cam-2+Math.max(0,q-1.2)*20;my=q<1.2?Math.max(0,48-q*40):0;if(q>2.6)sx=-99}
+ const air=my>0,run=Math.floor(T*10)%2,py=gy-16-my;if(sx>-20){f(3);x.fillRect(sx+3,py,7,3);x.fillRect(sx+2,py+3,9,4);f(0);x.fillRect(sx+7,py+4,2,2);f(3);x.fillRect(sx+2,py+7,9,5);f(1);x.fillRect(sx+4,py+8,5,3);f(3);if(air){x.fillRect(sx+1,py+12,4,3);x.fillRect(sx+8,py+11,4,3)}else if(run){x.fillRect(sx+2,py+12,3,4);x.fillRect(sx+8,py+12,3,4)}else{x.fillRect(sx+4,py+12,5,4)}}
+ f(3);x.textAlign='left';x.fillText('MARIO',4,2);x.fillText(String(score).padStart(6,'0'),4,10);x.fillText('o x'+String(coins).padStart(2,'0'),58,10);x.fillText('WORLD',98,2);x.fillText(' 1-1',98,10);x.fillText('TIME',134,2);x.fillText(String(Math.max(0,400-Math.floor(pt*2))).padStart(3,'0'),136,10);return cv}
+
+/* --- BlackBerry: 40 people calling one after another; each call rings, becomes a missed call, the screen dims, the next call lights it up --- */
+const BBN=['Mom','Big Mike','Tay','Dre (Studio)','Unknown','Jaylen','Keisha','Uncle Ron','Marcus B','Lil Saint','DJ Rocko','Nia','Coach T','Brandon','Aaliyah','Manager Lou','Rico','Shay','T-Money','Grandma','Quinn','Deshawn','Vee','Studio A Booking','Kev','Mya','Pooh','Landlord','Chris P','Jasmine','Bank of America','Twin','Ant','Dee Dee','Smoke','Ray Ray','Label - Kim','Ty Dolla','Cuz','Bri'];
+function bbScr(T){const W=330,H=200,[cv,x]=scv('bb',W,H),RING=7,MISS=1.6,REST=4.2,per=RING+MISS+REST,n=BBN.length,ci=Math.floor(T/per)%n,ct=T%per,nm=BBN[ci],ph=ct<RING?'ring':ct<RING+MISS?'miss':'rest',missed=Math.floor(T/per)+(ph==='ring'?0:1);x.imageSmoothingEnabled=true;
+ const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0a1a33');g.addColorStop(1,'#03070f');x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.fillStyle='#e8eef8';x.font='bold 11px Arial';x.textBaseline='top';x.textAlign='left';x.fillText('▂▄▆█ ',6,4);x.textAlign='right';x.fillText('3G ▮▮▮▯',W-6,4);x.textAlign='center';const mm=24+Math.floor(T/60);x.fillText('10:'+String(mm%60).padStart(2,'0')+' AM',W/2,4);x.fillStyle='rgba(255,255,255,.15)';x.fillRect(0,19,W,1);
+ if(ph==='rest'){x.fillStyle='#fff';x.font='300 46px Arial';x.fillText('10:'+String(mm%60).padStart(2,'0'),W/2,34);x.font='14px Arial';x.fillStyle='#b9c6dc';x.fillText('Thu, Apr 16',W/2,86);
+  x.fillStyle='#d6242d';x.beginPath();x.arc(W/2-58,121,9,0,6.3);x.fill();x.fillStyle='#fff';x.font='bold 11px Arial';x.fillText(String(Math.min(missed,99)),W/2-58,115);x.font='13px Arial';x.textAlign='left';x.fillText(missed+' Missed Call'+(missed>1?'s':''),W/2-44,113);x.textAlign='center';
+  ['✉','31','◷','☏','⊕'].forEach((s,i)=>{x.fillStyle='rgba(255,255,255,.85)';x.font='18px Arial';x.fillText(s,40+i*62,156)});x.fillStyle='rgba(0,0,0,'+(.62*ease(Math.min(1,(ct-RING-MISS)/.6))).toFixed(3)+')';x.fillRect(0,0,W,H);return cv}
+ const hue=(nm.length*47+ci*31)%360,init=nm.split(/[\s(-]+/).filter(Boolean).map(s=>s[0]).join('').slice(0,2).toUpperCase(),pulse=ph==='ring'?.5+.5*Math.sin(ct*7):0;
+ x.fillStyle='#9fb3d1';x.font='12px Arial';x.fillText(ph==='ring'?'Incoming Call':'Missed Call',W/2,26);
+ x.save();x.globalAlpha=.35*pulse;x.strokeStyle='#5fd06a';x.lineWidth=3;x.beginPath();x.arc(W/2,72,30+8*pulse,0,6.3);x.stroke();x.restore();
+ const ag=x.createLinearGradient(0,44,0,100);ag.addColorStop(0,'hsl('+hue+',55%,58%)');ag.addColorStop(1,'hsl('+hue+',60%,38%)');x.fillStyle=ag;x.beginPath();x.arc(W/2,72,26,0,6.3);x.fill();x.fillStyle='#fff';x.font='bold 20px Arial';x.textBaseline='middle';x.fillText(init,W/2,73);x.textBaseline='top';
+ x.font='bold 17px Arial';x.fillText(nm,W/2,104);x.font='12px Arial';x.fillStyle='#b9c6dc';const num='('+(200+ci*17%700)+') '+(300+ci*23%600)+'-'+String(1000+ci*137%9000).padStart(4,'0');x.fillText(nm==='Unknown'?'Private Number':num,W/2,124);
+ if(ph==='ring'){[[W/2-70,'#2fa84a','Answer'],[W/2+70,'#c7262f','Ignore']].forEach(([bx,col,l])=>{x.fillStyle=col;x.beginPath();x.roundRect?x.roundRect(bx-55,150,110,32,6):x.rect(bx-55,150,110,32);x.fill();x.fillStyle='#fff';x.font='bold 13px Arial';x.fillText(l,bx,159)})}
+ else{x.fillStyle='rgba(199,38,47,.9)';x.beginPath();x.roundRect?x.roundRect(30,150,W-60,32,6):x.rect(30,150,W-60,32);x.fill();x.fillStyle='#fff';x.font='bold 13px Arial';x.fillText('Missed call from '+nm,W/2,159)}
+ if(ct<.5){x.fillStyle='rgba(0,0,0,'+(.62*(1-ct/.5)).toFixed(3)+')';x.fillRect(0,0,W,H)}return cv}
+
+/* --- Sidekick: a 100-message text thread that plays out across the whole video (typing dots before each reply) --- */
+const SKM=['yo you up?','always. in the lab rn','send me something','cooking one right now, hold on','what bpm','like 92, dusty','say less','kicks hitting crazy on this one','lemme hear it','sending the bounce in 5','bet','ok its sent','OHHH','that sample?? where you find that','crate digging lol, flea market vinyl','bro this is crazy','you want it?','yes. dont send it to nobody else','its yours if you want it','how much','we can talk, come thru the studio','tonight?','after 10','ight im coming','bring the hook you was talking about','i got 3 hooks lol','bring all 3','what you on rn','mpc60 and a dusty lamp','old school','only way to do it','facts','can you make the drums knock more','already on it, swapping the kick','i need it to slap in the car','it will','send the new one when done','give me 20','ok','...','new one sent','THIS IS IT','told you','the snare got that crack now','yea i layered it','who mixing it','me first, then we send it out','cool','you still got that other beat from last week','the one with the flute?','yeah','still got it','hold that too','holding','yo my manager wanna hear','send him mzprd.com lol','he on it now','tell him the packs on there too','he said the vinyl pack hard','big citi vinyl, thats the one','we using that for the album','lets work','what time you closing up','when the beat done lol','respect','im outside','door open','yo turn it up','its up','neighbors gonna call','let em','haha','what we naming it','you name it','late night dusty','i like that','done','we need a video for it','already filming the pads','for real?','its on the desk right now','post it','posting tonight','tag me','always','one more beat before i go?','one more','go crazy','already started','this the one','you say that every time','and im always right','lol true','send stems later','sending in the morning','bet','good session','for sure','tomorrow same time?','same time','say less','peace','✌️','back in the lab tomorrow 💯'];
+function skScr(T){const W=320,H=176,[cv,x]=scv('sk',W,H),GAP=2.2,n=SKM.length,cyc=n*GAP+6,t=T%cyc,shown=Math.min(n,Math.floor(t/GAP)+1),frac=(t%GAP)/GAP;x.imageSmoothingEnabled=true;
+ x.fillStyle='#e9eef5';x.fillRect(0,0,W,H);x.fillStyle='#1d3a63';x.fillRect(0,0,W,22);x.fillStyle='#fff';x.font='bold 12px Arial';x.textBaseline='middle';x.textAlign='left';x.fillText('✉  Tay',8,11);x.textAlign='right';x.font='11px Arial';x.fillText('AIM  ▮▮▮',W-8,11);
+ x.font='12px Arial';const wrap=s=>{const out=[];let line='';for(const w of s.split(' ')){const tt=line?line+' '+w:w;if(x.measureText(tt).width>190&&line){out.push(line);line=w}else line=tt}out.push(line);return out};
+ const items=[];for(let i=0;i<shown;i++){const me=i%2===1^(i>40&&i%3===0),L=wrap(SKM[i]);items.push({me,L,h:L.length*15+10})}
+ const nextMe=items.length<n?(shown%2===1^(shown>40&&shown%3===0)):true,typing=!nextMe&&frac>.45&&shown<n;
+ let y=H-6-(typing?26:0),slide=frac<.15&&shown>1?(1-frac/.15)*items[items.length-1].h:0;y+=slide;
+ x.save();x.beginPath();x.rect(0,22,W,H-22);x.clip();
+ for(let i=items.length-1;i>=0&&y>22;i--){const it=items[i],bw=Math.max(...it.L.map(l=>x.measureText(l).width))+16;y-=it.h;const bx=it.me?W-bw-8:8;x.fillStyle=it.me?'#2e7cf6':'#fff';x.beginPath();x.roundRect?x.roundRect(bx,y,bw,it.h-4,9):x.rect(bx,y,bw,it.h-4);x.fill();if(!it.me){x.strokeStyle='#cfd7e2';x.stroke()}
+  x.fillStyle=it.me?'#fff':'#1b2430';x.textAlign='left';x.textBaseline='top';it.L.forEach((l,j)=>x.fillText(l,bx+8,y+4+j*15));y-=4}
+ if(typing){const ty=H-28;x.fillStyle='#fff';x.beginPath();x.roundRect?x.roundRect(8,ty,46,20,9):x.rect(8,ty,46,20);x.fill();for(let k=0;k<3;k++){x.fillStyle='rgba(80,90,105,'+(.35+.65*Math.max(0,Math.sin(T*8-k*.9)))+')';x.beginPath();x.arc(20+k*11,ty+10,3,0,6.3);x.fill()}}
+ x.restore();return cv}
+
+/* --- Mini display: master bus meters (L/R with peak hold) that move with the beat, and four knobs turning --- */
+function miniScr(T,Sx,la){const W=220,H=166,[cv,x]=scv('mn',W,H);x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle='#1a1d1c';x.strokeStyle='#1a1d1c';x.font='bold 11px monospace';x.textBaseline='top';x.textAlign='left';
+ const hs=(Sx&&Sx.hits)||[],env=(tt,tau)=>{let lo=0,hi=hs.length;while(lo<hi){const m=(lo+hi)>>1;if(hs[m].t<=tt)lo=m+1;else hi=m}let e=0;for(let i=lo-1;i>=0&&tt-hs[i].t<.8;i--)e+=hs[i].v*Math.exp(-(tt-hs[i].t)/tau);return Math.min(1,e*.55)};
+ const run=la>0&&Sx&&la<Sx.dur,lv=run?.42+.5*env(la,.14):0,lL=run?Math.min(1,lv*(1+.05*Math.sin(la*13))):0,lR=run?Math.min(1,lv*(1+.05*Math.sin(la*11+1))):0,pk=run?Math.max(env(la,.6),env(la-.3,.6))*.55+.42:0;
+ x.fillText('MASTER BUS',6,4);x.textAlign='right';x.fillText(run?'PLAY  '+mmss(la):'STOP  0:00',W-6,4);x.fillRect(6,17,W-12,1);
+ [['L',lL,26],['R',lR,44]].forEach(([n,l,y])=>{x.textAlign='left';x.fillText(n,6,y);const segs=28,sw=(W-34)/segs;for(let i=0;i<segs;i++){const on=i/segs<l,hot=i>=segs-4;x.globalAlpha=on?1:.12;x.fillRect(22+i*sw,y+1,sw-2,hot?11:9)}x.globalAlpha=1;const pp=Math.floor(Math.min(.98,pk)*segs);x.fillRect(22+pp*sw,y-1,2,13)});
+ x.font='9px monospace';x.textAlign='center';['-48','-24','-12','-6','-3','0'].forEach((s,i)=>x.fillText(s,24+i*(W-40)/5,60));
+ const K=[['VOL',.62+.04*Math.sin(T*.3)],['LOW',.5+.18*Math.sin(T*.47)],['HIGH',.55+.2*Math.sin(T*.39+1)],['COMP',.35+.25*(run?env(la,.25):0)+.1*Math.sin(T*.2)]];
+ K.forEach(([n,v],i)=>{const cx=30+i*53,cy=104,r=17;x.lineWidth=2;x.beginPath();x.arc(cx,cy,r,.75*Math.PI,2.25*Math.PI);x.stroke();x.lineWidth=4;x.beginPath();x.arc(cx,cy,r,.75*Math.PI,.75*Math.PI+1.5*Math.PI*v);x.stroke();const a=.75*Math.PI+1.5*Math.PI*v;x.lineWidth=2;x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(a)*(r-5),cy+Math.sin(a)*(r-5));x.stroke();x.font='bold 9px monospace';x.fillText(n,cx,cy+21);x.font='9px monospace';x.fillText(Math.round(v*100),cx,cy-4+12)});
+ x.font='bold 10px monospace';x.textAlign='left';x.fillText((Sx&&Sx.bpm?Sx.bpm:'--')+' BPM',6,150);x.textAlign='right';x.fillText('MZPRD',W-6,150);return cv}
+
+/* --- iPhone: scrolling a photo feed, flick and pause, about 3 minutes of posts before it loops --- */
+const IGU=['mzprd','studio.nights','vinyl.diggers','beatmakersdaily','mpc.heads','dustykicks','lofi.lab','samplecrate','boom.bap.only','gearporn.audio','late.night.loops','crate.culture','drumbreaks','producergrind','tapehiss'];
+const IGC=['late night session 🎛️','new pack drops friday','dust on the pads, fire in the speakers','sampled this off a $1 record','who still uses floppies?','the lamp stays on till the beat is done','mpc life 🔥','cooking with the classics','link in bio','vinyl > everything','90 bpm and a dream','studio ritual','pads worn, beats hard','sunday crate dig haul','mixing tonight'];
+function igScr(T){const W=180,H=390,[cv,x]=scv('ig',W,H),ims=RPIMG.ig||[],PH=262,N=45,cyc=180,t=T%cyc;x.imageSmoothingEnabled=true;
+ /* scroll: a flick (about one post) then a pause to look; sometimes a slow drag */
+ let pos=0;{const step=4;const k=Math.floor(t/step),u=(t%step)/step;for(let i=0;i<k;i++)pos+=PH*(.75+rnd(i+11)*.6);pos+=PH*(.75+rnd(k+11)*.6)*ease(clamp((u-.55)/.35,0,1))}
+ pos+=70;x.fillStyle='#000';x.fillRect(0,0,W,H);
+ const top=44;x.save();x.beginPath();x.rect(0,top,W,H-top-34);x.clip();
+ /* stories row at the very top of the feed */
+ let y=top-pos+70;if(y>top-70){for(let i=0;i<5;i++){const cx=22+i*36,cy=y-38;const g=x.createLinearGradient(cx-15,cy-15,cx+15,cy+15);g.addColorStop(0,'#f9ce34');g.addColorStop(.5,'#ee2a7b');g.addColorStop(1,'#6228d7');x.fillStyle=g;x.beginPath();x.arc(cx,cy,15,0,6.3);x.fill();x.fillStyle='#000';x.beginPath();x.arc(cx,cy,13,0,6.3);x.fill();x.fillStyle='hsl('+(i*67)+',45%,45%)';x.beginPath();x.arc(cx,cy,11.5,0,6.3);x.fill();x.fillStyle='#ddd';x.font='7px Arial';x.textAlign='center';x.fillText(IGU[i].slice(0,9),cx,cy+23)}}
+ const i0=Math.max(0,Math.floor((pos-70)/PH)-1);
+ for(let i=i0;i<i0+4;i++){const py=top+70+i*PH-pos;if(py>H)break;const pi=i%N,u=IGU[(pi*7+3)%IGU.length],im=ims.length?ims[(pi*5)%ims.length]:null;
+  x.fillStyle='hsl('+(pi*53%360)+',50%,50%)';x.beginPath();x.arc(14,py+14,9,0,6.3);x.fill();x.fillStyle='#fff';x.font='bold 9px Arial';x.textAlign='left';x.textBaseline='middle';x.fillText(u,28,py+14);x.fillText('···',W-16,py+13);
+  const iy=py+28;if(im){const s=Math.min(im.width,im.height)*(.35+rnd(pi+5)*.35),sx=(im.width-s)*rnd(pi+9),sy=(im.height-s)*rnd(pi+13);x.drawImage(im,sx,sy,s,s,0,iy,W,W)}else{x.fillStyle='#333';x.fillRect(0,iy,W,W)}
+  const ay=iy+W+12;x.fillStyle='#fff';x.font='13px Arial';x.fillText('♡  💬  ➤',6,ay);x.textAlign='right';x.fillText('⚐',W-6,ay);x.textAlign='left';x.font='bold 9px Arial';x.fillText((1200+Math.floor(rnd(pi)*48000)).toLocaleString('en-US')+' likes',6,ay+16);
+  x.font='9px Arial';x.fillText(u+'  '+IGC[(pi*3)%IGC.length],6,ay+29);x.fillStyle='#999';x.fillText('View all '+(12+Math.floor(rnd(pi+2)*300))+' comments',6,ay+41)}
+ x.restore();
+ x.fillStyle='#000';x.fillRect(0,0,W,top);x.fillStyle='#fff';x.font='bold 10px Arial';x.textBaseline='middle';x.textAlign='left';x.fillText('9:41',16,12);x.textAlign='right';x.fillText('▂▄▆ ᯤ ▮',W-12,12);x.textAlign='left';x.font='italic bold 17px Georgia, serif';x.fillText('Instagram',10,32);x.textAlign='right';x.font='13px Arial';x.fillText('♡  ✉',W-10,32);
+ x.fillStyle='#000';x.fillRect(0,H-34,W,34);x.fillStyle='#fff';x.font='14px Arial';x.textAlign='center';['⌂','⌕','⊕','▶','◉'].forEach((s,i)=>x.fillText(s,18+i*36,H-20));x.fillStyle='#fff';x.fillRect(W/2-36,H-6,72,3);x.fillStyle='#111';x.beginPath();x.roundRect?x.roundRect(W/2-30,4,60,16,8):x.rect(W/2-30,4,60,16);x.fill();return cv}
+
+function drawRProp(c,G,Sx,T,la){const k=ST.rprop||'floppy',im=RPIMG[k];if(k==='floppy'||!im)return;c.save();c.drawImage(im,RPAT[0],RPAT[1]);const q=RSQ[k];
+ if(k==='gameboy'||k==='mini'){c.save();quadPath(c,q);c.clip();c.globalCompositeOperation='multiply';c.globalAlpha=k==='mini'?.82:.9;warp(c,k==='gameboy'?gbScr(T):miniScr(T,Sx,la),q,4);c.restore()}
+ else{const scr=k==='bberry'?bbScr(T):k==='sidekick'?skScr(T):igScr(T);c.save();quadPath(c,q);c.clip();c.fillStyle='#000';c.fill();warp(c,scr,q,6);
+  const g=c.createLinearGradient(q[0][0],q[0][1],q[2][0],q[2][1]);g.addColorStop(0,'rgba(255,255,255,.10)');g.addColorStop(.45,'rgba(255,255,255,0)');g.addColorStop(1,'rgba(0,0,0,.15)');c.fillStyle=g;c.fill();c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.5)';quadPath(c,q);c.stroke();c.restore();
+  c.save();c.globalCompositeOperation='lighter';const cx=(q[0][0]+q[2][0])/2,cy=(q[0][1]+q[2][1])/2,gl=c.createRadialGradient(cx,cy,30,cx,cy,170);gl.addColorStop(0,'rgba(120,160,255,.07)');gl.addColorStop(1,'rgba(120,160,255,0)');c.fillStyle=gl;c.fillRect(cx-170,cy-170,340,340);c.restore()}
+ c.restore()}
+
 function deck(c,G,SRC,ang,S,pw){const D=G.deck,u=G.u||1,V=vinylOf(SRC,D,D.vr||D.r-28),VR=V.VR;
  c.save();c.beginPath();c.arc(D.cx,D.cy,VR,0,6.2832);c.clip();c.drawImage(V.A,D.cx-VR,D.cy-VR);c.translate(D.cx,D.cy);c.rotate(ang);c.drawImage(V.sp,-VR,-VR);c.restore();
  const R=D.lab,t=String((S&&S.title)||'SAMPLE PACK').toUpperCase(),hue=hashStr(t)%360;c.save();c.translate(D.cx,D.cy);c.rotate(ang);
@@ -355,7 +457,7 @@ async function ensureScene(fmt){fmt=fmt||ST.fmt;const tall=fmt==='v'||fmt==='c';
  if(ST.scene==='white'){await ensureStudio();return}
  if(!tall){if(!DESKS.h)DESKS.h=await loadImg('mpc/desk_nocan.webp?v=1');if(!DESKS.h0&&(ST.can||{}).id==='orig'&&(!ST.skin||ST.skin==='orig'))DESKS.h0=await loadImg('mpc/desk.webp?v=2');if(!DESKS.h)DESKS.h=DESKS.h0}
  else if(!DESKS.v)DESKS.v=await loadImg('mpc/desk_v.webp?v=2');
- await loadSkin(ST.skin||'orig',fmt);await loadProp();if(tall&&!DESKS.vpatch)DESKS.vpatch=await loadImg('mpc/desk_v_nofloppy.webp?v=1');
+ await loadSkin(ST.skin||'orig',fmt);await loadProp();await loadRProp();if(tall&&!DESKS.vpatch)DESKS.vpatch=await loadImg('mpc/desk_v_nofloppy.webp?v=1');
  const c=ST.can||{};if(!tall&&c.id!=='orig'&&c.id!=='none'&&!CANS.length)await loadCans();
  if(!tall&&c.id==='orig'&&ST.skin&&ST.skin!=='orig'&&!CANS.length)await loadCans();
  sampleColors()}
@@ -626,6 +728,7 @@ function frame(c,W,H,fmt,T,X){if(X.base){frame(c,W,H,fmt,Math.max(0,T-X.card),X.
  if(SC&&SC.G.deck){fx.btn.stop=0;fx.btn.end=pulse(T,lastEnd-.08,lastEnd+.2)}
  machine(c,ox,oy,sc,Sx,{arm:SC&&SC.G.arm?armAt(SC.G,T,X.intro,t0,lastEnd):null,spin:SC&&SC.G.deck?spinAt(T,X.intro>0?t0-.27:-9,lastEnd):0,lcd:X.make&&!((X.intro>0)&&T<X.intro)?X.make.lcdAt(T):null,boot:(X.intro>0&&T<X.intro&&T>=PW)?T-PW:-1,img:SC?SC.img:CUT,geo:SC?SC.G:null,src:SC?SC.img:null,fx,lt:la,power:(X.make&&X.make.pdAt&&X.make.pdAt(T+.1)>=0)?0:(X.intro>0?ease((T-PW)/.12):1),pdown:(X.intro>0&&T<PW)?5:(X.make&&X.make.pdAt?X.make.pdAt(T):-1),run:la>=-.02&&T<(X.make&&X.make.stopT?X.make.stopT:lastEnd),trk:tape?[k+1,X.tracks.length]:null,loading:tape&&k>0,head:intro?X.title:'',sub:intro?X.tracks.length+' TRACKS':'',press:i=>la>=-.02?pressAt(Sx,i,la):0});
 {c.save();c.translate(ox,oy);c.scale(sc,sc);const Gs=SC?SC.G:PH;
+  if(SC&&Gs.id==='deskh')drawRProp(c,Gs,Sx,T,la);
   if(SC&&Gs.id==='deskh')drawCan(c,Gs,Sx);
   if(SC&&Gs.id==='deskh')drawProp(c,Gs,Sx,T);
   if(ST.hands&&ST.hands.on)drawHands(c,Gs,Sx,la,!!SC);
@@ -704,6 +807,7 @@ function html(){return`<div class="mg"><div>
   <label>LOOK OF THE VIDEOS</label><select id="mScene"><option value="desk">Desk scene (the worn desk, lamp and floppy disks)</option><option value="white">White studio</option></select>
   <label>MACHINE SKIN (DESK SCENES)</label><select id="mSkin">${SKINS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
   <label>LEFT DESK ITEM (MPC DESK, 16:9 ONLY)</label><select id="mProp">${PROPS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
+  <label>RIGHT DESK ITEM (MPC DESK, 16:9 ONLY)</label><select id="mRProp">${RPROPS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
   <label>PAD MACHINE SKIN (SAMPLE PACKS SCENE)</label><select id="mPSkin">${PSKINS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('')}</select>
   <div class="sub">CAN ON THE DESK (16:9)</div>
   <select id="mCan"><option value="orig">The original Pepsi can (as in the picture)</option><option value="auto">A different can for each beat (automatic)</option>${CAN_NAMES.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('')}<option value="none">No can</option></select>
@@ -1002,7 +1106,7 @@ async function setSrc(m){if((ST.src||'beats')===m)return;stopPlay();ST['pick_'+(
 function wire(){$q('#mSrcB').onclick=()=>setSrc('beats');$q('#mSrcP').onclick=()=>setSrc('packs');srcUI();const sel=$q('#mBeat');sel.innerHTML='<option value="">Choose a beat...</option>'+beats.map(b=>`<option value="${esc(b.id)}">${esc(b.title)}${b.bpm?' ('+b.bpm+' BPM)':''}</option>`).join('');if(ST.beat)sel.value=String(ST.beat);$q('#mLearnAll').onclick=()=>learnAll();
  $q('#mArt').value=ST.artist;$q('#mLcd').value=ST.lcd;$q('#mTxt').checked=!!ST.text;$q('#mLen').value=String(ST.len);
  sel.onchange=()=>{if(sel.value)pick(sel.value)};$q('#mArt').onchange=e=>{ST.artist=e.target.value.trim();save();mark('yt','th','gen')};for(const k in PNL){$q(PNL[k][0]).addEventListener('toggle',paintPanels)}
- $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};$q('#mProp').value=ST.prop||'floppy';$q('#mProp').onchange=async e=>{ST.prop=e.target.value;await ensureScene(ST.fmt);save();drawNow()};$q('#mPSkin').value=ST.pskin||'0';$q('#mPSkin').onchange=async e=>{ST.pskin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};
+ $q('#mLcd').oninput=e=>{ST.lcd=e.target.value;if(S){S.lcd=ST.lcd.trim();drawNow()}save()};$q('#mRes').value=ST.res||'1080';$q('#mRes').onchange=e=>{ST.res=e.target.value;save()};$q('#mSkin').value=ST.skin||'orig';$q('#mSkin').onchange=async e=>{ST.skin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};$q('#mProp').value=ST.prop||'floppy';$q('#mProp').onchange=async e=>{ST.prop=e.target.value;await ensureScene(ST.fmt);save();drawNow()};$q('#mRProp').value=ST.rprop||'floppy';$q('#mRProp').onchange=async e=>{ST.rprop=e.target.value;await ensureScene(ST.fmt);save();drawNow()};$q('#mPSkin').value=ST.pskin||'0';$q('#mPSkin').onchange=async e=>{ST.pskin=e.target.value;await ensureScene(ST.fmt);save();drawNow()};
  const CM=ST.cam;CM.moves=CM.moves||{};{const box=$q('#mCamMvList');if(box){box.innerHTML=CAMMV.map(([k,t])=>'<label class="chk" style="font-size:11px"><input type="checkbox" data-mv="'+k+'"'+(CM.moves[k]?' checked':'')+'> '+t+'</label>').join('');box.querySelectorAll('[data-mv]').forEach(c=>c.onchange=()=>{CM.moves[c.dataset.mv]=c.checked;save();drawNow();summ()})}}$q('#mDof').value=CM.dof;$q('#mRack').checked=!!CM.rack;$q('#mGrade').value=CM.grade;
  $q('#mDof').onchange=e=>{CM.dof=e.target.value;save();drawNow()};$q('#mRack').onchange=e=>{CM.rack=e.target.checked;save();drawNow()};$q('#mGrade').onchange=e=>{CM.grade=e.target.value;save();drawNow()};
  $q('#mIntro').checked=startOn();$q('#mIntro').onchange=e=>{ST.start=e.target.checked;save();stopPlay();if(S&&S.buf){S.tl=tlOne(S);dropV()}if(TP){TP=null;$q('#mTpMsg').textContent='The intro changed. Press BUILD THE TAPE again.';mark('yt','th','gen')}drawNow()};
