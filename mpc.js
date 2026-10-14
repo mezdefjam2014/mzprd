@@ -43,14 +43,27 @@ const packMode=()=>!!(ST&&ST.src==='packs');
 /* the record's angle: it spins up when START is pressed and brakes to a stop at the end (33 1/3 RPM) */
 const spinAt=(T,ts,te)=>{const w=3.4907,ru=.45,rd=1.1;let e=0;if(T>ts){const a=Math.min(T,te)-ts;e=a<ru?a*a/(2*ru):ru/2+(a-ru)}if(T>te&&te>ts){const b=Math.min(T-te,rd);e+=b-b*b/(2*rd)}return e*w};
 /* the record: the strobe dots on the platter edge turn with it, the label (the pack name) turns, the spindle and the light on the vinyl stay put */
-function deck(c,G,SRC,ang,S,pw){const D=G.deck,u=G.u||1;c.save();c.beginPath();c.arc(D.cx,D.cy,D.r,0,6.2832);c.arc(D.cx,D.cy,D.r-30,0,6.2832,true);c.clip();c.translate(D.cx,D.cy);c.rotate(ang);c.drawImage(SRC,D.cx-D.r,D.cy-D.r,2*D.r,2*D.r,-D.r,-D.r,2*D.r,2*D.r);c.restore();
+/* the vinyl, split once from the photo into: a plain record (the same all the way round, so it can turn), and the light on it (which stays still) */
+const VYL=new Map();
+function vinylOf(SRC,D,VR){const key=(SRC.src||SRC.width)+'|'+D.cx;if(VYL.has(key))return VYL.get(key);const n=2*VR,cv=document.createElement('canvas');cv.width=cv.height=n;const x=cv.getContext('2d');x.drawImage(SRC,D.cx-VR,D.cy-VR,n,n,0,0,n,n);
+ const id=x.getImageData(0,0,n,n),d=id.data,sum=new Float64Array((VR+2)*4);for(let y=0;y<n;y++)for(let q=0;q<n;q++){const r=Math.round(Math.hypot(q-VR+.5,y-VR+.5));if(r>VR)continue;const i=(y*n+q)*4;sum[r*4]+=d[i];sum[r*4+1]+=d[i+1];sum[r*4+2]+=d[i+2];sum[r*4+3]++}
+ const A=x.createImageData(n,n),H=x.createImageData(n,n);for(let y=0;y<n;y++)for(let q=0;q<n;q++){const r=Math.round(Math.hypot(q-VR+.5,y-VR+.5)),i=(y*n+q)*4;if(r>VR)continue;const k=Math.max(1,sum[r*4+3]);for(let ch=0;ch<3;ch++){const av=sum[r*4+ch]/k;A.data[i+ch]=av;H.data[i+ch]=Math.max(0,d[i+ch]-av)}A.data[i+3]=255;H.data[i+3]=255}
+ const mk=im=>{const z=document.createElement('canvas');z.width=z.height=n;z.getContext('2d').putImageData(im,0,0);return z};
+ /* a few specks of dust and wear marks on the vinyl: they turn with it, so the eye sees it spinning */
+ const sp=document.createElement('canvas');sp.width=sp.height=n;const y2=sp.getContext('2d');let a=hashStr('vinyl')||1;const rn=()=>{a=(Math.imul(a,1664525)+1013904223)>>>0;return a/4294967296};
+ for(let i=0;i<70;i++){const r=D.lab+8+rn()*(VR-D.lab-14),t=rn()*6.2832,px=VR+Math.cos(t)*r,py=VR+Math.sin(t)*r;y2.fillStyle='rgba(235,225,205,'+(.08+rn()*.22).toFixed(3)+')';y2.beginPath();y2.arc(px,py,.6+rn()*1.3,0,6.2832);y2.fill()}
+ for(let i=0;i<5;i++){const r=D.lab+20+rn()*(VR-D.lab-40),t0=rn()*6.2832;y2.strokeStyle='rgba(220,210,190,'+(.05+rn()*.06).toFixed(3)+')';y2.lineWidth=.8;y2.beginPath();y2.arc(VR,VR,r,t0,t0+.25+rn()*.5);y2.stroke()}
+ const o={A:mk(A),H:mk(H),sp,VR};VYL.set(key,o);return o}
+/* the record: only the vinyl turns (its label, specks and wear); the platter, its strobe dots, the spindle and the light on the vinyl stay put */
+function deck(c,G,SRC,ang,S,pw){const D=G.deck,u=G.u||1,V=vinylOf(SRC,D,D.vr||D.r-28),VR=V.VR;
+ c.save();c.beginPath();c.arc(D.cx,D.cy,VR,0,6.2832);c.clip();c.drawImage(V.A,D.cx-VR,D.cy-VR);c.translate(D.cx,D.cy);c.rotate(ang);c.drawImage(V.sp,-VR,-VR);c.restore();
  const R=D.lab,t=String((S&&S.title)||'SAMPLE PACK').toUpperCase(),hue=hashStr(t)%360;c.save();c.translate(D.cx,D.cy);c.rotate(ang);
  const g=c.createRadialGradient(-R*.3,-R*.3,R*.1,0,0,R);g.addColorStop(0,'hsl('+hue+',48%,40%)');g.addColorStop(1,'hsl('+hue+',52%,22%)');c.fillStyle=g;c.beginPath();c.arc(0,0,R,0,6.2832);c.fill();
  c.strokeStyle='rgba(255,255,255,.22)';c.lineWidth=1.4*u;c.beginPath();c.arc(0,0,R*.86,0,6.2832);c.stroke();
  c.fillStyle='rgba(255,246,225,.92)';c.textAlign='center';c.textBaseline='middle';c.font='700 '+Math.round(R*.2)+'px Anton, Oswald, sans-serif';c.fillText('MZPRD',0,-R*.48);
  const f=q=>'700 '+q+'px Oswald, sans-serif',sz=fitFont(c,t,f,Math.round(R*.2),R*1.45);c.font=f(sz);c.fillText(t,0,R*.42);c.font='600 '+Math.round(R*.11)+'px Oswald, sans-serif';c.fillStyle='rgba(255,246,225,.7)';c.fillText('SAMPLE PACK   33 1/3',0,R*.66);c.restore();
  c.fillStyle='#c9c9cc';c.beginPath();c.arc(D.cx,D.cy,5*u,0,6.2832);c.fill();c.fillStyle='rgba(0,0,0,.4)';c.beginPath();c.arc(D.cx+1.2*u,D.cy+1.2*u,2*u,0,6.2832);c.fill();
- const sh=c.createLinearGradient(D.cx-R,D.cy-R,D.cx+R,D.cy+R);sh.addColorStop(0,'rgba(255,220,170,.16)');sh.addColorStop(.5,'rgba(255,220,170,0)');sh.addColorStop(1,'rgba(0,0,0,.18)');c.fillStyle=sh;c.beginPath();c.arc(D.cx,D.cy,R,0,6.2832);c.fill();
+ c.save();c.beginPath();c.arc(D.cx,D.cy,VR,0,6.2832);c.clip();c.globalCompositeOperation='lighter';c.globalAlpha=.85;c.drawImage(V.H,D.cx-VR,D.cy-VR);c.restore();
  if(D.strobe&&pw>.5){c.save();c.globalCompositeOperation='lighter';const r=c.createRadialGradient(D.strobe[0],D.strobe[1],2,D.strobe[0],D.strobe[1],70*u);r.addColorStop(0,'rgba(255,90,40,.45)');r.addColorStop(1,'rgba(255,90,40,0)');c.fillStyle=r;c.fillRect(D.strobe[0]-70*u,D.strobe[1]-70*u,140*u,140*u);c.restore()}}
 /* pad order on the MPC60 II, top row first */
 const PAD_NAMES=['PERC 1','PERC 2','PERC 3','PERC 4','RIDE 1','RIDE 2','CRASH 1','CRASH 2','TOM 1','TOM 2','TOM 3','TOM 4','HIHAT','SNARE 1','SNARE 2','BASS'];
