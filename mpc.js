@@ -228,7 +228,8 @@ function derive(X,fmt,cu){const E=ST.eng,sub=E.sub&&!cu,loop=E.loop&&X.kind==='o
   const A={S:Sx,start:lead,off:xf,dur:Sx.dur-xf,fi:.04,fo:xf},B={S:Sx,start:lead+Sx.dur-2*xf,off:0,dur:xf,fi:xf,fo:0};tracks=[A,B];total=A.start+A.dur}
  else{tracks=X.tracks.map(t=>Object.assign({},t));const l=tracks[tracks.length-1];total=l.start+l.dur+3.6}
  return{kind:X.kind,tracks,total,lead:X.lead,title:X.title,sub:!!sub,subT0:sub?total-4.2:0,loop,intro:loop?0:(X.intro||0),make:X.make}}
-const XF=fmt=>{const b=X();if(!b)return null;const k=fmt==='v'?'_v':fmt==='c'?'_c':'_h';if(!b[k])b[k]=derive(b,fmt==='c'?'v':fmt,fmt==='c');return b[k]};
+const XF=fmt=>{const b=X();if(!b)return null;const k=fmt==='v'?'_v':fmt==='c'?'_c':'_h';if(!b[k])b[k]=derive(b,fmt==='c'?'v':fmt,fmt==='c');const d=b[k];
+ if(!(packMode()&&ST.eng&&ST.eng.logo&&fmt!=='c'&&!d.loop&&b.kind==='one'))return d;if(!d._card)d._card={kind:d.kind,tracks:d.tracks,lead:d.lead,title:d.title,intro:d.intro,card:CARD,base:d,total:d.total+CARD,coverId:ST.beat};return d._card};
 function dropV(){if(S&&S.tl){S.tl._v=null;S.tl._h=null;S.tl._c=null}if(TP){TP._v=null;TP._h=null;TP._c=null}}
 const trackAt=(X,T)=>{let k=0;for(let i=0;i<X.tracks.length;i++)if(T>=X.tracks[i].start)k=i;return k};
 const SKINS=[['orig','The original (aged cream)'],['2','Black with red slashes'],['3','Synthwave sunset'],['4','Rosewood']];
@@ -463,7 +464,42 @@ function camMoves(M,T,X,Sx,la,G,sc,ox,oy,W,H,t0,lastEnd){const lerp=(a,b,q)=>a+(
   if(ev!=null&&ev<1.2)z*=1+.09*Math.exp(-ev/.26)*ease(ev/.035)}
  if(M.tilt){rot=.0105*Math.sin(T*.285)+.004*Math.sin(T*.71+1);z*=1.014}
  const hw=W/(2*z),hh=H/(2*z);tx=clamp(tx,hw,W-hw);ty=clamp(ty,hh,H-hh);return{z,tx,ty,rot}}
-function frame(c,W,H,fmt,T,X){
+/* MZPRD LOGO INTRO (optional, sample packs): before the session a gold MZPRD crown slams in out of a light streak (flash, shockwave, sparks,
+   colour split, a gloss sweep), then rises while the pack cover glides in, and the card fades away into the session */
+const CARD=3.4,COVERS={};
+function loadCover(b){if(!b||!b.cover_path||COVERS[b.id]!==undefined)return;COVERS[b.id]=null;const i=new Image();i.crossOrigin='anonymous';i.onload=()=>{COVERS[b.id]=i;drawNow()};i.onerror=()=>{};i.src=pubU(b.cover_path)}
+let LOGOC=null;
+function crown(x,cx,cy,w,lw){const h=w*.62;x.beginPath();x.moveTo(cx-w/2,cy+h/2);x.lineTo(cx-w/2,cy-h*.15);x.lineTo(cx-w*.25,cy+h*.12);x.lineTo(cx,cy-h/2);x.lineTo(cx+w*.25,cy+h*.12);x.lineTo(cx+w/2,cy-h*.15);x.lineTo(cx+w/2,cy+h/2);x.closePath();x.lineJoin='round';x.lineWidth=lw;x.stroke()}
+function logoArt(W,H,u,k){const w=Math.ceil(900*u),h=Math.ceil(420*u);if(!LOGOC)LOGOC=document.createElement('canvas');if(LOGOC.width!==w||LOGOC.height!==h){LOGOC.width=w;LOGOC.height=h}const x=LOGOC.getContext('2d');x.clearRect(0,0,w,h);
+ const g=x.createLinearGradient(0,h*.15,0,h*.95);g.addColorStop(0,'#fff3c4');g.addColorStop(.45,'#f2c14e');g.addColorStop(.55,'#c98a1c');g.addColorStop(1,'#ffe08a');
+ x.strokeStyle=g;x.fillStyle=g;crown(x,w/2,h*.2,130*u,9*u);x.font='400 '+Math.round(230*u)+'px Anton, Oswald, sans-serif';x.textAlign='center';x.textBaseline='alphabetic';x.fillText('MZPRD',w/2,h*.93);
+ /* the gloss: a bright band that crosses the letters once */
+ const q=clamp((k-.45)/.8,0,1);if(q>0&&q<1){x.save();x.globalCompositeOperation='source-atop';const bx=-w*.3+q*w*1.6,lg=x.createLinearGradient(bx-90*u,0,bx+90*u,0);lg.addColorStop(0,'rgba(255,255,255,0)');lg.addColorStop(.5,'rgba(255,255,255,.85)');lg.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=lg;x.fillRect(0,0,w,h);x.restore()}
+ return LOGOC}
+function logoCard(c,W,H,T,X){const cd=X.card,u=Math.min(W,H)/1080,v=H>W,fade=1-ease(clamp((T-(cd-.65))/.65,0,1));if(fade<=0)return;const hit=.42,k=T-hit;
+ c.save();c.globalAlpha=fade;c.fillStyle='#050405';c.fillRect(0,0,W,H);
+ const bg=c.createRadialGradient(W/2,H*.45,0,W/2,H*.45,Math.max(W,H)*.62);bg.addColorStop(0,'rgba(140,82,22,'+(.18+.22*clamp(T/hit,0,1)).toFixed(3)+')');bg.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=bg;c.fillRect(0,0,W,H);
+ const cv=COVERS[X.coverId],up=cv?ease(clamp((T-1.25)/.75,0,1)):0,cy=lerp0(v?H*.42:H*.46,v?H*.2:H*.17,up),ls=lerp0(1,v?.62:.5,up);
+ c.globalCompositeOperation='lighter';
+ /* the light streak that grows to the hit, then thins away */
+ if(T<hit+.6){const a=T<hit?ease(T/hit):1-ease(k/.6),sw=W*(.15+.95*ease(clamp(T/hit,0,1))),sh=(T<hit?3:3+20*Math.exp(-k*9))*u,lg=c.createLinearGradient(W/2-sw/2,0,W/2+sw/2,0);lg.addColorStop(0,'rgba(255,190,90,0)');lg.addColorStop(.5,'rgba(255,236,190,'+(.95*a).toFixed(3)+')');lg.addColorStop(1,'rgba(255,190,90,0)');c.fillStyle=lg;c.shadowColor='rgba(255,170,60,.9)';c.shadowBlur=30*u;c.fillRect(W/2-sw/2,cy-sh/2,sw,sh);c.shadowBlur=0}
+ if(k>=0){const art=logoArt(W,H,u,k),sc=ls*(1+.22*Math.exp(-k*7)*Math.cos(k*14)),sk=k<.35?(1-k/.35)*7*u*Math.sin(k*95):0,aw=art.width*sc,ah=art.height*sc,ax=W/2-aw/2+sk,ay=cy-ah/2,ca=clamp(k/.06,0,1),split=16*u*Math.exp(-k*7);
+  c.globalCompositeOperation='source-over';c.globalAlpha=fade*ca;c.shadowColor='rgba(255,170,50,.55)';c.shadowBlur=40*u*(.6+.4*Math.exp(-k*3));c.drawImage(art,ax,ay,aw,ah);c.shadowBlur=0;
+  /* colour split on the hit (red and cyan ghosts that snap back) */
+  if(split>.4){c.globalCompositeOperation='lighter';c.globalAlpha=fade*.45*Math.exp(-k*5);c.filter='hue-rotate(-40deg) saturate(3)';c.drawImage(art,ax-split,ay,aw,ah);c.filter='hue-rotate(160deg) saturate(3)';c.drawImage(art,ax+split,ay,aw,ah);c.filter='none'}
+  c.globalCompositeOperation='lighter';
+  /* flash and shockwave ring */
+  if(k<.7){c.globalAlpha=fade*.55*Math.exp(-k*11);c.fillStyle='#fff3d6';c.fillRect(0,0,W,H);const q=k/.7;c.globalAlpha=fade*.55*(1-q);c.strokeStyle='rgba(255,215,140,1)';c.lineWidth=22*u*(1-q)+1;c.beginPath();c.ellipse(W/2,cy,W*.75*ease(q),W*.75*ease(q)*.42,0,0,6.2832);c.stroke()}
+  /* sparks thrown out of the hit */
+  if(k<1.4){let a=7;const rn=()=>{a=(Math.imul(a,1664525)+1013904223)>>>0;return a/4294967296};for(let i=0;i<46;i++){const ang=rn()*6.2832,sp=(260+rn()*620)*u,life=.6+rn()*.8;if(k>life)continue;const px=W/2+Math.cos(ang)*sp*k,py=cy+Math.sin(ang)*sp*k*.6+260*u*k*k,al=(1-k/life);c.globalAlpha=fade*al;c.fillStyle=i%3?'#ffd27a':'#fff4d8';c.beginPath();c.arc(px,py,(1.5+rn()*2.5)*u,0,6.2832);c.fill()}}}
+ /* the pack cover glides up under the logo, with a soft shadow and a faint reflection */
+ if(cv&&up>0){const sz=(v?W*.62:H*.5),x=W/2-sz/2,y0=(v?H*.33:H*.32)+(1-up)*60*u,r=14*u;c.globalCompositeOperation='source-over';c.globalAlpha=fade*up;
+  c.save();c.shadowColor='rgba(0,0,0,.7)';c.shadowBlur=50*u;c.shadowOffsetY=24*u;c.beginPath();c.roundRect?c.roundRect(x,y0,sz,sz,r):c.rect(x,y0,sz,sz);c.fillStyle='#000';c.fill();c.restore();
+  c.save();c.beginPath();c.roundRect?c.roundRect(x,y0,sz,sz,r):c.rect(x,y0,sz,sz);c.clip();c.drawImage(cv,x,y0,sz,sz);const sh=c.createLinearGradient(x,y0,x+sz,y0+sz),q=clamp((T-1.6)/.9,0,1);sh.addColorStop(Math.max(0,q-.15),'rgba(255,255,255,0)');sh.addColorStop(q,'rgba(255,255,255,.28)');sh.addColorStop(Math.min(1,q+.15),'rgba(255,255,255,0)');c.fillStyle=sh;c.fillRect(x,y0,sz,sz);c.restore();
+  c.save();c.globalAlpha=fade*up*.16;c.translate(0,2*(y0+sz)+6*u);c.scale(1,-1);c.beginPath();c.rect(x,y0+sz*.72,sz,sz*.28);c.clip();c.drawImage(cv,x,y0,sz,sz);c.restore()}
+ c.restore()}
+const lerp0=(a,b,q)=>a+(b-a)*q;
+function frame(c,W,H,fmt,T,X){if(X.base){frame(c,W,H,fmt,Math.max(0,T-X.card),X.base);if(T<X.card)logoCard(c,W,H,T,X);return}
  LAMPFL=lampLevel(T);const cu=fmt==='c';if(cu)fmt='v';const OV=!cu&&!X.long;
  const v=fmt==='v',E=ST.eng,sc0=v?.87*W/848:.6*W/848,k=trackAt(X,T),tr=X.tracks[k],Sx=tr.S,lt=T-tr.start,la=lt+(tr.off||0),tape=X.kind==='tape',last=X.tracks[X.tracks.length-1],lastEnd=last.start+last.dur,t0=X.make?X.make.T0:X.tracks[0].start;
  const dx=(1.3*Math.sin(T*.31)+.7*Math.sin(T*.77+1.3))*W/1920,dy=(1.1*Math.sin(T*.27+.8)+.6*Math.sin(T*.69+2.1))*W/1920,zs=(1+.0028*Math.sin(T*.21+.4))*(E.hook?1+.2*(1-ease(T/.8)):1)*(ST.cam&&ST.cam.rack?1+.014*(1-ease((T-.15)/1.8)):1);
@@ -591,6 +627,7 @@ function html(){return`<div class="mg"><div>
  <details class="sec grp" id="g_watch"><summary>6. KEEP THEM WATCHING <small id="s_watch"></small></summary><div class="in">
   <label class="chk"><input type="checkbox" id="mEhk"> BIG HOOK LINE AT THE START (SLAMS ON SCREEN, THE MPC PUNCHES IN)</label>
   <input type="text" id="mEhkT" maxlength="40" placeholder="Leave empty for an automatic line, or type your own">
+  <label class="chk"><input type="checkbox" id="mElogo"> MZPRD LOGO INTRO (SAMPLE PACKS): THE GOLD LOGO SLAMS IN WITH A FLASH, SPARKS AND A SHOCKWAVE, THEN THE PACK COVER GLIDES IN AND IT FADES INTO THE SESSION (ADDS 3.4 SEC)</label>
   <label class="chk"><input type="checkbox" id="mEmet"> BEAT METERS AND A BAR COUNTER (FOUR LED LADDERS BOTTOM LEFT: KICK, SNARE, HATS, PADS, THEY JUMP ON EVERY HIT)</label>
   <label class="chk"><input type="checkbox" id="mEsub"> ANIMATED SUBSCRIBE AT THE END (BOTH FORMATS)</label>
   <label class="chk"><input type="checkbox" id="mEloop"> LOOPING ENDING (9:16, SINGLE BEAT): THE END BLENDS BACK INTO THE START</label>
@@ -645,7 +682,7 @@ const X=()=>ST.tape.on?TP:(S&&S.tl);
 function applyKit(){const id=ST.beat,k=kitOf(id),L=layout(S.raw,k);S.kit=k;S.hits=L.hits;S.per=L.per;
  const tot=S.per.map((x,i)=>x.length?PAD_NAMES[i]+' '+x.length:'').filter(Boolean);const m=root&&$q('#mMap');if(m)m.textContent='Kit: '+KITS[k].n+'. '+(tot.join(' / ')||'Nothing was found.');const ks=root&&$q('#mKit');if(ks)ks.value=(ST.kits&&ST.kits[id]!=null&&ST.kits[id]!=='')?String(ST.kits[id]):''}
 async function pick(id){ST.beat=id;if(EP){EP=null;if(ST.s2b)ST.s2b.useEp=false}save();stopPlay();const b=beats.find(x=>String(x.id)===String(id));if(!b)return;
- S=null;drawNow();$q('#mMsg').textContent='Loading "'+b.title+'" and listening for the hits...';$q('#mInfo').textContent='';
+ loadCover(b);S=null;drawNow();$q('#mMsg').textContent='Loading "'+b.title+'" and listening for the hits...';$q('#mInfo').textContent='';
  try{await loadBeat(b);if(String(ST.beat)!==String(id))return;S=mkS(b,ST.len,kitOf(id));S.lcd=ST.lcd.trim();S.tl=tlOne(S);applyKit();
   $q('#mInfo').textContent=mmss(CACHE[b.id].buf.duration)+' preview / '+S.hits.length+' pad hits found';$q('#mMsg').textContent='Ready. Press PLAY to watch it, or render the video.';mark('yt','th','gen');if(window.__lpShow)__lpShow();drawNow()}
  catch(e){$q('#mMsg').textContent='Could not load this beat: '+(e&&e.message||e)}}
@@ -654,7 +691,14 @@ function drawNow(){const cv=$q('#mCv'),Xt=XF(ST.fmt);if(!cv||!sceneOK(ST.fmt))re
  const T=PV.playing?(AC.currentTime-PV.t0):parseFloat($q('#mScrub').value)/1000*Xt.total;frame(cv.getContext('2d'),cv.width,cv.height,ST.fmt,T,Xt);$q('#mTime').textContent=mmss(clamp(T,0,Xt.total))+' / '+mmss(Xt.total)}
 function stopPlay(){PV.playing=false;PV.loading=false;cancelAnimationFrame(PV.raf);try{PV.src&&PV.src.stop()}catch(e){}PV.src=null;if(root)$q('#mPlay').textContent='PLAY'}
 /* the whole sound of the video in one buffer: lead-in, every beat with its blend, the fade out */
-async function mixAudio(Xt,sr){if(Xt.mix&&Xt.mixSr===sr)return Xt.mix;const oa=new OfflineAudioContext(2,Math.ceil(Xt.total*sr),sr);
+async function mixAudio(Xt,sr){if(Xt.mix&&Xt.mixSr===sr)return Xt.mix;
+ if(Xt.base){const m=await mixAudio(Xt.base,sr),oa=new OfflineAudioContext(2,Math.ceil(Xt.total*sr),sr),s0=oa.createBufferSource();s0.buffer=m;s0.connect(oa.destination);s0.start(Xt.card);
+  const nb=oa.createBuffer(1,sr*2,sr),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;const hit=.42;
+  {const n=oa.createBufferSource();n.buffer=nb;const f=oa.createBiquadFilter();f.type='bandpass';f.Q.value=2.5;f.frequency.setValueAtTime(300,0);f.frequency.exponentialRampToValueAtTime(5200,hit);const g=oa.createGain();g.gain.setValueAtTime(.0001,0);g.gain.exponentialRampToValueAtTime(.22,hit-.02);g.gain.exponentialRampToValueAtTime(.0001,hit+.05);n.connect(f);f.connect(g);g.connect(oa.destination);n.start(0);n.stop(hit+.1)}
+  {const o=oa.createOscillator(),g=oa.createGain();o.type='sine';o.frequency.setValueAtTime(90,hit);o.frequency.exponentialRampToValueAtTime(32,hit+.9);g.gain.setValueAtTime(.0001,hit);g.gain.linearRampToValueAtTime(.55,hit+.008);g.gain.exponentialRampToValueAtTime(.0001,hit+1.2);o.connect(g);g.connect(oa.destination);o.start(hit);o.stop(hit+1.3)}
+  {const n=oa.createBufferSource();n.buffer=nb;const f=oa.createBiquadFilter();f.type='lowpass';f.frequency.value=2400;const g=oa.createGain();g.gain.setValueAtTime(.3,hit);g.gain.exponentialRampToValueAtTime(.0001,hit+.35);n.connect(f);f.connect(g);g.connect(oa.destination);n.start(hit);n.stop(hit+.4)}
+  [1318.5,1975.5,2637].forEach((fq,i)=>{const o=oa.createOscillator(),g=oa.createGain(),t=1.3+i*.05;o.type='sine';o.frequency.value=fq;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.05/(i+1),t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+1.4);o.connect(g);g.connect(oa.destination);o.start(t);o.stop(t+1.5)});
+  const ab=await oa.startRendering();Xt.mix=ab;Xt.mixSr=sr;return ab}const oa=new OfflineAudioContext(2,Math.ceil(Xt.total*sr),sr);
  Xt.tracks.forEach((tr,i)=>{const src=oa.createBufferSource();src.buffer=tr.S.buf;src.loop=tr.S.buf.duration<tr.dur+(tr.off||0);const g=oa.createGain();src.connect(g);g.connect(oa.destination);const last=i===Xt.tracks.length-1,fin=tr.fi!=null?tr.fi:(i===0?.04:(Xt.xf||1.2)),fout=tr.fo!=null?tr.fo:(last?1.3:(Xt.xf||1.2)),s0=tr.start,e0=tr.start+tr.dur;
   g.gain.setValueAtTime(.0001,s0);g.gain.linearRampToValueAtTime(1,s0+Math.max(.01,fin));if(fout>0){g.gain.setValueAtTime(1,Math.max(s0+fin,e0-fout));g.gain.linearRampToValueAtTime(.0001,e0)}else g.gain.setValueAtTime(1,e0);src.start(s0,tr.off||0,tr.dur)});
  if(Xt.sub){const at=Xt.subT0,tone=(t,f0,f1,d,v)=>{const o=oa.createOscillator(),g=oa.createGain();o.type='sine';o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t+d);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(oa.destination);o.start(t);o.stop(t+d+.05)};
@@ -860,9 +904,9 @@ function wire(){$q('#mSrcB').onclick=()=>setSrc('beats');$q('#mSrcP').onclick=()
  $q('#mTpT').onchange=e=>{T.title=e.target.value.trim()||'MZPRD BEAT TAPE';if(TP){TP.title=T.title;TP.mix=null}save();ytRender();thRender();drawNow()};
  $q('#mTpL').onchange=e=>{T.len=+e.target.value;tpDirty()};$q('#mTpX').onchange=e=>{T.xf=+e.target.value;tpDirty()};
  $q('#mTpAdd').onclick=()=>{const v=$q('#mTpA').value;if(!v)return;T.ids.push(v);tpDirty()};$q('#mTpBuild').onclick=buildTape;
- const En=ST.eng;$q('#mEhk').checked=!!En.hook;$q('#mEhkT').value=En.hookText;$q('#mEsub').checked=!!En.sub;$q('#mEmet').checked=En.meters!==false;$q('#mEloop').checked=!!En.loop;$q('#mEnote').checked=!!En.note;$q('#mEnoteT').value=En.noteText;$q('#mEq').checked=!!En.q;$q('#mEqT').value=En.qText;
- const eng=(id,k,box)=>{$q(id).onchange=e=>{En[k]=box?e.target.checked:e.target.value;if(k==='sub'||k==='loop'){dropV();stopPlay()}save();drawNow()};if(!box)$q(id).oninput=e=>{En[k]=e.target.value;drawNow()}};
- eng('#mEhk','hook',1);eng('#mEhkT','hookText');eng('#mEsub','sub',1);eng('#mEmet','meters',1);eng('#mEloop','loop',1);eng('#mEnote','note',1);eng('#mEnoteT','noteText');eng('#mEq','q',1);eng('#mEqT','qText');
+ const En=ST.eng;$q('#mEhk').checked=!!En.hook;$q('#mEhkT').value=En.hookText;$q('#mEsub').checked=!!En.sub;$q('#mEmet').checked=En.meters!==false;$q('#mElogo').checked=!!En.logo;$q('#mEloop').checked=!!En.loop;$q('#mEnote').checked=!!En.note;$q('#mEnoteT').value=En.noteText;$q('#mEq').checked=!!En.q;$q('#mEqT').value=En.qText;
+ const eng=(id,k,box)=>{$q(id).onchange=e=>{En[k]=box?e.target.checked:e.target.value;if(k==='sub'||k==='loop'||k==='logo'){dropV();stopPlay()}save();drawNow()};if(!box)$q(id).oninput=e=>{En[k]=e.target.value;drawNow()}};
+ eng('#mEhk','hook',1);eng('#mEhkT','hookText');eng('#mEsub','sub',1);eng('#mEmet','meters',1);eng('#mElogo','logo',1);eng('#mEloop','loop',1);eng('#mEnote','note',1);eng('#mEnoteT','noteText');eng('#mEq','q',1);eng('#mEqT','qText');
  $q('#mRcu').onclick=()=>render(['c']);$q('#mRlp').onclick=renderLoop;
  const lpShow=()=>{const o=$q('#mLpOut'),P=loopPack();if(!P||!ST.beat){o.innerHTML='';return}o.innerHTML='<h4>LOOP VIDEO TITLES AND DESCRIPTION</h4>'+P.titles.map((t,i)=>'<div class="it"><b>'+esc(t)+'</b><button data-lt="'+i+'">COPY</button></div>').join('')+'<button class="btn" id="mLpD" style="width:100%;margin-top:6px">COPY DESCRIPTION</button>';o.querySelectorAll('[data-lt]').forEach(b=>b.onclick=async()=>{b.textContent=(await cpy(P.titles[+b.dataset.lt]))?'COPIED':'FAILED'});$q('#mLpD').onclick=async e=>{e.target.textContent=(await cpy(P.desc))?'COPIED':'FAILED'}};
  $q('#mLpM').onchange=lpShow;window.__lpShow=lpShow;
@@ -873,7 +917,7 @@ window.mpcOpen=async function(){css();root=document.getElementById('mpcmk');root
    await Promise.all(["40px Anton","600 40px Oswald","30px VT323","700 40px Caveat","40px Reenie Beanie"].map(f=>document.fonts.load(f).catch(()=>{})));prepHands(await loadImg('mpc/hand_r.webp'),await loadImg('mpc/hand_l.webp'))}
   catch(e){root.innerHTML='<div class="pn"><div class="msg">The MPC did not load. Refresh the page.</div></div>';return}
   try{const {data}=await sb.from('beats').select('id,title,bpm,musical_key,preview_path,slug,tags').order('sort_order',{ascending:true}).order('created_at',{ascending:false});beats=(data||[]).filter(b=>b.preview_path)}catch(e){beats=[]}BEATS0=beats;
-  try{const {data}=await sb.from('packs').select('id,title,preview_path,slug').eq('published',true).order('created_at',{ascending:false});PACKS=(data||[]).filter(p=>p.preview_path).map(p=>({id:'p:'+p.id,title:p.title,bpm:null,musical_key:'',preview_path:p.preview_path,slug:p.slug,tags:'Sample pack'}))}catch(e){PACKS=[]}
+  try{const {data}=await sb.from('packs').select('id,title,preview_path,cover_path,slug').eq('published',true).order('created_at',{ascending:false});PACKS=(data||[]).filter(p=>p.preview_path).map(p=>({id:'p:'+p.id,title:p.title,bpm:null,musical_key:'',preview_path:p.preview_path,cover_path:p.cover_path,slug:p.slug,tags:'Sample pack'}))}catch(e){PACKS=[]}
   ST=load();if(!ST.th)ST.th={seed:1,pal:'',fmt:'h'};if(!ST.yt.v)ST.yt.v=0;if(!ST.tape)ST.tape=defaults().tape;if(!ST.eng)ST.eng=defaults().eng;if(!ST.smoke)ST.smoke=defaults().smoke;if(!ST.hands)ST.hands=defaults().hands;if(!ST.gen)ST.gen=defaults().gen;if(!ST.can)ST.can=defaults().can;if(!ST.cam)ST.cam=defaults().cam;if(!ST.open)ST.open={g_beat:1};S=null;if(packMode())beats=PACKS;root.innerHTML=html();wire();await ensureScene(ST.fmt);size();mounted=true;drawNow();if(ST.beat&&beats.some(b=>String(b.id)===String(ST.beat)))pick(ST.beat)}
 };
 window.mpcClose=function(){if(root)root.classList.remove('on');stopPlay()};
