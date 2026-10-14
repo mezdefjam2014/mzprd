@@ -432,7 +432,7 @@ function machine(c,ox,oy,sc,S,o){
  if(G.deck)deck(c,G,SRC,o.spin||0,S,o.power==null?1:o.power);if(G.arm&&o.arm)drawArm(c,G,DESKS.arm,o.arm);
  if(o.fx){knob(c,SRC,G.vol[0],G.vol[1],G.vol[2],o.fx.vol);if(G.con)knob(c,SRC,G.con[0],G.con[1],G.con[2],o.fx.con);if(G.fader)fader(c,G,SRC,o.fx.fader*u);for(const k in G.btn)button(c,SRC,G,G.btn[k],o.fx.btn[k]||0);if(G.wheel&&o.fx.wheel!=null)wheelMark(c,G.wheel,o.fx.wheel)}
  for(let i=0;i<(G.rows||4)*4;i++){const col=i%4,row=Math.floor(i/4),x=P.x0+col*P.px,y=P.y0+row*P.py,p=o.press(i);if(!(p>.004))continue;
-  c.fillStyle=plateCol(G,SRC,i);c.fillRect(x-3*u,y-3*u,P.w+6*u,P.h+6*u);
+  c.fillStyle=plateCol(G,SRC,i);c.fillRect(x-1.5*u,y+1*u,P.w+3*u,P.h+1.5*u);
   const k=1-.12*p,w=P.w*k,h=P.h*k,px=x+(P.w-w)/2,py=y+(P.h-h)/2+1.6*u*p;
   c.save();c.beginPath();c.rect(px,py,w,h);c.clip();c.drawImage(SRC,x,y,P.w,P.h,px,py,w,h);
   c.fillStyle='rgba(0,0,0,'+(.58*p).toFixed(3)+')';c.fillRect(px,py,w,h);
