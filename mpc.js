@@ -34,10 +34,10 @@ Object.assign(DKV.btn,{power:[790,598,26,16],soft1:[759,936,34,16],soft2:[803,93
 DK.wheel=[1160,822,35];DKV.wheel=[660,1170,31];
 /* the SAMPLE PACKS scene (2000 x 1131): an MPD218 pad controller (12 pads, 3 rows) and a Technics SL-1200 turntable with a spinning record */
 const DKP={id:'packh',W:2000,H:1131,u:1.32,sampled:true,glow:true,rows:3,lamp:DK.lamp,bulb:DK.bulb,cone:DK.cone,pad:{x0:596,y0:505,w:74,h:76,px:91.6,py:100.5},lcd:{x:612,y:389,w:219,h:84},
- btn:{power:[1047,744,52,52],start:[1046,838,98,68],end:[1046,838,98,68],stop:[495,734,44,25],play:[494,790,44,25]},vol:[905,407,21],deck:{cx:1400,cy:558,r:344,lab:92,strobe:[1100,735]},boot:['AKAI PROFESSIONAL MPD218','12 PADS / SL-1200MK2']};
+ btn:{power:[507,414,36,21],start:[1046,838,98,68],end:[1046,838,98,68],stop:[495,734,44,25],play:[494,790,44,25]},vol:[905,407,21],deck:{cx:1400,cy:558,r:344,lab:92,strobe:[1100,735]},boot:['AKAI MPD218','12 PADS  V1.0'],powLab:'rgba(225,222,212,.82)'};
 /* 9:16 shows the pad controller (a crop of the same photo) */
 const PX=430,DKPV={id:'packv',W:636,H:1131,u:1.32,sampled:true,glow:true,rows:3,lamp:[DK.lamp[0]-PX,DK.lamp[1],DK.lamp[2]],bulb:[DK.bulb[0]-PX,DK.bulb[1]],cone:{apex:[DK.cone.apex[0]-PX,DK.cone.apex[1]],a0:DK.cone.a0,a1:DK.cone.a1,len:DK.cone.len},
- pad:{x0:596-PX,y0:505,w:74,h:76,px:91.6,py:100.5},lcd:{x:612-PX,y:389,w:219,h:84},btn:{start:[494-PX,790,44,25],end:[495-PX,734,44,25]},vol:[905-PX,407,21],deck:{cx:1400-PX,cy:558,r:344,lab:92},boot:DKP.boot};
+ pad:{x0:596-PX,y0:505,w:74,h:76,px:91.6,py:100.5},lcd:{x:612-PX,y:389,w:219,h:84},btn:{power:[507-PX,414,36,21],start:[494-PX,790,44,25],end:[495-PX,734,44,25]},vol:[905-PX,407,21],deck:{cx:1400-PX,cy:558,r:344,lab:92},boot:DKP.boot,powLab:DKP.powLab};
 const GEO={deskh:DK,deskv:DKV,packh:DKP,packv:DKPV};
 const packMode=()=>!!(ST&&ST.src==='packs');
 /* the record's angle: it spins up when START is pressed and brakes to a stop at the end (33 1/3 RPM) */
@@ -181,7 +181,7 @@ function machine(c,ox,oy,sc,S,o){
  const led=(x,y,on,col)=>{c.fillStyle=on?col:'rgba(40,10,10,.9)';c.fillRect(x-4*u,y-2*u,8*u,3.4*u);if(on){const r=c.createRadialGradient(x,y,1,x,y,14*u);r.addColorStop(0,'rgba(255,60,40,.75)');r.addColorStop(1,'rgba(255,60,40,0)');c.fillStyle=r;c.fillRect(x-16*u,y-16*u,32*u,32*u)}};
  const ph=((lt%(bl*2))+bl*2)%(bl*2);
  if(G.leds){led(G.leds.play[0],G.leds.play[1],run,'#ff3a24');led(G.leds.rec[0],G.leds.rec[1],run,'#ff3a24');led(G.leds.over[0],G.leds.over[1],run&&ph<bl*.5,'#ff3a24')}
- if(o.power!=null&&G.btn&&G.btn.power&&!G.deck)powerSwitch(c,G,u,o.power);
+ if(o.power!=null&&G.btn&&G.btn.power)powerSwitch(c,G,u,o.power);
  c.restore()}
 /* a rocker power switch with a POWER label and a small green light: the rocker tips to the lit "I" side when the hand presses it (o.power 0 = off, 1 = on) */
 function powerSwitch(c,G,u,p){const r=G.btn.power,x=r[0],y=r[1],w=r[2],h=r[3],pl=4*u;c.save();
@@ -189,7 +189,7 @@ function powerSwitch(c,G,u,p){const r=G.btn.power,x=r[0],y=r[1],w=r[2],h=r[3],pl
  const hw=w/2,onSide=p>.5,drawHalf=(hx,up)=>{const g=c.createLinearGradient(0,y,0,y+h);if(up){g.addColorStop(0,'#e4e2dc');g.addColorStop(1,'#a9a69d')}else{g.addColorStop(0,'#3a3a3d');g.addColorStop(1,'#1d1d20')}c.fillStyle=g;const yy=up?y:y+h*.12,hh=up?h:h*.88;c.beginPath();c.roundRect?c.roundRect(hx+.6*u,yy,hw-1.2*u,hh,2*u):c.rect(hx+.6*u,yy,hw-1.2*u,hh);c.fill()};
  drawHalf(x,!onSide);drawHalf(x+hw,onSide);
  c.fillStyle=onSide?'#262628':'#c9c7c0';c.font='700 '+Math.round(h*.45)+'px Montserrat,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('O',x+hw/2,y+h*.52);c.fillStyle=onSide?'#262628':'#6b6b6e';c.fillText('I',x+hw*1.5,y+h*.52);
- c.fillStyle='rgba(58,55,48,.85)';c.font='700 '+Math.round(h*.34)+'px Montserrat,sans-serif';c.fillText('POWER',x+w/2,y-h*.42);
+ c.fillStyle=G.powLab||'rgba(58,55,48,.85)';c.font='700 '+Math.round(h*.34)+'px Montserrat,sans-serif';c.fillText('POWER',x+w/2,y-h*.42);
  const lx=x+w+pl+4*u,ly=y+h/2;c.fillStyle=onSide?'#3dff5a':'#102614';c.beginPath();c.arc(lx,ly,2.4*u,0,6.2832);c.fill();if(onSide){const rg=c.createRadialGradient(lx,ly,1,lx,ly,12*u);rg.addColorStop(0,'rgba(61,255,90,.55)');rg.addColorStop(1,'rgba(61,255,90,0)');c.fillStyle=rg;c.fillRect(lx-12*u,ly-12*u,24*u,24*u)}
  c.restore()}
 /* the start of every video: the unit is dark, a hand switches it on (the screen boots and types the beat name), then the hand presses PLAY START and the beat begins */
