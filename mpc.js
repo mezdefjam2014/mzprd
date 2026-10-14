@@ -502,7 +502,9 @@ const SKEM={fg:'#eaf3ff',bg:'rgba(70,120,255,.22)'};
 const DKL0={lcd:DK.lcd,glow:DK.glow},DKVL0={lcd:DKV.lcd,glow:DKV.glow};
 /* 9:16 desk: the same machine, scaled (from the pad grid) */
 const toV=r=>{const sx=75.3/83.7,sy=76.8/82.3;return{x:r[0]*sx+258-712*sx,y:r[1]*sy+935.5-570*sy,w:r[2]*sx,h:r[3]*sy}};
-function applySkinLcd(){const id=ST.skin||'orig',r=SKLCD[id];if(!r){DK.lcd=DKL0.lcd;DK.glow=DKL0.glow;DKV.lcd=DKVL0.lcd;DKV.glow=DKVL0.glow;DK.emit=DKV.emit=null;return}
+const DKP0=DK.pad,DKVP0=DKV.pad,SKPAD={g1:{x0:709,y0:572,w:75,h:68,px:85.2,py:84},g7:{x0:713,y0:553,w:71,h:67,px:86.2,py:86.5}};
+function applySkinPad(id){const P=SKPAD[id];if(!P){DK.pad=DKP0;DKV.pad=DKVP0;return}DK.pad=P;const sx=75.3/83.7,sy=76.8/82.3;DKV.pad={x0:P.x0*sx+258-712*sx,y0:P.y0*sy+935.5-570*sy,w:P.w*sx,h:P.h*sy,px:P.px*sx,py:P.py*sy}}
+function applySkinLcd(){const id=ST.skin||'orig',r=SKLCD[id];applySkinPad(id);if(!r){DK.lcd=DKL0.lcd;DK.glow=DKL0.glow;DKV.lcd=DKVL0.lcd;DKV.glow=DKVL0.glow;DK.emit=DKV.emit=null;return}
  DK.lcd={x:r[0],y:r[1],w:r[2],h:r[3]};DKV.lcd=toV(r);const em=id==='g3'?null:SKEM;DK.emit=DKV.emit=em;DK.glow=DKV.glow=!em}
 const SKINIMG={};
 async function loadSkin(id,fmt){if(!SKINS.some(k=>k[0]===id)){ST.skin='orig';id='orig'}applySkinLcd();if(id==='orig')return;const k=(fmt==='v'||fmt==='c')?'v':'h';SKINIMG[id]=SKINIMG[id]||{};if(!SKINIMG[id][k])SKINIMG[id][k]=await loadImg('mpc/desk_'+k+'_s'+id+'.webp?v=1')}
