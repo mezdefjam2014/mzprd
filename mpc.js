@@ -93,7 +93,7 @@ function quadPath(c,q){c.beginPath();q.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.mo
 function warp(c,img,q,N){const W=img.width,H=img.height,P=(u,v)=>[(q[0][0]*(1-u)+q[1][0]*u)*(1-v)+(q[3][0]*(1-u)+q[2][0]*u)*v,(q[0][1]*(1-u)+q[1][1]*u)*(1-v)+(q[3][1]*(1-u)+q[2][1]*u)*v];
  const tri=(s0,s1,s2,d0,d1,d2)=>{c.save();const cx=(d0[0]+d1[0]+d2[0])/3,cy=(d0[1]+d1[1]+d2[1])/3,ex=p=>[p[0]+(p[0]-cx)*.04,p[1]+(p[1]-cy)*.04];const e0=ex(d0),e1=ex(d1),e2=ex(d2);c.beginPath();c.moveTo(e0[0],e0[1]);c.lineTo(e1[0],e1[1]);c.lineTo(e2[0],e2[1]);c.closePath();c.clip();
   const x1=s1[0]-s0[0],y1=s1[1]-s0[1],x2=s2[0]-s0[0],y2=s2[1]-s0[1],u1=d1[0]-d0[0],v1=d1[1]-d0[1],u2=d2[0]-d0[0],v2=d2[1]-d0[1],det=x1*y2-x2*y1;if(!det){c.restore();return}
-  const A=(u1*y2-u2*y1)/det,B=(v1*y2-v2*y1)/det,C=(u2*x1-u1*x2)/det,D=(v2*x1-v1*x2)/det;c.transform(A,B,C,D,d0[0]-A*s0[0]-C*s0[1],d0[1]-B*s0[0]-D*s0[1]);c.drawImage(img,0,0);c.restore()};
+  const A=(u1*y2-u2*y1)/det,B=(v1*y2-v2*y1)/det,C=(u2*x1-u1*x2)/det,D=(v2*x1-v1*x2)/det;c.transform(A,B,C,D,d0[0]-A*s0[0]-C*s0[1],d0[1]-B*s0[0]-D*s0[1]);const bx=Math.max(0,Math.floor(Math.min(s0[0],s1[0],s2[0]))-1),by=Math.max(0,Math.floor(Math.min(s0[1],s1[1],s2[1]))-1),bw=Math.min(W,Math.ceil(Math.max(s0[0],s1[0],s2[0]))+1)-bx,bh=Math.min(H,Math.ceil(Math.max(s0[1],s1[1],s2[1]))+1)-by;if(bw>0&&bh>0)c.drawImage(img,bx,by,bw,bh,bx,by,bw,bh);c.restore()};
  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const u0=i/N,u1=(i+1)/N,v0=j/N,v1=(j+1)/N,a=P(u0,v0),b=P(u1,v0),cc=P(u1,v1),d=P(u0,v1),sa=[u0*W,v0*H],sb=[u1*W,v0*H],sc=[u1*W,v1*H],sd=[u0*W,v1*H];tri(sa,sb,sc,a,b,cc);tri(sa,sc,sd,a,cc,d)}}
 const SCV={};const scv=(k,w,h)=>{let cv=SCV[k];if(!cv){cv=SCV[k]=document.createElement('canvas');cv.width=w;cv.height=h}const x=cv.getContext('2d');x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,w,h);x.imageSmoothingEnabled=false;return[cv,x]};
 /* tiny 3x5 pixel font for the phone and pager LCDs */
@@ -295,7 +295,7 @@ function igScr(T){const W=360,H=780,[cv,x]=scv('ig',W,H),ims=RPIMG.ig||[],PH=500
 function drawRProp(c,G,Sx,T,la){const k=ST.rprop||'floppy',im=RPIMG[k];if(k==='floppy'||!im)return;c.save();c.drawImage(im,RPAT[0],RPAT[1]);let q=RSQ[k];
  if(k==='iphone'&&+ST.iprot){const a=+ST.iprot*Math.PI/180,cx=q.reduce((v,p)=>v+p[0],0)/4,cy=q.reduce((v,p)=>v+p[1],0)/4,co=Math.cos(a),si=Math.sin(a);q=q.map(p=>[cx+(p[0]-cx)*co-(p[1]-cy)*si,cy+(p[0]-cx)*si+(p[1]-cy)*co])}
  if(k==='gameboy'||k==='mini'){c.save();quadPath(c,q);c.clip();c.globalCompositeOperation='multiply';c.globalAlpha=k==='mini'?.82:.9;warp(c,k==='gameboy'?gbScr(T):miniScr(T,Sx,la),q,4);c.restore()}
- else{const ip=k==='iphone',scr=k==='bberry'?bbScr(T):k==='sidekick'?skScr(T):igScr(T);c.save();quadPath(c,q);c.clip();if(!ip){c.fillStyle='#000';c.fill()}warp(c,scr,q,ip?10:6);
+ else{const ip=k==='iphone',scr=k==='bberry'?bbScr(T):k==='sidekick'?skScr(T):igScr(T);c.save();quadPath(c,q);c.clip();if(!ip){c.fillStyle='#000';c.fill()}warp(c,scr,q,ip?6:4);
   const g=c.createLinearGradient(q[0][0],q[0][1],q[2][0],q[2][1]);g.addColorStop(0,'rgba(255,255,255,.10)');g.addColorStop(.45,'rgba(255,255,255,0)');g.addColorStop(1,'rgba(0,0,0,.15)');c.fillStyle=g;if(!ip){c.fill();c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.5)';quadPath(c,q);c.stroke()}c.restore();
   c.save();c.globalCompositeOperation='lighter';const cx=(q[0][0]+q[2][0])/2,cy=(q[0][1]+q[2][1])/2,gl=c.createRadialGradient(cx,cy,30,cx,cy,170);gl.addColorStop(0,'rgba(120,160,255,.07)');gl.addColorStop(1,'rgba(120,160,255,0)');c.fillStyle=gl;c.fillRect(cx-170,cy-170,340,340);c.restore()}
  c.restore()}
