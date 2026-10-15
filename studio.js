@@ -139,7 +139,7 @@ function html(){
    <label>TAGS <span id="yGi" style="color:#6c6c73"></span></label><textarea id="yG"></textarea><div class="cnt" id="yGc"></div>
    <div class="two2" style="margin-top:6px"><button class="btn" data-c="yG">COPY TAGS</button><button class="btn" data-n="g">NEXT TAGS</button></div>
   </div>
-  <div class="pn yt" id="ygP" style="margin-top:18px"><h4>YT STUDIO: PACKAGES + THUMBNAILS</h4><div id="ygN"></div>
+  <div class="pn yt" id="ygP" style="margin-top:18px"><h4>YT STUDIO: PACKAGES + THUMBNAILS</h4><div id="ygN"></div></div>
  </div>
  <div>
   <div class="pn"><h4>PRESET STYLE</h4>
