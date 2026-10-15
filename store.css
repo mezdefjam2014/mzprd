@@ -188,3 +188,14 @@ body.store .fsub button{background:#0d0d0d!important;color:#fff!important;border
 body.store footer.f{margin-top:40px;padding:26px 16px;text-align:center;font:500 12px Inter,sans-serif;letter-spacing:.08em}
 body.store .bp .prc,body.store .bp .price{font:800 26px Inter,sans-serif}
 body.store #bpage #bX{border-radius:50%;border:1px solid #ddd;background:#fff}
+/* You May Also Like: lighter and quieter */
+.st-rel{padding-top:40px}
+.st-rel h2{font:700 14px Inter,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#777;margin-bottom:18px}
+.st-rel .st-grid{max-width:860px;margin:0 auto;gap:22px}
+.st-rel .st-card{background:none;box-shadow:none;padding:0;border-radius:0}
+.st-rel .st-card:hover{transform:translateY(-3px);box-shadow:none}
+.st-rel .st-cv{border-radius:10px;box-shadow:0 8px 22px rgba(0,0,0,.12)}
+.st-rel .st-tag{display:none}
+.st-rel .st-nm{text-align:left;margin:10px 2px 2px;font:600 14px Inter,sans-serif}
+.st-rel .st-pr{background:none;color:#777;text-align:left;padding:0 2px;font:500 13px Inter,sans-serif;width:auto}
+.st-rel .st-pr s{color:#aaa}
