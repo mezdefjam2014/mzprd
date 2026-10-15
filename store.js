@@ -31,7 +31,7 @@ const caseEl=$('.case');caseEl.insertBefore(home,caseEl.querySelector('.view'));
 const navA=[...top.querySelectorAll('.st-nav a')];
 function mark(v){navA.forEach(a=>a.classList.toggle('on',(a.dataset.v||a.dataset.h)===v))}
 function showHome(push){document.title='MZPRD | Beats & Sample Packs';document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-home'));mark('home');if(push&&location.pathname!==(window.BASEPATH||'/'))history.pushState(null,'',window.BASEPATH||'/');render();scrollTo(0,0)}
-navA.forEach(a=>a.onclick=()=>{if(a.dataset.v){const b=document.querySelector('header nav button[data-v="'+a.dataset.v+'"]');if(b)b.click();mark(a.dataset.v)}else if(a.dataset.h==='home')showHome(true);else{showHome(true);setTimeout(()=>{const f=$('#stFaq');if(f)f.scrollIntoView({behavior:'smooth'})},60)}});
+navA.forEach(a=>a.onclick=()=>{if(a.dataset.v){const b=document.querySelector('header nav button[data-v="'+a.dataset.v+'"]');if(b)b.click();mark(a.dataset.v)}else if(a.dataset.h==='home')showHome(true);else{const b=document.querySelector('header nav button[data-v="about"]');if(b)b.click();mark('about');setTimeout(()=>{const f=$('#stFaq');if(f)f.scrollIntoView({behavior:'smooth'})},120)}});
 $('#stLogo').onclick=()=>showHome(true);
 /* keep the nav underline in step with the site's own view changes */
 new MutationObserver(()=>{const on=document.querySelector('.view.on');if(!on)return;const v=on.id.slice(2);mark(v==='beat'?'beats':v)}).observe(caseEl,{subtree:true,attributes:true,attributeFilter:['class']});
@@ -59,7 +59,8 @@ function render(force){const bs=B(),ps=P(),s=bs.length+'|'+ps.length+'|'+pg+'|'+
  ${f?(()=>{const art=fImg||(()=>{try{return coverUrl(f,800)}catch(e){return''}})();return `<div class="st-feat st-feat2" style="--fbg:url('${esc(art)}')"><div class="in"><div class="st-fart"><div class="st-fvin"><img src="mpc/endvinyl.webp?v=1" alt=""><img class="st-flab" src="${esc(art)}" alt=""></div><div class="st-fcov">${fImg?'<img src="'+esc(fImg)+'" alt="">':cov(f,fk==='b'?fIdx:fIdx+2)}</div></div><div class="st-ftx"><span class="st-feye">${fk==='p'?'FEATURED SAMPLE PACK':'FEATURED BEAT'}</span><h3>${esc(f.title)}</h3>${f.description?'<div class="d">'+esc(f.description)+'</div>':''}<div class="p">${window.MZPrice?MZPrice(fk,f):m(fk==='b'?priceOf(f):f.price)}</div><div class="st-fbtns"><button class="a" id="stFa">Add to cart</button><button class="b" id="stFb">${f.preview_path?'▶ Play preview':'View'}</button></div><button class="lnk" id="stFv">View details →</button></div></div></div>`})():''}
  ${bs.length?`<button class="st-bteaser" data-go="beats"><span>🎧</span><b>Also available: beats &amp; instrumentals</b><em>${bs.length} beats →</em></button>`:''}
  ${pick.length?`<section class="st-sec"><h2>Try These</h2><div class="st-grid">${pick.map(([k,x,i])=>card(k,x,i)).join('')}</div></section>`:''}
- <section class="st-sec" id="stFaq"><h2>FAQs</h2><div class="st-faq">${FAQ.map(q=>'<details><summary>'+esc(q[0])+'</summary><p>'+esc(q[1])+'</p></details>').join('')}</div></section>`;
+`;
+ {const va=document.getElementById('v-about');if(va&&!document.getElementById('stFaq')){const f=document.createElement('section');f.className='st-sec';f.id='stFaq';f.innerHTML='<h2>FAQs</h2><div class="st-faq">'+FAQ.map(q=>'<details><summary>'+esc(q[0])+'</summary><p>'+esc(q[1])+'</p></details>').join('')+'</div>';va.appendChild(f)}}
  wire(home);
  {const pb=document.getElementById('stPackBands');if(pb)pb.remove()}
  {const vb=document.getElementById('v-beats');let hb=document.getElementById('stHotB');if(vb&&bs.length){if(!hb){hb=document.createElement('section');hb.id='stHotB';hb.className='st-sec st-hotb';vb.insertBefore(hb,vb.firstChild)}
