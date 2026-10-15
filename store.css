@@ -245,3 +245,4 @@ body.store #bpage .more{display:none!important}
 .st-sl.in{z-index:2}
 .st-sl.in .st-scv{transition:transform .25s}.st-sl.in:hover .st-scv{transform:scale(1.03)}
 .st-sbtn{display:inline-block}
+.st-tick{padding:8px 0}.st-tick div{font-size:clamp(14px,1.4vw,17px)}.st-tick span{margin:0 18px}
