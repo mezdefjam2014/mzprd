@@ -60,5 +60,9 @@ function drop(){const s=S(),tk=$('.st-tick');if(!tk)return;let el=$('#stDrop');i
  const sec=Math.floor((t-now)/1000),d=Math.floor(sec/86400),h=Math.floor(sec%86400/3600),mi=Math.floor(sec%3600/60),se=sec%60,p=n=>String(n).padStart(2,'0');
  el.innerHTML='<span>🔥 NEXT DROP IN</span><b>'+(d?d+'<small>d</small> ':'')+p(h)+'<small>h</small> '+p(mi)+'<small>m</small> '+p(se)+'<small>s</small></b>'}
 
-setInterval(()=>{for(const f of [trust,player,related,bundles,cartMem,drop]){try{f()}catch(e){}}},500);
+/* pack covers in grids: the record peeks out of the sleeve and spins */
+function sleeves(){const sel=['#packs .card .cv','.st-card[data-k="p"] .st-cv'];document.querySelectorAll(sel.join(',')).forEach(cv=>{if(cv.parentElement.classList.contains('st-vw'))return;
+ const card=cv.closest('.card,.st-card');let art='';const im=cv.querySelector('img');if(im)art=im.getAttribute('src');
+ const w=document.createElement('div');w.className='st-vw';cv.parentElement.insertBefore(w,cv);w.innerHTML='<div class="st-vrec"><img src="mpc/endvinyl.webp?v=1" alt="">'+(art?'<img class="st-vlab" src="'+esc(art)+'" alt="">':'')+'</div>';w.appendChild(cv);if(card)card.classList.add('st-hasvin')})}
+setInterval(()=>{for(const f of [trust,player,related,bundles,cartMem,drop,sleeves]){try{f()}catch(e){}}},500);
 })();
