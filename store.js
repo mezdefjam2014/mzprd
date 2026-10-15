@@ -2,7 +2,12 @@
 (function(){
 const PROMO='New beats every week  •  Instant download after checkout';
 const TICK=['New Beats Every Week','Vinyl Sample Packs','Instant Download','Royalty-Free Loops','Prod. MZPRD'];
-const FAQ=[['What do I get when I buy a beat?','An instant download of the beat after checkout, with the license that matches what you picked.'],
+const FAQ=[['What is inside a sample pack?','Original loops and compositions made to be chopped and flipped, labelled with BPM and key, ready to drag into your DAW or MPC.'],
+ ['What format are the samples?','High quality WAV files, so they sound clean in any DAW, sampler or MPC.'],
+ ['Do I need to clear the samples?','No. Every sound is original and made by MZPRD, so there is nothing to clear. Use them in your beats and releases.'],
+ ['What if my song gets flagged for a sample?','Get in touch with your order details and I will help you sort it out.'],
+ ['Can I sell beats made with the packs?','Yes. Make beats, sell them, place them. You just cannot resell or share the samples on their own.'],
+ ['How do I get my pack after buying?','The download is ready right after checkout. If you have an account, it also stays in your purchases so you can download it again.'],['What do I get when I buy a beat?','An instant download of the beat after checkout, with the license that matches what you picked.'],
  ['Can I use MZPRD sample packs in commercial songs?','Yes. The packs are royalty free for your beats and releases. Just do not resell the samples as they are.'],
  ['How are the samples made?','Every sound is original, recorded and made by MZPRD, so there is nothing to clear.'],
  ['How fast is delivery?','Right away. Your download is ready as soon as the payment goes through.'],
