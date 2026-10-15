@@ -6,26 +6,29 @@
 (function(){
 const SITE='https://mzprd.com',KEY='mzprd_email_list';
 const STYLES={
- dark:{n:'DARK',bg:'#09090c',card:'#111116',text:'#e9e9ee',sub:'#9a9aa5',accent:'#e0242f',btn:'#ffffff',line:'#26262e',gold:'#e8b94a'},
- gold:{n:'GOLD',bg:'#050505',card:'#0e0c08',text:'#f5efe0',sub:'#a89a78',accent:'#e8b94a',btn:'#000000',line:'#3a2f17',gold:'#e8b94a'},
- light:{n:'LIGHT',bg:'#f2f2f5',card:'#ffffff',text:'#101014',sub:'#5b5b66',accent:'#e0242f',btn:'#ffffff',line:'#e2e2e8',gold:'#b8860b'}
+ crate:{n:'CRATE',bg:'#050506',card:'#0b0b0d',text:'#ffffff',sub:'#9a9aa2',accent:'#e0242f',btn:'#ffffff',line:'#1f1f23',gold:'#e0242f'},
+ sleeve:{n:'SLEEVE',bg:'#050506',card:'#111113',text:'#ffffff',sub:'#a2a2aa',accent:'#e0242f',btn:'#ffffff',line:'#26262a',gold:'#e0242f'},
+ ticket:{n:'TICKET',bg:'#0a0a0b',card:'#e0242f',text:'#ffffff',sub:'#ffd9db',accent:'#0a0a0b',btn:'#ffffff',line:'#a8121b',gold:'#ffffff'},
+ zine:{n:'ZINE',bg:'#d9d5cc',card:'#f1eee8',text:'#0a0a0b',sub:'#4a4a50',accent:'#e0242f',btn:'#ffffff',line:'#0a0a0b',gold:'#e0242f'}
 };
-const TYPES={drop:'NEW DROP',teaser:'TEASER (COMING SOON)',last:'LAST CALL',promo:'PROMO / SALE'};
-const HEAD={drop:'NEW DROP',teaser:'COMING SOON',last:'LAST CALL',promo:'SALE'};
-const CTA={drop:'LISTEN & GET IT',teaser:'GET A FIRST LOOK',last:'GET IT BEFORE IT IS GONE',promo:'SHOP THE SALE'};
+const TYPES={drop:'NEW DROP',teaser:'TEASER (COMING SOON)',last:'LAST CALL',promo:'PROMO / SALE',roundup:'PACK ROUNDUP (MULTIPLE PACKS)'};
+const HEAD={drop:'NEW DROP',teaser:'COMING SOON',last:'LAST CALL',promo:'SALE',roundup:'NEW PACKS'};
+const CTA={drop:'LISTEN & GET IT',teaser:'GET A FIRST LOOK',last:'GET IT BEFORE IT IS GONE',promo:'SHOP THE SALE',roundup:'SHOP ALL PACKS'};
 const SUBJ={
  drop:[x=>'New '+x.noun+' out now: '+x.T,x=>'"'+x.T+'" just dropped',x=>x.T+' is live'+(x.info?' ('+x.info+')':''),x=>'Fresh from the studio: '+x.T],
  teaser:[x=>'Coming '+(x.when||'soon')+': '+x.T,x=>'Something new drops '+(x.when||'soon'),x=>'First look: "'+x.T+'"'],
  last:[x=>'Last call: '+x.T,x=>'Still available: '+x.T,x=>'Do not sleep on "'+x.T+'"'],
+ roundup:[x=>x.packs.length+' new sample packs just landed',x=>'Fresh packs: '+x.packs.slice(0,3).map(p=>p.T).join(', '),x=>'Your next pack is in here'],
  promo:[x=>x.promoLine,x=>'All beats '+x.promoPrice+' - limited time',x=>'The beat sale is on']
 };
 const BODY={
  drop:[x=>'A new '+x.mood+' '+x.genre+' '+x.noun+' just landed. Hit play, feel it out, and grab it before someone else does.',x=>'"'+x.T+'" is live on MZPRD. '+(x.info?x.info+'. ':'')+'Preview it now and download it instantly after you check out.',x=>'Fresh out of the studio: '+x.T+'. Listen first, then lock it in.'],
  teaser:[x=>'Something new is dropping '+(x.when||'soon')+'. Here is a first look at "'+x.T+'". Mark your calendar.',x=>'"'+x.T+'" lands '+(x.when||'soon')+'. '+(x.info?x.info+'. ':'')+'Be first in line.',x=>'New '+x.noun+' loading. Preview "'+x.T+'" now, it goes live '+(x.when||'soon')+'.'],
  last:[x=>'"'+x.T+'" is still available, but not for long. If it has been on your list, now is the time.',x=>'Quick reminder: "'+x.T+'" is waiting for you. Preview it again and get it today.',x=>'You listened, now finish the job. "'+x.T+'" is ready to download.'],
+ roundup:[x=>'Fresh sounds just hit the store. Preview every pack, then grab the ones that fit your sound.',x=>x.packs.length+' packs, all royalty-free and ready to flip. Pick your favorite below.',x=>'New drums, loops and one-shots. Tap any pack to hear it.'],
  promo:[x=>x.promoLine+'. Every beat on the site, one price. Preview anything and download instantly.',x=>'The sale is on: all beats '+x.promoPrice+' for a limited time. Start with "'+x.T+'".',x=>'Grab more for less. All beats '+x.promoPrice+' right now.']
 };
-const E={stk:{},stkBusy:{},items:[],kind:'beats',item:null,type:'drop',style:'dark',sj:0,bd:0,rec:[],bcc:true,when:'',dt:'',headline:'',body:'',cta:'',addr:'',foot:true};
+const E={multi:[],stk:{},stkBusy:{},items:[],kind:'beats',item:null,type:'drop',style:'crate',sj:0,bd:0,rec:[],bcc:true,when:'',dt:'',headline:'',body:'',cta:'',addr:'',foot:true};
 let root=null,mounted=false;
 const $q=s=>root.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -38,7 +41,8 @@ function ctx(){
  let when=E.when.trim();
  if(E.dt){const d=new Date(E.dt);if(!isNaN(d))when=when||d.toLocaleString([], {weekday:'long',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'})}
  const pr=(typeof promo!=='undefined'&&promo)||{};
- return{it,isB,noun:isB?'beat':'pack',T:it.title||'Untitled',mood:tags[1]||'hard',genre:(tags[0]||'hip hop').toLowerCase(),info,when,
+ const packs=E.multi.map(id=>E.items.find(i=>i._k==='packs'&&String(i.id)===id)).filter(Boolean).map(p=>{const ps=p.slug||String(p.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||p.id;return{T:p.title||'Untitled',url:SITE+'/pack/'+ps+'/',cover:p.cover_path?pub(p.cover_path):'',price:p.price!=null?'$'+Number(p.price).toFixed(2).replace(/\.00$/,''):''}});
+ return{packs,it,isB,noun:isB?'beat':'pack',T:it.title||'Untitled',mood:tags[1]||'hard',genre:(tags[0]||'hip hop').toLowerCase(),info,when,
   url:SITE+'/'+(isB?'beat':'pack')+'/'+sl+'/',cover:it.cover_path?pub(it.cover_path):(isB&&E.stk[it.id]||''),
   promoPrice:pr.promo_price!=null?'$'+Number(pr.promo_price).toFixed(0):'$10',promoLine:((pr.promo_text||'ALL BEATS')+' '+(pr.promo_price!=null?'$'+Number(pr.promo_price).toFixed(0):'$10')).trim()};
 }
@@ -51,25 +55,80 @@ function calUrl(x,c){
  return'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('MZPRD drop: '+x.T)+'&dates='+f(d)+'/'+f(e)+'&details='+encodeURIComponent('Listen and get it: '+x.url)+'&location='+encodeURIComponent(SITE);
 }
 function mailHtml(){
- const c=content(),x=c.x,s=STYLES[E.style],cal=calUrl(x,c),F="'Arial Black','Helvetica Neue',Arial,sans-serif",B="'Helvetica Neue',Arial,sans-serif";
- const pre=c.body.slice(0,110);
- const drop=x.when&&(E.type==='drop'||E.type==='teaser')?`<tr><td style="padding:6px 28px 4px"><table role="presentation" cellspacing="0" cellpadding="0" width="100%" style="border:1px solid ${s.accent}"><tr><td align="center" style="padding:14px;font:700 13px ${B};letter-spacing:3px;color:${s.accent}">${E.type==='teaser'?'DROPS':'LIVE'} ${esc(x.when).toUpperCase()}</td></tr></table></td></tr>`:'';
- return`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="${E.style==='light'?'light':'dark light'}"><title>${esc(c.subject)}</title></head>
+ const c=content(),x=c.x,s=STYLES[E.style]||STYLES.crate,L=E.style,cal=calUrl(x,c),A="Anton,Impact,'Arial Narrow Bold','Arial Black',sans-serif",B="Inter,'Helvetica Neue',Arial,sans-serif";
+ const T=`role="presentation" cellspacing="0" cellpadding="0" border="0"`,u=esc(x.url),cv=x.cover?esc(x.cover):'',hd=esc(c.headline).toUpperCase(),tt=esc(x.T).toUpperCase(),when=x.when&&(E.type==='drop'||E.type==='teaser')?esc(x.when).toUpperCase():'';
+ const btn=(bg,fg,bd)=>`<table ${T}><tr><td bgcolor="${bg}" style="background:${bg};${bd?'border:2px solid '+bd+';':''}"><a href="${E.type==='roundup'?SITE:u}" style="display:inline-block;padding:17px 38px;font:800 13px ${B};letter-spacing:4px;color:${fg};text-decoration:none">${esc(c.cta).toUpperCase()} &rarr;</a></td></tr></table>`;
+ const links=col=>`<a href="${u}" style="color:${col};text-decoration:none">&#9654; PLAY PREVIEW</a>${cal?` &nbsp;&middot;&nbsp; <a href="${esc(cal)}" style="color:${col};text-decoration:none">ADD TO CALENDAR</a>`:''} &nbsp;&middot;&nbsp; <a href="${SITE}" style="color:${col};text-decoration:none">${x.isB?'ALL BEATS':'ALL PACKS'}</a>`;
+ const img=(w,st)=>cv?`<a href="${u}" style="text-decoration:none"><img src="${cv}" width="${w}" alt="${esc(x.T)}" style="display:block;width:100%;max-width:${w}px;height:auto;border:0;${st||''}"></a>`:'';
+ const foot=(col,bd)=>E.foot?`<tr><td style="padding:22px 32px;border-top:1px solid ${bd};font:400 11px/1.7 ${B};color:${col}">You're getting this because you listened to, bought from or signed up with MZPRD. Don't want these? Reply STOP and you're off the list.${E.addr.trim()?'<br>'+esc(E.addr.trim()):''}<br><a href="${SITE}" style="color:${col}">${SITE.replace('https://','')}</a></td></tr>`:'';
+ const mark=(col,sz)=>`<span style="font:400 ${sz||22}px/1 ${A};letter-spacing:6px;color:${col}">MZPRD</span>`;
+ let body='';
+ if(E.type==='roundup')return roundupHtml(c,x,s,L,T,A,B,btn,mark,foot);
+ if(L==='crate')body=`
+<tr><td style="padding:20px 32px;border-bottom:1px solid ${s.line}"><table ${T} width="100%"><tr><td>${mark('#fff')}</td><td align="right" style="font:800 10px ${B};letter-spacing:4px;color:${s.accent}">&#9679; ${hd}</td></tr></table></td></tr>
+${cv?`<tr><td style="padding:0">${img(600)}</td></tr><tr><td height="4" bgcolor="${s.accent}" style="font-size:0;line-height:0;background:${s.accent}">&nbsp;</td></tr>`:''}
+<tr><td style="padding:34px 32px 8px"><div style="font:400 58px/0.95 ${A};color:#fff;letter-spacing:1px">${tt}</div>
+${x.info?`<div style="margin-top:14px;font:800 11px ${B};letter-spacing:4px;color:${s.sub}">${esc(x.info)}</div>`:''}</td></tr>
+<tr><td style="padding:14px 32px 6px;font:400 16px/1.65 ${B};color:#c9c9cf">${esc(c.body)}</td></tr>
+${when?`<tr><td style="padding:16px 32px 0"><table ${T} width="100%"><tr><td style="border-left:4px solid ${s.accent};padding:12px 16px;background:#141416;font:400 22px/1 ${A};letter-spacing:2px;color:#fff">${E.type==='teaser'?'DROPS':'LIVE'} ${when}</td></tr></table></td></tr>`:''}
+<tr><td style="padding:28px 32px 10px">${btn(s.accent,'#fff')}</td></tr>
+<tr><td style="padding:10px 32px 30px;font:800 10px ${B};letter-spacing:3px">${links('#8a8a92')}</td></tr>${foot(s.sub,s.line)}`;
+ else if(L==='sleeve')body=`
+<tr><td height="6" bgcolor="${s.accent}" style="font-size:0;line-height:0;background:${s.accent}">&nbsp;</td></tr>
+<tr><td align="center" style="padding:24px 28px 6px">${mark('#fff',26)}</td></tr>
+<tr><td align="center" style="padding:0 28px 22px;font:800 10px ${B};letter-spacing:5px;color:${s.accent}">${hd}</td></tr>
+<tr><td style="padding:0 28px"><table ${T} width="100%" bgcolor="#0a0a0b" style="background:#0a0a0b;border:1px solid ${s.line}"><tr>
+${cv?`<td width="250" valign="top" style="padding:16px">${img(250,'box-shadow:0 14px 30px rgba(0,0,0,.7)')}</td>`:''}
+<td valign="middle" style="padding:20px 20px 20px ${cv?'4':'20'}px"><div style="font:800 10px ${B};letter-spacing:4px;color:${s.sub}">${x.isB?'BEAT':'SAMPLE PACK'}</div>
+<div style="margin-top:8px;font:400 36px/1 ${A};color:#fff">${tt}</div>${x.info?`<div style="margin-top:10px;font:700 11px ${B};letter-spacing:3px;color:${s.sub}">${esc(x.info)}</div>`:''}
+<div style="margin-top:14px;height:2px;width:46px;background:${s.accent};font-size:0">&nbsp;</div></td></tr></table></td></tr>
+<tr><td style="padding:24px 34px 6px;font:400 16px/1.65 ${B};color:#c9c9cf;text-align:center">${esc(c.body)}</td></tr>
+${when?`<tr><td align="center" style="padding:14px 28px 0;font:400 20px ${A};letter-spacing:3px;color:#fff">${E.type==='teaser'?'DROPS':'LIVE'} <span style="color:${s.accent}">${when}</span></td></tr>`:''}
+<tr><td align="center" style="padding:26px 28px 10px">${btn(s.accent,'#fff')}</td></tr>
+<tr><td align="center" style="padding:10px 28px 30px;font:800 10px ${B};letter-spacing:3px">${links('#8a8a92')}</td></tr>${foot(s.sub,s.line)}`;
+ else if(L==='ticket')body=`
+<tr><td style="padding:22px 30px 0"><table ${T} width="100%"><tr><td>${mark('#fff')}</td><td align="right" style="font:800 10px ${B};letter-spacing:4px;color:#fff">NO. ${String(x.it.id||'').replace(/\D/g,'').slice(0,4)||'001'}</td></tr></table></td></tr>
+<tr><td style="padding:18px 30px 0;font:400 92px/0.9 ${A};color:#0a0a0b;letter-spacing:1px">${hd}</td></tr>
+<tr><td style="padding:22px 30px 0">${cv?`<table ${T} width="100%"><tr><td style="border:8px solid #0a0a0b;background:#0a0a0b">${img(524)}</td></tr></table>`:''}</td></tr>
+<tr><td style="padding:22px 30px 0"><div style="font:400 40px/1 ${A};color:#fff">${tt}</div>${x.info?`<div style="margin-top:10px;font:800 11px ${B};letter-spacing:4px;color:#0a0a0b">${esc(x.info)}</div>`:''}</td></tr>
+<tr><td style="padding:14px 30px 0;font:500 16px/1.6 ${B};color:#fff">${esc(c.body)}</td></tr>
+<tr><td style="padding:26px 0 0"><table ${T} width="100%"><tr><td style="border-top:2px dashed #0a0a0b;font-size:0;line-height:0">&nbsp;</td></tr></table></td></tr>
+<tr><td style="padding:22px 30px 26px"><table ${T} width="100%"><tr><td valign="middle" style="font:400 22px/1.1 ${A};letter-spacing:2px;color:#0a0a0b">${when?(E.type==='teaser'?'DROPS ':'LIVE ')+when:'ADMIT ONE'}</td><td align="right" valign="middle">${btn('#0a0a0b','#fff')}</td></tr></table></td></tr>
+<tr><td style="padding:0 30px 26px;font:800 10px ${B};letter-spacing:3px">${links('#fff')}</td></tr>${foot('#ffd9db',s.line)}`;
+ else body=`
+<tr><td style="padding:24px 30px 18px;border-bottom:3px solid #0a0a0b"><table ${T} width="100%"><tr><td>${mark('#0a0a0b',26)}</td><td align="right" style="font:800 10px ${B};letter-spacing:4px;color:#0a0a0b">ISSUE &mdash; ${new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'}).toUpperCase()}</td></tr></table></td></tr>
+<tr><td style="padding:26px 30px 0"><span style="display:inline-block;background:${s.accent};color:#fff;font:800 10px ${B};letter-spacing:4px;padding:7px 10px">${hd}</span></td></tr>
+<tr><td style="padding:14px 30px 0;font:400 64px/0.92 ${A};color:#0a0a0b">${tt}</td></tr>
+${cv?`<tr><td style="padding:22px 30px 0">${img(540,'filter:grayscale(0)')}</td></tr>`:''}
+<tr><td style="padding:20px 30px 0"><table ${T} width="100%"><tr><td valign="top" width="60%" style="padding-right:18px;font:500 16px/1.6 ${B};color:#1a1a1d">${esc(c.body)}</td><td valign="top" style="border-left:3px solid #0a0a0b;padding-left:16px;font:800 10px/2 ${B};letter-spacing:3px;color:#0a0a0b">${x.isB?'BEAT':'SAMPLE PACK'}${x.info?'<br>'+esc(x.info):''}${when?'<br><span style="color:'+s.accent+'">'+(E.type==='teaser'?'DROPS ':'LIVE ')+when+'</span>':''}</td></tr></table></td></tr>
+<tr><td style="padding:28px 30px 10px">${btn('#0a0a0b','#fff')}</td></tr>
+<tr><td style="padding:10px 30px 30px;font:800 10px ${B};letter-spacing:3px">${links('#0a0a0b')}</td></tr>${foot(s.sub,'#0a0a0b')}`;
+ return`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="${L==='zine'?'light':'dark'}"><title>${esc(c.subject)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet"></head>
 <body style="margin:0;padding:0;background:${s.bg}">
-<span style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;font-size:1px">${esc(pre)}</span>
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="${s.bg}" style="background:${s.bg}"><tr><td align="center" style="padding:24px 12px">
-<table role="presentation" width="600" cellspacing="0" cellpadding="0" bgcolor="${s.card}" style="width:100%;max-width:600px;background:${s.card};border:1px solid ${s.line}">
-<tr><td align="center" style="padding:18px 24px;border-bottom:1px solid ${s.line};font:700 15px ${F};letter-spacing:8px;color:${s.text}">MZPRD</td></tr>
-${x.cover?`<tr><td style="padding:0"><a href="${esc(x.url)}" style="text-decoration:none"><img src="${esc(x.cover)}" width="600" alt="${esc(x.T)}" style="display:block;width:100%;max-width:600px;height:auto;border:0"></a></td></tr>`:''}
-<tr><td style="padding:28px 28px 6px"><div style="font:700 12px ${B};letter-spacing:4px;color:${s.accent}">${esc(c.headline).toUpperCase()}</div>
-<div style="margin:10px 0 0;font:900 34px/1.1 ${F};color:${s.text};text-transform:uppercase">${esc(x.T)}</div>
-${x.info?`<div style="margin:10px 0 0;font:700 13px ${B};letter-spacing:3px;color:${s.gold}">${esc(x.info)}</div>`:''}</td></tr>
-<tr><td style="padding:14px 28px 12px;font:400 16px/1.6 ${B};color:${s.sub}">${esc(c.body)}</td></tr>
-${drop}
-<tr><td align="center" style="padding:18px 28px 8px"><table role="presentation" cellspacing="0" cellpadding="0"><tr><td align="center" bgcolor="${s.accent}" style="background:${s.accent}"><a href="${esc(x.url)}" style="display:inline-block;padding:16px 34px;font:700 14px ${B};letter-spacing:3px;color:${s.btn};text-decoration:none">${esc(c.cta).toUpperCase()}</a></td></tr></table></td></tr>
-<tr><td align="center" style="padding:6px 28px 26px;font:600 12px ${B};letter-spacing:2px"><a href="${esc(x.url)}" style="color:${s.text};text-decoration:underline">&#9654; PLAY THE PREVIEW</a>${cal?` &nbsp;&nbsp;|&nbsp;&nbsp; <a href="${esc(cal)}" style="color:${s.text};text-decoration:underline">ADD TO CALENDAR</a>`:''} &nbsp;&nbsp;|&nbsp;&nbsp; <a href="${SITE}" style="color:${s.text};text-decoration:underline">ALL BEATS</a></td></tr>
-${E.foot?`<tr><td style="padding:18px 28px;border-top:1px solid ${s.line};font:400 11px/1.6 ${B};color:${s.sub}">You are getting this because you listened to, bought from or signed up with MZPRD. If you do not want these emails, just reply with the word STOP and you will be removed.${E.addr.trim()?'<br>'+esc(E.addr.trim()):''}<br><a href="${SITE}" style="color:${s.sub}">${SITE.replace('https://','')}</a></td></tr>`:''}
+<span style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;font-size:1px">${esc(c.body.slice(0,110))}</span>
+<table ${T} width="100%" bgcolor="${s.bg}" style="background:${s.bg}"><tr><td align="center" style="padding:28px 12px">
+<table ${T} width="600" bgcolor="${s.card}" style="width:100%;max-width:600px;background:${s.card}${L==='crate'||L==='sleeve'?';border:1px solid '+s.line:''}">${body}
 </table></td></tr></table></body></html>`;
+}
+function roundupHtml(c,x,s,L,T,A,B,btn,mark,foot){
+ const lite=L==='zine',red=L==='ticket',ink=lite||red?'#0a0a0b':'#fff',cardBg=red?'#0a0a0b':lite?'#ffffff':'#0a0a0b',cardBd=red?'#0a0a0b':lite?'#0a0a0b':s.line,tTxt=lite?'#0a0a0b':'#fff',prC=red?'#e0242f':s.accent;
+ const P=x.packs.length?x.packs:[{T:'Pick packs on the left',url:SITE,cover:'',price:''}];
+ const card=p=>`<td valign="top" width="50%" style="padding:8px"><table ${T} width="100%" bgcolor="${cardBg}" style="background:${cardBg};border:${lite?'2px':'1px'} solid ${cardBd}"><tr><td style="padding:0">${p.cover?`<a href="${esc(p.url)}"><img src="${esc(p.cover)}" width="268" height="268" alt="${esc(p.T)}" style="display:block;width:100%;height:268px;object-fit:cover;border:0"></a>`:`<div style="height:140px;background:#1a1a1d"></div>`}</td></tr>
+<tr><td style="padding:14px 14px 4px;font:400 20px/1.05 ${A};color:${tTxt}">${esc(p.T).toUpperCase()}</td></tr>
+<tr><td style="padding:4px 14px 16px"><table ${T} width="100%"><tr><td style="font:400 22px ${A};color:${prC}">${esc(p.price)}</td><td align="right"><a href="${esc(p.url)}" style="font:800 10px ${B};letter-spacing:3px;color:${tTxt};text-decoration:none">&#9654; LISTEN</a></td></tr></table></td></tr></table></td>`;
+ let rows='';for(let i=0;i<P.length;i+=2)rows+='<tr>'+card(P[i])+(P[i+1]?card(P[i+1]):'<td width="50%"></td>')+'</tr>';
+ const top=`<tr><td style="padding:22px 30px${lite?' 18px;border-bottom:3px solid #0a0a0b':' 0'}"><table ${T} width="100%"><tr><td>${mark(lite?'#0a0a0b':'#fff',24)}</td><td align="right" style="font:800 10px ${B};letter-spacing:4px;color:${red?'#fff':lite?'#0a0a0b':s.accent}">${P.length} ${P.length===1?'PACK':'PACKS'}</td></tr></table></td></tr>`;
+ const body=`${L==='sleeve'?`<tr><td height="6" bgcolor="${s.accent}" style="font-size:0;line-height:0">&nbsp;</td></tr>`:''}${top}
+<tr><td style="padding:24px 30px 0;font:400 ${red?78:58}px/0.92 ${A};color:${red?'#0a0a0b':ink}">${esc(c.headline).toUpperCase()}</td></tr>
+<tr><td style="padding:14px 30px 10px;font:500 16px/1.6 ${B};color:${red?'#fff':lite?'#1a1a1d':'#c9c9cf'}">${esc(c.body)}</td></tr>
+<tr><td style="padding:8px 22px"><table ${T} width="100%">${rows}</table></td></tr>
+<tr><td align="center" style="padding:22px 30px 30px">${btn(red||lite?'#0a0a0b':s.accent,'#fff')}</td></tr>${foot(red?'#ffd9db':s.sub,lite?'#0a0a0b':s.line)}`;
+ return`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="${lite?'light':'dark'}"><title>${esc(c.subject)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet"></head>
+<body style="margin:0;padding:0;background:${s.bg}"><span style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;font-size:1px">${esc(c.body.slice(0,110))}</span>
+<table ${T} width="100%" bgcolor="${s.bg}" style="background:${s.bg}"><tr><td align="center" style="padding:28px 12px">
+<table ${T} width="600" bgcolor="${s.card}" style="width:100%;max-width:600px;background:${s.card}${L==='crate'||L==='sleeve'?';border:1px solid '+s.line:''}">${body}</table></td></tr></table></body></html>`;
 }
 function mailText(){const c=content(),x=c.x;return[c.headline.toUpperCase(),x.T+(x.info?' ('+x.info+')':''),'',c.body,'',x.when&&(E.type==='drop'||E.type==='teaser')?(E.type==='teaser'?'Drops ':'Live ')+x.when+'\n':'',c.cta+': '+x.url,'','- MZPRD',SITE,E.foot?'\nReply STOP to be removed from these emails.':''].filter((l,i,a)=>!(l===''&&a[i-1]==='')).join('\n')}
 function recipients(){return E.rec}
@@ -118,6 +177,7 @@ function css(){
 #emailst .btn{background:transparent;border:1.5px solid #4a4a50;color:#fff;font:600 10px Montserrat;letter-spacing:.18em;padding:11px 8px}
 #emailst .btn:hover{border-color:#fff}
 #emailst .btn.big{background:var(--red);border-color:var(--red);font-size:11px;padding:14px}
+#emailst .mlt{max-height:190px;overflow:auto;border:1px solid #26262a;padding:8px 10px;display:grid;gap:6px;margin-bottom:6px}#emailst .mlt .chk{display:flex;gap:8px;align-items:center;margin:0}
 #emailst .seg{display:flex;gap:6px}#emailst .seg button{flex:1}
 #emailst .seg button.on{background:var(--red);border-color:var(--red)}
 #emailst .chk{display:flex;gap:8px;align-items:center;letter-spacing:.1em;margin:8px 0}#emailst .chk input{width:auto}
@@ -130,8 +190,9 @@ function html(){return`<div class="eg"><div>
  <div class="pn"><h4>1. WHAT ARE YOU SENDING</h4>
   <div class="seg"><button class="btn on" data-k="beats">BEATS</button><button class="btn" data-k="packs">PACKS</button></div>
   <label>FEATURED ITEM</label><select id="emItem"></select>
+  <div id="emMultiW" style="display:none"><label>PACKS IN THIS EMAIL (tick 2 to 6)</label><div id="emMulti" class="mlt"></div></div>
   <label>EMAIL TYPE</label><select id="emType">${Object.keys(TYPES).map(k=>`<option value="${k}">${TYPES[k]}</option>`).join('')}</select>
-  <label>LOOK</label><div class="seg" id="emStyle">${Object.keys(STYLES).map(k=>`<button class="btn${k==='dark'?' on':''}" data-s="${k}">${STYLES[k].n}</button>`).join('')}</div>
+  <label>LOOK</label><div class="seg" id="emStyle">${Object.keys(STYLES).map(k=>`<button class="btn${k==='crate'?' on':''}" data-s="${k}">${STYLES[k].n}</button>`).join('')}</div>
   <h4>2. THE DROP</h4>
   <label>DROP DATE AND TIME (optional, adds an Add to Calendar link)</label><input type="datetime-local" id="emDt">
   <label>OR TYPE IT YOURSELF (e.g. Friday 6 PM EST)</label><input type="text" id="emWhen" placeholder="Friday 6 PM EST">
@@ -166,8 +227,8 @@ async function ensureStock(it){
  E.stkBusy[it.id]=0;if(ok){E.stk[it.id]=u;say('Cover image ready.');if(E.item===it)refresh()}else say('Could not put the cover image online'+(err?' ('+err+')':'')+'. The email is sent without a picture until this works.');
 }
 function refresh(){
- if(!E.item){return}
- ensureStock(E.item);
+ if(!E.item&&E.type!=='roundup'){return}
+ if(E.item)ensureStock(E.item);
  const c=content(),S=SUBJ[E.type];$q('#emSubj').value=c.subject;$q('#emSi').textContent='('+(E.sj%S.length+1)+'/'+S.length+')';
  $q('#emFrame').srcdoc=mailHtml();
  $q('#emRc').textContent=E.rec.length+' address'+(E.rec.length===1?'':'es')+(E.rec.length>400?' (Gmail limits how many you can send per day, split big lists)':'');
@@ -177,10 +238,14 @@ function fillItems(){
  sel.innerHTML=rows.length?rows.map(r=>`<option value="${esc(r.id)}">${esc(r.title)}</option>`).join(''):'<option value="">(none yet)</option>';
  E.item=rows[0]||null;sel.onchange=()=>{E.item=rows.find(r=>String(r.id)===sel.value)||null;E.sj=E.bd=0;refresh()};refresh();
 }
+function multiUI(){const r=E.type==='roundup',w=$q('#emMultiW');w.style.display=r?'':'none';$q('#emItem').parentNode.querySelectorAll('#emItem,#emItem+*').forEach(()=>{});$q('#emItem').style.display=r?'none':'';$q('#emItem').previousElementSibling.style.display=r?'none':'';
+ const ps=E.items.filter(i=>i._k==='packs');if(r&&!E.multi.length)E.multi=ps.slice(0,4).map(p=>String(p.id));
+ $q('#emMulti').innerHTML=ps.map(p=>'<label class="chk"><input type="checkbox" value="'+esc(p.id)+'"'+(E.multi.includes(String(p.id))?' checked':'')+'> '+esc(p.title)+'</label>').join('')||'<div class="cnt">No packs yet.</div>'}
 function wire(){
  root.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{E.kind=b.dataset.k;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));fillItems()});
  root.querySelectorAll('#emStyle [data-s]').forEach(b=>b.onclick=()=>{E.style=b.dataset.s;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));refresh()});
- $q('#emType').onchange=e=>{E.type=e.target.value;E.sj=E.bd=0;refresh()};
+ $q('#emType').onchange=e=>{E.type=e.target.value;E.sj=E.bd=0;multiUI();refresh()};
+ $q('#emMulti').onchange=e=>{const on=[...root.querySelectorAll('#emMulti input:checked')].map(i=>i.value);if(on.length>6){e.target.checked=false;say('Up to 6 packs per email.');return}E.multi=on;refresh()};
  const bind=(id,key)=>{$q(id).oninput=$q(id).onchange=e=>{E[key]=e.target.value;refresh()}};
  bind('#emDt','dt');bind('#emWhen','when');bind('#emHead','headline');bind('#emBody','body');bind('#emCta','cta');bind('#emAddr','addr');
  $q('#emFoot').onchange=e=>{E.foot=e.target.checked;refresh()};
