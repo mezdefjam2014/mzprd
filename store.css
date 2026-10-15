@@ -167,3 +167,24 @@ body.store #bar.st-playing .st-peq{display:flex}
 .st-peq i{width:3px;background:#f0c35c;border-radius:2px;animation:steq .8s ease-in-out infinite}
 .st-peq i:nth-child(2){animation-delay:.15s}.st-peq i:nth-child(3){animation-delay:.3s}.st-peq i:nth-child(4){animation-delay:.05s}.st-peq i:nth-child(5){animation-delay:.22s}
 @media(max-width:600px){body.store #bar{height:70px;padding:0 10px;gap:10px;bottom:8px}body.store .st-pcov{width:46px;height:46px;flex-basis:46px}.st-peq,body.store #vol{display:none!important}body.store .bc #pp{width:42px;height:42px}}
+/* beat / pack page: premium */
+body.store .bp h1{font:800 clamp(30px,4vw,48px)/1.05 Inter,sans-serif;letter-spacing:-.02em;text-transform:none;color:#0f0f0f;margin-bottom:12px}
+body.store .bp .tgs span{border:0;background:#111;color:#f0c35c;border-radius:999px;padding:6px 12px;font:700 10px Inter,sans-serif;letter-spacing:.14em}
+body.store .bp .prc,body.store .bp [class*="pr"]{font-family:Inter,sans-serif}
+body.store #bwv{background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 8px 26px rgba(0,0,0,.07);box-sizing:border-box;height:84px}
+body.store .acts2{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+body.store .acts2 .pl{width:58px;height:58px;border-radius:50%;border:0;background:linear-gradient(180deg,#f3c862,#c9952c);box-shadow:0 10px 24px rgba(201,149,44,.45);display:grid;place-items:center;transition:transform .15s}
+body.store .acts2 .pl:hover{transform:scale(1.06)}
+body.store .acts2 .pl i{border-left-color:#111!important}
+body.store .acts2 .cart{height:50px;border-radius:999px!important;padding:0 26px;font:700 12px Inter,sans-serif!important;letter-spacing:.12em!important;transition:.15s;background:#fff!important;color:#111!important;border:1.5px solid #e2e0e0!important;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+body.store .acts2 .cart:hover{border-color:#111!important;transform:translateY(-1px)}
+body.store .acts2 #bCart{background:#0d0d0d!important;color:#fff!important;border-color:#0d0d0d!important;padding:0 34px;box-shadow:0 10px 24px rgba(0,0,0,.25)}
+body.store .acts2 #bCart.in{background:#e0242f!important;border-color:#e0242f!important}
+/* email box + footer */
+body.store .fsub{max-width:640px;margin:40px auto 0;border-radius:16px;padding:26px 22px;box-shadow:0 10px 30px rgba(0,0,0,.07);display:grid;grid-template-columns:1fr auto;gap:10px}
+body.store .fsub label{grid-column:1/-1;text-align:center;font:700 13px Inter,sans-serif;letter-spacing:.06em}
+body.store .fsub input[type=email]{background:#f4f3f3!important;color:#111!important;border:1px solid #e3e1e1!important;border-radius:999px;padding:14px 18px;font:500 14px Inter,sans-serif}
+body.store .fsub button{background:#0d0d0d!important;color:#fff!important;border:0!important;border-radius:999px;padding:0 24px;font:700 12px Inter,sans-serif;letter-spacing:.1em}
+body.store footer.f{margin-top:40px;padding:26px 16px;text-align:center;font:500 12px Inter,sans-serif;letter-spacing:.08em}
+body.store .bp .prc,body.store .bp .price{font:800 26px Inter,sans-serif}
+body.store #bpage #bX{border-radius:50%;border:1px solid #ddd;background:#fff}
