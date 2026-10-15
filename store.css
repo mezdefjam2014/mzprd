@@ -282,3 +282,6 @@ body.store #bpage .more{display:none!important}
 .sd-foot{padding:0 26px 22px;text-align:right}.sd-foot button{background:none;border:1px solid #ddd;border-radius:999px;padding:8px 16px;font:600 12px Inter,sans-serif;cursor:pointer;color:#555}
 @media(max-width:600px){.sd-stats{grid-template-columns:repeat(2,1fr)}.sd-grid{grid-template-columns:repeat(2,1fr)}.sd-body{padding:18px}}
 #acct.st-dash .x{color:#fff!important;background:rgba(255,255,255,.08)!important;border:0!important;border-radius:50%;font-size:22px;top:20px;right:20px}
+.st-bteaser{display:flex;align-items:center;gap:14px;width:100%;max-width:980px;margin:40px auto 0;background:#fff;border:1px solid #e3e1e1;border-radius:14px;padding:16px 20px;cursor:pointer;text-align:left;box-shadow:0 6px 18px rgba(0,0,0,.05);transition:.2s}
+.st-bteaser:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,0,0,.1);border-color:#111}
+.st-bteaser span{font-size:24px}.st-bteaser b{flex:1;font:700 16px Inter,sans-serif;color:#111}.st-bteaser em{font:600 13px Inter,sans-serif;color:#666;font-style:normal}

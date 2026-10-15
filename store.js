@@ -14,7 +14,7 @@ document.body.classList.add('store');
 /* top: promo bar, centred logo, tools (the site's own buttons, moved), nav, ticker */
 const top=document.createElement('div');top.id='stTop';
 top.innerHTML=`<div class="st-bar">${esc(PROMO)}</div><div class="st-head"><a class="st-logo" id="stLogo">MZ<span>PRD</span></a><div class="st-tools" id="stTools"></div></div>
-<nav class="st-nav"><a data-h="home" class="on">Home</a><a data-v="beats">Beats</a><a data-v="kits">Sample Packs</a><a data-v="show">Show</a><a data-v="about">About</a><a data-h="faq">FAQ</a></nav>
+<nav class="st-nav"><a data-h="home" class="on">Home</a><a data-v="kits">Sample Packs</a><a data-v="beats">Beats</a><a data-v="show">Show</a><a data-v="about">About</a><a data-h="faq">FAQ</a></nav>
 <div class="st-tick"><div>${Array(8).fill(TICK.map(t=>'<span>⋆ '+esc(t)+'</span>').join('')).join('')}</div></div>`;
 document.body.insertBefore(top,document.body.firstChild);
 const tools=document.querySelector('header .tools');if(tools)$('#stTools').appendChild(tools);
@@ -49,10 +49,11 @@ let pg=0,sig='';
 function render(force){const bs=B(),ps=P(),s=bs.length+'|'+ps.length+'|'+pg+'|'+(()=>{try{return[...cart].join()}catch(e){return''}})();if(s===sig&&!force)return;sig=s;
  const S=(()=>{try{return promo||{}}catch(e){return{}}})(),hotIds=String(S.home_hot||'').split(',').filter(Boolean),hot=hotIds.map(id=>bs.findIndex(b=>String(b.id)===id)).filter(i=>i>=0);for(let i=0;hot.length<3&&i<bs.length;i++)if(!hot.includes(i))hot.push(i);
  const fs=String(S.home_feature||''),fk0=fs[0],fi=fs?(fk0==='p'?ps:bs).findIndex(x=>'x:'.replace('x',fk0)+x.id===fs):-1,fk=fi>=0?fk0:(ps[0]?'p':'b'),fIdx=fi>=0?fi:0,f=(fk==='p'?ps:bs)[fIdx],fImg=S.home_feature_img?(()=>{try{return pub(S.home_feature_img)}catch(e){return null}})():null;
- const all=[...bs.map((x,i)=>['b',x,i]),...ps.map((x,i)=>['p',x,i])].filter(([k,x,i])=>!(k==='b'&&hot.slice(0,3).includes(i))),st0=all.length?Math.floor(Date.now()/864e5)%all.length:0,pick=[...all.slice(st0),...all.slice(0,st0)].slice(0,4);
- home.innerHTML=`${bs.length?`<section class="st-sec"><h2>Hot Beats 🔥</h2><div class="st-row st-hot">${hot.slice(0,3).map((i,r)=>card('b',bs[i],i,r+1)).join('')}</div><button class="st-all" data-go="beats">View All</button></section>`:''}
- ${ps.length?`<section class="st-sec"><h2>Sample Packs</h2><div class="st-row">${ps.slice(0,3).map((x,i)=>card('p',x,i)).join('')}</div><button class="st-all" data-go="kits">View All</button></section>`:''}
+ const all=(ps.length>=4?ps.map((x,i)=>['p',x,i]):[...ps.map((x,i)=>['p',x,i]),...bs.map((x,i)=>['b',x,i])]).filter(([k,x,i])=>!(k==='b'&&ps.length<3&&hot.slice(0,3).includes(i))&&!(k==='p'&&i<3)),st0=all.length?Math.floor(Date.now()/864e5)%all.length:0,pick=[...all.slice(st0),...all.slice(0,st0)].slice(0,4);
+ home.innerHTML=`${ps.length?`<section class="st-sec"><h2>Sample Packs 🔥</h2><div class="st-row">${ps.slice(0,3).map((x,i)=>card('p',x,i)).join('')}</div><button class="st-all" data-go="kits">View All</button></section>`:''}
  ${f?`<div class="st-feat"><div class="in"><div>${fImg?'<img src="'+esc(fImg)+'" alt="">':cov(f,fk==='b'?fIdx:fIdx+2)}</div><div><h3>${esc(f.title)}</h3><div class="p">${window.MZPrice?MZPrice(fk,f):m(fk==='b'?priceOf(f):f.price)}</div>${f.description?'<div class="d">'+esc(f.description)+'</div>':''}<button class="a" id="stFa">Add to Cart</button><button class="b" id="stFb">${f.preview_path?'Play Preview':'View'}</button><button class="lnk" id="stFv">Visit product page →</button></div></div></div>`:''}
+ ${bs.length?`<button class="st-bteaser" data-go="beats"><span>🎧</span><b>Also available: beats &amp; instrumentals</b><em>${bs.length} beats →</em></button>`:''}
+ ${ps.length<3&&bs.length?`<section class="st-sec"><h2>Hot Beats 🔥</h2><div class="st-row st-hot">${hot.slice(0,3).map((i,r)=>card('b',bs[i],i,r+1)).join('')}</div><button class="st-all" data-go="beats">View All</button></section>`:''}
  ${pick.length?`<section class="st-sec"><h2>Try These</h2><div class="st-grid">${pick.map(([k,x,i])=>card(k,x,i)).join('')}</div></section>`:''}
  <section class="st-sec" id="stFaq"><h2>FAQs</h2><div class="st-faq">${FAQ.map(q=>'<details><summary>'+esc(q[0])+'</summary><p>'+esc(q[1])+'</p></details>').join('')}</div></section>`;
  wire(home);
