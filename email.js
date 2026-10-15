@@ -114,15 +114,21 @@ ${cv?`<tr><td style="padding:22px 30px 0">${img(540,'filter:grayscale(0)')}</td>
 function roundupHtml(c,x,s,L,T,A,B,btn,mark,foot){
  const lite=L==='zine',red=L==='ticket',ink=lite||red?'#0a0a0b':'#fff',cardBg=red?'#0a0a0b':lite?'#ffffff':'#0a0a0b',cardBd=red?'#0a0a0b':lite?'#0a0a0b':s.line,tTxt=lite?'#0a0a0b':'#fff',prC=red?'#e0242f':s.accent;
  const P=x.packs.length?x.packs:[{T:'Pick packs on the left',url:SITE,cover:'',price:''}];
- const card=p=>`<td valign="top" width="50%" style="padding:8px"><table ${T} width="100%" bgcolor="${cardBg}" style="background:${cardBg};border:${lite?'2px':'1px'} solid ${cardBd}"><tr><td style="padding:0">${p.cover?`<a href="${esc(p.url)}"><img src="${esc(p.cover)}" width="268" height="268" alt="${esc(p.T)}" style="display:block;width:100%;height:268px;object-fit:cover;border:0"></a>`:`<div style="height:140px;background:#1a1a1d"></div>`}</td></tr>
-<tr><td style="padding:14px 14px 4px;font:400 20px/1.05 ${A};color:${tTxt}">${esc(p.T).toUpperCase()}</td></tr>
-<tr><td style="padding:4px 14px 16px"><table ${T} width="100%"><tr><td style="font:400 22px ${A};color:${prC}">${esc(p.price)}</td><td align="right"><a href="${esc(p.url)}" style="font:800 10px ${B};letter-spacing:3px;color:${tTxt};text-decoration:none">&#9654; LISTEN</a></td></tr></table></td></tr></table></td>`;
- let rows='';for(let i=0;i<P.length;i+=2)rows+='<tr>'+card(P[i])+(P[i+1]?card(P[i+1]):'<td width="50%"></td>')+'</tr>';
+ const sub=red?'#ffd9db':lite?'#55555c':'#8a8a92',rule=red?'rgba(0,0,0,.35)':lite?'#0a0a0b':'#222226',f=P[0],rest=P.slice(1);
+ const hero=`<tr><td style="padding:0 30px">${f.cover?`<a href="${esc(f.url)}"><img src="${esc(f.cover)}" width="540" height="540" alt="${esc(f.T)}" style="display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;border:0"></a>`:''}
+<table ${T} width="100%" bgcolor="${red?'#0a0a0b':lite?'#0a0a0b':s.accent}" style="background:${red?'#0a0a0b':lite?'#0a0a0b':s.accent}"><tr><td style="padding:18px 20px"><div style="font:800 9px ${B};letter-spacing:4px;color:${red||lite?s.accent==='#0a0a0b'?'#e0242f':'#e0242f':'#ffd9db'}">FEATURED PACK</div><div style="margin-top:6px;font:400 30px/1 ${A};color:#fff">${esc(f.T).toUpperCase()}</div></td>
+<td align="right" valign="middle" style="padding:18px 20px;white-space:nowrap"><div style="font:400 26px/1 ${A};color:#fff">${esc(f.price)}</div><a href="${esc(f.url)}" style="display:inline-block;margin-top:8px;font:800 10px ${B};letter-spacing:3px;color:#fff;text-decoration:none;border-bottom:2px solid #fff;padding-bottom:2px">&#9654; LISTEN</a></td></tr></table></td></tr>`;
+ const row=(p,i)=>`<tr><td style="padding:0 30px"><table ${T} width="100%" style="border-bottom:1px solid ${rule}"><tr>
+<td width="44" valign="middle" style="padding:16px 0;font:400 26px ${A};color:${red?'#0a0a0b':s.accent}">${String(i+2).padStart(2,'0')}</td>
+<td width="76" valign="middle" style="padding:12px 14px 12px 0">${p.cover?`<a href="${esc(p.url)}"><img src="${esc(p.cover)}" width="64" height="64" alt="" style="display:block;width:64px;height:64px;object-fit:cover;border:0"></a>`:''}</td>
+<td valign="middle" style="padding:12px 0"><a href="${esc(p.url)}" style="text-decoration:none;font:400 21px/1.05 ${A};color:${tTxt}">${esc(p.T).toUpperCase()}</a><div style="margin-top:5px;font:800 9px ${B};letter-spacing:3px;color:${sub}">SAMPLE PACK</div></td>
+<td align="right" valign="middle" style="padding:12px 0;white-space:nowrap"><div style="font:400 20px/1 ${A};color:${tTxt}">${esc(p.price)}</div><a href="${esc(p.url)}" style="display:inline-block;margin-top:6px;font:800 9px ${B};letter-spacing:3px;color:${red?'#fff':prC};text-decoration:none">&#9654; LISTEN</a></td></tr></table></td></tr>`;
+ const rows=hero+(rest.length?`<tr><td style="padding:26px 30px 4px;font:800 10px ${B};letter-spacing:4px;color:${sub}">ALSO NEW</td></tr>`+rest.map(row).join(''):'');
  const top=`<tr><td style="padding:22px 30px${lite?' 18px;border-bottom:3px solid #0a0a0b':' 0'}"><table ${T} width="100%"><tr><td>${mark(lite?'#0a0a0b':'#fff',24)}</td><td align="right" style="font:800 10px ${B};letter-spacing:4px;color:${red?'#fff':lite?'#0a0a0b':s.accent}">${P.length} ${P.length===1?'PACK':'PACKS'}</td></tr></table></td></tr>`;
  const body=`${L==='sleeve'?`<tr><td height="6" bgcolor="${s.accent}" style="font-size:0;line-height:0">&nbsp;</td></tr>`:''}${top}
 <tr><td style="padding:24px 30px 0;font:400 ${red?78:58}px/0.92 ${A};color:${red?'#0a0a0b':ink}">${esc(c.headline).toUpperCase()}</td></tr>
 <tr><td style="padding:14px 30px 10px;font:500 16px/1.6 ${B};color:${red?'#fff':lite?'#1a1a1d':'#c9c9cf'}">${esc(c.body)}</td></tr>
-<tr><td style="padding:8px 22px"><table ${T} width="100%">${rows}</table></td></tr>
+${rows}
 <tr><td align="center" style="padding:22px 30px 30px">${btn(red||lite?'#0a0a0b':s.accent,'#fff')}</td></tr>${foot(red?'#ffd9db':s.sub,lite?'#0a0a0b':s.line)}`;
  return`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="${lite?'light':'dark'}"><title>${esc(c.subject)}</title>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet"></head>
