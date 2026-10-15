@@ -7,7 +7,7 @@ const G=n=>{try{return (0,eval)(n)}catch(e){return undefined}};
 const BS=()=>G('beats')||[],PS=()=>G('packs')||[],U=()=>G('acUser');
 const SEEN='mzprd_rel_seen',seen=()=>{try{return +localStorage.getItem(SEEN)||0}catch(e){return 0}};
 const allItems=()=>[...BS().map((x,i)=>['b',x,i]),...PS().map((x,i)=>['p',x,i])];
-const newRel=()=>{const s=seen()||Date.now()-14*864e5;return allItems().filter(([k,x])=>x.created_at&&new Date(x.created_at).getTime()>s).sort((a,b)=>new Date(b[1].created_at)-new Date(a[1].created_at))};
+const newRel=()=>{const s=seen()||Date.now()-14*864e5;return PS().map((x,i)=>['p',x,i]).filter(([k,x])=>x.created_at&&new Date(x.created_at).getTime()>s).sort((a,b)=>new Date(b[1].created_at)-new Date(a[1].created_at))};
 const cover=(x,k,i)=>{try{return thumb(x,k==='b'?i:i+2,'')}catch(e){return''}};
 const findItem=t=>allItems().find(([k,x])=>String(x.title).toLowerCase()===String(t).toLowerCase());
 let unread=0,tab='home';
@@ -40,8 +40,15 @@ async function show(){const body=$('#sdBody');if(!body)return;document.querySele
  if(tab==='inbox'){const ms=await api.msgs(),last=await api.readAt();
   body.innerHTML=ms.length?'<div class="sd-inbox">'+ms.map(m=>{const nw=new Date(m.created_at).getTime()>last;return '<details class="sd-msg'+(nw?' new':'')+'"'+(nw?' open':'')+'><summary><span class="sd-dot"></span><b>'+esc(m.subject)+'</b><em>'+(m.kind==='promo'?'Offer':'Message')+' · '+new Date(m.created_at).toLocaleDateString()+'</em></summary><p>'+esc(m.body)+'</p></details>'}).join('')+'</div>':'<p class="sd-empty">No messages yet.</p>';
   await api.markRead();unread=0;counts();const t=document.querySelector('.sd-tabs [data-t="inbox"] i');if(t)t.remove();return}
- if(tab==='new'){const rel=newRel(),recent=allItems().filter(([k,x])=>x.created_at).sort((a,b)=>new Date(b[1].created_at)-new Date(a[1].created_at)).slice(0,8);
-  body.innerHTML=(rel.length?'<h4>New since your last visit</h4>'+grid(rel):'<p class="sd-empty">Nothing new since your last visit.</p>')+'<h4>Latest releases</h4>'+grid(recent);wireGrid(body);
+ if(tab==='new'){const rel=newRel(),isN=new Set(rel.map(r=>r[1].id)),list=PS().map((x,i)=>['p',x,i]).sort((a,b)=>new Date(b[1].created_at||0)-new Date(a[1].created_at||0));
+  body.innerHTML=(list.length?'<div class="sd-rel">'+list.map(([k,x,i])=>{const inC=(()=>{try{return cart.has('p:'+x.id)}catch(e){return false}})();let pr='';try{pr=window.MZPrice?MZPrice('p',x):money(x.price)}catch(e){}return '<div class="sd-rr" data-i="'+i+'"><div class="sd-bc">'+cover(x,'p',i)+'</div>'+(x.preview_path?'<button class="sd-rp" aria-label="Play"><i></i></button>':'<span></span>')+'<div class="sd-bt"><b>'+esc(x.title)+(isN.has(x.id)?' <em class="sd-nw">NEW</em>':'')+'</b><span>Sample pack</span></div><div class="sd-rpr">'+pr+'</div><button class="sd-dl sd-add">'+(inC?'In cart':'Add to cart')+'</button></div>'}).join('')+'</div>':'<p class="sd-empty">No sample packs yet.</p>')+
+  '<div class="sd-relb"><button class="sd-dl" id="sdCheck">Checkout →</button><button class="sd-beats" id="sdBeats">BEATS</button></div>';
+  try{paintArt(body)}catch(e){}
+  body.querySelectorAll('.sd-rr').forEach(r=>{const i=+r.dataset.i,x=PS()[i];const pl=r.querySelector('.sd-rp');if(pl)pl.onclick=()=>{try{playPack(i)}catch(e){}setTimeout(()=>body.querySelectorAll('.sd-rp').forEach((b,q)=>b.classList.toggle('on',(G('curPack')===+b.closest('.sd-rr').dataset.i)&&!!G('playing'))),120)};
+   r.querySelector('.sd-add').onclick=e=>{try{toggleCart('p:'+x.id,e.currentTarget)}catch(er){}const c=G('cart');e.currentTarget.textContent=c&&c.has('p:'+x.id)?'In cart':'Add to cart'};
+   r.querySelector('.sd-bt b').onclick=()=>{$('#acct').classList.remove('on');try{goItem('pack',bslug(x))}catch(er){}}});
+  $('#sdCheck').onclick=()=>{$('#acct').classList.remove('on');$('#cartBtn').click()};
+  $('#sdBeats').onclick=()=>{$('#acct').classList.remove('on');const b=document.querySelector('.st-nav a[data-v="beats"]');if(b)b.click()};
   try{localStorage.setItem(SEEN,String(Date.now()))}catch(e){}counts();const t=document.querySelector('.sd-tabs [data-t="new"] i');if(t)t.remove();return}
  if(tab==='saved'){const lk=G('liked')||new Set(),it=[...lk].map(k=>{try{const x=lookup(k);if(!x)return null;const arr=k[0]==='b'?BS():PS();return[k[0],x,arr.indexOf(x)]}catch(e){return null}}).filter(Boolean);
   body.innerHTML=it.length?grid(it):'<p class="sd-empty">Tap the heart on any beat or pack to save it here.</p>';wireGrid(body)}}
