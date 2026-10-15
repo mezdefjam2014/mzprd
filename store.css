@@ -343,3 +343,31 @@ body.store #packs .card .ti:after{content:none}
 body.store #packs .card .cart{margin-top:10px;opacity:0;transform:translateY(4px);transition:.2s}
 body.store #packs .card:hover .cart,body.store #packs .card .cart.in{opacity:1;transform:none}
 @media(hover:none){body.store #packs .card .cart{opacity:1;transform:none}}
+/* featured band, made over */
+.st-feat2{position:relative;overflow:hidden;background:#070708;padding-top:80px;padding-bottom:80px}
+.st-feat2:before{content:'';position:absolute;inset:-60px;background:var(--fbg) center/cover;filter:blur(60px) saturate(1.3);opacity:.45;transform:scale(1.1)}
+.st-feat2:after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(0,0,0,0),rgba(0,0,0,.75) 70%),linear-gradient(90deg,rgba(7,7,8,.2),rgba(7,7,8,.85))}
+.st-feat2 .in{position:relative;z-index:2;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:70px}
+.st-fart{position:relative;max-width:470px;width:100%;aspect-ratio:1}
+.st-fcov{position:relative;z-index:2;width:100%;height:100%;border-radius:8px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)}
+.st-fcov img,.st-fcov canvas{width:100%;height:100%;object-fit:cover;display:block;border-radius:0}
+.st-fvin{position:absolute;z-index:1;top:4%;left:38%;width:92%;height:auto;aspect-ratio:1;border-radius:50%;animation:stvin 6s linear infinite;filter:drop-shadow(0 20px 40px rgba(0,0,0,.6));transition:left .6s cubic-bezier(.2,.8,.2,1)}
+.st-feat2:hover .st-fvin{left:48%}
+@keyframes stvin{to{transform:rotate(360deg)}}
+.st-feye{display:inline-block;font:700 11px Inter,sans-serif;letter-spacing:.24em;color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:7px 14px}
+.st-feat2 h3{font:900 clamp(40px,5.2vw,72px)/.95 Inter,sans-serif;letter-spacing:-.035em;color:#fff;margin:20px 0 16px}
+.st-feat2 .d{color:rgba(255,255,255,.7);font:400 16px/1.6 Inter,sans-serif;max-width:440px}
+.st-feat2 .p{font:800 30px Inter,sans-serif;color:#fff;margin:4px 0 26px;letter-spacing:-.01em}.st-feat2 .p s{font-size:18px;color:rgba(255,255,255,.4)}
+.st-fbtns{display:flex;gap:12px;flex-wrap:wrap}
+.st-feat2 .st-fbtns button{width:auto;max-width:none;margin:0;padding:16px 30px;border-radius:999px;font:700 14px Inter,sans-serif;letter-spacing:.02em;transition:.2s}
+.st-feat2 .a{background:#fff;color:#0a0a0a;box-shadow:0 12px 30px rgba(255,255,255,.15)}
+.st-feat2 .a:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(255,255,255,.25)}
+.st-feat2 .b{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25)!important;backdrop-filter:blur(8px)}
+.st-feat2 .b:hover{background:rgba(255,255,255,.16)}
+.st-feat2 .lnk{margin-top:18px;color:rgba(255,255,255,.7);text-decoration:none;font:600 13px Inter,sans-serif}
+.st-feat2 .lnk:hover{color:#fff}
+.st-feat2 .st-trust{margin-top:22px;opacity:.8}
+@media(max-width:820px){.st-feat2 .in{gap:40px}.st-fart{max-width:340px;margin:0 auto}.st-feat2 .st-ftx{text-align:center}.st-fbtns{justify-content:center}.st-feat2 .d{margin:0 auto}.st-fvin{left:28%}}
+.st-fvin img{width:100%;height:100%;display:block}
+.st-fvin .st-flab{position:absolute;left:33%;top:33%;width:34%;height:34%;border-radius:50%;object-fit:cover;box-shadow:0 0 0 3px rgba(0,0,0,.6)}
+.st-fvin:after{content:'';position:absolute;left:48.6%;top:48.6%;width:2.8%;height:2.8%;border-radius:50%;background:#0a0a0a}
