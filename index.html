@@ -1457,7 +1457,7 @@ async function boRender(){
  document.getElementById('bo2b').style.display=tab==='promo'?'':'none';
  if(tab==='promo'){document.getElementById('bo2c').style.display='';await promoRender();await bundlesRender();try{await loadScript('slots.js?v=4');await slotsAdmin($('#bf3'),$('#bl3'))}catch(e){$('#bf3').innerHTML='<h3>SLOTS</h3><div class="cur">Could not load the slots panel.</div>'}return}
  {const bf=$('#bf');if(bf){bf.style.display='';if(bf.parentElement)bf.parentElement.style.gridTemplateColumns=''}}
- if(tab==='sales'){if(window.MZSales)return window.MZSales();return loadScript('sales.js?v=1').then(()=>window.MZSales?window.MZSales():salesRender(),()=>salesRender())}
+ if(tab==='sales'){if(window.MZSales)return window.MZSales();return loadScript('sales.js?v=2').then(()=>window.MZSales?window.MZSales():salesRender(),()=>salesRender())}
  if(tab==='accounts')return accountsRender();
  const F=FIELDS[tab],e=editing||{};
  const files=F.files.map(([k,l,acc])=>`<label>${l}</label><input type="file" data-k="${k}" accept="${acc}">${e[k]?`<div class="cur">Current: ${esc(e[k].split('/').pop())} (choose a new file to replace)</div><label class="chk" style="margin-top:6px"><input type="checkbox" data-rm="${k}"${tab==='beats'&&k==='cover_path'?' id="f_usestk"':''}> ${tab==='beats'&&k==='cover_path'?'USE THE GENERATED COVER INSTEAD (removes the uploaded one, frees the space)':'REMOVE THIS FILE'}</label>`:''}`).join('');
