@@ -4,7 +4,7 @@
 const $=s=>document.querySelector(s),esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const G=n=>{try{return (0,eval)(n)}catch(e){return undefined}};
 const M=v=>{try{return money(v)}catch(e){return'$'+Number(v||0).toFixed(2)}},DAY=864e5;
-let S={range:30,view:'both',sort:'rev',q:'',st:'paid',orders:[],events:[]};
+let S={visits:[],range:30,view:'both',sort:'rev',q:'',st:'paid',orders:[],events:[]};
 const css=`#sx{display:grid;gap:18px;font-family:Inter,sans-serif;color:#e9e9e9}
 #sx .sx-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 #sx h3{font:400 34px/1 Anton,sans-serif;letter-spacing:.02em;margin:0 auto 0 0;color:#fff}
@@ -48,6 +48,14 @@ const css=`#sx{display:grid;gap:18px;font-family:Inter,sans-serif;color:#e9e9e9}
 #sx .empty{color:#777;font:500 13px Inter,sans-serif;padding:20px 0;text-align:center}
 #sx canvas{max-width:none!important}#sx #sxC{height:260px!important}#sx #sxD{height:200px!important;width:100%!important}#sx .k canvas{height:42px!important}
 #sx b,#sx span,#sx small,#sx td,#sx th,#sx em{text-transform:none}#sx .ti b,#sx .ti small,#sx .ti .c{letter-spacing:0;font-family:Inter,sans-serif}#sx .ti .v{letter-spacing:.02em}
+#sx #sxVi{height:220px!important}
+#sx .src{display:flex;flex-direction:column;gap:10px}
+#sx .sr{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center}
+#sx .sr>i{width:34px;height:34px;display:grid;place-items:center;background:#1a1a1d;border:1px solid #2a2a2e;font:800 10px Inter,sans-serif;font-style:normal;color:#fff}
+#sx .sr b{font:600 13px Inter,sans-serif;color:#fff;text-transform:capitalize}#sx .sr .bar{margin-top:5px}
+#sx .sr em{font:400 20px Anton,sans-serif;font-style:normal;color:#fff;text-align:right}#sx .sr em small{display:block;font:700 10px Inter,sans-serif;color:#777}
+#sx h5{font:700 10px Inter,sans-serif;letter-spacing:.18em;color:#86868c;margin:10px 0 0;padding-top:12px;border-top:1px solid #1f1f23}
+#sx .lp{display:flex;justify-content:space-between;font:500 13px Inter,sans-serif;color:#ccc;text-transform:capitalize}#sx .lp b{color:#fff}
 @media(max-width:900px){#sx .row2{grid-template-columns:1fr}}`;
 
 const allItems=()=>[...(G('beats')||[]).map(x=>['b',x]),...(G('packs')||[]).map(x=>['p',x])];
@@ -55,20 +63,23 @@ const find=id=>allItems().find(([k,x])=>String(x.id)===String(id));
 const cov=x=>{try{return coverUrl(x,128)||''}catch(e){return''}};
 
 async function load(){const [o,e]=await Promise.all([sb.from('orders').select('*').order('created_at',{ascending:false}).limit(3000),sb.from('events').select('kind,item_id,created_at').gte('created_at',new Date(Date.now()-366*DAY).toISOString()).limit(50000)]);
- S.orders=o.data||[];S.events=e.data||[];S.err=o.error&&o.error.message}
+ S.orders=o.data||[];S.events=e.data||[];S.err=o.error&&o.error.message;
+ const v=await sb.from('visits').select('created_at,src,page,device').gte('created_at',new Date(Date.now()-731*DAY).toISOString()).limit(100000);S.visits=v.data||[];S.vErr=!!v.error}
 
 function within(t,from,to){return t>=from&&t<to}
 function stats(){const now=Date.now(),r=S.range===0?3650:S.range,from=now-r*DAY,pfrom=from-r*DAY;
  const paid=S.orders.filter(o=>o.status==='paid'&&o.paid_at),tO=o=>new Date(o.paid_at).getTime(),tE=e=>new Date(e.created_at).getTime();
  const cur=paid.filter(o=>within(tO(o),from,now)),prev=paid.filter(o=>within(tO(o),pfrom,from)),ev=S.events.filter(e=>within(tE(e),from,now)),pev=S.events.filter(e=>within(tE(e),pfrom,from));
  const sum=a=>a.reduce((q,o)=>q+Number(o.total||0),0),buyers=a=>new Set(a.map(o=>(o.payer_email||'').toLowerCase()).filter(Boolean)).size;
- const nb=Math.min(r,S.range===0?365:r),days=[...Array(nb)].map((_,i)=>{const d=new Date(now-(nb-1-i)*DAY);d.setHours(0,0,0,0);return{t:d.getTime(),rev:0,ord:0,lis:0}}),idx=t=>{const d=new Date(t);d.setHours(0,0,0,0);return days.findIndex(x=>x.t===d.getTime())};
+ const nb=Math.min(r,S.range===0?365:r),days=[...Array(nb)].map((_,i)=>{const d=new Date(now-(nb-1-i)*DAY);d.setHours(0,0,0,0);return{t:d.getTime(),rev:0,ord:0,lis:0,vis:0}}),idx=t=>{const d=new Date(t);d.setHours(0,0,0,0);return days.findIndex(x=>x.t===d.getTime())};
  cur.forEach(o=>{const i=idx(tO(o));if(i>=0){days[i].rev+=Number(o.total||0);days[i].ord++}});ev.forEach(e=>{const i=idx(tE(e));if(i>=0)days[i].lis++});
  const per={};const add=(id,k,f,v)=>{per[id]=per[id]||{id,sold:0,rev:0,lis:0};per[id][f]+=v};
  cur.forEach(o=>(o.items||[]).forEach(it=>add(it.id,it.t,'sold',1)||add(it.id,it.t,'rev',Number(it.price||0))));ev.forEach(e=>add(e.item_id,null,'lis',1));
  let bRev=0,pRev=0;cur.forEach(o=>(o.items||[]).forEach(it=>{if(it.t==='p')pRev+=Number(it.price||0);else bRev+=Number(it.price||0)}));
+ const tV=v=>new Date(v.created_at).getTime(),vc=S.visits.filter(v=>within(tV(v),from,now)),pvc=S.visits.filter(v=>within(tV(v),pfrom,from));vc.forEach(v=>{const i=idx(tV(v));if(i>=0)days[i].vis++});
+ const cnt=k=>{const m={};vc.forEach(v=>{const x=v[k]||'—';m[x]=(m[x]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
  const hm=[...Array(7)].map(()=>Array(24).fill(0));ev.forEach(e=>{const d=new Date(e.created_at);hm[d.getDay()][d.getHours()]++});
- return{rev:sum(cur),prevRev:sum(prev),ord:cur.length,prevOrd:prev.length,aov:cur.length?sum(cur)/cur.length:0,prevAov:prev.length?sum(prev)/prev.length:0,lis:ev.length,prevLis:pev.length,buy:buyers(cur),prevBuy:buyers(prev),conv:ev.length?cur.length/ev.length*100:0,prevConv:pev.length?prev.length/pev.length*100:0,days,per:Object.values(per),bRev,pRev,hm}}
+ return{rev:sum(cur),prevRev:sum(prev),ord:cur.length,prevOrd:prev.length,aov:cur.length?sum(cur)/cur.length:0,prevAov:prev.length?sum(prev)/prev.length:0,lis:ev.length,prevLis:pev.length,buy:buyers(cur),prevBuy:buyers(prev),conv:ev.length?cur.length/ev.length*100:0,prevConv:pev.length?prev.length/pev.length*100:0,vis:vc.length,prevVis:pvc.length,vconv:vc.length?cur.length/vc.length*100:0,prevVconv:pvc.length?prev.length/pvc.length*100:0,srcs:cnt('src'),pages:cnt('page'),mob:vc.filter(v=>v.device==='mobile').length,days,per:Object.values(per),bRev,pRev,hm}}
 
 function delta(a,b){if(!b&&!a)return'<em class="fl">—</em>';if(!b)return'<em class="up">▲ new</em>';const d=(a-b)/b*100;return'<em class="'+(d>=0?'up':'dn')+'">'+(d>=0?'▲ ':'▼ ')+Math.abs(d).toFixed(0)+'% vs prev</em>'}
 function spark(cv,vals,col){const dpr=devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext('2d');x.scale(dpr,dpr);const mx=Math.max(1,...vals);
@@ -93,18 +104,20 @@ function donut(cv,a,b){const dpr=devicePixelRatio||1,W=cv.clientWidth,H=cv.clien
 
 function render(){const st=stats(),L=$('#bl'),F=$('#bf');if(!$('#sxcss')){const s=document.createElement('style');s.id='sxcss';s.textContent=css;document.head.appendChild(s)}
  F.style.display='none';L.parentElement.style.gridTemplateColumns='1fr';
+ const K=[['Visits',st.vis,delta(st.vis,st.prevVis),st.days.map(d=>d.vis),'#e8e8e8'],['Revenue',M(st.rev),delta(st.rev,st.prevRev),st.days.map(d=>d.rev),'#e0242f'],['Orders',st.ord,delta(st.ord,st.prevOrd),st.days.map(d=>d.ord),'#e0242f'],['Visit → buy',st.vconv.toFixed(1)+'%',delta(st.vconv,st.prevVconv),null],['Avg order',M(st.aov),delta(st.aov,st.prevAov),null],['Listens',st.lis,delta(st.lis,st.prevLis),st.days.map(d=>d.lis),'#e8e8e8'],['Listen → buy',st.conv.toFixed(1)+'%',delta(st.conv,st.prevConv),null],['Buyers',st.buy,delta(st.buy,st.prevBuy),null]];
  const R=[[7,'7D'],[30,'30D'],[90,'90D'],[365,'1Y'],[0,'ALL']];
  L.innerHTML=`<div id="sx"><div class="sx-top"><h3>SALES</h3><div class="chips" id="sxR">${R.map(([v,t])=>'<button data-r="'+v+'"'+(S.range===v?' class="on"':'')+'>'+t+'</button>').join('')}</div></div>
  ${S.err?'<div class="card empty">'+esc(S.err)+'</div>':''}
- <div class="kpis">${[['Revenue',M(st.rev),delta(st.rev,st.prevRev),st.days.map(d=>d.rev),'#e0242f'],['Orders',st.ord,delta(st.ord,st.prevOrd),st.days.map(d=>d.ord),'#e0242f'],['Avg order',M(st.aov),delta(st.aov,st.prevAov),null],['Listens',st.lis,delta(st.lis,st.prevLis),st.days.map(d=>d.lis),'#e8e8e8'],['Listen → buy',st.conv.toFixed(1)+'%',delta(st.conv,st.prevConv),null],['Buyers',st.buy,delta(st.buy,st.prevBuy),null]].map((k,i)=>'<div class="k"><span>'+k[0]+'</span><b>'+k[1]+'</b>'+k[2]+(k[3]?'<canvas data-sp="'+i+'"></canvas>':'')+'</div>').join('')}</div>
+ <div class="kpis">${K.map((k,i)=>'<div class="k"><span>'+k[0]+'</span><b>'+k[1]+'</b>'+k[2]+(k[3]?'<canvas data-sp="'+i+'"></canvas>':'')+'</div>').join('')}</div>
  <div class="row2"><div class="card"><h4>Revenue &amp; listens <span class="chips" id="sxV">${[['both','BOTH'],['rev','REVENUE'],['lis','LISTENS']].map(([v,t])=>'<button data-v="'+v+'"'+(S.view===v?' class="on"':'')+'>'+t+'</button>').join('')}</span></h4><div class="leg"><span><i style="background:#e0242f"></i>Revenue</span><span><i style="background:#e8e8e8"></i>Listens</span></div><canvas id="sxC" style="width:100%;height:260px;display:block;margin-top:8px"></canvas><div class="tip" id="sxT"></div></div>
  <div class="card"><h4>Beats vs packs</h4><canvas id="sxD" style="width:100%;height:200px;display:block"></canvas><div class="leg" style="justify-content:center;margin-top:10px"><span><i style="background:#e0242f"></i>Beats ${M(st.bRev)}</span><span><i style="background:#e8e8e8"></i>Packs ${M(st.pRev)}</span></div></div></div>
+ <div class="row2"><div class="card"><h4>Visits <span class="leg"><span>${st.vis} visits · ${st.vis?Math.round(st.mob/st.vis*100):0}% mobile</span></span></h4><canvas id="sxVi" style="width:100%;height:220px;display:block"></canvas><div class="tip" id="sxVT"></div>${S.vErr?'<div class="empty">Visit tracking is not switched on yet: run supabase/visits.sql in Supabase.</div>':''}</div>
+ <div class="card"><h4>Where they come from</h4><div class="src">${src(st)}</div></div></div>
  <div class="row2"><div class="card"><h4>Top items <span class="chips" id="sxS">${[['rev','REVENUE'],['sold','SOLD'],['lis','LISTENS']].map(([v,t])=>'<button data-s="'+v+'"'+(S.sort===v?' class="on"':'')+'>'+t+'</button>').join('')}</span></h4><div class="top" id="sxTop"></div></div>
  <div class="card"><h4>When people listen</h4><div class="hm" id="sxH"></div><div class="tip" id="sxHT"></div></div></div>
  <div class="card"><h4>Orders <span style="display:flex;gap:8px;flex-wrap:wrap"><input class="q" id="sxQ" placeholder="Search email or item" value="${esc(S.q)}"><span class="chips" id="sxF">${[['paid','PAID'],['created','STARTED'],['review','REVIEW'],['all','ALL']].map(([v,t])=>'<button data-f="'+v+'"'+(S.st===v?' class="on"':'')+'>'+t+'</button>').join('')}</span></span></h4><div id="sxO"></div></div></div>`;
- L.querySelectorAll('[data-sp]').forEach(c=>{const k=+c.dataset.sp,v=[st.days.map(d=>d.rev),st.days.map(d=>d.ord),0,st.days.map(d=>d.lis)][k];spark(c,v,k===3?'#e8e8e8':'#e0242f')});
- const draw=()=>{L.querySelectorAll('[data-sp]').forEach(c=>{const k=+c.dataset.sp,v=[st.days.map(d=>d.rev),st.days.map(d=>d.ord),0,st.days.map(d=>d.lis)][k];spark(c,v,k===3?'#e8e8e8':'#e0242f')});chart($('#sxC'),$('#sxT'),st.days);donut($('#sxD'),st.bRev,st.pRev)};draw();
- if(window._sxRO)_sxRO.disconnect();let _rq;window._sxRO=new ResizeObserver(()=>{cancelAnimationFrame(_rq);_rq=requestAnimationFrame(draw)});[$('#sxC'),$('#sxD')].forEach(c=>_sxRO.observe(c));
+ const draw=()=>{L.querySelectorAll('[data-sp]').forEach(c=>{const k=K[+c.dataset.sp];spark(c,k[3],k[4])});vchart($('#sxVi'),$('#sxVT'),st.days);chart($('#sxC'),$('#sxT'),st.days);donut($('#sxD'),st.bRev,st.pRev)};draw();
+ if(window._sxRO)_sxRO.disconnect();let _rq;window._sxRO=new ResizeObserver(()=>{cancelAnimationFrame(_rq);_rq=requestAnimationFrame(draw)});[$('#sxC'),$('#sxD'),$('#sxVi')].forEach(c=>_sxRO.observe(c));
  top(st);heat(st.hm);orders();
  $('#sxR').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.range=+b.dataset.r;render()};
  $('#sxV').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.view=b.dataset.v;$('#sxV').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));chart($('#sxC'),$('#sxT'),st.days)};
@@ -112,6 +125,22 @@ function render(){const st=stats(),L=$('#bl'),F=$('#bf');if(!$('#sxcss')){const 
  $('#sxF').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.st=b.dataset.f;$('#sxF').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));orders()};
  $('#sxQ').oninput=e=>{S.q=e.target.value;orders()};
  clearTimeout(render.t);onresize=()=>{clearTimeout(render.t);render.t=setTimeout(()=>{if($('#sx'))render()},200)}}
+
+function src(st){const t=Math.max(1,st.vis),ic={direct:'DIR',google:'G',instagram:'IG',youtube:'YT',tiktok:'TT',facebook:'FB',x:'X',reddit:'R',discord:'DC','link in bio':'BIO',beatstars:'BS',soundcloud:'SC',bing:'B'};
+ if(!st.srcs.length)return'<div class="empty">No visits in this range yet.</div>';
+ return st.srcs.slice(0,7).map(([k,v],i)=>'<div class="sr"><i>'+esc(ic[k]||k.slice(0,2).toUpperCase())+'</i><div><b>'+esc(k)+'</b><div class="bar"><i style="width:'+(v/st.srcs[0][1]*100)+'%;'+(i?'background:#5a5a60':'')+'"></i></div></div><em>'+v+'<small>'+Math.round(v/t*100)+'%</small></em></div>').join('')
+  +'<h5>LANDING PAGES</h5>'+st.pages.slice(0,5).map(([k,v])=>{let n=k;try{n=decodeURIComponent(k)}catch(e){}return'<div class="lp"><span>'+esc(k==='/'?'Home':n.replace(/^\/|\/$/g,'').replace(/[-\/]/g,' '))+'</span><b>'+v+'</b></div>'}).join('')}
+
+function vchart(cv,tip,days){const dpr=devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight,P={l:34,r:10,t:12,b:24};if(!W)return;cv.width=W*dpr;cv.height=H*dpr;const x=cv.getContext('2d');x.scale(dpr,dpr);
+ const n=days.length,iw=W-P.l-P.r,ih=H-P.t-P.b,mx=Math.max(4,...days.map(d=>d.vis)),X=i=>P.l+(n<2?iw/2:i/(n-1)*iw),Y=v=>P.t+ih-v/mx*ih;let hov=-1;
+ const draw=()=>{x.clearRect(0,0,W,H);x.font='600 10px Inter';x.strokeStyle='#1d1d20';x.fillStyle='#666';x.textAlign='right';for(let i=0;i<=4;i++){const y=P.t+ih*i/4;x.beginPath();x.moveTo(P.l,y);x.lineTo(W-P.r,y);x.stroke();x.fillText(Math.round(mx*(1-i/4)),P.l-6,y+3)}
+  const g=x.createLinearGradient(0,P.t,0,P.t+ih);g.addColorStop(0,'rgba(224,36,47,.45)');g.addColorStop(1,'rgba(224,36,47,0)');x.beginPath();days.forEach((d,i)=>i?x.lineTo(X(i),Y(d.vis)):x.moveTo(X(i),Y(d.vis)));x.lineTo(X(n-1),P.t+ih);x.lineTo(X(0),P.t+ih);x.fillStyle=g;x.fill();
+  x.beginPath();days.forEach((d,i)=>i?x.lineTo(X(i),Y(d.vis)):x.moveTo(X(i),Y(d.vis)));x.strokeStyle='#e0242f';x.lineWidth=2;x.lineJoin='round';x.stroke();
+  x.fillStyle='#666';x.textAlign='center';const step=Math.ceil(n/Math.max(2,Math.floor(iw/70)));days.forEach((d,i)=>{if(i%step===0){const dt=new Date(d.t);x.fillText((dt.getMonth()+1)+'/'+dt.getDate(),X(i),H-6)}});
+  if(hov>=0){x.strokeStyle='rgba(255,255,255,.2)';x.beginPath();x.moveTo(X(hov),P.t);x.lineTo(X(hov),P.t+ih);x.stroke();x.fillStyle='#fff';x.beginPath();x.arc(X(hov),Y(days[hov].vis),4,0,6.3);x.fill()}};
+ draw();cv.onmousemove=e=>{const r=cv.getBoundingClientRect(),i=Math.round((e.clientX-r.left-P.l)/(iw/Math.max(1,n-1)));if(i<0||i>=n){hov=-1;tip.style.display='none';draw();return}hov=i;draw();const d=days[i];
+  tip.innerHTML=new Date(d.t).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})+'<br><b>'+d.vis+'</b> visit'+(d.vis===1?'':'s');tip.style.display='block';tip.style.left=Math.min(r.width-130,e.clientX-r.left+12)+'px';tip.style.top=(e.clientY-r.top+20)+'px'};
+ cv.onmouseleave=()=>{hov=-1;tip.style.display='none';draw()}}
 
 function top(st){const box=$('#sxTop'),list=st.per.map(p=>{const f=find(p.id);return Object.assign({},p,{f})}).filter(p=>p.f).sort((a,b)=>b[S.sort]-a[S.sort]).slice(0,8),mx=Math.max(1,...list.map(p=>p[S.sort]));
  if(!list.length){box.innerHTML='<div class="empty">No sales or listens in this range yet.</div>';return}
