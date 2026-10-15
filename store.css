@@ -199,3 +199,18 @@ body.store #bpage #bX{border-radius:50%;border:1px solid #ddd;background:#fff}
 .st-rel .st-nm{text-align:left;margin:10px 2px 2px;font:600 14px Inter,sans-serif}
 .st-rel .st-pr{background:none;color:#777;text-align:left;padding:0 2px;font:500 13px Inter,sans-serif;width:auto}
 .st-rel .st-pr s{color:#aaa}
+/* no yellow: black play buttons, dark prices */
+body.store .acts2 .pl{background:#0d0d0d;box-shadow:0 10px 24px rgba(0,0,0,.28)}
+body.store .acts2 .pl i{border-left-color:#fff!important}
+body.store .acts2 .pl.on i,body.store .acts2 .pl i{filter:none}
+body.store .bc #pp{background:#fff;color:#111;box-shadow:none}
+body.store #bar.st-playing .bc #pp{animation:none}
+body.store .bp .prc,body.store .bp .price,body.store .bp [class*="prc"]{color:#111!important}
+.st-hot .st-pr{background:#fff;color:#111}
+body.store #pg b{background:#fff;box-shadow:0 0 10px rgba(255,255,255,.4)}
+body.store #pg b:after{box-shadow:0 0 8px rgba(255,255,255,.7)}
+.st-peq i,.st-eq i{background:#fff}
+.st-card.playing{box-shadow:0 0 0 2px #111,0 18px 40px rgba(0,0,0,.3)!important}
+.st-hot .st-card:hover{box-shadow:0 22px 46px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.25)}
+body.store #vol{accent-color:#fff}
+body.store .bp .tgs span{color:#fff}

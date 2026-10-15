@@ -410,7 +410,7 @@ footer.f a:hover{color:#fff}
 .ms{display:none;font:500 10px Montserrat;letter-spacing:.2em;color:#6c6c73;margin-top:6px}
 @media(max-width:380px){header{padding:12px 8px;gap:6px}nav{gap:8px}nav button{letter-spacing:.06em;font-size:9.5px}.tools{gap:6px}.tools>*{transform:scale(.9)}}
 </style>
-<link rel="stylesheet" href="store.css?v=8">
+<link rel="stylesheet" href="store.css?v=10">
 </head>
 <body>
 <noscript><p style="padding:24px;color:#ccc;font:16px/1.6 sans-serif">MZPRD sells beats and sample packs. Please turn on JavaScript to listen to previews and buy.</p></noscript>
@@ -1236,7 +1236,7 @@ function drawWv(w,p){
  const H=c.clientHeight||42;if(c.width!==Math.round(W*dpr)||c.height!==Math.round(H*dpr)){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr)}
  const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,H);
  const n=w.bars.length,s=W/n;
- if(document.body.classList.contains('store')){const g=x.createLinearGradient(0,0,W,0);g.addColorStop(0,'#e0242f');g.addColorStop(1,'#f0b43c');const bw=Math.max(1.5,s*.6),r=bw/2;w.bars.forEach((a,k)=>{const h=Math.max(3,a*(H-6)),X=k*s,Y=H/2-h/2;x.fillStyle=k/n<p?g:'rgba(20,20,24,.34)';x.beginPath();x.roundRect?x.roundRect(X,Y,bw,h,r):x.rect(X,Y,bw,h);x.fill()});return}
+ if(document.body.classList.contains('store')){const g=x.createLinearGradient(0,0,W,0);g.addColorStop(0,'#111');g.addColorStop(1,'#444');const bw=Math.max(1.5,s*.6),r=bw/2;w.bars.forEach((a,k)=>{const h=Math.max(3,a*(H-6)),X=k*s,Y=H/2-h/2;x.fillStyle=k/n<p?g:'rgba(20,20,24,.34)';x.beginPath();x.roundRect?x.roundRect(X,Y,bw,h,r):x.rect(X,Y,bw,h);x.fill()});return}
  w.bars.forEach((a,k)=>{x.fillStyle=k/n<p?'#e0242f':'#8a8a90';const h=Math.max(2,a*(H-4));x.fillRect(k*s,H/2-h/2,Math.max(1,s*.55),h)});
 }
 addEventListener('resize',()=>{wvs.forEach(w=>w.d=0);if(pwv)pwv.d=0;vinSize();fxSize();lapSize();eyesSize();mpcSize();padSize();hpSize()});
