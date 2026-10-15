@@ -19,7 +19,7 @@ document.body.classList.add('store');
 /* top: promo bar, centred logo, tools (the site's own buttons, moved), nav, ticker */
 const top=document.createElement('div');top.id='stTop';
 top.innerHTML=`<div class="st-bar">${esc(PROMO)}</div><div class="st-head"><a class="st-logo" id="stLogo">MZ<span>PRD</span></a><div class="st-tools" id="stTools"></div></div>
-<nav class="st-nav"><a data-h="home" class="on">Home</a><a data-v="kits">Sample Packs</a><a data-v="beats">Beats</a><a data-v="about">About</a><a data-h="faq">FAQ</a></nav>
+<nav class="st-nav"><a data-h="home" class="on">Home</a><a data-v="kits">Sample Packs</a><a data-v="beats">Beats</a><a data-v="about">About</a></nav>
 <div class="st-tick"><div>${Array(8).fill(TICK.map(t=>'<span>⋆ '+esc(t)+'</span>').join('')).join('')}</div></div>`;
 document.body.insertBefore(top,document.body.firstChild);
 const tools=document.querySelector('header .tools');if(tools)$('#stTools').appendChild(tools);
