@@ -641,6 +641,7 @@ function ytCount(){const t=$s('#yT').value.length,d=$s('#yD').value.length,g=$s(
 function ytNext(k){yi[k]++;ytText()}
 const ygKeep=()=>{const it=S.item;if(it!==ygKeep.it){ygKeep.it=it;YG.list=[];YG.open=-1;if($s('#ygN'))ygRender()}};
 /* YT STUDIO: the MPC package generator (titles, thumbnail words, description, tags, pinned comment, scored) with a matching thumbnail for every package, made by this studio's thumbnail engine */
+const YG_MPC=['mpc','challenge','series'],YG_BAD=/mpc|pad performance|1988|sp-?1200|drum machine/i;
 const YG={n:25,angle:'',seed:1,sort:'score',fav:[],open:-1,list:[]};let ygP=null;
 const ygLoad=()=>ygP=ygP||Promise.all([thLoad(),...['mpcyt.js?v=14','mpcgen.js?v=5','mpcpack.js?v=3'].map(f=>new Promise((ok,no)=>{const n=f.split('?')[0];if(document.querySelector('script[data-yg="'+n+'"]'))return ok();const sc=document.createElement('script');sc.src=new URL(f,document.baseURI).href;sc.dataset.yg=n;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)}))]);
 function ygInfo(){const it=S.item;if(!it)return null;const pk=S.kind==='packs',sl=it.slug||String(it.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
@@ -652,7 +653,7 @@ const ygCopy=async t=>{try{await navigator.clipboard.writeText(t);return true}ca
 const ygAll=p=>p.title+'\n\nTHUMBNAIL TEXT: '+p.thumb+'\n\nDESCRIPTION\n'+p.desc+'\n\nTAGS\n'+p.tags+'\n\nPINNED COMMENT\n'+p.pin+(p.shorts?'\n\nSHORTS\n'+p.shorts.title+'\n'+p.shorts.desc:'');
 function ygRender(){const el=$s('#ygN');if(!el)return;const G=window.MZMpcGen,pk=S.kind==='packs';
  if(!G){el.innerHTML='<div class="msg">Loading…</div>';ygLoad().then(ygRender,()=>{el.innerHTML='<div class="msg">Could not load the package tools.</div>'});return}
- const opts=Object.entries(G.ANGLES).map(([k,v])=>`<option value="${k}"${YG.angle===k?' selected':''}>${v.n} only</option>`).join('');
+ const opts=Object.entries(G.ANGLES).filter(([k])=>pk||!YG_MPC.includes(k)).map(([k,v])=>`<option value="${k}"${YG.angle===k?' selected':''}>${v.n} only</option>`).join('');
  const view=YG.list.map((p,i)=>[p,i]).filter(([p])=>YG.sort!=='fav'||YG.fav.includes(p.title)).sort((a,b)=>YG.sort==='order'?a[1]-b[1]:b[0].score-a[0].score);
  el.innerHTML=`<div class="msg" style="margin-top:0">Full YouTube packages for <b style="color:#fff">${esc(S.item?S.item.title:'(pick an item)')}</b>, each with its own thumbnail, title, description (link first), tags and pinned comment. Scored, best first. Star your favourites, then test 3 with Test &amp; Compare in YouTube Studio.</div>
  <div class="row"><div><label>HOW MANY</label><select id="ygC">${[10,25,50].map(n=>`<option${YG.n===n?' selected':''}>${n}</option>`).join('')}</select></div><div><label>STYLE</label><select id="ygA"><option value="">All styles mixed</option>${opts}</select></div><div><label>SHOW</label><select id="ygS"><option value="score"${YG.sort==='score'?' selected':''}>Best score first</option><option value="order"${YG.sort==='order'?' selected':''}>Mixed order</option><option value="fav"${YG.sort==='fav'?' selected':''}>My picks (${YG.fav.length})</option></select></div></div>
@@ -663,7 +664,8 @@ function ygRender(){const el=$s('#ygN');if(!el)return;const G=window.MZMpcGen,pk
  <div class="row" style="margin-top:10px"><button class="btn" id="ygTxt">DOWNLOAD ALL AS .TXT</button></div><div class="msg" id="ygM"></div>`;
  const say=t=>{$s('#ygM').textContent=t};
  const run=more=>{const inf=ygInfo();if(!inf){say('Pick a beat or pack first (step 01).');return}YG.seed=more?YG.seed+1:YG.seed;const ST=ygST();
-  YG.list=(pk&&window.MZMpcPack?MZMpcPack.generate(ST,inf,YG.n,YG.seed,YG.angle?[YG.angle]:null,G):G.generate(ST,inf,YG.n,YG.seed,YG.angle?[YG.angle]:null,window.MZMpcYT))||[];YG.open=-1;ygRender();$s('#ygM').textContent=YG.list.length+' packages. Best score '+(YG.list.length?Math.max(...YG.list.map(p=>p.score)):0)+'.'};
+  const only=YG.angle?[YG.angle]:(pk?null:Object.keys(G.ANGLES).filter(k=>!YG_MPC.includes(k)));let L=(pk&&window.MZMpcPack?MZMpcPack.generate(ST,inf,YG.n*3,YG.seed,only,G):G.generate(ST,inf,YG.n*3,YG.seed,only,window.MZMpcYT))||[];
+  const clean=t=>String(t||'').split('\n').filter(l=>!YG_BAD.test(l)).join('\n');L=L.filter(p=>!YG_BAD.test(p.title+' '+p.thumb)).map(p=>Object.assign(p,{desc:clean(p.desc),pin:clean(p.pin),tags:String(p.tags||'').split(',').filter(t=>!YG_BAD.test(t)).join(',')}));YG.list=L.slice(0,YG.n);YG.open=-1;ygRender();$s('#ygM').textContent=YG.list.length+' packages. Best score '+(YG.list.length?Math.max(...YG.list.map(p=>p.score)):0)+'.'};
  $s('#ygGo').onclick=()=>run(false);$s('#ygMore').onclick=()=>run(true);
  $s('#ygC').onchange=e=>{YG.n=+e.target.value};$s('#ygA').onchange=e=>{YG.angle=e.target.value};$s('#ygS').onchange=e=>{YG.sort=e.target.value;ygRender()};
  el.onclick=async e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset,P=k=>YG.list[+d[k]];
