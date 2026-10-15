@@ -26,7 +26,7 @@ function player(){const bar=$('#bar');if(!bar)return;if(!bar.querySelector('.st-
 function related(){const bp=$('#bpage');if(!bp||!bp.firstElementChild||!$('#v-beat.on'))return;const path=location.pathname;if(bp.dataset.rel===path&&bp.querySelector('.st-rel'))return;bp.dataset.rel=path;
  const old=bp.querySelector('.st-rel');if(old)old.remove();const isPack=/\/pack\//.test(path),slug=decodeURIComponent((path.match(/\/(beat|pack)\/([^/]+)/)||[])[2]||'');
  const all=[...BS().map((x,i)=>['b',x,i]),...PS().map((x,i)=>['p',x,i])].filter(([k,x])=>{try{return bslug(x)!==slug}catch(e){return true}});
- const same=all.filter(a=>a[0]===(isPack?'p':'b')),pool=[...same,...all.filter(a=>!same.includes(a))].slice(0,4);if(!pool.length)return;
+ const same=all.filter(a=>a[0]===(isPack?'p':'b')),pool=(isPack?same:[...same,...all.filter(a=>!same.includes(a))]).slice(0,4);if(!pool.length)return;
  const box=document.createElement('section');box.className='st-sec st-rel';
  box.innerHTML='<h2>You May Also Like</h2><div class="st-grid">'+pool.map(([k,x,i])=>{let th='';try{th=thumb(x,k==='b'?i:i+2,'')}catch(e){}return '<div class="st-card" data-k="'+k+'" data-i="'+i+'"><div class="st-cv">'+th+(isNew(x)?'<span class="st-tag st-new">NEW</span>':'')+'</div><div class="st-nm">'+esc(x.title)+'</div><button class="st-pr">'+price(k,x)+'</button></div>'}).join('')+'</div>';
  bp.appendChild(box);try{paintArt(box)}catch(e){}
