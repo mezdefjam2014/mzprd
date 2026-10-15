@@ -103,7 +103,8 @@ function render(){const st=stats(),L=$('#bl'),F=$('#bf');if(!$('#sxcss')){const 
  <div class="card"><h4>When people listen</h4><div class="hm" id="sxH"></div><div class="tip" id="sxHT"></div></div></div>
  <div class="card"><h4>Orders <span style="display:flex;gap:8px;flex-wrap:wrap"><input class="q" id="sxQ" placeholder="Search email or item" value="${esc(S.q)}"><span class="chips" id="sxF">${[['paid','PAID'],['created','STARTED'],['review','REVIEW'],['all','ALL']].map(([v,t])=>'<button data-f="'+v+'"'+(S.st===v?' class="on"':'')+'>'+t+'</button>').join('')}</span></span></h4><div id="sxO"></div></div></div>`;
  L.querySelectorAll('[data-sp]').forEach(c=>{const k=+c.dataset.sp,v=[st.days.map(d=>d.rev),st.days.map(d=>d.ord),0,st.days.map(d=>d.lis)][k];spark(c,v,k===3?'#e8e8e8':'#e0242f')});
- chart($('#sxC'),$('#sxT'),st.days);donut($('#sxD'),st.bRev,st.pRev);
+ const draw=()=>{L.querySelectorAll('[data-sp]').forEach(c=>{const k=+c.dataset.sp,v=[st.days.map(d=>d.rev),st.days.map(d=>d.ord),0,st.days.map(d=>d.lis)][k];spark(c,v,k===3?'#e8e8e8':'#e0242f')});chart($('#sxC'),$('#sxT'),st.days);donut($('#sxD'),st.bRev,st.pRev)};draw();
+ if(window._sxRO)_sxRO.disconnect();let _rq;window._sxRO=new ResizeObserver(()=>{cancelAnimationFrame(_rq);_rq=requestAnimationFrame(draw)});[$('#sxC'),$('#sxD')].forEach(c=>_sxRO.observe(c));
  top(st);heat(st.hm);orders();
  $('#sxR').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.range=+b.dataset.r;render()};
  $('#sxV').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.view=b.dataset.v;$('#sxV').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));chart($('#sxC'),$('#sxT'),st.days)};
