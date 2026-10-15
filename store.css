@@ -336,3 +336,6 @@ body.store #packs .card .ds{display:none}
 body.store #packs .card .cart{grid-column:1/-1;margin-top:14px;background:transparent!important;color:#111!important;border:1px solid #d9d7d7!important;border-radius:10px!important;font:600 12px Inter,sans-serif!important;letter-spacing:.06em!important;padding:11px!important;transition:.2s}
 body.store #packs .card .cart:hover{background:#111!important;color:#fff!important;border-color:#111!important}
 body.store #packs .card .cart.in{background:#111!important;color:#fff!important;border-color:#111!important}
+body.store #packs .card .ti:after{text-transform:none;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.store #packs .card .ti{text-transform:none}
+body.store #v-kits{padding-top:34px}
