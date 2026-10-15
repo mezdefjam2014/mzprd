@@ -296,3 +296,17 @@ body.store #bpage .more{display:none!important}
 .st-hotb .st-play i{border-left-width:10px;border-top-width:7px;border-bottom-width:7px}
 .st-hotb .st-rank{font-size:13px;padding:4px 8px;top:-8px;left:-6px}
 .st-hotb .st-tag{display:none}
+/* Hot Beats crate: the front record big, the others tilted back like a crate; rotates on its own */
+.st-hotb{padding:10px 0 40px}.st-hotb h2{font-size:clamp(24px,2.6vw,32px);margin-bottom:10px}
+.st-crate{position:relative;height:440px;perspective:1300px;margin:0 auto;max-width:900px}
+.st-cstage{position:absolute;inset:0;transform-style:preserve-3d}
+.st-crate .st-card{position:absolute;left:50%;top:20px;width:320px;margin-left:-160px;transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .8s,filter .8s;transform-origin:50% 100%}
+.st-crate .st-card[data-o="0"]{transform:translateZ(60px) rotateX(0);z-index:3}
+.st-crate .st-card[data-o="1"]{transform:translateX(250px) translateZ(-160px) rotateY(-38deg) rotateX(8deg);z-index:2;filter:brightness(.55);cursor:pointer}
+.st-crate .st-card[data-o="-1"]{transform:translateX(-250px) translateZ(-160px) rotateY(38deg) rotateX(8deg);z-index:2;filter:brightness(.55);cursor:pointer}
+.st-crate .st-card[data-o="0"]:hover{transform:translateZ(80px) translateY(-6px)}
+.st-crate .st-card .st-play{opacity:0}.st-crate .st-card[data-o="0"] .st-play{opacity:1}
+.st-cn{position:absolute;top:50%;z-index:5;width:46px;height:46px;margin-top:-23px;border-radius:50%;border:0;background:#111;color:#fff;font:400 28px/1 Inter,sans-serif;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.st-cl{left:0}.st-cr{right:0}
+.st-crate:after{content:'';position:absolute;left:10%;right:10%;bottom:-6px;height:30px;background:radial-gradient(ellipse at center,rgba(0,0,0,.25),transparent 70%);z-index:0}
+@media(max-width:700px){.st-crate{height:380px}.st-crate .st-card{width:240px;margin-left:-120px}.st-crate .st-card[data-o="1"]{transform:translateX(120px) translateZ(-200px) rotateY(-40deg)}.st-crate .st-card[data-o="-1"]{transform:translateX(-120px) translateZ(-200px) rotateY(40deg)}}

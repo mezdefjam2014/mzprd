@@ -57,7 +57,11 @@ function render(force){const bs=B(),ps=P(),s=bs.length+'|'+ps.length+'|'+pg+'|'+
  <section class="st-sec" id="stFaq"><h2>FAQs</h2><div class="st-faq">${FAQ.map(q=>'<details><summary>'+esc(q[0])+'</summary><p>'+esc(q[1])+'</p></details>').join('')}</div></section>`;
  wire(home);
  {const vb=document.getElementById('v-beats');let hb=document.getElementById('stHotB');if(vb&&bs.length){if(!hb){hb=document.createElement('section');hb.id='stHotB';hb.className='st-sec st-hotb';vb.insertBefore(hb,vb.firstChild)}
-  hb.innerHTML='<h2>Hot Beats 🔥</h2><div class="st-row st-hot">'+hot.slice(0,3).map((i,r)=>card('b',bs[i],i,r+1)).join('')+'</div>';wire(hb)}}
+  hb.innerHTML='<h2>Hot Beats 🔥</h2><div class="st-crate st-hot"><button class="st-cn st-cl" aria-label="Previous">‹</button><div class="st-cstage">'+hot.slice(0,3).map((i,r)=>card('b',bs[i],i,r+1)).join('')+'</div><button class="st-cn st-cr" aria-label="Next">›</button></div>';wire(hb);
+  const cs=[...hb.querySelectorAll('.st-cstage .st-card')];let at=window.__crAt||0;const pos=()=>{cs.forEach((c,q)=>{const d=((q-at)%cs.length+cs.length)%cs.length,o=d===0?0:d===1?1:-1;c.dataset.o=o})};pos();
+  const go=d=>{at=(at+d+cs.length)%cs.length;window.__crAt=at;pos()};hb.querySelector('.st-cl').onclick=()=>go(-1);hb.querySelector('.st-cr').onclick=()=>go(1);
+  cs.forEach((c,q)=>{const oc=c.onclick;c.onclick=e=>{if(c.dataset.o!=='0'){e.stopPropagation();at=q;window.__crAt=at;pos();return}oc&&oc.call(c,e)}});
+  clearInterval(window.__crT);window.__crT=setInterval(()=>{if(!document.body.contains(hb)||hb.matches(':hover'))return;go(1)},3800)}}
  home.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>navA.find(a=>a.dataset.v===b.dataset.go).click());
  home.querySelectorAll('[data-pg]').forEach(a=>a.onclick=()=>{pg=+a.dataset.pg;render();home.querySelector('.st-grid').scrollIntoView({behavior:'smooth',block:'start'})});
  if(f){const k=fk+':'+f.id;$('#stFa').onclick=e=>{try{toggleCart(k,e.currentTarget)}catch(er){}render(true)};$('#stFb').onclick=()=>{try{if(!f.preview_path)return goItem(fk==='b'?'beat':'pack',bslug(f));fk==='b'?play(fIdx):playPack(fIdx)}catch(er){}};$('#stFv').onclick=()=>{try{goItem(fk==='b'?'beat':'pack',bslug(f))}catch(er){}}}}
