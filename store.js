@@ -31,7 +31,7 @@ $('#stLogo').onclick=()=>showHome(true);
 /* keep the nav underline in step with the site's own view changes */
 new MutationObserver(()=>{const on=document.querySelector('.view.on');if(!on)return;const v=on.id.slice(2);mark(v==='beat'?'beats':v)}).observe(caseEl,{subtree:true,attributes:true,attributeFilter:['class']});
 
-const B=()=>{try{return beats}catch(e){return[]}},P=()=>{try{return packs}catch(e){return[]}};
+const B=()=>{try{return Array.isArray(beats)?beats:[]}catch(e){return[]}},P=()=>{try{return Array.isArray(packs)?packs:[]}catch(e){return[]}};
 const priceOf=x=>{try{return eff(x)}catch(e){return Number(x.price)||0}},m=v=>{try{return money(v)}catch(e){return'$'+Number(v).toFixed(2)}};
 const cov=(x,i)=>{try{return thumb(x,i,'')}catch(e){return'<canvas></canvas>'}};
 function card(kind,x,i){const isB=kind==='b',p=isB?priceOf(x):Number(x.price),full=Number(x.price),key=kind+':'+x.id,inC=(()=>{try{return cart.has(key)}catch(e){return false}})();
@@ -44,16 +44,18 @@ function wire(root){root.querySelectorAll('.st-card').forEach(c=>{const k=c.data
  try{paintArt(root)}catch(e){}}
 let pg=0,sig='';
 function render(force){const bs=B(),ps=P(),s=bs.length+'|'+ps.length+'|'+pg+'|'+(()=>{try{return[...cart].join()}catch(e){return''}})();if(s===sig&&!force)return;sig=s;
- const all=[...bs.map((x,i)=>['b',x,i]),...ps.map((x,i)=>['p',x,i])],per=12,pages=Math.max(1,Math.ceil(all.length/per)),f=ps[0]||bs[0],fk=ps[0]?'p':'b';
- home.innerHTML=`${bs.length?`<section class="st-sec"><h2>Hot Beats 🔥</h2><div class="st-row">${bs.slice(0,3).map((x,i)=>card('b',x,i)).join('')}</div><button class="st-all" data-go="beats">View All</button></section>`:''}
+ const S=(()=>{try{return promo||{}}catch(e){return{}}})(),hotIds=String(S.home_hot||'').split(',').filter(Boolean),hot=hotIds.map(id=>bs.findIndex(b=>String(b.id)===id)).filter(i=>i>=0);for(let i=0;hot.length<3&&i<bs.length;i++)if(!hot.includes(i))hot.push(i);
+ const fs=String(S.home_feature||''),fk0=fs[0],fi=fs?(fk0==='p'?ps:bs).findIndex(x=>'x:'.replace('x',fk0)+x.id===fs):-1,fk=fi>=0?fk0:(ps[0]?'p':'b'),fIdx=fi>=0?fi:0,f=(fk==='p'?ps:bs)[fIdx],fImg=S.home_feature_img?(()=>{try{return pub(S.home_feature_img)}catch(e){return null}})():null;
+ const all=[...bs.map((x,i)=>['b',x,i]),...ps.map((x,i)=>['p',x,i])].filter(([k,x,i])=>!(k==='b'&&hot.slice(0,3).includes(i))),st0=all.length?Math.floor(Date.now()/864e5)%all.length:0,pick=[...all.slice(st0),...all.slice(0,st0)].slice(0,4);
+ home.innerHTML=`${bs.length?`<section class="st-sec"><h2>Hot Beats 🔥</h2><div class="st-row">${hot.slice(0,3).map(i=>card('b',bs[i],i)).join('')}</div><button class="st-all" data-go="beats">View All</button></section>`:''}
  ${ps.length?`<section class="st-sec"><h2>Sample Packs</h2><div class="st-row">${ps.slice(0,3).map((x,i)=>card('p',x,i)).join('')}</div><button class="st-all" data-go="kits">View All</button></section>`:''}
- ${f?`<div class="st-feat"><div class="in"><div>${cov(f,fk==='b'?0:2)}</div><div><h3>${esc(f.title)}</h3><div class="p">${m(fk==='b'?priceOf(f):f.price)}</div>${f.description?'<div class="d">'+esc(f.description)+'</div>':''}<button class="a" id="stFa">Add to Cart</button><button class="b" id="stFb">${f.preview_path?'Play Preview':'View'}</button><button class="lnk" id="stFv">Visit product page →</button></div></div></div>`:''}
- ${all.length?`<section class="st-sec"><h2>Try These</h2><div class="st-grid">${all.slice(pg*per,pg*per+per).map(([k,x,i])=>card(k,x,i)).join('')}</div>${pages>1?'<div class="st-pg">'+[...Array(pages)].map((_,i)=>'<a data-pg="'+i+'"'+(i===pg?' class="on"':'')+'>'+(i+1)+'</a>').join('')+'</div>':''}</section>`:''}
+ ${f?`<div class="st-feat"><div class="in"><div>${fImg?'<img src="'+esc(fImg)+'" alt="">':cov(f,fk==='b'?fIdx:fIdx+2)}</div><div><h3>${esc(f.title)}</h3><div class="p">${m(fk==='b'?priceOf(f):f.price)}</div>${f.description?'<div class="d">'+esc(f.description)+'</div>':''}<button class="a" id="stFa">Add to Cart</button><button class="b" id="stFb">${f.preview_path?'Play Preview':'View'}</button><button class="lnk" id="stFv">Visit product page →</button></div></div></div>`:''}
+ ${pick.length?`<section class="st-sec"><h2>Try These</h2><div class="st-grid">${pick.map(([k,x,i])=>card(k,x,i)).join('')}</div></section>`:''}
  <section class="st-sec" id="stFaq"><h2>FAQs</h2><div class="st-faq">${FAQ.map(q=>'<details><summary>'+esc(q[0])+'</summary><p>'+esc(q[1])+'</p></details>').join('')}</div></section>`;
  wire(home);
  home.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>navA.find(a=>a.dataset.v===b.dataset.go).click());
  home.querySelectorAll('[data-pg]').forEach(a=>a.onclick=()=>{pg=+a.dataset.pg;render();home.querySelector('.st-grid').scrollIntoView({behavior:'smooth',block:'start'})});
- if(f){const k=fk+':'+f.id;$('#stFa').onclick=e=>{try{toggleCart(k,e.currentTarget)}catch(er){}render(true)};$('#stFb').onclick=()=>{try{if(!f.preview_path)return goItem(fk==='b'?'beat':'pack',bslug(f));fk==='b'?play(0):playPack(0)}catch(er){}};$('#stFv').onclick=()=>{try{goItem(fk==='b'?'beat':'pack',bslug(f))}catch(er){}}}}
+ if(f){const k=fk+':'+f.id;$('#stFa').onclick=e=>{try{toggleCart(k,e.currentTarget)}catch(er){}render(true)};$('#stFb').onclick=()=>{try{if(!f.preview_path)return goItem(fk==='b'?'beat':'pack',bslug(f));fk==='b'?play(fIdx):playPack(fIdx)}catch(er){}};$('#stFv').onclick=()=>{try{goItem(fk==='b'?'beat':'pack',bslug(f))}catch(er){}}}}
 /* the home page is the front page */
 const isRoot=()=>{const b=window.BASEPATH||'/';return location.pathname===b||location.pathname===b+'index.html'};
 function tick(){render();{const on=document.querySelector('.case>.view.on');if(on){const v=on.id.slice(2);mark(v==='beat'?'beats':v)}}if(isRoot()&&!location.hash&&!document.querySelector('.view.on:not(#v-beats)')&&document.getElementById('v-beats').classList.contains('on'))showHome(false)}
