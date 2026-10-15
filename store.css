@@ -214,3 +214,28 @@ body.store #pg b:after{box-shadow:0 0 8px rgba(255,255,255,.7)}
 .st-hot .st-card:hover{box-shadow:0 22px 46px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.25)}
 body.store #vol{accent-color:#fff}
 body.store .bp .tgs span{color:#fff}
+/* You May Also Like: one at a time; the cover runs in, the price slides in beside it, holds, fades, next */
+.st-spot{position:relative;max-width:760px;height:300px;margin:0 auto}
+.st-sl{position:absolute;inset:0 0 34px;display:grid;grid-template-columns:260px 1fr;gap:34px;align-items:center;cursor:pointer;pointer-events:none;opacity:0}
+.st-sl.in,.st-sl.out{pointer-events:auto}
+.st-scv{width:260px;height:260px;border-radius:14px;overflow:hidden;box-shadow:0 22px 50px rgba(0,0,0,.25)}
+.st-scv img,.st-scv canvas{width:100%;height:100%;object-fit:cover;display:block}
+.st-sinfo{text-align:left}
+.st-sk{font:700 11px Inter,sans-serif;letter-spacing:.2em;color:#888}
+.st-sinfo b{display:block;font:800 clamp(26px,3.4vw,40px)/1.05 Inter,sans-serif;color:#0f0f0f;margin:8px 0 14px;letter-spacing:-.02em}
+.st-sp{display:inline-block;background:#0d0d0d;color:#fff;font:800 20px Inter,sans-serif;padding:10px 18px;border-radius:999px}
+.st-sp s{color:#999;font-weight:500;font-size:15px;margin-right:8px}
+.st-sbtn{display:block;margin-top:16px;background:none;border:0;padding:0;font:600 14px Inter,sans-serif;color:#111;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.st-sl.in{opacity:1}
+.st-sl.in .st-scv{animation:stIn .8s cubic-bezier(.2,.9,.25,1) both}
+.st-sl.in .st-sk{animation:stUp .6s .25s both}.st-sl.in b{animation:stUp .6s .35s both}
+.st-sl.in .st-sp{animation:stSide .7s .5s cubic-bezier(.2,.9,.25,1.2) both}.st-sl.in .st-sbtn{animation:stUp .6s .65s both}
+.st-sl.out{animation:stOut .6s both}
+@keyframes stIn{from{transform:translateX(-120px) rotate(-6deg) scale(.9);opacity:0}to{transform:none;opacity:1}}
+@keyframes stUp{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+@keyframes stSide{from{transform:translateX(60px);opacity:0}to{transform:none;opacity:1}}
+@keyframes stOut{from{opacity:1}to{opacity:0;transform:translateY(-8px)}}
+.st-dots{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:8px}
+.st-dots i{width:8px;height:8px;border-radius:50%;background:#cfcdcd;cursor:pointer;transition:.25s}
+.st-dots i.on{width:26px;border-radius:6px;background:#111}
+@media(max-width:600px){.st-spot{height:430px}.st-sl{grid-template-columns:1fr;gap:16px;justify-items:center}.st-scv{width:220px;height:220px}.st-sinfo{text-align:center}}

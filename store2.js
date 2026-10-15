@@ -28,9 +28,13 @@ function related(){const bp=$('#bpage');if(!bp||!bp.firstElementChild||!$('#v-be
  const all=[...BS().map((x,i)=>['b',x,i]),...PS().map((x,i)=>['p',x,i])].filter(([k,x])=>{try{return bslug(x)!==slug}catch(e){return true}});
  const same=all.filter(a=>a[0]===(isPack?'p':'b')),pool=(isPack?same:[...same,...all.filter(a=>!same.includes(a))]).slice(0,4);if(!pool.length)return;
  const box=document.createElement('section');box.className='st-sec st-rel';
- box.innerHTML='<h2>You May Also Like</h2><div class="st-grid">'+pool.map(([k,x,i])=>{let th='';try{th=thumb(x,k==='b'?i:i+2,'')}catch(e){}return '<div class="st-card" data-k="'+k+'" data-i="'+i+'"><div class="st-cv">'+th+(isNew(x)?'<span class="st-tag st-new">NEW</span>':'')+'</div><div class="st-nm">'+esc(x.title)+'</div><button class="st-pr">'+price(k,x)+'</button></div>'}).join('')+'</div>';
+ box.innerHTML='<h2>You May Also Like</h2><div class="st-spot">'+pool.map(([k,x,i],j)=>{let th='';try{th=thumb(x,k==='b'?i:i+2,'')}catch(e){}return '<div class="st-sl" data-k="'+k+'" data-i="'+i+'"><div class="st-scv">'+th+'</div><div class="st-sinfo"><span class="st-sk">'+(k==='p'?'SAMPLE PACK':'BEAT')+'</span><b>'+esc(x.title)+'</b><div class="st-sp">'+price(k,x)+'</div><button class="st-sbtn">Listen &amp; buy →</button></div></div>'}).join('')+'<div class="st-dots">'+pool.map((_,j)=>'<i data-j="'+j+'"></i>').join('')+'</div></div>';
  bp.appendChild(box);try{paintArt(box)}catch(e){}
- box.querySelectorAll('.st-card').forEach(c=>{const k=c.dataset.k,x=(k==='b'?BS():PS())[+c.dataset.i];c.onclick=()=>{try{goItem(k==='b'?'beat':'pack',bslug(x));scrollTo(0,0)}catch(e){}};c.querySelector('.st-pr').onclick=e=>{e.stopPropagation();try{toggleCart(k+':'+x.id,e.currentTarget)}catch(er){}}})}
+ const sl=[...box.querySelectorAll('.st-sl')],dots=[...box.querySelectorAll('.st-dots i')];let at=-1;
+ const show=j=>{sl.forEach((e,q)=>{e.classList.remove('in','out');if(q===at&&q!==j)e.classList.add('out')});dots.forEach((d,q)=>d.classList.toggle('on',q===j));at=j;void sl[j].offsetWidth;sl[j].classList.add('in')};
+ show(0);clearInterval(related.t);if(sl.length>1)related.t=setInterval(()=>{if(!document.body.contains(box)){clearInterval(related.t);return}if(!box.matches(':hover'))show((at+1)%sl.length)},4200);
+ dots.forEach(d=>d.onclick=()=>show(+d.dataset.j));
+ sl.forEach(c=>{const k=c.dataset.k,x=(k==='b'?BS():PS())[+c.dataset.i];c.onclick=()=>{try{goItem(k==='b'?'beat':'pack',bslug(x));scrollTo(0,0)}catch(e){}}})}
 
 /* 7. bundle deals: a banner on the front page and a nudge in the cart */
 function bundles(){const bl=(G('bundles')||[]).filter(b=>b.active!==false);const home=$('#v-home');
