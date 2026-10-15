@@ -285,3 +285,14 @@ body.store #bpage .more{display:none!important}
 .st-bteaser{display:flex;align-items:center;gap:14px;width:100%;max-width:980px;margin:40px auto 0;background:#fff;border:1px solid #e3e1e1;border-radius:14px;padding:16px 20px;cursor:pointer;text-align:left;box-shadow:0 6px 18px rgba(0,0,0,.05);transition:.2s}
 .st-bteaser:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,0,0,.1);border-color:#111}
 .st-bteaser span{font-size:24px}.st-bteaser b{flex:1;font:700 16px Inter,sans-serif;color:#111}.st-bteaser em{font:600 13px Inter,sans-serif;color:#666;font-style:normal}
+.st-hotb{padding:20px 0 40px}
+.st-hotb{padding:6px 0 22px}
+.st-hotb h2{font-size:20px;margin-bottom:16px}
+.st-hotb .st-row{max-width:620px;margin:0 auto;gap:14px}
+.st-hotb .st-card{padding:8px}
+.st-hotb .st-nm{font-size:12px;margin:8px 2px 6px}
+.st-hotb .st-pr{font-size:12px;padding:6px}
+.st-hotb .st-play{width:36px;height:36px;right:7px;bottom:7px}
+.st-hotb .st-play i{border-left-width:10px;border-top-width:7px;border-bottom-width:7px}
+.st-hotb .st-rank{font-size:13px;padding:4px 8px;top:-8px;left:-6px}
+.st-hotb .st-tag{display:none}
