@@ -140,7 +140,7 @@ function html(){
    <label class="chk"><input type="checkbox" id="sSync" checked> COVER PULSES TO THE BEAT</label>
    <label class="chk"><input type="checkbox" id="sGlow"> GLOW EFFECT</label>
    <h4>END CARD</h4>
-   <label class="chk"><input type="checkbox" id="sEnd" checked> 8-BIT SUBSCRIBE CARD AT THE END</label>
+   <label class="chk"><input type="checkbox" id="sEnd" checked> END CARD</label><select id="sEndT"><option value="sell">Sell the beat (price, link, instant download)</option><option value="sub">8-bit subscribe card</option></select>
   </div>
   <button class="go" id="sRender">RENDER VIDEO</button>
   <div class="bar"><b id="sProg"></b></div><div class="msg" id="sMsg">Keep this tab open and visible while it renders. A 3 minute beat takes about 3 minutes.</div>
@@ -251,7 +251,27 @@ function frame(cv,t,dur){
  const ecd=Math.min(6,dur*.5);if(S.end&&dur&&t>dur-ecd)endCard(c,W,H,t-(dur-ecd),ecd);
 }
 let ec=null,heroImg=null;
+function sellCard(c,W,H,tt,ecd){
+ const land=W>H,k=land?H/1080:W/1080,it=S.item||{},isPack=S.kind==='packs'||it._k==='packs',ease=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),3),fi=ease(tt/.6);
+ const F="Anton, Impact, 'Arial Narrow Bold', sans-serif",B="Inter, 'Helvetica Neue', Arial, sans-serif";
+ c.save();c.globalAlpha=fi;c.fillStyle='#070708';c.fillRect(0,0,W,H);
+ const g=c.createRadialGradient(W*.3,H*.5,0,W*.3,H*.5,W*.6);g.addColorStop(0,'rgba(224,36,47,.16)');g.addColorStop(1,'rgba(224,36,47,0)');c.fillStyle=g;c.fillRect(0,0,W,H);
+ const cs=land?H*.56:W*.62,cx=land?W*.28:W/2,cy=land?H*.5:H*.3,push=1+.03*(tt/ecd),ci=ease((tt-.1)/.8);
+ if(S.cover&&S.cover.naturalWidth){const s=cs*push,iw=S.cover.naturalWidth,ih=S.cover.naturalHeight,m=Math.min(iw,ih);c.save();c.globalAlpha=fi*ci;c.translate(cx,cy+(1-ci)*30*k);c.shadowColor='rgba(0,0,0,.8)';c.shadowBlur=70*k;c.shadowOffsetY=24*k;c.fillStyle='#000';c.fillRect(-s/2,-s/2,s,s);c.shadowColor='transparent';c.drawImage(S.cover,(iw-m)/2,(ih-m)/2,m,m,-s/2,-s/2,s,s);c.restore()}
+ const tx=land?W*.53:W*.08,mw=land?W*.4:W*.84;let y=land?H*.27:H*.6;
+ const line=(d,fn)=>{const a=ease((tt-d)/.5);if(a<=0)return;c.save();c.globalAlpha=fi*a;c.translate((1-a)*40*k,0);fn();c.restore()};
+ c.textBaseline='top';c.textAlign='left';
+ line(.35,()=>{c.fillStyle='#e0242f';c.fillRect(tx,y,6*k,26*k);c.font=`800 ${22*k}px ${B}`;c.fillStyle='#e0242f';c.fillText(isPack?'GET THIS PACK':'LICENSE THIS BEAT',tx+18*k,y+2*k)});y+=50*k;
+ const title=String(it.title||'').toUpperCase();let ts=110*k;c.font=`${ts}px ${F}`;while(c.measureText(title).width>mw&&ts>40*k){ts-=4*k;c.font=`${ts}px ${F}`}
+ line(.5,()=>{c.font=`${ts}px ${F}`;c.fillStyle='#fff';c.fillText(title,tx,y)});y+=ts*1.08;
+ const price=Number(it.price);if(price>0){line(.7,()=>{c.font=`${30*k}px ${F}`;c.fillStyle='#9a9aa2';c.fillText(isPack?'':'LEASES FROM',tx,y+12*k);const w=isPack?0:c.measureText('LEASES FROM ').width;c.font=`${64*k}px ${F}`;c.fillStyle='#fff';c.fillText('$'+price.toFixed(price%1?2:0),tx+w,y)});y+=86*k}
+ line(.85,()=>{c.font=`700 ${24*k}px ${B}`;c.fillStyle='#c9c9cf';c.fillText(isPack?'ROYALTY-FREE  ·  INSTANT DOWNLOAD':'INSTANT DOWNLOAD  ·  FULL QUALITY FILES',tx,y)});y+=64*k;
+ line(1.05,()=>{const bw=Math.min(mw,560*k),bh=92*k,pul=.5+.5*Math.sin(tt*4);c.fillStyle='#e0242f';c.fillRect(tx,y,bw,bh);c.strokeStyle='rgba(224,36,47,'+(.5*pul)+')';c.lineWidth=3*k;c.strokeRect(tx-8*k*pul,y-8*k*pul,bw+16*k*pul,bh+16*k*pul);
+  c.font=`${46*k}px ${F}`;c.fillStyle='#fff';c.textBaseline='middle';c.fillText('MZPRD.COM',tx+28*k,y+bh/2+2*k);c.textAlign='right';c.font=`800 ${18*k}px ${B}`;c.fillText('LINK IN DESCRIPTION ↓',tx+bw-24*k,y+bh/2+2*k)});y+=130*k;
+ line(1.3,()=>{c.textBaseline='top';c.textAlign='left';c.font=`700 ${20*k}px ${B}`;c.fillStyle='#6f6f76';c.fillText('SUBSCRIBE FOR NEW BEATS EVERY WEEK',tx,y)});
+ c.restore()}
 function endCard(c,W,H,tt,ecd){
+ if(S.endType!=='sub')return sellCard(c,W,H,tt,ecd);
  if(!heroImg){heroImg=new Image();heroImg.src=new URL('hero.jpg',document.baseURI).href}
  if(!heroImg.complete||!heroImg.naturalWidth)return;
  const land=W>H,lw=land?480:270,lh=land?270:480;
@@ -680,7 +700,7 @@ function wire(){
  const bind=(id,key,fn)=>{const el=q(id);el.oninput=el.onchange=()=>{S[key]=fn?fn(el):el.value;if(key==='layout')S.bd=null;redraw()}};
  bind('#sLay','layout');bind('#sAnim','anim');bind('#sGrain','grain',e=>e.checked);bind('#sVig','vig',e=>e.checked);
  bind('#sFont','font');bind('#sCol','color');bind('#sStr','stroke',e=>+e.value);bind('#sSize','size',e=>+e.value);
- bind('#sVis','vis');bind('#sVc','visColor');bind('#sVh','visH',e=>+e.value);bind('#sSync','sync',e=>e.checked);bind('#sGlow','glow',e=>e.checked);bind('#sEnd','end',e=>e.checked);
+ bind('#sVis','vis');bind('#sVc','visColor');bind('#sVh','visH',e=>+e.value);bind('#sSync','sync',e=>e.checked);bind('#sGlow','glow',e=>e.checked);bind('#sEnd','end',e=>e.checked);bind('#sEndT','endType');
  q('#sMax').oninput=()=>{S.maxLen=q('#sMax').value;redraw()};
  q('#sCov').onchange=e=>{const f=e.target.files[0];if(f)loadCover(URL.createObjectURL(f))};
  document.querySelectorAll('#studio [name=sSrc]').forEach(r=>r.onchange=()=>{S.src=r.value;stopPlay();if(S.src==='preview')loadPreview();else{S.buf=null;setAudM('Choose your audio file below.');if(q('#sAud').files[0])loadFile(q('#sAud').files[0]);else redraw()}});
