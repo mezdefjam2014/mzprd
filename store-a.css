@@ -151,20 +151,38 @@ body.store #acct .acl{color:#aaa;border-color:#333;border-radius:0}
 .sd-beats{background:none;border:1px solid #444;color:#fff;font:400 20px Anton,sans-serif;letter-spacing:.08em;padding:9px 22px;cursor:pointer}
 .sd-beats:hover{border-color:#fff}
 @media(max-width:600px){.sd-rr{grid-template-columns:44px 36px 1fr;}.sd-rpr,.sd-add{grid-column:span 1}}
-/* BACK OFFICE: colours and type only (the layout stays the site's own) */
-#bo{background:#0a0a0b}
-#bo .bh{border-bottom:1px solid #1d1d20}
-#bo .bh h2{font:400 34px/1 Anton,sans-serif;letter-spacing:.02em}
-#bo .bh button{border-radius:0;border-color:#2a2a2e;font-family:Inter,sans-serif;font-weight:700}
-#bo .bh button.on{background:#e0242f;border-color:#e0242f}
-#bo h3{font:400 28px Anton,sans-serif;letter-spacing:.02em}
-#bo label{font-family:Inter,sans-serif;font-weight:700;color:#8a8a90}
-#bo input[type=text],#bo input[type=number],#bo textarea,#bo select{background:#0a0a0b;border-color:#2a2a2e;border-radius:0}
+/* BACK OFFICE in the record store theme */
+#bo{background:#0a0a0b;font-family:Inter,sans-serif;padding-top:0}
+#bo .bh{position:sticky;top:0;z-index:5;background:rgba(10,10,11,.96);backdrop-filter:blur(8px);margin:0 calc(-1*clamp(14px,4vw,60px)) 26px;padding:18px clamp(14px,4vw,60px);border-bottom:1px solid #1d1d20;gap:4px}
+#bo .bh h2{font:400 34px/1 Anton,sans-serif;letter-spacing:.02em;color:#fff;margin-right:auto}
+#bo .bh button{background:none;border:0;border-bottom:2px solid transparent;color:#7c7c82;font:700 11px Inter,sans-serif;letter-spacing:.16em;padding:10px 11px}
+#bo .bh button:hover{color:#fff;border-color:#3a3a3e}
+#bo .bh button.on{background:none;color:#fff;border-color:#e0242f}
+#bo .bh button[data-t=out],#bo #boOut{border:1px solid #333;margin-left:8px}
+#bo .bo2{gap:22px}
+#bo .bo2>form,#bo .bo2>div>form,#bo #bf,#bo #bf2,#bo #bf3{background:#111113;border:1px solid #1f1f23;padding:22px}
+#bo h3{font:400 30px/1 Anton,sans-serif;letter-spacing:.02em;color:#fff;margin-bottom:16px}
+#bo label{font:700 10px Inter,sans-serif;letter-spacing:.18em;color:#86868c;text-transform:uppercase}
+#bo input[type=text],#bo input[type=number],#bo input[type=email],#bo textarea,#bo select{background:#0a0a0b;border:1px solid #26262a;color:#fff;border-radius:0;font:500 14px Inter,sans-serif;padding:12px}
 #bo input:focus,#bo textarea:focus,#bo select:focus{border-color:#e0242f;outline:0}
-#bo .go{border-radius:0;font-family:Inter,sans-serif;font-weight:800}
-#bo .bi{background:#111113;border-color:#1f1f23}
-#bo .bi b{font:400 20px Anton,sans-serif;letter-spacing:.03em;text-transform:uppercase}
-#bo .bi span{font-family:Inter,sans-serif;letter-spacing:.02em}
-#bo .bi .acts button{border-radius:0;border-color:#333;font-family:Inter,sans-serif;font-weight:700}
-#bo .bi .acts button:hover{border-color:#fff}
-#bo .bi.gp{background:#140a0c;border-color:#3a1418}
+#bo input[type=file]{color:#888;font:500 12px Inter,sans-serif}
+#bo input[type=file]::file-selector-button{background:#1a1a1d;color:#fff;border:1px solid #333;padding:8px 12px;font:700 11px Inter,sans-serif;letter-spacing:.1em;margin-right:10px;cursor:pointer}
+#bo .chk{font:600 12px Inter,sans-serif;color:#cfcfd3;letter-spacing:.06em}
+#bo input[type=checkbox]{accent-color:#e0242f}
+#bo .go{background:#e0242f;color:#fff;border:0;border-radius:0;font:800 12px Inter,sans-serif;letter-spacing:.16em;padding:16px}
+#bo .go:hover{background:#fff;color:#000}
+#bo .bi{background:#111113;border:1px solid #1f1f23;padding:12px 14px;transition:border-color .2s}
+#bo .bi:hover{border-color:#34343a}
+#bo .bi img,#bo .bi .nc{box-shadow:0 8px 18px rgba(0,0,0,.6)}
+#bo .bi b{font:400 21px/1.05 Anton,sans-serif;letter-spacing:.03em;color:#fff}
+#bo .bi span{font:600 13px Inter,sans-serif;color:#9a9aa0;letter-spacing:.02em}
+#bo .bi .acts button{background:none;border:1px solid #2e2e33;color:#ddd;font:700 10px Inter,sans-serif;letter-spacing:.14em;padding:10px 13px;border-radius:0}
+#bo .bi .acts button:hover{border-color:#fff;color:#fff}
+#bo .bi .acts button:first-child{color:#fff;border-color:#4a4a50}
+#bo .bi .acts .del{border-color:#4a1a1d;color:#ff6b6b}
+#bo .bi .acts .del:hover{background:#e0242f;border-color:#e0242f;color:#fff}
+#bo .bi.gp{background:linear-gradient(90deg,#1a0a0d,#111113);border:1px solid #3a1418}
+#bo .bi.gp b{font:400 24px Anton,sans-serif}
+#bo .bi.gp input{background:#0a0a0b;border:1px solid #333;border-radius:0;font:700 15px Inter,sans-serif}
+#bo .cur,#bo #bmsg,#bo .nt{color:#9a9a9a;font-family:Inter,sans-serif}
+#bo .bi:has(>span:only-child){grid-template-columns:1fr!important}
