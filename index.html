@@ -410,7 +410,7 @@ footer.f a:hover{color:#fff}
 .ms{display:none;font:500 10px Montserrat;letter-spacing:.2em;color:#6c6c73;margin-top:6px}
 @media(max-width:380px){header{padding:12px 8px;gap:6px}nav{gap:8px}nav button{letter-spacing:.06em;font-size:9.5px}.tools{gap:6px}.tools>*{transform:scale(.9)}}
 </style>
-<link rel="stylesheet" href="store.css?v=5">
+<link rel="stylesheet" href="store.css?v=6">
 </head>
 <body>
 <noscript><p style="padding:24px;color:#ccc;font:16px/1.6 sans-serif">MZPRD sells beats and sample packs. Please turn on JavaScript to listen to previews and buy.</p></noscript>
@@ -1685,6 +1685,8 @@ async function promoRender(){
   <label>BIG FEATURED BLOCK (THE BLACK BAND)</label><select id="p_feat"><option value="">(first sample pack)</option>${packs.map(x=>'<option value="p:'+esc(x.id)+'"'+(e.home_feature==='p:'+x.id?' selected':'')+'>PACK: '+esc(x.title)+'</option>').join('')}${beats.map(x=>'<option value="b:'+esc(x.id)+'"'+(e.home_feature==='b:'+x.id?' selected':'')+'>BEAT: '+esc(x.title)+'</option>').join('')}</select>
   <label>BIG FEATURED IMAGE (OPTIONAL, SQUARE WORKS BEST; EMPTY = THE COVER)</label><input type="file" id="p_fimg" accept="image/*">
   ${e.home_feature_img?`<div class="cur">Current: ${esc(e.home_feature_img.split('/').pop())}</div><label class="chk" style="margin-top:6px"><input type="checkbox" id="p_frm"> REMOVE THIS IMAGE</label>`:''}
+  <label>SLASHED "WAS" PRICE: SHOW THE OLD PRICE THIS % HIGHER, CROSSED OUT (0 = OFF)</label><input type="number" min="0" max="90" step="1" id="p_slash" value="${esc(e.slash_pct||0)}">
+  <label>NEXT DROP COUNTDOWN (FRONT PAGE)</label><div style="display:flex;gap:8px"><select id="p_dday"><option value="">Off</option>${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map((d,i)=>'<option value="'+i+'"'+(String(e.drop_day)===String(i)?' selected':'')+'>'+d+'</option>').join('')}</select><select id="p_dhr">${[...Array(24)].map((_,h)=>'<option value="'+h+'"'+(Number(e.drop_hour==null?18:e.drop_hour)===h?' selected':'')+'>'+((h%12)||12)+(h<12?' AM':' PM')+'</option>').join('')}</select></div>
   <button class="go" type="submit" id="p_save">SAVE PROMO + FRONT PAGE</button><div id="bmsg"></div>`;
  $('#bf').onsubmit=promoSave;
  $('#bl').innerHTML='<div class="bi"><span>While the promo is on, every beat on the site sells at the promo price and the girl pops in with your message. Turn it off to go back to the price set on each beat. Sample packs are not affected.</span></div>';
@@ -1698,11 +1700,11 @@ async function promoSave(ev){
   const f=$('#p_img').files[0],rm=$('#p_rm');
   if(f){msg.textContent='Uploading image...';newImg=await upload(f,'public-media','promo');row.promo_image_path=newImg;oldImg=cur}
   else if(rm&&rm.checked){row.promo_image_path=null;oldImg=cur}
-  {const hot=[0,1,2].map(i=>$('#p_hot'+i).value).filter(Boolean);row.home_hot=hot.join(',')||null;row.home_feature=$('#p_feat').value||null;
+  {const hot=[0,1,2].map(i=>$('#p_hot'+i).value).filter(Boolean);row.home_hot=hot.join(',')||null;row.home_feature=$('#p_feat').value||null;row.slash_pct=parseFloat($('#p_slash').value)||0;row.drop_day=$('#p_dday').value===''?null:+$('#p_dday').value;row.drop_hour=+$('#p_dhr').value;
    const ff=$('#p_fimg').files[0],frm=$('#p_frm'),curF=(await sb.from('site_settings').select('*').eq('id',1).maybeSingle()).data?.home_feature_img||null;
    if(ff){msg.textContent='Uploading featured image...';row.home_feature_img=await upload(ff,'public-media','promo')}else if(frm&&frm.checked)row.home_feature_img=null}
   msg.textContent='Saving...';
-  const {error}=await sb.from('site_settings').upsert(row);if(error){if(/home_/.test(error.message||''))throw new Error('Run supabase/storefront.sql in Supabase (SQL Editor) once, then save again.');throw error}
+  const {error}=await sb.from('site_settings').upsert(row);if(error){if(/home_|slash_|drop_/.test(error.message||''))throw new Error('Run supabase/storefront.sql in Supabase (SQL Editor) once, then save again.');throw error}
   if(oldImg)await sb.storage.from('public-media').remove([oldImg]);
   girlGone=false;await loadAll();promoRender();toast('PROMO SAVED');
  }catch(err){if(newImg)await sb.storage.from('public-media').remove([newImg]);msg.textContent='Error: '+(err.message||err);btn.disabled=false}
@@ -1900,6 +1902,7 @@ window.slotsBoot=async function(){
 $('#slotBtn').onclick=async()=>{try{if(!window.slotsOpen)await loadScript('slots.js?v=4');await window.slotsOpen()}catch(e){toast('SLOTS FAILED TO LOAD')}};
 checkAdmin();loadAll();frame();
 </script>
-<script src="store.js?v=7"></script>
+<script src="store.js?v=8"></script>
+<script src="store2.js?v=1"></script>
 </body>
 </html>

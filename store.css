@@ -122,3 +122,48 @@ body.store .bp .bk,body.store .bp a[href*="beats"]{color:#555}
 @keyframes steq{0%,100%{height:5px}50%{height:22px}}
 .st-card.playing .st-eq{display:flex}
 .st-card.playing{box-shadow:0 0 0 2px #f0c35c,0 18px 40px rgba(240,195,92,.3)!important}
+/* trust badges */
+.st-trust{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;justify-content:center;margin:12px 0 4px;font:600 11px Inter,sans-serif;color:#555}
+.st-trust b{background:#fff;border:1px solid #ddd;border-radius:4px;padding:3px 7px;color:#1a1a1a;font-weight:800;letter-spacing:.02em}
+.st-feat .st-trust{justify-content:flex-start;color:#aaa}.st-feat .st-trust b{background:#1b1b1d;border-color:#333;color:#eee}
+#modal .st-trust{color:#bbb}#modal .st-trust b{background:#1a1a1c;border-color:#333;color:#eee}
+/* NEW tag, slashed price */
+.st-tag.st-new{background:#16a34a}
+.st-pr s,.st-feat .p s{opacity:.55;font-weight:500;margin-right:6px}
+/* bundle banner + cart nudge */
+.st-bund{margin:30px auto 0;max-width:980px;background:linear-gradient(90deg,#111,#2a0d10);color:#fff;border-radius:10px;padding:14px 18px;display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;justify-content:center;font:500 14px Inter,sans-serif}
+.st-bund b{color:#f0c35c;letter-spacing:.06em}
+.st-bnudge{margin:10px 0;padding:10px 12px;border:1px dashed #f0c35c;color:#f0c35c;font:600 12px Inter,sans-serif;border-radius:6px;text-align:center}
+/* cart reminder */
+.st-remind{position:fixed;left:50%;bottom:96px;transform:translate(-50%,30px);opacity:0;z-index:60;background:#111;color:#fff;border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:center;box-shadow:0 18px 40px rgba(0,0,0,.35);transition:.35s;font:500 14px Inter,sans-serif;max-width:calc(100% - 24px)}
+.st-remind.on{transform:translate(-50%,0);opacity:1}
+.st-remind button{background:#e0242f;color:#fff;border:0;border-radius:6px;padding:9px 14px;font:700 12px Inter,sans-serif;cursor:pointer}
+.st-remind a{cursor:pointer;color:#888;font-size:20px;padding:0 4px}
+/* next drop countdown */
+.st-drop{display:flex;justify-content:center;align-items:center;gap:12px;padding:10px 16px;background:#111;color:#fff;font:600 13px Inter,sans-serif;letter-spacing:.08em}
+.st-drop b{font:800 18px Inter,sans-serif;color:#f0c35c;font-variant-numeric:tabular-nums}.st-drop small{font-size:11px;color:#aaa;margin-left:1px}
+/* THE BOTTOM PLAYER, remodelled */
+body.store #bar{height:84px;bottom:12px;left:50%;right:auto;width:min(980px,calc(100% - 24px));transform:translate(-50%,130%);border:1px solid rgba(255,255,255,.08);border-radius:18px;
+ background:linear-gradient(135deg,rgba(18,18,22,.92),rgba(8,8,10,.94));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 18px 50px rgba(0,0,0,.45),0 0 0 1px rgba(240,195,92,.12);padding:0 18px 0 12px;gap:16px}
+body.store #bar.on{transform:translate(-50%,0)}
+body.store .st-pcov{width:60px;height:60px;border-radius:10px;overflow:hidden;flex:0 0 60px;box-shadow:0 6px 16px rgba(0,0,0,.5)}
+body.store .st-pcov img{width:100%;height:100%;object-fit:cover;display:block}
+body.store #bar.st-playing .st-pcov img{animation:stspin 8s linear infinite;border-radius:50%}
+@keyframes stspin{to{transform:rotate(360deg)}}
+body.store #bt{color:#fff;font:700 14px Inter,sans-serif;letter-spacing:.02em;min-width:0;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+body.store #bm{color:#9a9aa2;font:500 11px Inter,sans-serif;letter-spacing:.04em}
+body.store .bc{display:flex;gap:10px;align-items:center}
+body.store .bc button{width:36px;height:36px;border-radius:50%;border:1px solid #333;background:#16161a;color:#ddd;font:700 11px Inter,sans-serif;transition:.15s}
+body.store .bc button:hover{border-color:#f0c35c;color:#f0c35c}
+body.store .bc #pp{width:50px;height:50px;border:0;background:linear-gradient(180deg,#f3c862,#c9952c);color:#111;font-size:15px;box-shadow:0 0 0 0 rgba(240,195,92,.6)}
+body.store #bar.st-playing .bc #pp{animation:stpulse2 1.8s infinite}
+@keyframes stpulse2{0%{box-shadow:0 0 0 0 rgba(240,195,92,.55)}70%{box-shadow:0 0 0 12px rgba(240,195,92,0)}100%{box-shadow:0 0 0 0 rgba(240,195,92,0)}}
+body.store #pg{height:6px;border-radius:6px;background:#26262c;overflow:visible}
+body.store #pg b{border-radius:6px;background:linear-gradient(90deg,#e0242f,#f0c35c);box-shadow:0 0 12px rgba(240,195,92,.5);position:relative}
+body.store #pg b:after{content:'';position:absolute;right:-7px;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;background:#fff;box-shadow:0 0 10px rgba(240,195,92,.9)}
+body.store #vol{accent-color:#f0c35c}
+.st-peq{display:none;gap:3px;align-items:flex-end;height:20px}
+body.store #bar.st-playing .st-peq{display:flex}
+.st-peq i{width:3px;background:#f0c35c;border-radius:2px;animation:steq .8s ease-in-out infinite}
+.st-peq i:nth-child(2){animation-delay:.15s}.st-peq i:nth-child(3){animation-delay:.3s}.st-peq i:nth-child(4){animation-delay:.05s}.st-peq i:nth-child(5){animation-delay:.22s}
+@media(max-width:600px){body.store #bar{height:70px;padding:0 10px;gap:10px;bottom:8px}body.store .st-pcov{width:46px;height:46px;flex-basis:46px}.st-peq,body.store #vol{display:none!important}body.store .bc #pp{width:42px;height:42px}}
