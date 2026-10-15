@@ -151,3 +151,20 @@ body.store #acct .acl{color:#aaa;border-color:#333;border-radius:0}
 .sd-beats{background:none;border:1px solid #444;color:#fff;font:400 20px Anton,sans-serif;letter-spacing:.08em;padding:9px 22px;cursor:pointer}
 .sd-beats:hover{border-color:#fff}
 @media(max-width:600px){.sd-rr{grid-template-columns:44px 36px 1fr;}.sd-rpr,.sd-add{grid-column:span 1}}
+/* BACK OFFICE: colours and type only (the layout stays the site's own) */
+#bo{background:#0a0a0b}
+#bo .bh{border-bottom:1px solid #1d1d20}
+#bo .bh h2{font:400 34px/1 Anton,sans-serif;letter-spacing:.02em}
+#bo .bh button{border-radius:0;border-color:#2a2a2e;font-family:Inter,sans-serif;font-weight:700}
+#bo .bh button.on{background:#e0242f;border-color:#e0242f}
+#bo h3{font:400 28px Anton,sans-serif;letter-spacing:.02em}
+#bo label{font-family:Inter,sans-serif;font-weight:700;color:#8a8a90}
+#bo input[type=text],#bo input[type=number],#bo textarea,#bo select{background:#0a0a0b;border-color:#2a2a2e;border-radius:0}
+#bo input:focus,#bo textarea:focus,#bo select:focus{border-color:#e0242f;outline:0}
+#bo .go{border-radius:0;font-family:Inter,sans-serif;font-weight:800}
+#bo .bi{background:#111113;border-color:#1f1f23}
+#bo .bi b{font:400 20px Anton,sans-serif;letter-spacing:.03em;text-transform:uppercase}
+#bo .bi span{font-family:Inter,sans-serif;letter-spacing:.02em}
+#bo .bi .acts button{border-radius:0;border-color:#333;font-family:Inter,sans-serif;font-weight:700}
+#bo .bi .acts button:hover{border-color:#fff}
+#bo .bi.gp{background:#140a0c;border-color:#3a1418}
