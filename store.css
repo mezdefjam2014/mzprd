@@ -372,3 +372,11 @@ body.store #packs .card:hover .cart,body.store #packs .card .cart.in{opacity:1;t
 .st-fvin .st-flab{position:absolute;left:33%;top:33%;width:34%;height:34%;border-radius:50%;object-fit:cover;box-shadow:0 0 0 3px rgba(0,0,0,.6)}
 .st-fvin:after{content:'';position:absolute;left:48.6%;top:48.6%;width:2.8%;height:2.8%;border-radius:50%;background:#0a0a0a}
 .st-feat2 .st-fvin{left:30%}.st-feat2:hover .st-fvin{left:38%}.st-feat2 .st-ftx{position:relative;z-index:3}.st-feat2 .in{gap:90px}
+/* Sample Packs page: each pack as a featured band */
+body.store #v-kits{padding-top:0}
+body.store #v-kits #packs{display:none}
+#stPackBands .st-pband{margin:0 calc(50% - 50vw);border-bottom:1px solid rgba(255,255,255,.06)}
+#stPackBands .st-fcov{cursor:pointer}
+#stPackBands .flip .in{direction:rtl}#stPackBands .flip .in>*{direction:ltr}
+#stPackBands .flip .st-fvin{left:auto;right:30%}#stPackBands .flip:hover .st-fvin{right:38%;left:auto}
+#stPackBands .flip .st-fart{margin-left:auto}
