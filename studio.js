@@ -64,6 +64,16 @@ function css(){
 #studio .yt textarea{min-height:60px}
 #studio canvas#sWave{width:100%;height:56px;max-height:none;min-width:0;cursor:pointer;touch-action:none;background:#050506}
 #studio.busy .pn:not(.yt) input,#studio.busy .pn:not(.yt) select,#studio.busy .pn:not(.yt) textarea,#studio.busy .pn:not(.yt) button,#studio.busy .pn:not(.yt) .it{pointer-events:none;opacity:.5}
+#studio .ygl{display:grid;gap:10px;margin-top:12px}
+#studio .ygc{display:grid;grid-template-columns:240px 1fr;gap:14px;border:1px solid #1f1f23;background:#0d0d0f;padding:10px;transition:border-color .15s}
+#studio .ygc:hover,#studio .ygc.on{border-color:#e0242f}
+#studio .ygt{aspect-ratio:16/9;background:#000;overflow:hidden}#studio .ygt canvas{width:100%!important;height:100%!important;max-height:none;border:0;display:block}
+#studio .ygb{min-width:0;display:flex;flex-direction:column;gap:5px}#studio .ygb b{font:600 15px/1.35 Inter,sans-serif;color:#fff;letter-spacing:0}#studio .ygb small{font:500 11px Inter,sans-serif;color:#8a8a92}
+#studio .ygh{display:flex;align-items:center;gap:10px}#studio .ygsc{font:400 26px/1 Anton,sans-serif}
+#studio .ygs{background:none;border:1px solid #333;color:#aaa;font-size:15px;padding:2px 8px;cursor:pointer}#studio .ygs.on{color:#e0242f;border-color:#e0242f}
+#studio .ygx{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}#studio .ygx .btn{flex:none;padding:8px 10px;font-size:10px}
+#studio .ygo{grid-column:1/-1;border-top:1px solid #1f1f23;padding-top:8px}#studio .ygo textarea{font:500 12px/1.5 ui-monospace,monospace}
+@media(max-width:700px){#studio .ygc{grid-template-columns:1fr}}
 #studio .cnt{font:500 10px Montserrat;color:#6c6c73;letter-spacing:.1em;margin-top:4px}
 #studio #thGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 #studio .thc{background:#050506;border:1px solid #2a2a2e;padding:5px}
@@ -121,6 +131,7 @@ function html(){
    <label>TAGS <span id="yGi" style="color:#6c6c73"></span></label><textarea id="yG"></textarea><div class="cnt" id="yGc"></div>
    <div class="two2" style="margin-top:6px"><button class="btn" data-c="yG">COPY TAGS</button><button class="btn" data-n="g">NEXT TAGS</button></div>
   </div>
+  <div class="pn yt" id="ygP" style="margin-top:18px"><h4>YT STUDIO: PACKAGES + THUMBNAILS</h4><div id="ygN"></div>
  </div>
  <div>
   <div class="pn"><h4>PRESET STYLE</h4>
@@ -617,7 +628,7 @@ TAGS_P.push(
  x=>['free sample pack preview','vinyl sample pack','dusty samples','boom bap samples',x.genre+' sample pack',x.T,'MZPRD'],
  x=>['buy sample packs','sample packs for sale','producer sounds','drum and sample pack',x.T,'MZPRD','Meztheprod']);
 function fitTags(a){const seen=new Set(),out=[];let len=0;for(const t of a.map(x=>String(x||'').trim()).filter(Boolean)){const k=t.toLowerCase();if(seen.has(k))continue;if(len+t.length+(out.length?2:0)>500)break;seen.add(k);out.push(t);len+=t.length+(out.length>1?2:0)}return out.join(', ')}
-function ytText(reset){
+function ytText(reset){try{ygKeep()}catch(e){}
  const it=S.item;if(!it||!$s('#yT'))return;if(reset===true){yi.t=yi.d=yi.g=0}
  const x=ytCtx(),T=x.isB?TITLES_B:TITLES_P,D=x.isB?DESCS_B:DESCS_P,G=x.isB?TAGS_B:TAGS_P;
  yi.t%=T.length;yi.d%=D.length;yi.g%=G.length;
@@ -628,6 +639,43 @@ function ytText(reset){
 function ytCount(){const t=$s('#yT').value.length,d=$s('#yD').value.length,g=$s('#yG').value.length;
  $s('#yTc').textContent=t+' / 100 characters'+(t>100?' (too long)':'');$s('#yDc').textContent=d+' / 5000 characters';$s('#yGc').textContent=g+' / 500 characters'+(g>500?' (too long)':'')}
 function ytNext(k){yi[k]++;ytText()}
+const ygKeep=()=>{const it=S.item;if(it!==ygKeep.it){ygKeep.it=it;YG.list=[];YG.open=-1;if($s('#ygN'))ygRender()}};
+/* YT STUDIO: the MPC package generator (titles, thumbnail words, description, tags, pinned comment, scored) with a matching thumbnail for every package, made by this studio's thumbnail engine */
+const YG={n:25,angle:'',seed:1,sort:'score',fav:[],open:-1,list:[]};let ygP=null;
+const ygLoad=()=>ygP=ygP||Promise.all([thLoad(),...['mpcyt.js?v=14','mpcgen.js?v=5','mpcpack.js?v=3'].map(f=>new Promise((ok,no)=>{const n=f.split('?')[0];if(document.querySelector('script[data-yg="'+n+'"]'))return ok();const sc=document.createElement('script');sc.src=new URL(f,document.baseURI).href;sc.dataset.yg=n;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)}))]);
+function ygInfo(){const it=S.item;if(!it)return null;const pk=S.kind==='packs',sl=it.slug||String(it.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+ const SS={dur:S.buf?S.buf.duration:120,bpm:+it.bpm||0,key:it.musical_key||'',title:it.title,vibe:''};
+ return{beat:it,S:SS,title:it.title,bpm:+it.bpm||0,key:it.musical_key||'',mins:Math.max(1,Math.round(SS.dur/60)),link:SITE+'/'+(pk?'pack':'beat')+'/'+sl+'/',seedBase:String(it.id).length*17+String(it.title).length}}
+function ygST(){return{artist:(($s('#yA')||{}).value||'').trim(),yt:{mode:'',v:0,when:''},gen:YG}}
+function ygThumb(p,i,w,h){const n=window.MZThumbs.count||12,v=(i*5+YG.seed*3)%n,X=Object.assign(thCtx(v),{w:window.MZThumbs.words(p.thumb||S.item.title),seed:YG.seed*101+i*17});return window.MZThumbs.make(v,w,h,X)}
+const ygCopy=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){return false}};
+const ygAll=p=>p.title+'\n\nTHUMBNAIL TEXT: '+p.thumb+'\n\nDESCRIPTION\n'+p.desc+'\n\nTAGS\n'+p.tags+'\n\nPINNED COMMENT\n'+p.pin+(p.shorts?'\n\nSHORTS\n'+p.shorts.title+'\n'+p.shorts.desc:'');
+function ygRender(){const el=$s('#ygN');if(!el)return;const G=window.MZMpcGen,pk=S.kind==='packs';
+ if(!G){el.innerHTML='<div class="msg">Loading…</div>';ygLoad().then(ygRender,()=>{el.innerHTML='<div class="msg">Could not load the package tools.</div>'});return}
+ const opts=Object.entries(G.ANGLES).map(([k,v])=>`<option value="${k}"${YG.angle===k?' selected':''}>${v.n} only</option>`).join('');
+ const view=YG.list.map((p,i)=>[p,i]).filter(([p])=>YG.sort!=='fav'||YG.fav.includes(p.title)).sort((a,b)=>YG.sort==='order'?a[1]-b[1]:b[0].score-a[0].score);
+ el.innerHTML=`<div class="msg" style="margin-top:0">Full YouTube packages for <b style="color:#fff">${esc(S.item?S.item.title:'(pick an item)')}</b>, each with its own thumbnail, title, description (link first), tags and pinned comment. Scored, best first. Star your favourites, then test 3 with Test &amp; Compare in YouTube Studio.</div>
+ <div class="row"><div><label>HOW MANY</label><select id="ygC">${[10,25,50].map(n=>`<option${YG.n===n?' selected':''}>${n}</option>`).join('')}</select></div><div><label>STYLE</label><select id="ygA"><option value="">All styles mixed</option>${opts}</select></div><div><label>SHOW</label><select id="ygS"><option value="score"${YG.sort==='score'?' selected':''}>Best score first</option><option value="order"${YG.sort==='order'?' selected':''}>Mixed order</option><option value="fav"${YG.sort==='fav'?' selected':''}>My picks (${YG.fav.length})</option></select></div></div>
+ <div class="row" style="margin-top:10px"><button class="go" id="ygGo" style="margin:0">GENERATE</button><button class="btn" id="ygMore">NEW BATCH</button></div>
+ <div id="ygL" class="ygl">${view.map(([p,i])=>`<div class="ygc${YG.open===i?' on':''}" data-i="${i}"><div class="ygt" data-th="${i}"></div><div class="ygb"><div class="ygh"><button class="ygs${YG.fav.includes(p.title)?' on':''}" data-fav="${i}" title="Keep">${YG.fav.includes(p.title)?'&#9733;':'&#9734;'}</button><span class="ygsc" style="color:${p.score>=85?'#3ad17a':p.score>=70?'#e8c35a':'#ff8a5c'}">${p.score}</span><small>${esc(p.angleName)}</small></div><b>${esc(p.title)}</b><small>${p.title.length} chars · thumbnail: ${esc(p.thumb)}</small>
+  <div class="ygx"><button class="btn" data-ct="${i}">COPY TITLE</button><button class="btn" data-dl="${i}">THUMBNAIL PNG</button><button class="btn" data-op="${i}">${YG.open===i?'CLOSE':'FULL PACKAGE'}</button></div></div>
+  ${YG.open===i?`<div class="ygo"><div class="msg">${esc(p.why)}</div><label>DESCRIPTION</label><textarea rows="9">${esc(p.desc)}</textarea><label>TAGS</label><textarea rows="2">${esc(p.tags)}</textarea><label>PINNED COMMENT</label><textarea rows="2">${esc(p.pin||'')}</textarea><div class="row" style="margin-top:8px"><button class="btn" data-cd="${i}">COPY DESCRIPTION</button><button class="btn" data-cg="${i}">COPY TAGS</button><button class="btn" data-ca="${i}">COPY EVERYTHING</button></div></div>`:''}</div>`).join('')||(YG.list.length?'<div class="msg">No picks yet. Tap a star.</div>':'')}</div>
+ <div class="row" style="margin-top:10px"><button class="btn" id="ygTxt">DOWNLOAD ALL AS .TXT</button></div><div class="msg" id="ygM"></div>`;
+ const say=t=>{$s('#ygM').textContent=t};
+ const run=more=>{const inf=ygInfo();if(!inf){say('Pick a beat or pack first (step 01).');return}YG.seed=more?YG.seed+1:YG.seed;const ST=ygST();
+  YG.list=(pk&&window.MZMpcPack?MZMpcPack.generate(ST,inf,YG.n,YG.seed,YG.angle?[YG.angle]:null,G):G.generate(ST,inf,YG.n,YG.seed,YG.angle?[YG.angle]:null,window.MZMpcYT))||[];YG.open=-1;ygRender();$s('#ygM').textContent=YG.list.length+' packages. Best score '+(YG.list.length?Math.max(...YG.list.map(p=>p.score)):0)+'.'};
+ $s('#ygGo').onclick=()=>run(false);$s('#ygMore').onclick=()=>run(true);
+ $s('#ygC').onchange=e=>{YG.n=+e.target.value};$s('#ygA').onchange=e=>{YG.angle=e.target.value};$s('#ygS').onchange=e=>{YG.sort=e.target.value;ygRender()};
+ el.onclick=async e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset,P=k=>YG.list[+d[k]];
+  if(d.fav){const t=P('fav').title,x=YG.fav.indexOf(t);x>=0?YG.fav.splice(x,1):YG.fav.push(t);ygRender()}
+  else if(d.op){YG.open=YG.open===+d.op?-1:+d.op;ygRender()}
+  else if(d.ct)say(await ygCopy(P('ct').title)?'Title copied.':'Copy failed.');
+  else if(d.cd)say(await ygCopy(P('cd').desc)?'Description copied.':'Copy failed.');
+  else if(d.cg)say(await ygCopy(P('cg').tags)?'Tags copied.':'Copy failed.');
+  else if(d.ca)say(await ygCopy(ygAll(P('ca')))?'Whole package copied.':'Copy failed.');
+  else if(d.dl){const cv=ygThumb(P('dl'),+d.dl,1280,720);cv.toBlob(bl=>{const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=(S.item.title||'thumb')+' - thumbnail '+(+d.dl+1)+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)});say('Thumbnail saved (1280x720).')}};
+ $s('#ygTxt').onclick=()=>{if(!YG.list.length){say('Generate first.');return}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([YG.list.map((p,i)=>'=== PACKAGE '+(i+1)+' (score '+p.score+', '+p.angleName+') ===\n'+ygAll(p)).join('\n\n')],{type:'text/plain'}));a.download=(S.item?S.item.title:'beat')+' - YouTube packages.txt';a.click()};
+ const slots=[...el.querySelectorAll('[data-th]')];let k=0;const step=()=>{const t0=performance.now();while(k<slots.length&&performance.now()-t0<24){const sl=slots[k++],i=+sl.dataset.th;try{const cv=ygThumb(YG.list[i],i,480,270);sl.appendChild(cv)}catch(e){}}if(k<slots.length)requestAnimationFrame(step)};requestAnimationFrame(step)}
 const TH={seed:0,pf:'16:9',ord:null,page:0,sel:[],rr:{}},TH_N=6,THMODAL=`<div id="thModal" aria-hidden="true"><div class="thbox" role="dialog" aria-label="Thumbnails">
  <button class="thx" id="thClose" aria-label="Close">&times;</button>
  <h4>THUMBNAILS <span id="thCount" style="font:500 10px Montserrat;letter-spacing:.06em;color:#8e8e94"></span></h4>
