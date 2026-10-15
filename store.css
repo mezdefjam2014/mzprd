@@ -310,3 +310,18 @@ body.store #bpage .more{display:none!important}
 .st-cl{left:0}.st-cr{right:0}
 .st-crate:after{content:'';position:absolute;left:10%;right:10%;bottom:-6px;height:30px;background:radial-gradient(ellipse at center,rgba(0,0,0,.25),transparent 70%);z-index:0}
 @media(max-width:700px){.st-crate{height:380px}.st-crate .st-card{width:240px;margin-left:-120px}.st-crate .st-card[data-o="1"]{transform:translateX(120px) translateZ(-200px) rotateY(-40deg)}.st-crate .st-card[data-o="-1"]{transform:translateX(-120px) translateZ(-200px) rotateY(40deg)}}
+/* pack cards: cleaner play overlay */
+body.store .card .cv{position:relative;border-radius:8px;overflow:hidden}
+body.store .card .cv:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 50%,rgba(0,0,0,.55));opacity:0;transition:.25s;pointer-events:none}
+body.store .card:hover .cv:after{opacity:1}
+body.store .cv .pl{left:auto;top:auto;right:12px;bottom:12px;transform:translateY(8px);width:52px;height:52px;border:0!important;border-radius:50%;background:#fff!important;box-shadow:0 8px 22px rgba(0,0,0,.4);opacity:0;transition:.25s;z-index:3}
+body.store .card:hover .cv .pl,body.store .cv .pl.on{opacity:1;transform:none}
+body.store .cv .pl i{border-left-color:#111!important}
+body.store .cv .pl.on i{border-color:#111!important}
+body.store .cvlk{background:rgba(255,255,255,.92);border:0;color:#111;box-shadow:0 4px 12px rgba(0,0,0,.25);width:34px;height:34px}
+body.store .cvlk.on{color:#e0242f}body.store .cvlk.on svg{fill:#e0242f}
+body.store .cprog{height:3px;background:rgba(255,255,255,.25);z-index:3}body.store .cprog b{background:#fff;box-shadow:none}
+body.store .card .ti .tl{font:700 15px Inter,sans-serif;letter-spacing:0;text-transform:none}
+body.store .card .ds:empty{display:none}
+body.store .card .pr{font:800 18px Inter,sans-serif;letter-spacing:0}
+body.store .card .cart{border-radius:999px!important;font:700 12px Inter,sans-serif!important;letter-spacing:.1em!important;padding:12px!important}
