@@ -418,3 +418,4 @@ body.store #packs .card .cart{order:4;margin-top:14px;background:#111!important;
 body.store #packs .card .cart:hover{background:#2a2a2a!important;color:#fff!important;transform:translateY(-1px)}
 body.store #packs .card .cart.in{background:#e0242f!important;color:#fff!important}
 .st-card[data-k="p"] .st-pr{display:block;font:800 22px Inter,sans-serif;margin-top:2px}
+body.store .cv .pl.on i{border:0!important;width:14px;height:16px;margin:0;border-left:5px solid #111!important;border-right:5px solid #111!important;display:block}body.store .cv .pl.on i:before,body.store .cv .pl.on i:after{display:none}
