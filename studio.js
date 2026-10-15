@@ -319,7 +319,7 @@ function effects(c,W,H,t,d){
  const halo=(x,y,r,col,a)=>{const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba('+col+','+a+')');g.addColorStop(1,'rgba('+col+',0)');c.fillStyle=g;c.fillRect(x-r,y-r,r*2,r*2)};
  const breathe=1+b*.12;
  if(pr==='noir'){grade('saturation','#808080');grade('soft-light','rgba(40,40,40,.5)');
-  c.save();c.globalCompositeOperation='multiply';const off=(t*6)%(H*.16);c.translate(W*.15,0);c.rotate(-.22);for(let i=-4;i<12;i++){c.fillStyle='rgba(0,0,0,.38)';c.fillRect(-W*.3,i*H*.16+off,W*1.6,H*.07)}c.restore();
+  c.save();c.globalCompositeOperation='multiply';const P=H*.22,off=(t*4)%P;c.translate(W*.15,0);c.rotate(-.22);for(let i=-4;i<10;i++){const y=i*P+off,g=c.createLinearGradient(0,y,0,y+P*.6);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.5,'rgba(0,0,0,.2)');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(-W*.3,y,W*1.6,P*.6)}c.restore();
   c.save();c.globalCompositeOperation='screen';halo(W*.72,H*.18,W*.5,'255,255,255',(.06*breathe).toFixed(3));c.restore();return}
  if(pr==='golden'){grade('soft-light','rgba(255,170,90,.55)');grade('multiply','rgba(255,226,190,.9)');
   c.save();c.globalCompositeOperation='screen';const lx=W*(.85+.06*Math.sin(t*.13));halo(lx,H*.1,W*.7,'255,150,70',(.22*breathe).toFixed(3));halo(W*.05,H*.95,W*.4,'255,90,40',(.07).toFixed(3));
