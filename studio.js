@@ -641,7 +641,7 @@ function ytCount(){const t=$s('#yT').value.length,d=$s('#yD').value.length,g=$s(
 function ytNext(k){yi[k]++;ytText()}
 const ygKeep=()=>{const it=S.item;if(it!==ygKeep.it){ygKeep.it=it;YG.list=[];YG.open=-1;if($s('#ygN'))ygRender()}};
 /* YT STUDIO: the MPC package generator (titles, thumbnail words, description, tags, pinned comment, scored) with a matching thumbnail for every package, made by this studio's thumbnail engine */
-const YG_MPC=['mpc','challenge','series'],YG_BAD=/mpc|pad performance|1988|sp-?1200|drum machine/i;
+const YG_MPC=['mpc','challenge','series'],YG_BAD=/mpc|pad performance|1988|sp-?1200|drum machine|no computer|hardware|on a machine/i;
 const YG={n:25,angle:'',seed:1,sort:'score',fav:[],open:-1,list:[]};let ygP=null;
 const ygLoad=()=>ygP=ygP||Promise.all([thLoad(),...['mpcyt.js?v=14','mpcgen.js?v=5','mpcpack.js?v=3'].map(f=>new Promise((ok,no)=>{const n=f.split('?')[0];if(document.querySelector('script[data-yg="'+n+'"]'))return ok();const sc=document.createElement('script');sc.src=new URL(f,document.baseURI).href;sc.dataset.yg=n;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)}))]);
 function ygInfo(){const it=S.item;if(!it)return null;const pk=S.kind==='packs',sl=it.slug||String(it.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
