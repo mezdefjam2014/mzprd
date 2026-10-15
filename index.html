@@ -1459,7 +1459,7 @@ async function boRender(){
  if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=6');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
  if(tab==='mpc'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.mpcOpen)await loadScript('mpc.js?v=171');await mpcOpen();try{if(!window.mpcSkin)await loadScript('mpc-skin.js?v=1');mpcSkin()}catch(e){}}catch(e){toast('MPC FAILED TO LOAD')}return}
  if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=15');if(!window.MZShowFX)await loadScript('showfx.js?v=3');if(!window.showMakerOpen)await loadScript('showmaker.js?v=16');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
- if(vid){try{await loadStudio();await studioOpen()}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
+ if(vid){try{await loadStudio();await studioOpen();try{if(!window.studioSkin)await loadScript('studio-skin.js?v=1');studioSkin()}catch(e){}}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
  if(window.studioClose)studioClose();
  document.getElementById('bo2b').style.display=tab==='promo'?'':'none';
  if(tab==='promo'){document.getElementById('bo2c').style.display='';await promoRender();await bundlesRender();try{await loadScript('slots.js?v=4');await slotsAdmin($('#bf3'),$('#bl3'))}catch(e){$('#bf3').innerHTML='<h3>SLOTS</h3><div class="cur">Could not load the slots panel.</div>'}return}
