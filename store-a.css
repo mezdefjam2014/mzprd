@@ -108,3 +108,4 @@ body.store footer.f{background:#050506;color:#666}
 body.store .st-remind{border-radius:0}
 @media(max-width:820px){.st-feat2 .st-ftx{order:0}body.store #packs .grid{grid-template-columns:repeat(2,minmax(0,1fr))}.st-row>.st-card{flex-basis:calc((100% - 22px)/2)}}
 .st-row{justify-content:flex-start}
+.st-packrow{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}.st-packrow>.st-card{flex:none}@media(max-width:820px){.st-packrow{grid-template-columns:repeat(2,minmax(0,1fr))}}
