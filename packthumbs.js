@@ -132,5 +132,5 @@ function make(i,W,H,X){const c=document.createElement('canvas');c.width=W;c.heig
  const X2={name:String(X.title||'SAMPLE PACK').toUpperCase(),cover:X.cover&&(X.cover.naturalWidth||X.cover.width)?X.cover:null,tint:X.cover?hueOf(X.cover):[120,30,30]};
  const idx=((i%T.length)+T.length)%T.length;if(Math.abs(k-kk)>.01){/* other aspect (e.g. 9:16): draw 16:9 then fit */const t=make(i,1280,720,X);x.fillStyle='#08080a';x.fillRect(0,0,W,H);const s=Math.max(W/1280,H/720);x.drawImage(t,(W-1280*s)/2,(H-720*s)/2,1280*s,720*s);return c}
  T[idx](x,W,H,k,X2,rnd((X.seed||0)+idx*7+3));return c}
-window.MZPackThumbs={make,count:T.length,names:NAMES};
+window.MZPackThumbs={make,count:T.length,names:NAMES,daw:(x,W,H,k)=>daw(x,W,H,k,rnd(5),1)};
 })();

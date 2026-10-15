@@ -675,7 +675,7 @@ function ygRender(){const el=$s('#ygN');if(!el)return;const G=window.MZMpcGen,pk
   else if(d.cd)say(await ygCopy(P('cd').desc)?'Description copied.':'Copy failed.');
   else if(d.cg)say(await ygCopy(P('cg').tags)?'Tags copied.':'Copy failed.');
   else if(d.ca)say(await ygCopy(ygAll(P('ca')))?'Whole package copied.':'Copy failed.');
-  else if(d.dl){const cv=ygThumb(P('dl'),+d.dl,1280,720);cv.toBlob(bl=>{const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=(S.item.title||'thumb')+' - thumbnail '+(+d.dl+1)+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)});say('Thumbnail saved (1280x720).')}};
+  else if(d.dl){const cv=ygThumb(P('dl'),+d.dl,1280,720);if(cv.ready)await cv.ready;cv.toBlob(bl=>{const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=(S.item.title||'thumb')+' - thumbnail '+(+d.dl+1)+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)});say('Thumbnail saved (1280x720).')}};
  $s('#ygTxt').onclick=()=>{if(!YG.list.length){say('Generate first.');return}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([YG.list.map((p,i)=>'=== PACKAGE '+(i+1)+' (score '+p.score+', '+p.angleName+') ===\n'+ygAll(p)).join('\n\n')],{type:'text/plain'}));a.download=(S.item?S.item.title:'beat')+' - YouTube packages.txt';a.click()};
  const slots=[...el.querySelectorAll('[data-th]')];let k=0;const step=()=>{const t0=performance.now();while(k<slots.length&&performance.now()-t0<24){const sl=slots[k++],i=+sl.dataset.th;try{const cv=ygThumb(YG.list[i],i,480,270);sl.appendChild(cv)}catch(e){}}if(k<slots.length)requestAnimationFrame(step)};requestAnimationFrame(step)}
 const TH={seed:0,pf:'16:9',ord:null,page:0,sel:[],rr:{}},TH_N=6,THMODAL=`<div id="thModal" aria-hidden="true"><div class="thbox" role="dialog" aria-label="Thumbnails">
@@ -686,7 +686,7 @@ const TH={seed:0,pf:'16:9',ord:null,page:0,sel:[],rr:{}},TH_N=6,THMODAL=`<div id
  <div id="thGrid"></div><div class="msg" id="thMsg">40 looks, 6 at a time. The type line follows SOUNDS LIKE (artist). Every card downloads in 16:9 (1280x720) and 9:16 (1080x1920).</div>
  <button class="btn" id="thAll" style="display:none;margin-top:8px">DOWNLOAD THIS SET (12 FILES)</button>
 </div></div>`;
-function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=10',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
+function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=11',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
 /* the type line (ARTIST TYPE BEAT) comes from the same SOUNDS LIKE / MOOD boxes the YouTube text uses */
 function thCtx(i){const it=S.item||{},Y=S.item?ytCtx():{};return{title:it.title||'',w:window.MZThumbs.words(S.tx.title.text||it.title),cover:S.cover,bpm:it.bpm,key:it.musical_key,kind:S.kind,seed:TH.seed+(TH.rr[i]||0)*13,art:Y.art||'',mood:Y.mood||'',genre:Y.genre||''}}
 const thSize=f=>f==='16:9'?[1280,720]:[1080,1920];
@@ -724,8 +724,8 @@ function thBig(i){
 }
 function thDl(i,f){
  return new Promise(res=>{try{const [w,h]=thSize(f),cv=window.MZThumbs.make(i,w,h,thCtx(i));
-  cv.toBlob(b=>{if(!b){$s('#thMsg').textContent='Could not export (the cover blocks it). Re-add the cover image from your computer.';return res()}
-   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=((S.item&&S.item.slug)||'thumb')+'-'+String(window.MZThumbs.names[i]).toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+(f==='16:9'?'16x9':'9x16')+'.jpg';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);res()},'image/jpeg',.92)}catch(e){$s('#thMsg').textContent='Could not export: '+e.message;res()}});
+  Promise.resolve(cv.ready).then(()=>cv.toBlob(b=>{if(!b){$s('#thMsg').textContent='Could not export (the cover blocks it). Re-add the cover image from your computer.';return res()}
+   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=((S.item&&S.item.slug)||'thumb')+'-'+String(window.MZThumbs.names[i]).toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+(f==='16:9'?'16x9':'9x16')+'.jpg';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);res()},'image/jpeg',.92))}catch(e){$s('#thMsg').textContent='Could not export: '+e.message;res()}});
 }
 async function thAll(){for(const i of TH.sel){await thDl(i,'16:9');await new Promise(r=>setTimeout(r,350));await thDl(i,'9:16');await new Promise(r=>setTimeout(r,350))}}
 function renderList(){
