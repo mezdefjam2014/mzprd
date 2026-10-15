@@ -240,3 +240,8 @@ body.store .bp .tgs span{color:#fff}
 .st-dots i.on{width:26px;border-radius:6px;background:#111}
 @media(max-width:600px){.st-spot{height:430px}.st-sl{grid-template-columns:1fr;gap:16px;justify-items:center}.st-scv{width:220px;height:220px}.st-sinfo{text-align:center}}
 body.store #bpage .more{display:none!important}
+.st-sl{text-decoration:none;color:inherit}
+.st-sl.out{pointer-events:none}
+.st-sl.in{z-index:2}
+.st-sl.in .st-scv{transition:transform .25s}.st-sl.in:hover .st-scv{transform:scale(1.03)}
+.st-sbtn{display:inline-block}
