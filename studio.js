@@ -648,7 +648,7 @@ function ygInfo(){const it=S.item;if(!it)return null;const pk=S.kind==='packs',s
  const SS={dur:S.buf?S.buf.duration:120,bpm:+it.bpm||0,key:it.musical_key||'',title:it.title,vibe:''};
  return{beat:it,S:SS,title:it.title,bpm:+it.bpm||0,key:it.musical_key||'',mins:Math.max(1,Math.round(SS.dur/60)),link:SITE+'/'+(pk?'pack':'beat')+'/'+sl+'/',seedBase:String(it.id).length*17+String(it.title).length}}
 function ygST(){return{artist:(($s('#yA')||{}).value||'').trim(),yt:{mode:'',v:0,when:''},gen:YG}}
-function ygThumb(p,i,w,h){const n=window.MZThumbs.count||12,v=(i*5+YG.seed*3)%n,X=Object.assign(thCtx(v),{w:window.MZThumbs.words(p.thumb||S.item.title),seed:YG.seed*101+i*17});return window.MZThumbs.make(v,w,h,X)}
+function ygThumb(p,i,w,h){const n=window.MZThumbs.count||12,v=S.kind==='packs'&&i%3===0?window.MZThumbs.packBox:(i*5+YG.seed*3)%n,X=Object.assign(thCtx(v),{w:window.MZThumbs.words(p.thumb||S.item.title),seed:YG.seed*101+i*17});return window.MZThumbs.make(v,w,h,X)}
 const ygCopy=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){return false}};
 const ygAll=p=>p.title+'\n\nTHUMBNAIL TEXT: '+p.thumb+'\n\nDESCRIPTION\n'+p.desc+'\n\nTAGS\n'+p.tags+'\n\nPINNED COMMENT\n'+p.pin+(p.shorts?'\n\nSHORTS\n'+p.shorts.title+'\n'+p.shorts.desc:'');
 function ygRender(){const el=$s('#ygN');if(!el)return;const G=window.MZMpcGen,pk=S.kind==='packs';
@@ -686,7 +686,7 @@ const TH={seed:0,pf:'16:9',ord:null,page:0,sel:[],rr:{}},TH_N=6,THMODAL=`<div id
  <div id="thGrid"></div><div class="msg" id="thMsg">40 looks, 6 at a time. The type line follows SOUNDS LIKE (artist). Every card downloads in 16:9 (1280x720) and 9:16 (1080x1920).</div>
  <button class="btn" id="thAll" style="display:none;margin-top:8px">DOWNLOAD THIS SET (12 FILES)</button>
 </div></div>`;
-function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=8',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
+function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=9',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
 /* the type line (ARTIST TYPE BEAT) comes from the same SOUNDS LIKE / MOOD boxes the YouTube text uses */
 function thCtx(i){const it=S.item||{},Y=S.item?ytCtx():{};return{title:it.title||'',w:window.MZThumbs.words(S.tx.title.text||it.title),cover:S.cover,bpm:it.bpm,key:it.musical_key,kind:S.kind,seed:TH.seed+(TH.rr[i]||0)*13,art:Y.art||'',mood:Y.mood||'',genre:Y.genre||''}}
 const thSize=f=>f==='16:9'?[1280,720]:[1080,1920];
