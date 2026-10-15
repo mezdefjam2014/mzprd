@@ -339,3 +339,7 @@ body.store #packs .card .cart.in{background:#111!important;color:#fff!important;
 body.store #packs .card .ti:after{text-transform:none;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.store #packs .card .ti{text-transform:none}
 body.store #v-kits{padding-top:34px}
+body.store #packs .card .ti:after{content:none}
+body.store #packs .card .cart{margin-top:10px;opacity:0;transform:translateY(4px);transition:.2s}
+body.store #packs .card:hover .cart,body.store #packs .card .cart.in{opacity:1;transform:none}
+@media(hover:none){body.store #packs .card .cart{opacity:1;transform:none}}
