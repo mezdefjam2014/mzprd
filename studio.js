@@ -67,12 +67,20 @@ function css(){
 #studio .ygl{display:grid;gap:10px;margin-top:12px}
 #studio .ygc{display:grid;grid-template-columns:240px 1fr;gap:14px;border:1px solid #1f1f23;background:#0d0d0f;padding:10px;transition:border-color .15s}
 #studio .ygc:hover,#studio .ygc.on{border-color:#e0242f}
-#studio .ygt{aspect-ratio:16/9;background:#000;overflow:hidden}#studio .ygt canvas{width:100%!important;height:100%!important;max-height:none;border:0;display:block}
+#studio .ygt{cursor:zoom-in;aspect-ratio:16/9;background:#000;overflow:hidden}#studio .ygt canvas{width:100%!important;height:100%!important;max-height:none;border:0;display:block}
 #studio .ygb{min-width:0;display:flex;flex-direction:column;gap:5px}#studio .ygb b{font:600 15px/1.35 Inter,sans-serif;color:#fff;letter-spacing:0}#studio .ygb small{font:500 11px Inter,sans-serif;color:#8a8a92}
 #studio .ygh{display:flex;align-items:center;gap:10px}#studio .ygsc{font:400 26px/1 Anton,sans-serif}
 #studio .ygs{background:none;border:1px solid #333;color:#aaa;font-size:15px;padding:2px 8px;cursor:pointer}#studio .ygs.on{color:#e0242f;border-color:#e0242f}
 #studio .ygx{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}#studio .ygx .btn{flex:none;padding:8px 10px;font-size:10px}
 #studio .ygo{grid-column:1/-1;border-top:1px solid #1f1f23;padding-top:8px}#studio .ygo textarea{font:500 12px/1.5 ui-monospace,monospace}
+
+.yglb{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:24px;animation:yglbIn .18s ease-out}
+@keyframes yglbIn{from{opacity:0}to{opacity:1}}
+.yglbx{position:relative;width:min(1280px,94vw);display:flex;flex-direction:column;gap:12px}
+.yglbx canvas{width:100%;height:auto;display:block;box-shadow:0 30px 80px rgba(0,0,0,.8);border:1px solid #2a2a2e}
+.yglbx b{font:600 16px Inter,sans-serif;color:#fff}
+.yglbr{display:flex;gap:8px}.yglbr .btn{background:#111113;border:1px solid #333;color:#fff;font:800 11px Inter,sans-serif;letter-spacing:.14em;padding:11px 14px;cursor:pointer}.yglbr .btn:hover{border-color:#fff}
+.yglbc{position:absolute;top:-14px;right:-14px;width:40px;height:40px;border-radius:50%;background:#e0242f;border:0;color:#fff;font:700 24px/1 Inter,sans-serif;cursor:pointer;z-index:2}
 @media(max-width:700px){#studio .ygc{grid-template-columns:1fr}}
 #studio .cnt{font:500 10px Montserrat;color:#6c6c73;letter-spacing:.1em;margin-top:4px}
 #studio #thGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
@@ -668,7 +676,7 @@ function ygRender(){const el=$s('#ygN');if(!el)return;const G=window.MZMpcGen,pk
   const clean=t=>String(t||'').split('\n').filter(l=>!YG_BAD.test(l)).join('\n');L=L.filter(p=>!YG_BAD.test(p.title+' '+p.thumb)).map(p=>Object.assign(p,{desc:clean(p.desc),pin:clean(p.pin),tags:String(p.tags||'').split(',').filter(t=>!YG_BAD.test(t)).join(',')}));YG.list=L.slice(0,YG.n);YG.open=-1;ygRender();$s('#ygM').textContent=YG.list.length+' packages. Best score '+(YG.list.length?Math.max(...YG.list.map(p=>p.score)):0)+'.'};
  $s('#ygGo').onclick=()=>run(false);$s('#ygMore').onclick=()=>run(true);
  $s('#ygC').onchange=e=>{YG.n=+e.target.value};$s('#ygA').onchange=e=>{YG.angle=e.target.value};$s('#ygS').onchange=e=>{YG.sort=e.target.value;ygRender()};
- el.onclick=async e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset,P=k=>YG.list[+d[k]];
+ el.onclick=async e=>{const th=e.target.closest('[data-th]');if(th){const i=+th.dataset.th,cv=ygThumb(YG.list[i],i,1280,720),lb=document.createElement('div');lb.className='yglb';lb.innerHTML='<div class="yglbx"><button class="yglbc" title="Close">×</button><b></b><div class="yglbr"><button class="btn" data-lbdl>DOWNLOAD PNG</button><button class="btn" data-lbct>COPY TITLE</button></div></div>';lb.querySelector('b').textContent=YG.list[i].title;lb.querySelector('.yglbx').insertBefore(cv,lb.querySelector('b'));document.body.appendChild(lb);const close=()=>{lb.remove();removeEventListener('keydown',kd)},kd=ev=>{if(ev.key==='Escape')close()};addEventListener('keydown',kd);lb.onclick=async ev=>{if(ev.target===lb||ev.target.closest('.yglbc'))return close();if(ev.target.closest('[data-lbct]'))return ygCopy(YG.list[i].title);if(ev.target.closest('[data-lbdl]')){if(cv.ready)await cv.ready;cv.toBlob(bl=>{const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=(S.item.title||'thumb')+' - thumbnail '+(i+1)+'.png';a.click()})}};return}const b=e.target.closest('button');if(!b)return;const d=b.dataset,P=k=>YG.list[+d[k]];
   if(d.fav){const t=P('fav').title,x=YG.fav.indexOf(t);x>=0?YG.fav.splice(x,1):YG.fav.push(t);ygRender()}
   else if(d.op){YG.open=YG.open===+d.op?-1:+d.op;ygRender()}
   else if(d.ct)say(await ygCopy(P('ct').title)?'Title copied.':'Copy failed.');
@@ -686,7 +694,7 @@ const TH={seed:0,pf:'16:9',ord:null,page:0,sel:[],rr:{}},TH_N=6,THMODAL=`<div id
  <div id="thGrid"></div><div class="msg" id="thMsg">40 looks, 6 at a time. The type line follows SOUNDS LIKE (artist). Every card downloads in 16:9 (1280x720) and 9:16 (1080x1920).</div>
  <button class="btn" id="thAll" style="display:none;margin-top:8px">DOWNLOAD THIS SET (12 FILES)</button>
 </div></div>`;
-function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=12',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
+function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=13',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
 /* the type line (ARTIST TYPE BEAT) comes from the same SOUNDS LIKE / MOOD boxes the YouTube text uses */
 function thCtx(i){const it=S.item||{},Y=S.item?ytCtx():{};return{title:it.title||'',w:window.MZThumbs.words(S.tx.title.text||it.title),cover:S.cover,bpm:it.bpm,key:it.musical_key,kind:S.kind,seed:TH.seed+(TH.rr[i]||0)*13,art:Y.art||'',mood:Y.mood||'',genre:Y.genre||''}}
 const thSize=f=>f==='16:9'?[1280,720]:[1080,1920];
