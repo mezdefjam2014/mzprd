@@ -104,3 +104,21 @@ body.store .bp .bk,body.store .bp a[href*="beats"]{color:#555}
 .st-lpr{font:700 16px Inter,sans-serif;color:#111}.st-lpr s{color:#999;font-weight:500;margin-right:6px;font-size:13px}
 .st-lr .st-pr{font-size:12px;letter-spacing:.05em;padding:11px}
 @media(max-width:600px){.st-lr{grid-template-columns:52px 38px minmax(0,1fr) 92px;gap:10px;padding:10px}.st-lr>img,.st-lr>canvas{width:52px;height:52px}.st-lpr{display:none}.st-lp{width:36px;height:36px}}
+/* Hot Beats: dark premium cards with rank, hover lift + zoom, glowing play, live equalizer while playing */
+.st-hot .st-card{background:#0d0d0f;position:relative;padding:12px;box-shadow:0 14px 34px rgba(0,0,0,.28);overflow:visible}
+.st-hot .st-card:hover{transform:translateY(-6px);box-shadow:0 22px 46px rgba(0,0,0,.4),0 0 0 1px rgba(232,185,74,.5)}
+.st-hot .st-cv img,.st-hot .st-cv canvas{transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.st-hot .st-card:hover .st-cv img,.st-hot .st-card:hover .st-cv canvas{transform:scale(1.06)}
+.st-hot .st-cv:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,.55));pointer-events:none}
+.st-hot .st-nm{color:#fff;font-weight:700;letter-spacing:.02em}
+.st-hot .st-pr{background:linear-gradient(180deg,#f0c35c,#c9952c);color:#111}
+.st-hot .st-pr.in{background:#e0242f;color:#fff}
+.st-hot .st-play{opacity:1;transform:none;background:#fff;z-index:2;box-shadow:0 0 0 0 rgba(255,255,255,.6);animation:stpulse 2.4s infinite}
+@keyframes stpulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.55)}70%{box-shadow:0 0 0 14px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+.st-rank{position:absolute;top:-12px;left:-10px;z-index:3;background:#e0242f;color:#fff;font:900 18px Inter,sans-serif;padding:6px 11px;border-radius:8px;transform:rotate(-6deg);box-shadow:0 6px 16px rgba(224,36,47,.45)}
+.st-eq{position:absolute;left:12px;bottom:14px;z-index:2;display:none;gap:3px;align-items:flex-end;height:22px}
+.st-eq i{width:4px;background:#f0c35c;border-radius:2px;animation:steq .9s ease-in-out infinite}
+.st-eq i:nth-child(2){animation-delay:.2s}.st-eq i:nth-child(3){animation-delay:.4s}.st-eq i:nth-child(4){animation-delay:.1s}
+@keyframes steq{0%,100%{height:5px}50%{height:22px}}
+.st-card.playing .st-eq{display:flex}
+.st-card.playing{box-shadow:0 0 0 2px #f0c35c,0 18px 40px rgba(240,195,92,.3)!important}
