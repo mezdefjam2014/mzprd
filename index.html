@@ -412,9 +412,16 @@ footer.f a:hover{color:#fff}
 </style>
 <link rel="stylesheet" href="store.css?v=33">
 <link rel="stylesheet" href="store-a.css?v=12">
-<style>html:not(.ready) body{visibility:hidden}</style><script>setTimeout(function(){document.documentElement.classList.add("ready")},2500)</script>
+<style>html:not(.ready) body{visibility:hidden}
+#mzLoad{position:fixed;inset:0;z-index:99999;background:#0a0a0b;display:grid;place-items:center;visibility:visible;transition:opacity .35s ease,visibility 0s .35s}
+html.ready #mzLoad{opacity:0;visibility:hidden;pointer-events:none}
+#mzLoad b{font:400 clamp(44px,7vw,72px)/1 Anton,Impact,sans-serif;letter-spacing:.02em;color:#fff;animation:mzIn .6s ease both}#mzLoad b i{font-style:normal;color:#e0242f}
+#mzLoad span{display:block;width:120px;height:2px;margin:18px auto 0;background:#1d1d20;overflow:hidden;position:relative}
+#mzLoad span:after{content:'';position:absolute;inset:0;width:40%;background:#e0242f;animation:mzBar 1s cubic-bezier(.6,0,.4,1) infinite}
+@keyframes mzBar{from{transform:translateX(-100%)}to{transform:translateX(250%)}}@keyframes mzIn{from{opacity:0;transform:translateY(6px)}}
+@media(prefers-reduced-motion:reduce){#mzLoad span:after{animation:none;width:100%}}</style><script>setTimeout(function(){document.documentElement.classList.add("ready")},2500)</script>
 </head>
-<body>
+<body><div id="mzLoad" aria-hidden="true"><div><b>MZ<i>PRD</i></b><span></span></div></div>
 <noscript><p style="padding:24px;color:#ccc;font:16px/1.6 sans-serif">MZPRD sells beats and sample packs. Please turn on JavaScript to listen to previews and buy.</p></noscript>
 <div class="hero" id="hero">
  <div class="stage" id="stage"><img src="hero.webp" alt="MZPRD producing beats on an MPC in a dark studio with speakers, a lamp and a laptop" fetchpriority="high" decoding="async">
