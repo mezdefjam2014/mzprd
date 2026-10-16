@@ -1,0 +1,37 @@
+/* MZPRD sample pack coupons: the code strip at the top of the store (tap to copy + apply) and the
+   SAMPLE PACK COUPONS manager in the back office PROMO tab. Codes live in the pack_coupons table;
+   the checkout function applies them (percent off every sample pack in the cart). */
+(function(){
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const DAY=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+const endTxt=e=>{if(!e)return'';const d=new Date(e),h=(d-Date.now())/36e5;if(h<=0)return'';if(h<24)return'ENDS TONIGHT';if(h<24*6)return'ENDS '+DAY[d.getDay()];return'ENDS '+(d.getMonth()+1)+'/'+d.getDate()};
+window.MZPackCodes=[];
+async function load(){try{const {data}=await sb.from('pack_coupons').select('code,pct,banner,ends_at').order('created_at',{ascending:false});window.MZPackCodes=(data||[]).filter(c=>!c.ends_at||new Date(c.ends_at)>new Date());strip();try{renderCart()}catch(e){}}catch(e){}}
+/* slim strip above the header: USE CODE MZPRD10 · 10% OFF ALL SAMPLE PACKS */
+function strip(){const old=document.getElementById('cpStrip');if(old)old.remove();const c=window.MZPackCodes.find(x=>x.banner);if(!c||document.getElementById('bo')&&document.getElementById('bo').offsetParent)return;
+ const el=document.createElement('div');el.id='cpStrip';el.innerHTML=`<span class="cp-l">USE CODE</span><button type="button" class="cp-code" title="Copy the code">${esc(c.code)}</button><span class="cp-r"><b>${Math.round(c.pct)}% OFF</b> ALL SAMPLE PACKS</span>${endTxt(c.ends_at)?`<span class="cp-e">${endTxt(c.ends_at)}</span>`:''}<a class="cp-go" href="${(window.BASEPATH||'/')}sample-packs/">SHOP PACKS &rarr;</a>`;
+ document.body.prepend(el);
+ el.querySelector('.cp-code').onclick=async()=>{try{await navigator.clipboard.writeText(c.code)}catch(e){}const b=el.querySelector('.cp-code');b.dataset.t=b.textContent;b.textContent='COPIED ✓';setTimeout(()=>b.textContent=b.dataset.t,1400);try{if(typeof cart!=='undefined'&&cart.size&&!coupon)window.applyCoupon&&applyCoupon(c.code);const i=document.getElementById('cpnIn');if(i)i.value=c.code}catch(e){}}}
+const css=document.createElement('style');css.textContent=`#cpStrip{position:relative;z-index:30;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;background:#0a0a0b;border-bottom:1px solid #e0242f;padding:9px 16px;font:700 11px Inter,sans-serif;letter-spacing:.16em;color:#d6d6da;text-transform:uppercase}
+#cpStrip .cp-code{background:#e0242f;color:#fff;border:1px dashed rgba(255,255,255,.65);font:400 15px/1 Anton,sans-serif;letter-spacing:.12em;padding:6px 12px;cursor:pointer;transition:.15s}#cpStrip .cp-code:hover{background:#fff;color:#000}
+#cpStrip .cp-r b{color:#fff}#cpStrip .cp-e{color:#e0242f}#cpStrip .cp-go{color:#fff;border-bottom:1px solid #e0242f;padding-bottom:2px}#cpStrip .cp-go:hover{color:#e0242f}
+.st-pr s.was,.prc s.was,.p s.was,s.was{font:500 13px Inter,sans-serif!important;color:#77777d!important;margin-left:8px;vertical-align:middle;text-decoration-color:#e0242f}
+@media(max-width:600px){#cpStrip{gap:8px;font-size:10px}#cpStrip .cp-go{display:none}}`;document.head.appendChild(css);
+load();
+
+/* ---------- back office: SAMPLE PACK COUPONS (PROMO tab) ---------- */
+window.MZCouponAdmin=async function(host){const box=document.createElement('div');box.className='bi';box.style.cssText='display:block';host.appendChild(box);
+ const draw=async()=>{const {data,error}=await sb.from('pack_coupons').select('*').order('created_at',{ascending:false});
+  if(error){box.innerHTML='<b>SAMPLE PACK COUPONS</b><span style="display:block;margin-top:8px">Run <b>supabase/pack_coupons.sql</b> once in Supabase (SQL Editor) to switch coupons on.</span>';return}
+  box.innerHTML=`<b>SAMPLE PACK COUPONS</b><span style="display:block;margin:6px 0 12px">Codes give a percent off every sample pack in the cart. The top strip shows one code (tick SHOW IN STRIP). Beats are not affected.</span>
+  <div style="display:grid;grid-template-columns:1.2fr .6fr 1fr auto;gap:8px;align-items:end"><div><label>CODE</label><input type="text" id="pcC" placeholder="MZPRD10" maxlength="20" style="text-transform:uppercase"></div><div><label>% OFF</label><input type="number" id="pcP" min="1" max="90" value="10"></div><div><label>ENDS (OPTIONAL)</label><input type="datetime-local" id="pcE" style="background:#0a0a0b;border:1px solid #26262a;color:#fff;padding:11px;width:100%"></div><button type="button" class="go" id="pcAdd" style="padding:13px 16px">ADD CODE</button></div><div id="pcMsg" class="cur" style="margin-top:8px"></div>
+  <div style="margin-top:14px;display:grid;gap:8px">${(data||[]).map(c=>`<div data-c="${esc(c.code)}" style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:12px;align-items:center;border:1px solid #26262a;padding:10px 12px"><span><b style="font:400 20px Anton,sans-serif;letter-spacing:.06em">${esc(c.code)}</b> <span>${Number(c.pct)}% OFF PACKS · used ${c.uses||0}× ${c.ends_at?'· ends '+new Date(c.ends_at).toLocaleString():''}</span></span><label class="chk" style="margin:0"><input type="checkbox" data-a ${c.active?'checked':''}> ON</label><label class="chk" style="margin:0"><input type="checkbox" data-b ${c.banner?'checked':''}> SHOW IN STRIP</label><button type="button" data-s style="background:none;border:1px solid #4a4a50;color:#fff;font:700 10px Inter;letter-spacing:.14em;padding:9px 12px">SAVE</button><button type="button" data-d style="background:none;border:1px solid #4a1a1d;color:#ff6b6b;font:700 10px Inter;letter-spacing:.14em;padding:9px 12px">DELETE</button></div>`).join('')||'<span>No codes yet.</span>'}</div>`;
+  const msg=t=>box.querySelector('#pcMsg').textContent=t;
+  box.querySelector('#pcAdd').onclick=async()=>{const code=box.querySelector('#pcC').value.trim().toUpperCase(),pct=+box.querySelector('#pcP').value,e=box.querySelector('#pcE').value;
+   if(!/^[A-Z0-9-]{3,20}$/.test(code))return msg('Codes are 3-20 letters, numbers or dashes.');if(!(pct>0&&pct<=90))return msg('Pick 1 to 90 percent.');
+   const {error}=await sb.from('pack_coupons').insert({code,pct,active:true,banner:false,ends_at:e?new Date(e).toISOString():null});if(error)return msg(/duplicate/.test(error.message)?'That code already exists.':error.message);draw();load()};
+  box.querySelectorAll('[data-c]').forEach(r=>{const code=r.dataset.c;
+   r.querySelector('[data-s]').onclick=async()=>{const banner=r.querySelector('[data-b]').checked;if(banner)await sb.from('pack_coupons').update({banner:false}).neq('code',code);const {error}=await sb.from('pack_coupons').update({active:r.querySelector('[data-a]').checked,banner}).eq('code',code);msg(error?error.message:'Saved.');draw();load()};
+   r.querySelector('[data-d]').onclick=async()=>{const ok=window.askConfirm?await askConfirm('Delete the code '+code+'?'):confirm('Delete the code '+code+'?');if(!ok)return;await sb.from('pack_coupons').delete().eq('code',code);draw();load()}})};
+ draw()};
+})();

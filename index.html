@@ -759,9 +759,9 @@ function renderDeals(){
  const el=$('#deals');if(!el)return;
  el.innerHTML=bundles.map(b=>{const m=money(b.price).replace(/\.00$/,'');const txt=b.kind==='any_beats'?'ANY '+b.qty+' BEATS FOR '+m:b.kind==='any_packs'?'ANY '+b.qty+' PACKS FOR '+m:String(b.name)+': '+m;return '<span>'+esc(txt)+'</span>'}).join('');
 }
-/* one coupon = a percent off the single most expensive beat in the cart (the server uses the same rule) */
+/* slot-machine coupon = a percent off the single most expensive beat; sample pack code (e.g. MZPRD10) = a percent off every pack (the server uses the same rules) */
 function couponDisc(lines,bd){
- if(!coupon)return 0;const top=Math.max(0,...lines.filter(l=>l.t==='b').map(l=>l.price));
+ if(!coupon)return 0;const top=coupon.packs?lines.filter(l=>l.t==='p').reduce((q,l)=>q+l.price,0):Math.max(0,...lines.filter(l=>l.t==='b').map(l=>l.price));
  const d=Math.round(top*coupon.pct)/100;return Math.max(0,Math.min(d,lines.reduce((q,x)=>q+x.price,0)-bd.savings));
 }
 function renderCart(){
@@ -771,11 +771,11 @@ function renderCart(){
  if(bd.savings>0)html+='<div class="ci" style="color:var(--gold)"><span>BUNDLE: '+esc(bd.names.join(', ')).toUpperCase()+'</span><span>-'+money(bd.savings)+'</span></div>';
  const hint=bundleHint(its);if(hint)html+='<div class="ci" style="color:var(--gold);border:0;font-size:10px"><span>'+esc(hint)+'</span></div>';
  const cd=couponDisc(its,bd);
- if(coupon)html+='<div class="ci" style="color:#6fd08c"><span>COUPON '+esc(coupon.code)+' ('+coupon.pct+'% OFF ONE BEAT)</span><span>'+(cd>0?'-'+money(cd):'ADD A BEAT')+'<button id="cpnRm">REMOVE</button></span></div>';
+ if(coupon)html+='<div class="ci" style="color:#6fd08c"><span>COUPON '+esc(coupon.code)+' ('+coupon.pct+(coupon.packs?'% OFF SAMPLE PACKS':'% OFF ONE BEAT')+')</span><span>'+(cd>0?'-'+money(cd):(coupon.packs?'ADD A PACK':'ADD A BEAT'))+'<button id="cpnRm">REMOVE</button></span></div>';
  $('#items').innerHTML=html;
  $('#total').textContent=money(gross-bd.savings-cd);$('#nt').textContent='';
  {const rm=$('#cpnRm');if(rm)rm.onclick=()=>{coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}renderCart();prefetchOrder()}}
- $('#cpnRow').style.display=(slotsLive&&!coupon&&its.length)?'flex':'none';
+ $('#cpnRow').style.display=((slotsLive||(window.MZPackCodes&&MZPackCodes.length))&&!coupon&&its.length)?'flex':'none';
  document.querySelectorAll('#items button').forEach(b=>b.onclick=()=>{cart.delete(b.dataset.k);syncCart();renderCart();$('#ppbox').style.display=cart.size?'block':'none';prefetchOrder()});
 }
 const PP_ID='BAAk_pgKpR08tx_Fv0QmKgsVga24tfZI0Rqfxq2v4J27q6GWAcTfVadt2vtvjAanJGlYQ8o_9SjbI_vhkc',FN=SB_URL+'/functions/v1/checkout';
@@ -941,7 +941,7 @@ function showPackPage(i){
  const box=$('#bpage');pageIdx=i;pageKind='p';pwv=null;
  if(i<0||!packs[i]){box.innerHTML='<button class="back" id="bBack">&larr; ALL KITS</button><div class="empty"><b>NOT FOUND</b>THIS PACK IS NOT AVAILABLE</div>';$('#bBack').onclick=closeBeatPage;showView('beat');return}
  const P=packs[i],others=packs.map((p,k)=>[p,k]).filter(x=>x[1]!==i).slice(0,4);
- box.innerHTML='<button class="x" id="bX" aria-label="Close pack page">&times;</button><button class="back" id="bBack">&larr; ALL KITS</button><div class="bp'+(curPack===i&&playing?' play':'')+'"><div class="cov">'+thumb(P,i+2,'')+'</div><div><h1>'+esc(P.title)+'</h1><div class="tgs"><span>SAMPLE PACK</span></div><div class="prc">'+money(P.price)+'</div>'+(P.preview_path?'<canvas class="bwv" id="bwv"></canvas>':'')+(P.description?'<div class="d">'+esc(P.description)+'</div>':'')+'<div class="acts2">'+(P.preview_path?'<button class="pl" id="bPlay" aria-label="Play preview"><i></i></button>':'')+'<button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bLike" style="border-color:#4a4a50;color:#fff">SAVE</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(P.free_download&&P.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE PACKS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1]+2,'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
+ box.innerHTML='<button class="x" id="bX" aria-label="Close pack page">&times;</button><button class="back" id="bBack">&larr; ALL KITS</button><div class="bp'+(curPack===i&&playing?' play':'')+'"><div class="cov">'+thumb(P,i+2,'')+'</div><div><h1>'+esc(P.title)+'</h1><div class="tgs"><span>SAMPLE PACK</span></div><div class="prc">'+(window.MZPrice?MZPrice('p',P):money(P.price))+'</div>'+(P.preview_path?'<canvas class="bwv" id="bwv"></canvas>':'')+(P.description?'<div class="d">'+esc(P.description)+'</div>':'')+'<div class="acts2">'+(P.preview_path?'<button class="pl" id="bPlay" aria-label="Play preview"><i></i></button>':'')+'<button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bLike" style="border-color:#4a4a50;color:#fff">SAVE</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(P.free_download&&P.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE PACKS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1]+2,'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
  paintArt(box);
  $('#bBack').onclick=$('#bX').onclick=closeBeatPage;
  const pl=$('#bPlay');if(pl)pl.onclick=()=>playPack(i);
@@ -1703,11 +1703,12 @@ async function promoRender(){
   <label>BIG FEATURED BLOCK (THE BLACK BAND)</label><select id="p_feat"><option value="">(first sample pack)</option>${packs.map(x=>'<option value="p:'+esc(x.id)+'"'+(e.home_feature==='p:'+x.id?' selected':'')+'>PACK: '+esc(x.title)+'</option>').join('')}${beats.map(x=>'<option value="b:'+esc(x.id)+'"'+(e.home_feature==='b:'+x.id?' selected':'')+'>BEAT: '+esc(x.title)+'</option>').join('')}</select>
   <label>BIG FEATURED IMAGE (OPTIONAL, SQUARE WORKS BEST; EMPTY = THE COVER)</label><input type="file" id="p_fimg" accept="image/*">
   ${e.home_feature_img?`<div class="cur">Current: ${esc(e.home_feature_img.split('/').pop())}</div><label class="chk" style="margin-top:6px"><input type="checkbox" id="p_frm"> REMOVE THIS IMAGE</label>`:''}
-  <label>SLASHED "WAS" PRICE: SHOW THE OLD PRICE THIS % HIGHER, CROSSED OUT (0 = OFF)</label><input type="number" min="0" max="90" step="1" id="p_slash" value="${esc(e.slash_pct||0)}">
+  <label>SAMPLE PACK "WAS" PRICE: HOW MUCH HIGHER THE CROSSED-OUT PRICE IS, IN % (0 = AUTOMATIC, ABOUT 25%)</label><input type="number" min="0" max="90" step="1" id="p_slash" value="${esc(e.slash_pct||0)}">
   <label>NEXT DROP COUNTDOWN (FRONT PAGE)</label><div style="display:flex;gap:8px"><select id="p_dday"><option value="">Off</option>${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map((d,i)=>'<option value="'+i+'"'+(String(e.drop_day)===String(i)?' selected':'')+'>'+d+'</option>').join('')}</select><select id="p_dhr">${[...Array(24)].map((_,h)=>'<option value="'+h+'"'+(Number(e.drop_hour==null?18:e.drop_hour)===h?' selected':'')+'>'+((h%12)||12)+(h<12?' AM':' PM')+'</option>').join('')}</select></div>
   <button class="go" type="submit" id="p_save">SAVE PROMO + FRONT PAGE</button><div id="bmsg"></div>`;
  $('#bf').onsubmit=promoSave;
  $('#bl').innerHTML='<div class="bi"><span>While the promo is on, every beat on the site sells at the promo price and the girl pops in with your message. Turn it off to go back to the price set on each beat. Sample packs are not affected.</span></div>';
+ if(window.MZCouponAdmin)MZCouponAdmin($('#bl'));
 }
 async function promoSave(ev){
  ev.preventDefault();const msg=$('#bmsg'),btn=$('#p_save');btn.disabled=true;
@@ -1903,6 +1904,11 @@ window.setCoupon=c=>{coupon={code:c.code,pct:c.pct};try{sessionStorage.setItem('
 window.clearCoupon=()=>{coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}renderCart()};
 window.applyCoupon=async function(raw){
  const code=String(raw||'').trim().toUpperCase(),m=$('#cpnMsg');if(!code)return false;if(m)m.textContent='Checking...';
+ if(!/^MZ-[A-Z0-9]{8}$/.test(code)){/* sample pack code from the back office */
+  try{const {data:pc}=await sb.from('pack_coupons').select('code,pct,ends_at').eq('code',code).maybeSingle();
+   if(!pc){coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}if(m)m.textContent='That code is not valid or has ended.';renderCart();return false}
+   coupon={code:pc.code,pct:Number(pc.pct),packs:true};try{sessionStorage.setItem('mzprd_cpn',JSON.stringify(coupon))}catch(e){}if(m)m.textContent='';renderCart();prefetchOrder();return true}
+  catch(e){if(m)m.textContent='Could not check the code. Try again.';return false}}
  try{const r=await fetch(SLOTFN,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},body:JSON.stringify({action:'check',code})});const j=await r.json();
   if(!j.ok){coupon=null;try{sessionStorage.removeItem('mzprd_cpn')}catch(e){}if(m)m.textContent=j.reason||'That code is not valid.';renderCart();return false}
   coupon={code:j.code,pct:j.pct};try{sessionStorage.setItem('mzprd_cpn',JSON.stringify(coupon))}catch(e){}renderCart();prefetchOrder();return true}
@@ -1921,8 +1927,9 @@ $('#slotBtn').onclick=async()=>{try{if(!window.slotsOpen)await loadScript('slots
 checkAdmin();loadAll();frame();
 </script>
 <script src="store.js?v=21"></script>
-<script src="store2.js?v=5"></script>
+<script src="store2.js?v=6"></script>
 <script src="store3.js?v=2"></script>
+<script src="store4.js?v=1"></script>
 <script>/* show the page once the right view is drawn: on the home page that means the home layout with its packs, not the Beats list underneath */
 (function(){var B=window.BASEPATH||"/",root=location.pathname===B&&!location.hash,t=Date.now();
  (function check(){var h=document.getElementById("v-home");if(!root||(h&&h.classList.contains("on")&&h.querySelector(".st-sec,.st-feat"))||Date.now()-t>2500){document.documentElement.classList.add("ready")}else setTimeout(check,40)})()})()</script>
