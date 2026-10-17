@@ -1,6 +1,6 @@
 /* STOREFRONT MAKEOVER: builds the shop layout around the existing site (same data, player, cart, pages and admin). */
 (function(){
-const PROMO='New beats + sample packs every week  •  Instant download after checkout';
+const PROMO='New sample packs every week  •  Instant download after checkout';
 const TICK=['New Beats Every Week','Vinyl Sample Packs','Instant Download','Royalty-Free Loops','Prod. MZPRD'];
 const FAQ=[['What is inside a sample pack?','Original loops and compositions made to be chopped and flipped, labelled with BPM and key, ready to drag into your DAW or MPC.'],
  ['What format are the samples?','High quality WAV files, so they sound clean in any DAW, sampler or MPC.'],
