@@ -17,6 +17,16 @@ const css=document.createElement('style');css.textContent=`#cpStrip{position:rel
 #cpStrip .cp-r b{color:#fff}#cpStrip .cp-e{color:#e0242f}#cpStrip .cp-go{color:#fff;border-bottom:1px solid #e0242f;padding-bottom:2px}#cpStrip .cp-go:hover{color:#e0242f}
 .st-pr s.was,.prc s.was,.p s.was,s.was{font:600 14px Inter,sans-serif!important;color:#e2e2e6!important;opacity:1!important;margin-left:8px;vertical-align:middle;text-decoration-color:#e0242f}
 .st-card .st-cv:after{display:none!important}
+/* YOU MAY ALSO LIKE sits in a dark panel with a slow red light running round the edge */
+@property --mzA{syntax:'<angle>';inherits:false;initial-value:0deg}
+.st-sec.st-rel{position:relative;max-width:1180px;margin-left:auto;margin-right:auto;padding:30px 34px 26px!important;background:linear-gradient(180deg,#121214,#0b0b0d);border-radius:8px;isolation:isolate}
+.st-sec.st-rel:before{content:'';position:absolute;inset:0;padding:1px;border-radius:8px;background:conic-gradient(from var(--mzA),#2a2a2e 0deg,#e0242f 60deg,#ff6a72 90deg,#e0242f 120deg,#2a2a2e 180deg,#2a2a2e 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:mzSpin 6s linear infinite;pointer-events:none;z-index:-1}
+.st-sec.st-rel:after{content:'';position:absolute;inset:-1px;border-radius:9px;box-shadow:0 0 50px rgba(224,36,47,.12);pointer-events:none;z-index:-2}
+@keyframes mzSpin{to{--mzA:360deg}}
+@media(prefers-reduced-motion:reduce){.st-sec.st-rel:before{animation:none}}
+@media(max-width:640px){.st-sec.st-rel{padding:22px 16px!important}}
+.st-rel .st-sinfo{display:flex;flex-direction:column;align-items:flex-start}.st-rel .st-sp{background:none!important;color:#fff!important;padding:0!important;box-shadow:none!important;font:400 34px/1 Anton,sans-serif!important;margin:10px 0 0!important;display:flex!important;align-items:baseline;gap:4px}
+.st-rel .st-sbtn{display:inline-block!important;margin-top:18px!important;background:#e0242f!important;color:#fff!important;font:800 11px Inter,sans-serif!important;letter-spacing:.18em!important;text-transform:uppercase;padding:14px 22px!important;text-decoration:none!important;border:0!important;transition:background .15s}.st-rel .st-sl:hover .st-sbtn{background:#fff!important;color:#000!important}
 body .bp.play .acts2 .pl i,body.store .bp.play .acts2 .pl i{border:0!important;width:12px;height:14px;margin:0;background:linear-gradient(90deg,#000 0 4px,transparent 4px 8px,#000 8px 12px)!important}
 #bpage #bX{color:#000!important}
 .st-card.playing .st-play{opacity:1!important;transform:none!important}.st-card.playing .st-play i{border:0!important;width:12px;height:14px;margin:0;border-left:4px solid #111!important;border-right:4px solid #111!important}

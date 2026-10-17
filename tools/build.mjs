@@ -223,6 +223,16 @@ for (const c of [...beatCats, ...packCats]) {
   addUrl(c.path + '/')
 }
 
+/* page footer text: a short summary, not the whole description (the full text is on the page above) */
+function shortDesc(d) {
+  const t = String(d || '').replace(/\s+/g, ' ').trim()
+  if (t.length <= 240) return t
+  const parts = t.match(/[^.!?]+[.!?]+/g) || [t]
+  let out = ''
+  for (const s of parts) { if ((out + s).length > 240) break; out += s }
+  return (out || t.slice(0, 237).replace(/\s+\S*$/, '') + '...').trim()
+}
+
 /* ----- about ----- */
 {
   const content = ''
@@ -260,16 +270,12 @@ for (const t of ['', 'beats', 'packs', 'bundles', 'promo', 'sales', 'video', 'em
 for (const b of beats) {
   const rel = 'beat/' + slug(b), g = genreOf(b), price = eff(b)
   const title = trunc(`${b.title} | ${g} Beat Instrumental | MZPRD`, 62)
-  const base = String(b.description || '').trim()
+  const base = shortDesc(b.description)
   const desc = trunc(`${b.title}: ${g} beat and instrumental by MZPRD (Meztheprod). ${base ? base + ' ' : ''}Preview it free, ${money(price)} to buy, instant download.`, 158)
   const tg = tagsOf(b)
   const detail = `<div class="bp"><div class="cov"><img src="${esc(cover(b))}" alt="${esc(b.title)} cover art" width="360" height="360"></div><div><h1>${esc(b.title)}</h1><div class="tgs">${tg.map((t) => `<span>${esc(t)}</span>`).join('')}</div><div class="prc">${money(price)}</div>${base ? `<div class="d">${esc(base)}</div>` : ''}</div></div>`
   const related = beats.filter((x) => x !== b).slice(0, 6)
-  const content = `${crumbsHtml([['Home', ''], ['Beats', 'beats/'], [b.title, rel + '/']])}
-<h2>About this ${esc(g)} beat</h2>
-<p>${esc(b.title)} is a ${esc(g.toLowerCase())} instrumental by MZPRD (Meztheprod). ${esc(base)}</p>
-<p>Play the preview above, then pay securely with PayPal for ${money(price)} and download the full file right away. It is available to download for 15 minutes after payment in the same browser.</p>
-${related.length ? `<h3>More beats</h3>${li(related, 'beat')}` : ''}${catLinks()}<p><a href="beats/">All beats and instrumentals</a></p>`
+  const content = `${crumbsHtml([['Home', ''], ['Beats', 'beats/'], [b.title, rel + '/']])}`
   const ld = [
     crumbsLd([['Home', ''], ['Beats', 'beats/'], [b.title, rel + '/']]),
     {
@@ -287,16 +293,12 @@ ${related.length ? `<h3>More beats</h3>${li(related, 'beat')}` : ''}${catLinks()
 for (const p of packs) {
   const rel = 'pack/' + slug(p)
   const title = trunc(`${p.title} | Sample Pack | MZPRD`, 62)
-  const base = String(p.description || '').trim()
+  const base = shortDesc(p.description)
   const kindWords = /vinyl/.test(hay(p)) ? 'vinyl samples' : /loop/.test(hay(p)) ? 'producer loops' : 'sounds for producers'
   const desc = trunc(`${p.title}: sample pack by MZPRD (Meztheprod) with ${kindWords}. ${base ? base + ' ' : ''}Preview it free, ${money(p.price)} to buy, instant download.`, 158)
   const detail = `<div class="bp"><div class="cov"><img src="${esc(cover(p))}" alt="${esc(p.title)} sample pack cover art" width="360" height="360"></div><div><h1>${esc(p.title)}</h1><div class="tgs"><span>SAMPLE PACK</span></div><div class="prc">${money(p.price)}</div>${base ? `<div class="d">${esc(base)}</div>` : ''}</div></div>`
   const related = packs.filter((x) => x !== p).slice(0, 6)
-  const content = `${crumbsHtml([['Home', ''], ['Sample Packs', 'sample-packs/'], [p.title, rel + '/']])}
-<h2>About this sample pack</h2>
-<p>${esc(p.title)} is a sample pack by MZPRD (Meztheprod) with ${esc(kindWords)} for beat makers. ${esc(base)}</p>
-<p>Play the preview above, then pay securely with PayPal for ${money(p.price)} and download the full pack right away. It is available to download for 15 minutes after payment in the same browser.</p>
-${related.length ? `<h3>More sample packs</h3>${li(related, 'pack')}` : ''}${catLinks()}<p><a href="sample-packs/">All sample packs</a></p>`
+  const content = `${crumbsHtml([['Home', ''], ['Sample Packs', 'sample-packs/'], [p.title, rel + '/']])}`
   const ld = [
     crumbsLd([['Home', ''], ['Sample Packs', 'sample-packs/'], [p.title, rel + '/']]),
     {
