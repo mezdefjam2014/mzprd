@@ -16,6 +16,7 @@ const css=document.createElement('style');css.textContent=`#cpStrip{position:rel
 #cpStrip .cp-code{background:#e0242f;color:#fff;border:1px dashed rgba(255,255,255,.65);font:400 15px/1 Anton,sans-serif;letter-spacing:.12em;padding:6px 12px;cursor:pointer;transition:.15s}#cpStrip .cp-code:hover{background:#fff;color:#000}
 #cpStrip .cp-r b{color:#fff}#cpStrip .cp-e{color:#e0242f}#cpStrip .cp-go{color:#fff;border-bottom:1px solid #e0242f;padding-bottom:2px}#cpStrip .cp-go:hover{color:#e0242f}
 .st-pr s.was,.prc s.was,.p s.was,s.was{font:500 13px Inter,sans-serif!important;color:#77777d!important;margin-left:8px;vertical-align:middle;text-decoration-color:#e0242f}
+.st-feat .d{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-width:520px}
 @media(max-width:600px){#cpStrip{gap:8px;font-size:10px}#cpStrip .cp-go{display:none}}`;document.head.appendChild(css);
 load();
 
