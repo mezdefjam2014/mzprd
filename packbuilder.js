@@ -135,7 +135,7 @@ function editor(){
  <div class="pn"><h4>2. YOUR SOUNDS</h4><div class="drop" id="pbDrop">DROP FILES OR A FOLDER HERE, OR CLICK TO CHOOSE<input type="file" id="pbFiles" multiple style="display:none"></div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pbFolder">CHOOSE A FOLDER</button><button class="btn" id="pbAuto">AUTO-NAME ALL</button><button class="btn" id="pbDet">DETECT MISSING BPM (LOOPS)</button></div><input type="file" id="pbDir" webkitdirectory multiple style="display:none"><div id="pbTbl" style="margin-top:10px;overflow:auto;max-height:420px"></div><div class="msg" id="pbSum"></div></div>
  <div class="pn"><h4>3. COVER AND PREVIEW</h4><div class="g"><div><button class="btn" id="pbCov">MAKE A COVER</button> <button class="btn" id="pbCovUp">USE MY OWN IMAGE</button><input type="file" id="pbCovIn" accept="image/*" style="display:none"><div id="pbCovBox"></div></div><div><button class="btn" id="pbPrev">MAKE A PREVIEW (UP TO 60 SECONDS)</button> <button class="btn" id="pbPrevUp">USE MY OWN AUDIO</button><input type="file" id="pbPrevIn" accept="audio/*" style="display:none"><div id="pbPrevBox"></div></div><div><label>LICENSE TEXT (INCLUDED IN THE ZIP)</label><textarea id="pbLic" style="min-height:130px"></textarea><label style="display:flex;gap:8px;align-items:center;letter-spacing:.1em"><input type="checkbox" id="pbLicOn" style="width:auto" checked> INCLUDE LICENSE.TXT</label></div></div></div>
  <div class="pn"><h4>4. BUILD AND PUBLISH</h4><div class="msg" id="pbSize" style="margin:0 0 8px"></div>
- <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pbZipTest">BUILD THE ZIP ON MY COMPUTER (NO UPLOAD)</button><button class="btn go" id="pbPub">PUBLISH PACK (UPLOADS TO THE CLOUD)</button><button class="btn" id="pbUn" style="display:none">UNPUBLISH AND FREE CLOUD SPACE</button></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pbZipTest">BUILD THE ZIP ON MY COMPUTER (NO UPLOAD)</button><button class="btn go" id="pbPub">PUBLISH PACK (UPLOADS TO THE CLOUD)</button><button class="btn" id="pbIn" style="display:none">UPDATE WHAT'S INSIDE (8-SECOND PREVIEWS)</button><button class="btn" id="pbUn" style="display:none">UNPUBLISH AND FREE CLOUD SPACE</button></div>
  <div class="bar"><b id="pbProg"></b></div><div class="msg" id="pbMsg"></div></div>`;
  $q('#pbTitle').value=d.title;$q('#pbPrice').value=d.price;$q('#pbFree').checked=!!d.free;$q('#pbDesc').value=d.desc;$q('#pbLic').value=d.license;
  const sync=()=>{d.title=$q('#pbTitle').value;d.price=parseFloat($q('#pbPrice').value)||0;d.free=$q('#pbFree').checked;d.desc=$q('#pbDesc').value;d.license=$q('#pbLic').value;d.licOn=$q('#pbLicOn').checked};
@@ -152,7 +152,7 @@ function editor(){
  $q('#pbPrev').onclick=makePrev;$q('#pbPrevUp').onclick=()=>$q('#pbPrevIn').click();
  $q('#pbPrevIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;d.preview=f;d.previewExt=(f.name.match(/\.[A-Za-z0-9]+$/)||['.mp3'])[0].slice(1).toLowerCase();await save();rPrev()};
  $q('#pbZipTest').onclick=async()=>{sync();try{const z=await buildZip(true);const a=document.createElement('a');a.href=URL.createObjectURL(z);a.download=(clean(d.title)||'pack')+'.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),8000);msg('Zip built: '+mb(z.size)+'. It was saved to your downloads, nothing was uploaded.')}catch(e){msg('Zip failed: '+e.message)}};
- $q('#pbPub').onclick=publish;$q('#pbUn').onclick=unpublish;
+ $q('#pbPub').onclick=publish;$q('#pbUn').onclick=unpublish;$q('#pbIn').onclick=insideOnly;
  rTbl();rCov();rPrev();rSize();
 }
 async function readDrop(dt){
@@ -183,7 +183,7 @@ function rCov(){const d=S.cur,b=$q('#pbCovBox');if(d.cover){const u=URL.createOb
 function rPrev(){const d=S.cur,b=$q('#pbPrevBox');if(d.preview){const u=URL.createObjectURL(d.preview);b.innerHTML=`<audio controls src="${u}" style="width:100%;margin-top:8px"></audio><div class="msg">${mb(d.preview.size)} (${esc(d.previewExt||'')})</div>`}else b.innerHTML='<div class="msg">No preview yet.</div>'}
 function rSize(){const d=S.cur,u=d.files.filter(f=>f.use),zs=u.reduce((s,f)=>s+f.size,0)+(d.licOn===false?0:2000),total=zs+(d.cover?d.cover.size:0)+(d.preview?d.preview.size:0);
  $q('#pbSize').innerHTML=`Cloud space this pack will use once published: <b style="color:#fff">${mb(total)}</b> (zip ${mb(zs)}, cover ${mb(d.cover?d.cover.size:0)}, preview ${mb(d.preview?d.preview.size:0)}). Until you publish: <b style="color:#fff">0 MB</b> in the cloud.${d.cloud?`<br>This pack is published right now (${mb(d.cloud.size||0)} in the cloud).`:''}`;
- $q('#pbUn').style.display=d.cloud?'inline-block':'none';$q('#pbPub').textContent=d.cloud?'REPUBLISH WITH CHANGES (REPLACES THE CLOUD FILES)':'PUBLISH PACK (UPLOADS TO THE CLOUD)'}
+ $q('#pbUn').style.display=d.cloud?'inline-block':'none';$q('#pbIn').style.display=d.cloud?'inline-block':'none';$q('#pbPub').textContent=d.cloud?'REPUBLISH WITH CHANGES (REPLACES THE CLOUD FILES)':'PUBLISH PACK (UPLOADS TO THE CLOUD)'}
 async function makePrev(){
  const d=S.cur;msg('Making the preview...');try{await loadMuxer();await new Promise(r=>setTimeout(r,30));const p=await makePreview(d);d.preview=p.blob;d.previewExt=p.ext;await save();rPrev();rSize();msg('Preview made: '+mb(p.blob.size)+'.')}catch(e){msg('Could not make the preview: '+e.message)}
 }
@@ -195,6 +195,25 @@ async function buildZip(local){
  if(d.licOn!==false&&d.license)entries.push({name:'LICENSE.txt',blob:new Blob([d.license],{type:'text/plain'})});
  return await zipBlob(entries,p=>{$q('#pbProg').style.width=p+'%';msg('Building the zip '+p+'%')});
 }
+/* WHAT'S INSIDE: an 8-second preview of every sound (fades out over the last 1.5 s), mono MP3, plus the list shown on the pack page */
+const SNIP_SEC=8,SNIP_FADE=1.5,SNIP_MAX=60;
+function lame(){return window.lamejs?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js';s.onload=ok;s.onerror=()=>no(new Error('Could not load the MP3 encoder'));document.head.appendChild(s)})}
+function snipMp3(b){const sr=b.sampleRate,n=Math.min(b.length,Math.round(SNIP_SEC*sr)),ch=b.numberOfChannels,mono=new Float32Array(n);
+ for(let c=0;c<ch;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)mono[i]+=d[i]/ch}
+ const fi=Math.min(n,Math.round(.01*sr)),fo=Math.min(n,Math.round(SNIP_FADE*sr));for(let i=0;i<fi;i++)mono[i]*=i/fi;if(b.length>n||n>=SNIP_SEC*sr*.95)for(let i=0;i<fo;i++)mono[n-1-i]*=i/fo;
+ let pk=0;for(let i=0;i<n;i++)pk=Math.max(pk,Math.abs(mono[i]));const g=pk>0.98?0.98/pk:1;
+ const pcm=new Int16Array(n);for(let i=0;i<n;i++)pcm[i]=Math.max(-32768,Math.min(32767,mono[i]*g*32767));
+ const enc=new lamejs.Mp3Encoder(1,[44100,48000,32000].includes(sr)?sr:44100,96),out=[];for(let i=0;i<n;i+=1152){const o=enc.encodeBuffer(pcm.subarray(i,i+1152));if(o.length)out.push(new Uint8Array(o))}const e=enc.flush();if(e.length)out.push(new Uint8Array(e));
+ return new Blob(out,{type:'audio/mpeg'})}
+async function makeInside(d,onp){await lame();const L=d.files.filter(f=>f.use&&AUDIO.test(f.name)).slice(0,SNIP_MAX),list=[],paths=[];let i=0;
+ for(const f of L){i++;onp&&onp(i,L.length);try{const b=await decode(f.blob);if([44100,48000,32000].indexOf(b.sampleRate)<0)continue;const mp3=snipMp3(b),p=await upload(new File([mp3],'snip.mp3',{type:'audio/mpeg'}),'public-media','snips');paths.push(p);
+  list.push({n:(f.newName||f.name).replace(/\.[^.]+$/,''),k:f.kind||'other',bpm:f.bpm||0,key:f.key||'',dur:Math.round((f.dur||b.duration)*10)/10,p})}catch(e){}await new Promise(r=>setTimeout(r,0))}
+ return{list,paths}}
+async function saveInside(d){if(!d.cloud||!d.cloud.packId)return;msg('Making the 8-second previews for WHAT\'S INSIDE...');
+ const old=d.cloud.snips||[],{list,paths}=await makeInside(d,(i,n)=>{msg('Making preview '+i+' / '+n+'...');$q('#pbProg').style.width=Math.round(i/n*100)+'%'});
+ const r=await sb.from('packs').update({contents:list}).eq('id',d.cloud.packId);if(r.error){for(const p of paths)await rmObj('public-media',p);throw new Error(/contents/.test(r.error.message)?'Run supabase/pack_contents.sql in Supabase once.':r.error.message)}
+ for(const p of old)await rmObj('public-media',p);d.cloud.snips=paths;await save();return list.length}
+async function insideOnly(){const d=S.cur;if(!d||!d.cloud||S.busy)return;S.busy=true;try{const n=await saveInside(d);try{await loadAll()}catch(e){}msg('WHAT\'S INSIDE updated: '+n+' sounds with 8-second previews.');toast('WHAT\'S INSIDE UPDATED')}catch(e){msg('Could not make the previews: '+(e.message||e))}finally{S.busy=false}}
 async function publish(){
  const d=S.cur;if(S.busy)return;d.title=$q('#pbTitle').value.trim();if(!d.title){msg('Give the pack a title first.');return}
  const u=d.files.filter(f=>f.use);if(!u.length){msg('Add some sounds first.');return}
@@ -215,7 +234,8 @@ async function publish(){
   let r;if(d.cloud&&d.cloud.packId)r=await sb.from('packs').update(row).eq('id',d.cloud.packId).select('id').maybeSingle();else r=await sb.from('packs').insert(row).select('id').maybeSingle();
   if(r.error)throw r.error;
   if(d.cloud){for(const [b,p] of [['public-media',d.cloud.cover],['public-media',d.cloud.preview],['private-files',d.cloud.file]])if(p)await rmObj(b,p)}
-  d.cloud={packId:r.data.id,cover:cp,preview:pp,file:zp,size:row.size_bytes};await save();
+  d.cloud={packId:r.data.id,cover:cp,preview:pp,file:zp,size:row.size_bytes,snips:(d.cloud&&d.cloud.snips)||[]};await save();
+  try{await saveInside(d)}catch(e){msg('Published, but the WHAT\'S INSIDE previews failed: '+(e.message||e))}
   try{await loadAll()}catch(e){}
   msg('Published! "'+d.title+'" is live and uses '+mb(row.size_bytes)+' of cloud space.');toast('PACK PUBLISHED');rSize()
  }catch(e){for(const [b,p] of up)await rmObj(b,p);msg('Publish failed, nothing was kept in the cloud: '+(e.message||e))}
@@ -225,7 +245,7 @@ async function unpublish(){
  const d=S.cur;if(!d.cloud||S.busy)return;
  if(!(await askConfirm('UNPUBLISH AND FREE CLOUD SPACE?','The pack page is removed and its files are deleted from the cloud ('+mb(d.cloud.size||0)+'). Your draft stays on this computer so you can publish it again.','UNPUBLISH')))return;
  S.busy=true;try{
-  msg('Removing from the cloud...');for(const [b,p] of [['public-media',d.cloud.cover],['public-media',d.cloud.preview],['private-files',d.cloud.file]])if(p)await rmObj(b,p);
+  msg('Removing from the cloud...');for(const [b,p] of [['public-media',d.cloud.cover],['public-media',d.cloud.preview],['private-files',d.cloud.file]].concat((d.cloud.snips||[]).map(p=>['public-media',p])))if(p)await rmObj(b,p);
   const r=await sb.from('packs').delete().eq('id',d.cloud.packId);if(r.error)throw r.error;
   d.cloud=null;await save();try{await loadAll()}catch(e){}rSize();msg('Done. The pack is offline and its cloud files are deleted.');toast('PACK UNPUBLISHED')
  }catch(e){msg('Could not unpublish: '+(e.message||e))}finally{S.busy=false}
