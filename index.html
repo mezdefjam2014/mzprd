@@ -412,14 +412,14 @@ footer.f a:hover{color:#fff}
 </style>
 <link rel="stylesheet" href="store.css?v=33">
 <link rel="stylesheet" href="store-a.css?v=12">
-<style>html:not(.ready) body{visibility:hidden}
+<script>if(location.pathname.indexOf("/admin")>=0)document.documentElement.classList.add("adm")</script><style>html:not(.ready) body{visibility:hidden}html.adm .view,html.adm header,html.adm footer{display:none!important}
 #mzLoad{position:fixed;inset:0;z-index:99999;background:#0a0a0b;display:grid;place-items:center;visibility:visible;transition:opacity .35s ease,visibility 0s .35s}
 html.ready #mzLoad{opacity:0;visibility:hidden;pointer-events:none}
 #mzLoad b{font:400 clamp(44px,7vw,72px)/1 Anton,Impact,sans-serif;letter-spacing:.02em;color:#fff;animation:mzIn .6s ease both}#mzLoad b i{font-style:normal;color:#e0242f}
 #mzLoad span{display:block;width:120px;height:2px;margin:18px auto 0;background:#1d1d20;overflow:hidden;position:relative}
 #mzLoad span:after{content:'';position:absolute;inset:0;width:40%;background:#e0242f;animation:mzBar 1s cubic-bezier(.6,0,.4,1) infinite}
 @keyframes mzBar{from{transform:translateX(-100%)}to{transform:translateX(250%)}}@keyframes mzIn{from{opacity:0;transform:translateY(6px)}}
-@media(prefers-reduced-motion:reduce){#mzLoad span:after{animation:none;width:100%}}</style><script>setTimeout(function(){document.documentElement.classList.add("ready")},2500)</script>
+@media(prefers-reduced-motion:reduce){#mzLoad span:after{animation:none;width:100%}}</style><script>setTimeout(function(){document.documentElement.classList.add("ready")},location.pathname.indexOf("/admin")>=0?6000:2500)</script>
 </head>
 <body><div id="mzLoad" aria-hidden="true"><div><b>MZ<i>PRD</i></b><span></span></div></div>
 <noscript><p style="padding:24px;color:#ccc;font:16px/1.6 sans-serif">MZPRD sells beats and sample packs. Please turn on JavaScript to listen to previews and buy.</p></noscript>
@@ -1935,7 +1935,7 @@ checkAdmin();loadAll();frame();
 <script>try{history.scrollRestoration='manual'}catch(e){}</script>
 <script src="store4.js?v=4"></script>
 <script>/* show the page once the right view is drawn: on the home page that means the home layout with its packs, not the Beats list underneath */
-(function(){var B=window.BASEPATH||"/",root=location.pathname===B&&!location.hash,t=Date.now();
- (function check(){var h=document.getElementById("v-home");if(!root||(h&&h.classList.contains("on")&&h.querySelector(".st-sec,.st-feat"))||Date.now()-t>2500){document.documentElement.classList.add("ready")}else setTimeout(check,40)})()})()</script>
+(function(){var B=window.BASEPATH||"/",root=location.pathname===B&&!location.hash,adm=location.pathname.indexOf("/admin")>=0,t=Date.now();
+ (function check(){var h=document.getElementById("v-home"),bo=document.getElementById("bo"),lg=document.getElementById("login");if(adm?((bo&&bo.classList.contains("on"))||(lg&&lg.classList.contains("on"))||Date.now()-t>6000):!root||(h&&h.classList.contains("on")&&h.querySelector(".st-sec,.st-feat"))||Date.now()-t>2500){document.documentElement.classList.add("ready")}else setTimeout(check,40)})()})()</script>
 </body>
 </html>
