@@ -187,6 +187,13 @@ Deno.serve(async (req) => {
       return json({ key, url: await r2Presign('PUT', key, 3600) })
     }
 
+    if (body.action === 'r2-download-url') {
+      await authAdmin(req)
+      const key = String(body.key || '')
+      if (!/^[a-z0-9_-]+[/][A-Za-z0-9-]+([.][A-Za-z0-9]+)?$/i.test(key)) throw new Error('Bad key.')
+      return json({ url: await r2Presign('GET', key, 900) })
+    }
+
     if (body.action === 'r2-delete') {
       await authAdmin(req)
       const key = String(body.key || '')
