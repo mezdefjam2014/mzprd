@@ -1936,6 +1936,7 @@ checkAdmin();loadAll();frame();
 <script src="store4.js?v=13"></script>
 <script src="player.js?v=2"></script>
 <script src="fire.js?v=2"></script>
+<link rel="stylesheet" href="mobile.css?v=1">
 <script>/* show the page once the right view is drawn: on the home page that means the home layout with its packs, not the Beats list underneath */
 (function(){var B=window.BASEPATH||"/",root=location.pathname===B&&!location.hash,adm=location.pathname.indexOf("/admin")>=0,t=Date.now();
  (function check(){var h=document.getElementById("v-home"),bo=document.getElementById("bo"),lg=document.getElementById("login");if(adm?((bo&&bo.classList.contains("on"))||(lg&&lg.classList.contains("on"))||Date.now()-t>6000):!root||(h&&h.classList.contains("on")&&h.querySelector(".st-sec,.st-feat"))||Date.now()-t>2500){document.documentElement.classList.add("ready")}else setTimeout(check,40)})()})()</script>

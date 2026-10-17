@@ -1,0 +1,36 @@
+/* MZPRD phone layout (700px and under). Loaded last so it wins over the older store styles. */
+@media(max-width:700px){
+/* never let anything make the page wider than the phone (it zoomed the whole page out) */
+html,body{overflow-x:clip!important;max-width:100%}
+body{padding-bottom:150px!important}
+
+/* featured pack at the top: cover on top, text full width underneath */
+.st-feat2 .in{grid-template-columns:1fr!important;gap:22px!important;padding-top:10px!important;text-align:left}
+.st-feat2 .st-fart{width:min(78vw,320px)!important;max-width:none!important;margin:0 auto!important;order:-1}
+.st-feat2 .st-ftx{width:100%!important;text-align:left!important}
+.st-feat2 .st-ftx h3{font-size:clamp(40px,12vw,56px)!important;line-height:.95!important;text-align:left!important}
+.st-feat2 .st-feye,.st-feat2 .p,.st-feat2 .prc{text-align:left!important}
+.st-feat2 .st-fbtns{flex-wrap:wrap!important;gap:10px!important}.st-feat2 .st-fbtns>*{flex:1 1 140px}
+
+/* card rows: show every card in the 2-up grid (an old rule hid the 3rd one) */
+.st-row>.st-card:nth-child(3){display:block!important}
+
+/* bottom player: name + buttons on top, full-width waveform underneath */
+#bar{height:auto!important;min-height:0!important;overflow:visible!important;left:8px!important;right:8px!important;width:auto!important;max-width:none!important;transform:none!important;flex-wrap:wrap!important;gap:8px 10px!important;padding:10px 12px!important;bottom:8px!important}
+#bar>div:not(.bc):not(#pg){flex:1 1 0;min-width:0}#bar #bt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bar .bc{flex:none}#bar .st-pcov{width:44px!important;height:44px!important;flex:none!important}
+#pg.wclip{order:9;flex:1 1 100%!important;width:100%!important;height:42px!important;display:flex!important}
+
+/* pack / beat page buttons: play on the left, ADD TO CART full width, SAVE + SHARE side by side */
+html body #bpage .bp .acts2{display:grid!important;grid-template-columns:58px 1fr 1fr!important;gap:10px!important;align-items:center}
+html body #bpage .bp .acts2 #bPlay{grid-row:1/3}
+html body #bpage .bp .acts2 #bCart{grid-column:2/4;width:100%!important;margin:0!important}
+html body #bpage .bp .acts2 #bLike,html body #bpage .bp .acts2 #bShare{width:100%!important;margin:0!important;border:1px solid #2e2e33!important;padding:11px 6px!important;text-align:center}
+#bpage .st-trust{justify-content:flex-start!important}
+
+/* YOU MAY ALSO LIKE: centred under the cover */
+.st-rel .st-sinfo{align-items:center!important;text-align:center!important;width:100%;padding:0!important}.st-rel .st-sp{justify-content:center}
+
+/* Sample Packs page title lines up with the grid */
+.kits-hd{margin:6px auto 18px!important;padding:0 16px!important}.kits-hd p{font-size:14px}
+}
