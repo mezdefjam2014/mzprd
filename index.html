@@ -941,7 +941,7 @@ function showPackPage(i){
  const box=$('#bpage');pageIdx=i;pageKind='p';pwv=null;
  if(i<0||!packs[i]){box.innerHTML='<button class="back" id="bBack">&larr; ALL KITS</button><div class="empty"><b>NOT FOUND</b>THIS PACK IS NOT AVAILABLE</div>';$('#bBack').onclick=closeBeatPage;showView('beat');return}
  const P=packs[i],others=packs.map((p,k)=>[p,k]).filter(x=>x[1]!==i).slice(0,4);
- box.innerHTML='<button class="x" id="bX" aria-label="Close pack page">&times;</button><button class="back" id="bBack">&larr; ALL KITS</button><div class="bp'+(curPack===i&&playing?' play':'')+'"><div class="cov">'+thumb(P,i+2,'')+'</div><div><h1>'+esc(P.title)+'</h1><div class="tgs"><span>SAMPLE PACK</span></div><div class="prc">'+(window.MZPrice?MZPrice('p',P):money(P.price))+'</div>'+(P.preview_path?'<canvas class="bwv" id="bwv"></canvas>':'')+(P.description?'<div class="d">'+esc(P.description)+'</div>':'')+'<div class="acts2">'+(P.preview_path?'<button class="pl" id="bPlay" aria-label="Play preview"><i></i></button>':'')+'<button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bLike" style="border-color:#4a4a50;color:#fff">SAVE</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(P.free_download&&P.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(window.MZInside?MZInside(P):'')+(others.length?'<div class="more"><h4>MORE PACKS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1]+2,'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
+ box.innerHTML='<button class="x" id="bX" aria-label="Close pack page">&times;</button><button class="back" id="bBack">&larr; ALL KITS</button><div class="bp'+(curPack===i&&playing?' play':'')+'"><div class="cov">'+thumb(P,i+2,'')+'</div><div><h1>'+esc(P.title)+'</h1><div class="tgs"><span>SAMPLE PACK</span></div><div class="prc">'+(window.MZPrice?MZPrice('p',P):money(P.price))+'</div>'+(P.preview_path?'<canvas class="bwv" id="bwv"></canvas>':'')+(P.description?'<div class="d">'+esc(P.description)+'</div>':'')+'<div class="acts2">'+(P.preview_path?'<button class="pl" id="bPlay" aria-label="Play preview"><i></i></button>':'')+'<button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bLike" style="border-color:#4a4a50;color:#fff">SAVE</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(P.free_download&&P.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE PACKS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1]+2,'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
  paintArt(box);
  $('#bBack').onclick=$('#bX').onclick=closeBeatPage;
  const pl=$('#bPlay');if(pl)pl.onclick=()=>playPack(i);
@@ -1896,7 +1896,7 @@ function mzBid(){
  return b;
 }
 window.mzBid=mzBid;
-$('#pbkOpen').onclick=async()=>{try{if(!window.packBuilderOpen)await loadScript('packbuilder.js?v=3');await window.packBuilderOpen()}catch(e){toast('PACK BUILDER FAILED TO LOAD')}};
+$('#pbkOpen').onclick=async()=>{try{if(!window.packBuilderOpen)await loadScript('packbuilder.js?v=2');await window.packBuilderOpen()}catch(e){toast('PACK BUILDER FAILED TO LOAD')}};
 $('#fSub').onsubmit=async e=>{e.preventDefault();const sm=$('#fSm');sm.textContent='Saving...';
  try{const r=await (await fetch(SB_URL+'/functions/v1/site',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},body:JSON.stringify({action:'subscribe',email:$('#fEm').value,website:$('#fHp').value,source:'site'})})).json();
   sm.textContent=r.ok?'You are on the list. Thank you!':(r.error||'Something went wrong.');if(r.ok)$('#fEm').value=''}catch(x){sm.textContent='Network problem. Try again.'}};
@@ -1930,7 +1930,6 @@ checkAdmin();loadAll();frame();
 <script src="store2.js?v=6"></script>
 <script src="store3.js?v=2"></script>
 <script src="store4.js?v=1"></script>
-<script src="inside.js?v=1"></script>
 <script>/* show the page once the right view is drawn: on the home page that means the home layout with its packs, not the Beats list underneath */
 (function(){var B=window.BASEPATH||"/",root=location.pathname===B&&!location.hash,t=Date.now();
  (function check(){var h=document.getElementById("v-home");if(!root||(h&&h.classList.contains("on")&&h.querySelector(".st-sec,.st-feat"))||Date.now()-t>2500){document.documentElement.classList.add("ready")}else setTimeout(check,40)})()})()</script>
