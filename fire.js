@@ -13,8 +13,8 @@ function spawn(t){if(t==='f')return{t,x:rnd(0,W),y:H+rnd(0,10),vx:rnd(-.15,.15),
  if(t==='s')return{t,x:rnd(0,W),y:H*rnd(.7,1.05),vx:rnd(-.12,.12),vy:-rnd(.15,.35),s:rnd(60,120),l:0,L:rnd(260,420)};
  return{t,x:rnd(0,W),y:H+5,vx:rnd(-.3,.3),vy:-rnd(.6,1.4),s:rnd(3,6),l:0,L:rnd(120,220),ph:rnd(0,6.28)}}
 function seed(){P=[];for(let i=0;i<34;i++){const p=spawn('f');p.l=rnd(0,p.L);P.push(p)}for(let i=0;i<14;i++){const p=spawn('s');p.l=rnd(0,p.L);p.y-=p.vy*p.l;P.push(p)}for(let i=0;i<20;i++){const p=spawn('e');p.l=rnd(0,p.L);p.y+=p.vy*p.l;P.push(p)}}
-function size(){if(!cv)return;const r=cv.getBoundingClientRect();W=Math.max(1,Math.round(r.width*S));H=Math.max(1,Math.round(r.height*S));cv.width=W;cv.height=H}
-function frame(){g.clearRect(0,0,W,H);
+function size(){if(!cv)return;const r=cv.getBoundingClientRect();if(r.width<60)return;W=Math.max(1,Math.round(r.width*S));H=Math.max(1,Math.round(r.height*S));cv.width=W;cv.height=H}
+function frame(){if(W<60||H<40)return;g.clearRect(0,0,W,H);
  const bg=g.createLinearGradient(0,H,0,H*.45);bg.addColorStop(0,'rgba(224,36,20,.16)');bg.addColorStop(1,'rgba(224,36,20,0)');g.globalCompositeOperation='source-over';g.fillStyle=bg;g.fillRect(0,0,W,H);
  for(const p of P){p.l++;p.x+=p.vx;p.y+=p.vy;const k=p.l/p.L;if(k>=1||p.y<-80){Object.assign(p,spawn(p.t));continue}
   if(p.t==='s'){g.globalCompositeOperation='source-over';const a=Math.sin(Math.PI*k)*.55,s=p.s*(1+k*1.4)*S*2;g.globalAlpha=a;g.drawImage(SM,p.x-s/2,p.y-s/2,s,s);p.vx+=rnd(-.01,.01)}}
@@ -29,10 +29,12 @@ document.addEventListener('visibilitychange',()=>{vis=!document.hidden;go()});
 addEventListener('resize',()=>{size();if(RM)frame()});
 function attach(){const s=document.querySelector('#v-home .st-picks');
  if(!s||s===sec&&cv&&cv.isConnected)return;if(sec)io.unobserve(sec);sec=s;sec.classList.add('st-fire');
- cv=document.createElement('canvas');cv.className='st-firecv';cv.setAttribute('aria-hidden','true');sec.prepend(cv);g=cv.getContext('2d');size();seed();
+ if(cv)ro.unobserve(cv);cv=document.createElement('canvas');cv.className='st-firecv';cv.setAttribute('aria-hidden','true');sec.prepend(cv);g=cv.getContext('2d');size();seed();ro.observe(cv);
  if(RM){for(let i=0;i<60;i++)P.forEach(p=>{p.l++;p.x+=p.vx;p.y+=p.vy});frame()}io.observe(sec)}
-const home=document.getElementById('v-home');if(home)new MutationObserver(attach).observe(home,{childList:true});attach();
 const css=document.createElement('style');css.textContent=`.st-sec.st-fire{position:relative;isolation:isolate}
 .st-firecv{position:absolute;left:-40px;right:-40px;top:-30px;bottom:-10px;width:calc(100% + 80px);height:calc(100% + 40px);z-index:-1;pointer-events:none;opacity:.9;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}`;
 document.head.appendChild(css);
+/* attach only after the CSS above exists, so the canvas is measured at its real size */
+const ro=new ResizeObserver(()=>{size();if(RM)frame()});
+const home=document.getElementById('v-home');if(home)new MutationObserver(attach).observe(home,{childList:true});attach();
 })();

@@ -23,6 +23,7 @@ const css=document.createElement('style');css.textContent=`#cpStrip{position:rel
 .st-sec.st-rel:before{content:'';position:absolute;inset:0;padding:1px;border-radius:8px;background:conic-gradient(from var(--mzA),#2a2a2e 0deg,#e0242f 60deg,#ff6a72 90deg,#e0242f 120deg,#2a2a2e 180deg,#2a2a2e 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:mzSpin 6s linear infinite;pointer-events:none;z-index:-1}
 .st-sec.st-rel:after{content:'';position:absolute;inset:-1px;border-radius:9px;box-shadow:0 0 50px rgba(224,36,47,.12);pointer-events:none;z-index:-2}
 @keyframes mzSpin{to{--mzA:360deg}}
+.kits-hd{max-width:1180px;margin:34px auto 26px;padding:0 20px}.kits-k{display:block;font:800 10px Inter,sans-serif;letter-spacing:.24em;color:#e0242f;margin-bottom:8px}.kits-hd h1{font:400 clamp(44px,6vw,76px)/.92 Anton,sans-serif;color:#fff;margin:0;text-transform:uppercase;letter-spacing:.01em}.kits-hd p{max-width:620px;margin:14px 0 0;color:#a2a2a8;font-size:15px;line-height:1.6}
 .st-sec.st-picks{order:-1}.st-picks .st-pk{display:block;font:800 10px Inter,sans-serif;letter-spacing:.24em;color:#e0242f;margin-bottom:6px}
 @media(prefers-reduced-motion:reduce){.st-sec.st-rel:before{animation:none}}
 @media(max-width:640px){.st-sec.st-rel{padding:22px 16px!important}}

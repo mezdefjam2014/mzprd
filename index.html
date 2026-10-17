@@ -454,7 +454,7 @@ html.ready #mzLoad{opacity:0;visibility:hidden;pointer-events:none}
  <i class="rv a"></i><i class="rv b"></i><i class="rv c"></i><i class="rv d"></i>
  <div class="deals" id="deals"></div>
  <div class="view on" id="v-beats"><div id="list"></div></div>
- <div class="view" id="v-kits"><div id="packs"></div></div>
+ <div class="view" id="v-kits"><div class="kits-hd"><span class="kits-k">MZPRD SOUNDS</span><h1>Sample Packs</h1><p>Soul chops, vinyl textures, loops and one-shots made by MZPRD for producers. Every pack is royalty-free, ready for any DAW and downloads instantly after checkout.</p></div><div id="packs"></div></div>
  <div class="view" id="v-beat"><div id="bpage"></div></div>
  <div class="view" id="v-show"><div id="shRoot"></div></div>
  <div class="view" id="v-about"><div class="about"><!--ABOUT:BOX--><h2>MZPRD (MEZTHEPROD)</h2><p>MZPRD is short for Meztheprod: a music producer making original beats and instrumentals for rap, hip hop and R&amp;B, plus sample packs, vinyl samples and producer loops for other producers.</p><p>Every beat has a preview you can play right here. When you find the one, pay securely with PayPal and download the full file straight away.</p><p><a href="about/" style="color:var(--gold)">Read more about MZPRD</a></p><!--/ABOUT:BOX--></div></div>
@@ -1933,9 +1933,9 @@ checkAdmin();loadAll();frame();
 <script src="store2.js?v=7"></script>
 <script src="store3.js?v=2"></script>
 <script>try{history.scrollRestoration='manual'}catch(e){}</script>
-<script src="store4.js?v=12"></script>
+<script src="store4.js?v=13"></script>
 <script src="player.js?v=2"></script>
-<script src="fire.js?v=1"></script>
+<script src="fire.js?v=2"></script>
 <script>/* show the page once the right view is drawn: on the home page that means the home layout with its packs, not the Beats list underneath */
 (function(){var B=window.BASEPATH||"/",root=location.pathname===B&&!location.hash,adm=location.pathname.indexOf("/admin")>=0,t=Date.now();
  (function check(){var h=document.getElementById("v-home"),bo=document.getElementById("bo"),lg=document.getElementById("login");if(adm?((bo&&bo.classList.contains("on"))||(lg&&lg.classList.contains("on"))||Date.now()-t>6000):!root||(h&&h.classList.contains("on")&&h.querySelector(".st-sec,.st-feat"))||Date.now()-t>2500){document.documentElement.classList.add("ready")}else setTimeout(check,40)})()})()</script>
