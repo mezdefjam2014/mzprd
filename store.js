@@ -45,11 +45,16 @@ function card(kind,x,i,rank){const isB=kind==='b',p=isB?priceOf(x):Number(x.pric
  <div class="st-nm">${esc(x.title)}</div><button class="st-pr${inC?' in':''}">${inC?'IN CART':(window.MZPrice?MZPrice(kind,x):(p<full?'<s>'+m(full)+'</s>':'')+m(p))}</button></div>`}
 function lrow(x,i){const p=priceOf(x),full=Number(x.price),inC=(()=>{try{return cart.has('b:'+x.id)}catch(e){return false}})(),pl=(()=>{try{return cur===i&&playing}catch(e){return false}})();
  return`<div class="st-lr" data-i="${i}">${cov(x,i)}<button class="st-lp${pl?' on':''}" aria-label="Play ${esc(x.title)}"><i></i></button><div class="st-lt"><b>${esc(x.title)}</b><span>${esc(String(x.tags||'').replace(/ ?\/ ?/g,'  ·  '))}</span></div><div class="st-lpr">${p<full?'<s>'+m(full)+'</s>':''}${m(p)}</div><button class="st-pr${inC?' in':''}">${inC?'IN CART':'ADD TO CART'}</button></div>`}
-function wire(root){root.querySelectorAll('.st-lr').forEach(r=>{const i=+r.dataset.i,x=B()[i];if(!x)return;r.onclick=()=>{try{goItem('beat',bslug(x))}catch(e){}};r.querySelector('.st-lp').onclick=e=>{e.stopPropagation();try{play(i)}catch(er){}setTimeout(()=>render(true),80)};r.querySelector('.st-pr').onclick=e=>{e.stopPropagation();try{toggleCart('b:'+x.id,e.currentTarget)}catch(er){}render(true)}});root.querySelectorAll('.st-card').forEach(c=>{const k=c.dataset.k,i=+c.dataset.i,x=(k==='b'?B():P())[i];if(!x)return;
+function wire(root){root.querySelectorAll('.st-lr').forEach(r=>{const i=+r.dataset.i,x=B()[i];if(!x)return;r.onclick=()=>{try{goItem('beat',bslug(x))}catch(e){}};r.querySelector('.st-lp').onclick=e=>{e.stopPropagation();try{play(i)}catch(er){}setTimeout(syncPlay,30)};r.querySelector('.st-pr').onclick=e=>{e.stopPropagation();try{toggleCart('b:'+x.id,e.currentTarget)}catch(er){}render(true)}});root.querySelectorAll('.st-card').forEach(c=>{const k=c.dataset.k,i=+c.dataset.i,x=(k==='b'?B():P())[i];if(!x)return;
  c.onclick=()=>{try{goItem(k==='b'?'beat':'pack',bslug(x))}catch(e){}};
- const pl=c.querySelector('.st-play');if(pl)pl.onclick=e=>{e.stopPropagation();try{k==='b'?play(i):playPack(i)}catch(er){}setTimeout(()=>render(true),80)};
+ const pl=c.querySelector('.st-play');if(pl)pl.onclick=e=>{e.stopPropagation();try{k==='b'?play(i):playPack(i)}catch(er){}setTimeout(syncPlay,30)};
  c.querySelector('.st-pr').onclick=e=>{e.stopPropagation();try{toggleCart(k+':'+x.id,e.currentTarget)}catch(er){}render()}});
  try{paintArt(root)}catch(e){}}
+/* show which card is playing without redrawing the row (redrawing made the covers flash and the page jump) */
+function syncPlay(){const on=(()=>{try{return !document.getElementById('au').paused}catch(e){return false}})(),ci=(()=>{try{return cur}catch(e){return-1}})(),pi=(()=>{try{return curPack}catch(e){return-1}})();
+ document.querySelectorAll('.st-card[data-k]').forEach(c=>{const i=+c.dataset.i;c.classList.toggle('playing',on&&(c.dataset.k==='b'?ci===i:pi===i))});
+ document.querySelectorAll('.st-lr[data-i]').forEach(r=>{const b=r.querySelector('.st-lp');if(b)b.classList.toggle('on',on&&ci===+r.dataset.i)})}
+{const a=document.getElementById('au');if(a)['play','pause','ended','emptied'].forEach(ev=>a.addEventListener(ev,syncPlay))}
 let pg=0,sig='';
 function render(force){const bs=B(),ps=P(),s=bs.length+'|'+ps.length+'|'+pg+'|'+(()=>{try{return[...cart].join()}catch(e){return''}})();if(s===sig&&!force)return;sig=s;
  const S=(()=>{try{return promo||{}}catch(e){return{}}})(),hotIds=String(S.home_hot||'').split(',').filter(Boolean),hot=hotIds.map(id=>bs.findIndex(b=>String(b.id)===id)).filter(i=>i>=0);for(let i=0;hot.length<3&&i<bs.length;i++)if(!hot.includes(i))hot.push(i);
