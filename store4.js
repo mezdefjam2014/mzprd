@@ -17,6 +17,8 @@ const css=document.createElement('style');css.textContent=`#cpStrip{position:rel
 #cpStrip .cp-r b{color:#fff}#cpStrip .cp-e{color:#e0242f}#cpStrip .cp-go{color:#fff;border-bottom:1px solid #e0242f;padding-bottom:2px}#cpStrip .cp-go:hover{color:#e0242f}
 .st-pr s.was,.prc s.was,.p s.was,s.was{font:600 14px Inter,sans-serif!important;color:#e2e2e6!important;opacity:1!important;margin-left:8px;vertical-align:middle;text-decoration-color:#e0242f}
 .st-card .st-cv:after{display:none!important}
+body .bp.play .acts2 .pl i,body.store .bp.play .acts2 .pl i{border:0!important;width:12px;height:14px;margin:0;background:linear-gradient(90deg,#000 0 4px,transparent 4px 8px,#000 8px 12px)!important}
+#bpage #bX{color:#000!important}
 .st-card.playing .st-play{opacity:1!important;transform:none!important}.st-card.playing .st-play i{border:0!important;width:12px;height:14px;margin:0;border-left:4px solid #111!important;border-right:4px solid #111!important}
 .st-feat .d{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-width:520px}
 .pdesc{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}.pdesc.open{display:block;-webkit-line-clamp:unset}
