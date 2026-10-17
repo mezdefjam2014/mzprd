@@ -186,6 +186,15 @@ Deno.serve(async (req) => {
 
     if (body.action === 'ping') return json({ ok: true })
 
+    if (body.action === 'preview-urls') {
+      // public play links for previews kept in Cloudflare; only the previews/ folder, never paid files
+      const keys = (Array.isArray(body.keys) ? body.keys : []).slice(0, 400).map((k: any) => String(k))
+        .filter((k: string) => /^r2:previews\/[A-Za-z0-9-]+\.[A-Za-z0-9]{1,8}$/.test(k))
+      const urls: Record<string, string> = {}
+      for (const k of keys) urls[k] = await r2Presign('GET', k.slice(3), 21600)
+      return json({ urls })
+    }
+
     if (body.action === 'r2-upload-url') {
       await authAdmin(req)
       const folder = String(body.folder || 'files').replace(/[^a-z0-9_-]/gi, '')

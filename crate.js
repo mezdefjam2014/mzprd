@@ -74,6 +74,7 @@ window.MZCratePlaying=()=>{const x=items[deck],A=MA();return !!(x&&A&&A.src===x.
 window.MZCrateStop=()=>{document.body.classList.remove('on-crate')};
 
 async function fetchSamples(){try{const {data,error}=await sb.from('samples').select('*').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false});if(error||!data)return[];
+ if(window.MZPrime)await MZPrime(data.map(r=>r.preview_path));
  return data.filter(r=>r.preview_path).map(r=>({id:r.id,grp:r.id,title:r.title,cover:'',audio:G(()=>pub(r.preview_path),''),bpm:r.bpm||'',key:r.musical_key||'',kind:r.kind||'Sample',price:Number(r.price)||0,free:!!r.free_download}))}catch(e){return[]}}
 window.MZCrate=async function(el){if(host===el&&el.querySelector('.cr')){layout();document.body.classList.add('on-crate');plSync();return}host=el;{const real=await fetchSamples();window.MZCrateItems=real;items=shuffle(real.length?real:demo())}cur=0;deck=-1;shell();sleeves();layout();
  const W=host.querySelector('#crPlW');if(window.MZClip)clipC=MZClip(W,{url:()=>{const x=items[deck];return x?x.audio:''},name:()=>{const x=items[deck];return x?x.title:'MZPRD CRATE'},current:()=>{const x=items[deck],A=MA();return !!(x&&A&&A.src===x.audio)},start:()=>load(deck>=0?deck:cur)});

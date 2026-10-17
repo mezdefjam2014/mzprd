@@ -552,7 +552,12 @@ const HOME_TITLE='MZPRD (Meztheprod) | Rap, Hip Hop & R&B Beats + Sample Packs',
 const $=s=>document.querySelector(s);
 $('#enterT').innerHTML=[...'MZPRD'].map((c,i)=>'<span style="animation-delay:'+(1.5+i*.14)+'s">'+c+'</span>').join('');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const pub=p=>!p?'':/^(https?:|[\w.-]+\.(wav|mp3|jpg|png)$)/.test(p)?p:sb.storage.from('public-media').getPublicUrl(p).data.publicUrl;
+const pub=p=>!p?'':String(p).indexOf('r2:')===0?((window.MZSign||{})[p]||''):/^(https?:|[\w.-]+\.(wav|mp3|jpg|png)$)/.test(p)?p:sb.storage.from('public-media').getPublicUrl(p).data.publicUrl;
+/* play links for previews kept in Cloudflare: asked for in one go, good for 6 hours, refreshed every 3 */
+window.MZSign=window.MZSign||{};window.MZPrime=async function(paths,force){const keys=[...new Set((paths||[]).filter(p=>p&&String(p).indexOf('r2:previews/')===0&&(force||!MZSign[p])))];if(!keys.length)return;
+ for(let i=0;i<keys.length;i+=300){try{const r=await fetch(SB_URL+'/functions/v1/checkout',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify({action:'preview-urls',keys:keys.slice(i,i+300)})}).then(r=>r.json());Object.assign(MZSign,r.urls||{})}catch(e){}}};
+const primeAll=force=>MZPrime([...(beats||[]),...(packs||[]),...(window.MZSamplesAll||[])].map(x=>x.preview_path),force);
+setInterval(()=>{primeAll(true)},3*3600e3);
 const eff=B=>promo.promo_enabled?Number(promo.promo_price):Number(B.price);
 const money=n=>'$'+Number(n||0).toFixed(2);
 const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)};
@@ -886,7 +891,7 @@ function showView(v){
  {const pl=document.querySelector('.plc');if(pl)pl.style.display=v==='beats'?'':'none'}
  {const dl=$('#deals');if(dl)dl.style.display=(v==='about'||v==='show'||v==='crate')?'none':''}
  if(v==='show')openShow();else if(window.showPageClose)window.showPageClose();
- if(v==='crate'){(window.MZCrate?Promise.resolve():loadScript('crate.js?v=13')).then(()=>MZCrate($('#crHost'))).catch(()=>toast('CRATE DIG FAILED TO LOAD'))}else if(window.MZCrateStop)MZCrateStop();
+ if(v==='crate'){(window.MZCrate?Promise.resolve():loadScript('crate.js?v=14')).then(()=>MZCrate($('#crHost'))).catch(()=>toast('CRATE DIG FAILED TO LOAD'))}else if(window.MZCrateStop)MZCrateStop();
  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.v===(v==='beat'?'beats':v)));
  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
 }
@@ -989,6 +994,7 @@ async function loadAll(){
    sb.from('samples').select('id,title,price,kind,bpm,musical_key,preview_path,free_download').eq('published',true)]);
   if(b.error||p.error)toast('COULD NOT LOAD STORE');
   beats=b.data||[];packs=p.data||[];window.MZSamplesAll=(sm&&sm.data)||[];
+  await primeAll();
  }
  cur=-1;curPack=-1;renderBeats();renderPacks();renderDeals();syncLikes();setupPromo();route();
 }
@@ -1461,9 +1467,9 @@ document.querySelectorAll('.bh [data-t]').forEach(b=>b.onclick=()=>goAdmin(b.dat
 function openBO(){$('#bo').classList.add('on');boRender()}
 
 const FIELDS={
- beats:{table:'beats',title:'BEAT',files:[['cover_path','COVER IMAGE (optional: leave it empty to use the stock cover, which takes no storage)','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (tagged MP3/WAV, public)','audio/*','public-media','previews'],['audio_path','FULL FILE (private, for buyers, any size)','audio/*,.zip','private-files','beats']]},
- samples:{table:'samples',title:'SINGLE SAMPLE',files:[['preview_path','PREVIEW AUDIO (public: a short, tagged MP3 people hear in the crate)','audio/*','public-media','sample-previews'],['file_path','FULL SAMPLE (WAV, private: what buyers download, stored in Cloudflare)','audio/*,.wav,.aif,.aiff,.zip','private-files','samples']]},
- packs:{table:'packs',title:'SAMPLE PACK',files:[['cover_path','PACK IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (optional, public)','audio/*','public-media','previews'],['file_path','PACK FILE (.zip, private, any size)','.zip,application/zip,audio/*','private-files','packs']]}
+ beats:{table:'beats',title:'BEAT',files:[['cover_path','COVER IMAGE (optional: leave it empty to use the stock cover, which takes no storage)','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (tagged MP3/WAV, public)','audio/*','private-files','previews'],['audio_path','FULL FILE (private, for buyers, any size)','audio/*,.zip','private-files','beats']]},
+ samples:{table:'samples',title:'SINGLE SAMPLE',files:[['preview_path','PREVIEW AUDIO (public: a short, tagged MP3 people hear in the crate)','audio/*','private-files','previews'],['file_path','FULL SAMPLE (WAV, private: what buyers download, stored in Cloudflare)','audio/*,.wav,.aif,.aiff,.zip','private-files','samples']]},
+ packs:{table:'packs',title:'SAMPLE PACK',files:[['cover_path','PACK IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (optional, public)','audio/*','private-files','previews'],['file_path','PACK FILE (.zip, private, any size)','.zip,application/zip,audio/*','private-files','packs']]}
 };
 function loadScript(f){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+f;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
 function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=35';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
@@ -1520,7 +1526,7 @@ async function boRender(){
   d.querySelector('.del').onclick=()=>boDelete(r);
   bl.appendChild(d);
  });
- if(tab==='samples'){(window.MZSamplesBO?Promise.resolve():loadScript('samplesbo.js?v=1')).then(()=>MZSamplesBO()).catch(()=>toast('SAMPLE TOOLS FAILED TO LOAD'))}
+ if(tab==='samples'){(window.MZSamplesBO?Promise.resolve():loadScript('samplesbo.js?v=2')).then(()=>MZSamplesBO()).catch(()=>toast('SAMPLE TOOLS FAILED TO LOAD'))}
  if(rows.length){
   dragSort(bl,async()=>{const ids=[...bl.querySelectorAll('.bi[data-id]')].map(x=>x.dataset.id),byId=Object.fromEntries(rows.map(r=>[String(r.id),r]));let n=0,bad=0;
    for(let i=0;i<ids.length;i++){const r=byId[ids[i]];if(r&&Number(r.sort_order)!==i+1){const {error:e}=await sb.from(F.table).update({sort_order:i+1}).eq('id',r.id);if(e)bad++;else{r.sort_order=i+1;n++}}}

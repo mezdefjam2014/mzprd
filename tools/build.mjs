@@ -295,7 +295,7 @@ for (const b of beats) {
       offers: { '@type': 'Offer', url: SITE + '/' + rel + '/', price: price.toFixed(2), priceCurrency: 'USD', availability: 'https://schema.org/InStock', seller: { '@id': SITE + '/#org' } },
     },
   ]
-  if (b.preview_path) ld.push({ '@context': 'https://schema.org', '@type': 'AudioObject', name: `${b.title} preview`, contentUrl: PUB + b.preview_path, encodingFormat: mime(b.preview_path), description: `Preview of ${b.title} by MZPRD (Meztheprod).` })
+  if (b.preview_path && !String(b.preview_path).startsWith('r2:')) ld.push({ '@context': 'https://schema.org', '@type': 'AudioObject', name: `${b.title} preview`, contentUrl: PUB + b.preview_path, encodingFormat: mime(b.preview_path), description: `Preview of ${b.title} by MZPRD (Meztheprod).` })
   write(rel, render({ path: rel + '/', title, desc, h1: b.title, image: cover(b), ogType: 'product', page: { kind: 'beat', slug: slug(b) }, detail, content, ld }))
   addUrl(rel + '/', String(b.created_at || '').slice(0, 10))
 }
@@ -318,7 +318,7 @@ for (const p of packs) {
       offers: { '@type': 'Offer', url: SITE + '/' + rel + '/', price: Number(p.price).toFixed(2), priceCurrency: 'USD', availability: 'https://schema.org/InStock', seller: { '@id': SITE + '/#org' } },
     },
   ]
-  if (p.preview_path) ld.push({ '@context': 'https://schema.org', '@type': 'AudioObject', name: `${p.title} preview`, contentUrl: PUB + p.preview_path, encodingFormat: mime(p.preview_path), description: `Preview of ${p.title} by MZPRD (Meztheprod).` })
+  if (p.preview_path && !String(p.preview_path).startsWith('r2:')) ld.push({ '@context': 'https://schema.org', '@type': 'AudioObject', name: `${p.title} preview`, contentUrl: PUB + p.preview_path, encodingFormat: mime(p.preview_path), description: `Preview of ${p.title} by MZPRD (Meztheprod).` })
   write(rel, render({ path: rel + '/', title, desc, h1: p.title, image: cover(p), ogType: 'product', page: { kind: 'pack', slug: slug(p) }, detail, content, ld }))
   addUrl(rel + '/', String(p.created_at || '').slice(0, 10))
 }

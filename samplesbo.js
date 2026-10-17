@@ -47,7 +47,7 @@ function panels(){const bl=$('#bl');if(!bl||bl.querySelector('.smp-bulk'))return
   let done=0,bad=0;
   for(let i=0;i<files.length;i++){const f=files[i],st=list.querySelector(`[data-r="${i}"] em`),up=[];const say=t=>st.textContent=t;
    try{say('making preview...');const mp3=await makePreview(f);
-    say('uploading preview...');const pp=await upload(mp3,'public-media','sample-previews');up.push(['public-media',pp]);
+    say('uploading preview...');const pp=await upload(mp3,'private-files','previews');up.push(['private-files',pp]);
     const fp=await upload(f,'private-files','samples',pc=>say('uploading full sample '+pc+'%'));up.push(['private-files',fp]);
     say('saving...');const {error}=await sb.from('samples').insert({title:titleOf(f.name),kind,bpm:bpmOf(f.name),musical_key:keyOf(f.name),price,preview_path:pp,file_path:fp,published:pub});if(error)throw error;
     st.style.color='#6fd08c';say('done');done++}
