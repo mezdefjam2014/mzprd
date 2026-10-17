@@ -1433,7 +1433,7 @@ async function checkAdmin(){
 const ADM=['beats','packs','promo','sales','accounts','video','email','show','mpc'],adminRel=()=>location.pathname.slice(BASEPATH.length).match(/^admin\/(?:([a-z]+)\/)?$/);
 function syncBoTabs(){document.querySelectorAll('.bh [data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t===tab))}
 function goAdmin(t){if(!ADM.includes(t))t='beats';tab=t;editing=null;if(!adminRel()||adminRel()[1]!==t)history.pushState(null,'',BASEPATH+'admin/'+t+'/');syncBoTabs();openBO()}
-function leaveAdmin(){$('#bo').classList.remove('on');if(window.studioClose)studioClose();if(adminRel())history.pushState(null,'',BASEPATH);route()}
+function leaveAdmin(){if(!document.getElementById('v-home')){location.href=BASEPATH;return}$('#bo').classList.remove('on');if(window.studioClose)studioClose();if(adminRel())history.pushState(null,'',BASEPATH);route()}
 function showLogin(){$('#lMsg').textContent='';$('#login').classList.add('on');setTimeout(()=>$('#lEmail').focus(),50)}
 async function enterAdmin(t){
  if(t==='dash'||t==='orders')t='sales';if(t==='bundles')t='promo';if(!ADM.includes(t))t='beats';tab=t;editing=null;
