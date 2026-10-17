@@ -886,7 +886,7 @@ function showView(v){
  {const pl=document.querySelector('.plc');if(pl)pl.style.display=v==='beats'?'':'none'}
  {const dl=$('#deals');if(dl)dl.style.display=(v==='about'||v==='show'||v==='crate')?'none':''}
  if(v==='show')openShow();else if(window.showPageClose)window.showPageClose();
- if(v==='crate'){(window.MZCrate?Promise.resolve():loadScript('crate.js?v=11')).then(()=>MZCrate($('#crHost'))).catch(()=>toast('CRATE DIG FAILED TO LOAD'))}else if(window.MZCrateStop)MZCrateStop();
+ if(v==='crate'){(window.MZCrate?Promise.resolve():loadScript('crate.js?v=12')).then(()=>MZCrate($('#crHost'))).catch(()=>toast('CRATE DIG FAILED TO LOAD'))}else if(window.MZCrateStop)MZCrateStop();
  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.v===(v==='beat'?'beats':v)));
  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
 }
@@ -1940,7 +1940,7 @@ window.slotsBoot=async function(){slotsLive=false;return;
 if($('#slotBtn'))$('#slotBtn').onclick=async()=>{try{if(!window.slotsOpen)await loadScript('slots.js?v=4');await window.slotsOpen()}catch(e){toast('SLOTS FAILED TO LOAD')}};
 checkAdmin();loadAll();frame();
 </script>
-<script src="store.js?v=32"></script>
+<script src="store.js?v=33"></script>
 <script src="store2.js?v=8"></script>
 <script src="store3.js?v=2"></script>
 <script>try{history.scrollRestoration='manual'}catch(e){}</script>

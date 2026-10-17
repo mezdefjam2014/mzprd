@@ -1,7 +1,7 @@
 /* STOREFRONT MAKEOVER: builds the shop layout around the existing site (same data, player, cart, pages and admin). */
 (function(){
 const PROMO='New sample packs every week  •  Instant download after checkout';
-const TICK=['New Beats Every Week','Vinyl Sample Packs','Instant Download','Royalty-Free Loops','Prod. MZPRD'];
+const TICK=['New Sample Packs Every Week','Vinyl Sample Packs','Instant Download','Royalty-Free Loops','Prod. MZPRD'];
 const FAQ=[['What is inside a sample pack?','Original loops and compositions made to be chopped and flipped, labelled with BPM and key, ready to drag into your DAW or MPC.'],
  ['What format are the samples?','High quality WAV files, so they sound clean in any DAW, sampler or MPC.'],
  ['Do I need to clear the samples?','No. Every sound is original and made by MZPRD, so there is nothing to clear. Use them in your beats and releases.'],
