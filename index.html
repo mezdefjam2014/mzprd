@@ -18,7 +18,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"MZPRD","description":"Beats and sample packs by MZPRD."}</script>
 <!--/SEO:HEAD-->
 <script>try{if(localStorage.getItem('mzprd_seen')==='1')document.documentElement.classList.add('seen')}catch(e){}</script>
-<style>html.seen #enter{display:none!important}</style>
+<style>#enter{display:none!important}</style>
 <link rel="preload" as="image" href="hero.webp" type="image/webp" fetchpriority="high">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://qapmtiuptmgcajoaontj.supabase.co" crossorigin>
@@ -971,7 +971,8 @@ $('#go').onclick=()=>{initAudio();ac.resume();enterSite()};
 $('#enter').onclick=e=>{if(e.target.id!=='go'){try{initAudio();ac.resume()}catch(x){}enterSite()}};
 {let seen=false;try{seen=localStorage.getItem('mzprd_seen')==='1'}catch(e){}
  const P0=window.__PAGE,deep=!!(P0&&P0.kind!=='home');
- if(seen||deep||location.hash.indexOf('#/')===0){$('#enter').classList.add('off');setTimeout(()=>{loadPaypal().catch(()=>{});callCheckout({action:'ping'}).catch(()=>{})},1200)}}
+ /* the ENTER intro is retired: the site opens straight away */
+ if(true){$('#enter').classList.add('off');setTimeout(()=>{loadPaypal().catch(()=>{});callCheckout({action:'ping'}).catch(()=>{})},1200)}}
 addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body){e.preventDefault();$('#pp').click()}});
 
 async function loadAll(){
