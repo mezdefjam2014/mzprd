@@ -34,7 +34,7 @@ function showHome(push){document.title='MZPRD | Beats & Sample Packs';document.q
 navA.forEach(a=>a.onclick=()=>{if(a.dataset.v){const b=document.querySelector('header nav button[data-v="'+a.dataset.v+'"]');if(b)b.click();mark(a.dataset.v)}else if(a.dataset.h==='home')showHome(true);else{const b=document.querySelector('header nav button[data-v="about"]');if(b)b.click();mark('about');setTimeout(()=>{const f=$('#stFaq');if(f)f.scrollIntoView({behavior:'smooth'})},120)}});
 window.showHome=showHome;$('#stLogo').onclick=()=>showHome(true);
 /* keep the nav underline in step with the site's own view changes */
-new MutationObserver(()=>{const on=document.querySelector('.view.on');if(!on)return;const v=on.id.slice(2);mark(v==='beat'?'beats':v)}).observe(caseEl,{subtree:true,attributes:true,attributeFilter:['class']});
+new MutationObserver(()=>{const on=document.querySelector('.view.on');if(!on)return;const v=on.id.slice(2);mark(v==='beat'?((()=>{try{return pageKind==='p'}catch(e){return false}})()?'kits':'beats'):v)}).observe(caseEl,{subtree:true,attributes:true,attributeFilter:['class']});
 
 const B=()=>{try{return Array.isArray(beats)?beats:[]}catch(e){return[]}},P=()=>{try{return Array.isArray(packs)?packs:[]}catch(e){return[]}};
 const priceOf=x=>{try{return eff(x)}catch(e){return Number(x.price)||0}},m=v=>{try{return money(v)}catch(e){return'$'+Number(v).toFixed(2)}};
@@ -80,7 +80,7 @@ function render(force){const bs=B(),ps=P(),s=bs.length+'|'+ps.length+'|'+pg+'|'+
  if(f){const k=fk+':'+f.id;$('#stFa').onclick=e=>{try{toggleCart(k,e.currentTarget)}catch(er){}render(true)};$('#stFb').onclick=()=>{try{if(!f.preview_path)return goItem(fk==='b'?'beat':'pack',bslug(f));fk==='b'?play(fIdx):playPack(fIdx)}catch(er){}};$('#stFv').onclick=()=>{try{goItem(fk==='b'?'beat':'pack',bslug(f))}catch(er){}}}}
 /* the home page is the front page */
 const isRoot=()=>{const b=window.BASEPATH||'/';return location.pathname===b||location.pathname===b+'index.html'};
-function tick(){render();{const on=document.querySelector('.case>.view.on');if(on){const v=on.id.slice(2);mark(v==='beat'?'beats':v)}}if(isRoot()&&!location.hash&&!document.querySelector('.view.on:not(#v-beats)')&&document.getElementById('v-beats').classList.contains('on'))showHome(false)}
+function tick(){render();{const on=document.querySelector('.case>.view.on');if(on){const v=on.id.slice(2);mark(v==='beat'?((()=>{try{return pageKind==='p'}catch(e){return false}})()?'kits':'beats'):v)}}if(isRoot()&&!location.hash&&!document.querySelector('.view.on:not(#v-beats)')&&document.getElementById('v-beats').classList.contains('on'))showHome(false)}
 addEventListener('popstate',()=>setTimeout(()=>{if(isRoot())showHome(false)},0));
 setInterval(tick,700);setTimeout(()=>{if(isRoot()&&!location.hash)showHome(false)},50);
 })();
