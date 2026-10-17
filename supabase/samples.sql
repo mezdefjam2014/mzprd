@@ -21,3 +21,7 @@ drop policy if exists "public read samples" on public.samples;
 create policy "public read samples" on public.samples for select using (published or public.is_admin());
 drop policy if exists "admin all samples" on public.samples;
 create policy "admin all samples" on public.samples for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+-- duplicate guard: fingerprint of the full sample file
+alter table public.samples add column if not exists file_hash text;
+create unique index if not exists samples_file_hash_key on public.samples(file_hash) where file_hash is not null;

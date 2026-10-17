@@ -1526,7 +1526,7 @@ async function boRender(){
   d.querySelector('.del').onclick=()=>boDelete(r);
   bl.appendChild(d);
  });
- if(tab==='samples'){(window.MZSamplesBO?Promise.resolve():loadScript('samplesbo.js?v=2')).then(()=>MZSamplesBO()).catch(()=>toast('SAMPLE TOOLS FAILED TO LOAD'))}
+ if(tab==='samples'){(window.MZSamplesBO?Promise.resolve():loadScript('samplesbo.js?v=3')).then(()=>MZSamplesBO()).catch(()=>toast('SAMPLE TOOLS FAILED TO LOAD'))}
  if(rows.length){
   dragSort(bl,async()=>{const ids=[...bl.querySelectorAll('.bi[data-id]')].map(x=>x.dataset.id),byId=Object.fromEntries(rows.map(r=>[String(r.id),r]));let n=0,bad=0;
    for(let i=0;i<ids.length;i++){const r=byId[ids[i]];if(r&&Number(r.sort_order)!==i+1){const {error:e}=await sb.from(F.table).update({sort_order:i+1}).eq('id',r.id);if(e)bad++;else{r.sort_order=i+1;n++}}}
@@ -1781,7 +1781,7 @@ async function boSave(ev){
  const row={title:$('#f_title').value.trim(),description:$('#f_desc').value.trim()||null,price:parseFloat($('#f_price').value)||0,published:$('#f_pub').checked,free_download:$('#f_free').checked,sort_order:parseInt($('#f_sort').value)||0};
  if(!row.title){msg.textContent='Title is required.';btn.disabled=false;return}
  if(tab==='beats')row.tags=$('#f_tags').value.trim()||null;
- if(tab==='samples'){row.kind=$('#f_kind').value||null;row.bpm=parseInt($('#f_bpm').value)||null;row.musical_key=$('#f_key').value.trim()||null;if(!editing&&!document.querySelector('#bf input[data-k="preview_path"]').files[0]){msg.textContent=document.querySelector('#bf input[data-k="file_path"]').files[0]?'Still making the preview from the full sample. Try again in a moment.':'Choose the FULL SAMPLE file (the preview is made from it).';btn.disabled=false;return}}
+ if(tab==='samples'){row.kind=$('#f_kind').value||null;row.bpm=parseInt($('#f_bpm').value)||null;row.musical_key=$('#f_key').value.trim()||null;if(window.MZSampleCheck){msg.textContent='Checking for duplicates...';const dc=await MZSampleCheck(editing);if(dc.msg){msg.textContent='Not saved: '+dc.msg;btn.disabled=false;return}if(dc.hash)row.file_hash=dc.hash;msg.textContent=''}if(!editing&&!document.querySelector('#bf input[data-k="preview_path"]').files[0]){msg.textContent=document.querySelector('#bf input[data-k="file_path"]').files[0]?'Still making the preview from the full sample. Try again in a moment.':'Choose the FULL SAMPLE file (the preview is made from it).';btn.disabled=false;return}}
  row.slug=slugify($('#f_slug').value||row.title)||null;
  const oldFiles=[],newUploaded=[];
  try{
