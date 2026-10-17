@@ -956,7 +956,7 @@ function showPackPage(i){
   cv.onclick=e=>{if(curPack!==i){playPack(i);return}const r=cv.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration}}
  document.title=(window.__PAGE&&window.__PAGE.kind==='pack'&&window.__PAGE.slug===bslug(P))?SEO_TITLE:P.title+' | MZPRD';
  syncCart();showView('beat');
- {const d=box.querySelector('.pdesc'),m=$('#bMore');if(d&&m){if(d.scrollHeight<=d.clientHeight+4)m.remove();else m.onclick=()=>{const o=d.classList.toggle('open');m.textContent=o?'READ LESS':'READ MORE'}}}
+ {const d=box.querySelector('.pdesc'),m=$('#bMore');if(d&&m){/* description sits under the buttons so READ MORE never pushes them down */d.parentElement.appendChild(d);d.parentElement.appendChild(m);d.style.marginTop='22px';if(d.scrollHeight<=d.clientHeight+4)m.remove();else m.onclick=()=>{const o=d.classList.toggle('open');m.textContent=o?'READ LESS':'READ MORE'}}}
  try{scrollTo({top:0,behavior:'instant'})}catch(e){scrollTo(0,0)}
 }
 addEventListener('hashchange',()=>{if(location.hash==='#demo')return;hideSeo();route()});
