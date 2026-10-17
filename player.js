@@ -31,6 +31,9 @@ const all=f=>clips.forEach(c=>c.el.isConnected?f(c):clips.delete(c));
 au.addEventListener('loadedmetadata',()=>all(c=>c.refresh()));au.addEventListener('play',()=>{all(c=>c.refresh());cancelAnimationFrame(raf);raf=requestAnimationFrame(tick)});
 ['pause','seeked','emptied'].forEach(ev=>au.addEventListener(ev,()=>all(c=>c.pos())));addEventListener('resize',()=>all(c=>c.draw()));
 
+/* the bottom player stays hidden until something has been played */
+const shown=()=>document.body.classList.add('has-play');au.addEventListener('play',shown);au.addEventListener('loadstart',()=>{if(au.src)shown()});if(au.src)shown();
+
 /* bottom player */
 const G=(f,d)=>{try{return f()}catch(e){return d}};
 const barName=()=>{const t=document.getElementById('bt');return(t&&t.textContent.trim()&&t.textContent.trim()!=='--')?t.textContent.trim():'MZPRD'};
@@ -57,6 +60,7 @@ const css=document.createElement('style');css.textContent=`
 .wclip .wc-h span:before{content:'\\25B6';font-size:7px;margin-right:5px;color:#ffd6d9;vertical-align:1px}
 .wclip .wc-b{flex:1;position:relative;background:#16090b}.wclip canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .wclip .wc-ph{position:absolute;top:0;bottom:0;left:0;width:2px;margin-left:-1px;background:#e0242f;box-shadow:0 0 6px #e0242f;pointer-events:none}
+body:not(.has-play) #bar{display:none!important}
 .wpage{height:96px;margin:18px 0 6px;width:100%}.wpage .wc-h{height:20px;padding:0 9px}.wpage .wc-h span{font-size:11px}.wpage:not(.live) .wc-ph{opacity:0}`;
 document.head.appendChild(css);requestAnimationFrame(()=>bar.refresh());
 })();

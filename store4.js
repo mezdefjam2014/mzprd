@@ -23,6 +23,19 @@ const css=document.createElement('style');css.textContent=`#cpStrip{position:rel
 .st-sec.st-rel:before{content:'';position:absolute;inset:0;padding:1px;border-radius:8px;background:conic-gradient(from var(--mzA),#2a2a2e 0deg,#e0242f 60deg,#ff6a72 90deg,#e0242f 120deg,#2a2a2e 180deg,#2a2a2e 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:mzSpin 6s linear infinite;pointer-events:none;z-index:-1}
 .st-sec.st-rel:after{content:'';position:absolute;inset:-1px;border-radius:9px;box-shadow:0 0 50px rgba(224,36,47,.12);pointer-events:none;z-index:-2}
 @keyframes mzSpin{to{--mzA:360deg}}
+#mCart{display:none}
+body .st-remind{position:fixed!important;left:auto!important;right:20px!important;bottom:110px!important;top:auto!important;transform:translateY(12px)!important;opacity:0;z-index:60!important;display:flex!important;align-items:center!important;gap:14px!important;width:auto!important;max-width:380px!important;padding:14px 14px 14px 18px!important;background:rgba(14,14,16,.86)!important;-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%);border:1px solid rgba(255,255,255,.1)!important;border-left:2px solid #e0242f!important;border-radius:10px!important;box-shadow:0 18px 40px rgba(0,0,0,.55)!important;transition:opacity .3s ease,transform .35s ease!important;font-family:Inter,sans-serif!important}
+body .st-remind.on{opacity:1;transform:none!important}
+body .st-remind .rm-t{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+body .st-remind b{font:700 13px Inter,sans-serif!important;color:#fff!important;letter-spacing:.01em}body .st-remind span{font:500 12px Inter,sans-serif!important;color:#9a9aa0!important;white-space:nowrap}
+body .st-remind button{flex:none;background:#e0242f!important;color:#fff!important;border:0!important;border-radius:6px!important;font:800 10px Inter,sans-serif!important;letter-spacing:.16em!important;text-transform:uppercase;padding:11px 14px!important;cursor:pointer}
+body .st-remind a{flex:none;color:#6c6c72!important;font-size:18px!important;line-height:1;cursor:pointer;padding:2px 2px 2px 0;text-decoration:none!important}body .st-remind a:hover{color:#fff!important}
+@media(max-width:700px){body .st-remind{left:12px!important;right:12px!important;max-width:none!important;bottom:150px!important}}
+@media(max-width:700px){#mCart{display:grid;place-items:center;position:fixed;right:14px;bottom:16px;z-index:45;width:50px;height:50px;border-radius:50%;padding:0;border:1px solid rgba(255,255,255,.14);background:rgba(14,14,16,.78);-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);box-shadow:0 12px 30px rgba(0,0,0,.55);opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .25s ease,transform .3s ease,bottom .2s ease}
+#mCart.on{opacity:1;transform:none;pointer-events:auto}body:has(.st-remind.on) #mCart{opacity:0!important;pointer-events:none!important}#mCart:active{transform:scale(.94)}
+#mCart svg{width:21px;height:21px;fill:none;stroke:#fff;stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round}
+#mCart b{position:absolute;top:-3px;right:-3px;min-width:19px;height:19px;border-radius:10px;background:#e0242f;color:#fff;font:700 10.5px/19px Inter,sans-serif;text-align:center;padding:0 5px;box-shadow:0 0 0 2px #0b0b0d}
+#mCart.pop b{animation:mcPop .5s ease}@keyframes mcPop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}}
 .kits-hd{max-width:1180px;margin:34px auto 26px;padding:0 20px}.kits-k{display:block;font:800 10px Inter,sans-serif;letter-spacing:.24em;color:#e0242f;margin-bottom:8px}.kits-hd h1{font:400 clamp(44px,6vw,76px)/.92 Anton,sans-serif;color:#fff;margin:0;text-transform:uppercase;letter-spacing:.01em}.kits-hd p{max-width:620px;margin:14px 0 0;color:#a2a2a8;font-size:15px;line-height:1.6}
 .st-sec.st-picks{order:-1}.st-picks .st-pk{display:block;font:800 10px Inter,sans-serif;letter-spacing:.24em;color:#e0242f;margin-bottom:6px}
 @media(prefers-reduced-motion:reduce){.st-sec.st-rel:before{animation:none}}
@@ -37,6 +50,19 @@ body .bp.play .acts2 .pl i,body.store .bp.play .acts2 .pl i{border:0!important;w
 .rmore{background:none;border:0;border-bottom:1px solid #e0242f;color:#fff;font:800 10px Inter,sans-serif;letter-spacing:.18em;padding:0 0 3px;margin:10px 0 18px;cursor:pointer}.rmore:hover{color:#e0242f}
 @media(max-width:600px){#cpStrip{gap:8px;font-size:10px}#cpStrip .cp-go{display:none}}`;document.head.appendChild(css);
 load();
+
+/* ---------- phones: a small cart that follows you down the page ---------- */
+(function(){const b=document.createElement('button');b.id='mCart';b.type='button';b.setAttribute('aria-label','Open cart');
+ b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h3l2.5 12h11L21 7H6"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17.5" cy="19.5" r="1.5"/></svg><b>0</b>';
+ document.body.appendChild(b);b.onclick=()=>{const c=document.getElementById('cartBtn');if(c)c.click()};
+ const badge=document.getElementById('badge');let last=0;
+ const n=()=>{try{return cart.size}catch(e){return +(badge&&badge.textContent)||0}};
+ const place=()=>{const bar=document.getElementById('bar'),r=bar&&getComputedStyle(bar).display!=='none'?bar.getBoundingClientRect():null;b.style.bottom=(r&&r.height&&r.top<innerHeight?Math.round(innerHeight-r.top+10):16)+'px'};
+ const sync=()=>{const k=n();b.querySelector('b').textContent=k;const far=scrollY>260,bo=document.getElementById('bo'),inBO=bo&&bo.classList.contains('on');
+  b.classList.toggle('on',k>0&&far&&!inBO);if(k>last){b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')}last=k;place()};
+ if(badge)new MutationObserver(sync).observe(badge,{childList:true,characterData:true,subtree:true});
+ let t=0;addEventListener('scroll',()=>{if(!t)t=requestAnimationFrame(()=>{t=0;sync()})},{passive:true});addEventListener('resize',place);
+ const bar=document.getElementById('bar');if(bar)new MutationObserver(place).observe(bar,{attributes:true,attributeFilter:['class','style']});sync()})();
 
 /* ---------- back office: SAMPLE PACK COUPONS (PROMO tab) ---------- */
 window.MZCouponAdmin=async function(host){const box=document.createElement('div');box.className='bi';box.style.cssText='display:block';host.appendChild(box);

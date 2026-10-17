@@ -51,7 +51,7 @@ const CK='mzprd_cart_v1';let restored=false;
 function cartMem(){const c=G('cart');if(!c)return;if(!restored){if(!BS().length&&!PS().length)return;restored=true;try{const saved=JSON.parse(localStorage.getItem(CK)||'[]');const ok=saved.filter(k=>{try{return !!lookup(k)}catch(e){return false}});
   if(ok.length&&!c.size){ok.forEach(k=>c.add(k));try{syncCart()}catch(e){}remind(ok.length)}}catch(e){}}
  try{localStorage.setItem(CK,JSON.stringify([...c]))}catch(e){}}
-function remind(n){const d=document.createElement('div');d.className='st-remind';d.innerHTML='<b>Welcome back 👋</b><span>You left '+n+' item'+(n>1?'s':'')+' in your cart.</span><button>Checkout</button><a aria-label="Close">×</a>';document.body.appendChild(d);
+function remind(n){const d=document.createElement('div');d.className='st-remind';d.innerHTML='<div class="rm-t"><b>Your cart is waiting</b><span>'+n+' item'+(n>1?'s':'')+' saved from last time</span></div><button>Checkout</button><a aria-label="Close">×</a>';document.body.appendChild(d);
  requestAnimationFrame(()=>d.classList.add('on'));d.querySelector('button').onclick=()=>{$('#cartBtn').click();d.remove()};d.querySelector('a').onclick=()=>d.remove();setTimeout(()=>d.classList.remove('on'),12000)}
 
 /* 11. next drop countdown under the ticker */

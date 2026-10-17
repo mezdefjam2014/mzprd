@@ -2,7 +2,7 @@
 @media(max-width:700px){
 /* never let anything make the page wider than the phone (it zoomed the whole page out) */
 html,body{overflow-x:clip!important;max-width:100%}
-body{padding-bottom:150px!important}
+body.has-play{padding-bottom:150px!important}
 
 /* featured pack at the top: cover on top, text full width underneath */
 .st-feat2 .in{grid-template-columns:1fr!important;gap:22px!important;padding-top:10px!important;text-align:left}
