@@ -1490,11 +1490,15 @@ async function boRender(){
   <label class="chk"><input type="checkbox" id="f_free" ${e.free_download?'checked':''}> FREE DOWNLOAD (shows a download button for the preview file)</label>
   <button class="go" type="submit" id="f_save">${editing?'SAVE CHANGES':'UPLOAD AND SAVE'}</button>
   ${editing?'<button class="bo-btn" type="button" id="f_cancel" style="width:100%;margin-top:10px">CANCEL EDIT</button>':''}
+  ${editing&&tab==='packs'?`<div style="margin-top:18px;border-top:1px solid #26262a;padding-top:16px"><label>WHAT'S INSIDE (SOUND LIST + 8-SECOND PREVIEWS ON THE PACK PAGE)</label><span style="display:block;font-size:12px;color:#8a8a90;margin:4px 0 10px">${Array.isArray(e.contents)&&e.contents.length?e.contents.length+' sounds listed now.':'Not made yet.'} Made from the pack zip already uploaded. Takes a minute.</span><button class="bo-btn" type="button" id="f_ins" style="width:100%">MAKE WHAT'S INSIDE FROM THE PACK FILE</button><button class="bo-btn" type="button" id="f_insPick" style="width:100%;margin-top:8px">OR PICK THE ZIP / SOUND FOLDER FROM THIS COMPUTER</button><input type="file" id="f_insF" accept=".zip,audio/*" multiple hidden><div id="insMsg" style="margin-top:8px;font-size:12px;color:#d6d6da"></div></div>`:''}
   <div id="bmsg"></div>`;
  $('#bf').onsubmit=boSave;
  if(tab==='beats'&&$('#f_usestk')){const u=$('#f_usestk'),fi=document.querySelector('#bf input[data-k="cover_path"]');u.onchange=()=>{if(u.checked)fi.value=''};fi.addEventListener('change',()=>{if(fi.files[0])u.checked=false})}
  if(tab==='beats'&&$('#f_stk')){const up=()=>{$('#f_stk').src=stockCover($('#f_title').value||'BEAT NAME',420)};$('#f_title').addEventListener('input',up);up();document.fonts&&document.fonts.load('800 100px Inter').then(up).catch(()=>{})}
  if(editing)$('#f_cancel').onclick=()=>{editing=null;boRender()};
+ if(editing&&tab==='packs'){const P=editing,im=$('#insMsg'),run=async get=>{const bs=[$('#f_ins'),$('#f_insPick')];bs.forEach(b=>b.disabled=true);try{if(!window.MZInsideFromPack)await loadScript('packbuilder.js?v=4');const src=await get();const n=await MZInsideFromPack(P,src,t=>im.textContent=t);im.textContent='Done: '+n+' sounds with 8-second previews are on the pack page.';toast('WHAT\'S INSIDE READY')}catch(err){im.textContent='Could not make it: '+(err.message||err)}finally{bs.forEach(b=>b.disabled=false)}};
+  $('#f_ins').onclick=()=>run(async()=>{const p=P.file_path;if(!p)throw new Error('This pack has no pack file.');if(String(p).indexOf('r2:')===0)throw new Error('This pack file is in the big-file store. Use the pick button below.');im.textContent='Downloading the pack file...';const {data,error}=await sb.storage.from('private-files').download(p);if(error)throw error;return data});
+  $('#f_insPick').onclick=()=>$('#f_insF').click();$('#f_insF').onchange=ev=>{const fs=ev.target.files;if(fs.length)run(async()=>fs.length===1&&/\.zip$/i.test(fs[0].name)?fs[0]:fs)}}
  demoStop();const {data:rows,error}=await sb.from(F.table).select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false});
  const bl=$('#bl');
  if(error){bl.innerHTML='<div class="bi"><span>'+esc(error.message)+'</span></div>';return}
@@ -1896,7 +1900,7 @@ function mzBid(){
  return b;
 }
 window.mzBid=mzBid;
-$('#pbkOpen').onclick=async()=>{try{if(!window.packBuilderOpen)await loadScript('packbuilder.js?v=3');await window.packBuilderOpen()}catch(e){toast('PACK BUILDER FAILED TO LOAD')}};
+$('#pbkOpen').onclick=async()=>{try{if(!window.packBuilderOpen)await loadScript('packbuilder.js?v=4');await window.packBuilderOpen()}catch(e){toast('PACK BUILDER FAILED TO LOAD')}};
 $('#fSub').onsubmit=async e=>{e.preventDefault();const sm=$('#fSm');sm.textContent='Saving...';
  try{const r=await (await fetch(SB_URL+'/functions/v1/site',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},body:JSON.stringify({action:'subscribe',email:$('#fEm').value,website:$('#fHp').value,source:'site'})})).json();
   sm.textContent=r.ok?'You are on the list. Thank you!':(r.error||'Something went wrong.');if(r.ok)$('#fEm').value=''}catch(x){sm.textContent='Network problem. Try again.'}};

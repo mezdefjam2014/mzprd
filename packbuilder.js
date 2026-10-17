@@ -213,6 +213,21 @@ async function saveInside(d){if(!d.cloud||!d.cloud.packId)return;msg('Making the
  const old=d.cloud.snips||[],{list,paths}=await makeInside(d,(i,n)=>{msg('Making preview '+i+' / '+n+'...');$q('#pbProg').style.width=Math.round(i/n*100)+'%'});
  const r=await sb.from('packs').update({contents:list}).eq('id',d.cloud.packId);if(r.error){for(const p of paths)await rmObj('public-media',p);throw new Error(/contents/.test(r.error.message)?'Run supabase/pack_contents.sql in Supabase once.':r.error.message)}
  for(const p of old)await rmObj('public-media',p);d.cloud.snips=paths;await save();return list.length}
+function jszip(){return window.JSZip?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';s.onload=ok;s.onerror=()=>no(new Error('Could not load the zip reader'));document.head.appendChild(s)})}
+/* P = the packs row, src = a zip Blob or a list of Files; onp(text) shows progress */
+window.MZInsideFromPack=async function(P,src,onp){await lame();let files=[];
+ if(src instanceof Blob&&!(src instanceof File&&AUDIO.test(src.name))){await jszip();onp&&onp('Opening the pack zip...');const z=await JSZip.loadAsync(src);
+  for(const e of Object.values(z.files))if(!e.dir&&AUDIO.test(e.name)&&!/(^|\/)(__MACOSX|\.)/.test(e.name))files.push({name:e.name.split('/').pop(),path:e.name,get:()=>e.async('blob')})}
+ else files=[...src].filter(f=>AUDIO.test(f.name)).map(f=>({name:f.name,path:f.webkitRelativePath||f.name,get:async()=>f}));
+ files.sort((a,b)=>a.path.localeCompare(b.path));files=files.slice(0,SNIP_MAX);if(!files.length)throw new Error('No sounds found in the pack.');
+ const list=[],paths=[];let i=0;
+ for(const f of files){i++;onp&&onp('Making preview '+i+' / '+files.length+'...');try{const b=await decode(await f.get());if([44100,48000,32000].indexOf(b.sampleRate)<0)continue;
+  const p=await upload(new File([snipMp3(b)],'snip.mp3',{type:'audio/mpeg'}),'public-media','snips');paths.push(p);
+  const fold=f.path.toLowerCase(),k=/one.?shot|drum|kick|snare|hat|perc|fx/.test(fold)&&b.duration<4||b.duration<2.5?'shot':/extra|midi|stem/.test(fold)?'other':'loop';
+  list.push({n:f.name.replace(/\.[^.]+$/,''),k,bpm:guessBpm(f.path),key:guessKey(f.name),dur:Math.round(b.duration*10)/10,p})}catch(e){}await new Promise(r=>setTimeout(r,0))}
+ const old=(Array.isArray(P.contents)?P.contents:[]).map(x=>x.p).filter(Boolean);
+ const r=await sb.from('packs').update({contents:list}).eq('id',P.id);if(r.error){for(const p of paths)await rmObj('public-media',p);throw new Error(r.error.message)}
+ for(const p of old)if(paths.indexOf(p)<0)await rmObj('public-media',p);P.contents=list;return list.length};
 async function insideOnly(){const d=S.cur;if(!d||!d.cloud||S.busy)return;S.busy=true;try{const n=await saveInside(d);try{await loadAll()}catch(e){}msg('WHAT\'S INSIDE updated: '+n+' sounds with 8-second previews.');toast('WHAT\'S INSIDE UPDATED')}catch(e){msg('Could not make the previews: '+(e.message||e))}finally{S.busy=false}}
 async function publish(){
  const d=S.cur;if(S.busy)return;d.title=$q('#pbTitle').value.trim();if(!d.title){msg('Give the pack a title first.');return}
