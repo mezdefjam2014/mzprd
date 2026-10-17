@@ -912,6 +912,7 @@ function route(){
  const m=location.pathname.slice(BASEPATH.length).match(/^(beat|pack)\/([^/]+)\/?$/);
  if(m){const sl=decodeURIComponent(m[2]);if(m[1]==='beat')showBeatPage(beats.findIndex(b=>bslug(b)===sl));else showPackPage(packs.findIndex(b=>bslug(b)===sl));return}
  {const pv=pathView();if(pv){pageIdx=-1;hideSeo();showView(pv);document.title=VTITLE[pv];return}}
+ if(location.pathname===BASEPATH&&!location.hash&&window.showHome){pageIdx=-1;hideSeo();showHome();document.title=HOME_TITLE;return}
  if($('#v-beat').classList.contains('on')){const wasPack=pageKind==='p';pageIdx=-1;showView(wasPack?'kits':'beats')}
  else if(!location.hash&&location.pathname===BASEPATH&&!document.querySelector('#v-beats.on'))showView('beats');
  document.title=HOME_TITLE;
@@ -1928,11 +1929,11 @@ window.slotsBoot=async function(){
 $('#slotBtn').onclick=async()=>{try{if(!window.slotsOpen)await loadScript('slots.js?v=4');await window.slotsOpen()}catch(e){toast('SLOTS FAILED TO LOAD')}};
 checkAdmin();loadAll();frame();
 </script>
-<script src="store.js?v=23"></script>
+<script src="store.js?v=24"></script>
 <script src="store2.js?v=7"></script>
 <script src="store3.js?v=2"></script>
 <script>try{history.scrollRestoration='manual'}catch(e){}</script>
-<script src="store4.js?v=3"></script>
+<script src="store4.js?v=4"></script>
 <script>/* show the page once the right view is drawn: on the home page that means the home layout with its packs, not the Beats list underneath */
 (function(){var B=window.BASEPATH||"/",root=location.pathname===B&&!location.hash,t=Date.now();
  (function check(){var h=document.getElementById("v-home");if(!root||(h&&h.classList.contains("on")&&h.querySelector(".st-sec,.st-feat"))||Date.now()-t>2500){document.documentElement.classList.add("ready")}else setTimeout(check,40)})()})()</script>

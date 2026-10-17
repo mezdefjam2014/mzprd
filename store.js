@@ -32,7 +32,7 @@ const navA=[...top.querySelectorAll('.st-nav a')];
 function mark(v){navA.forEach(a=>a.classList.toggle('on',(a.dataset.v||a.dataset.h)===v))}
 function showHome(push){document.title='MZPRD | Beats & Sample Packs';document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-home'));mark('home');if(push&&location.pathname!==(window.BASEPATH||'/'))history.pushState(null,'',window.BASEPATH||'/');render();scrollTo(0,0)}
 navA.forEach(a=>a.onclick=()=>{if(a.dataset.v){const b=document.querySelector('header nav button[data-v="'+a.dataset.v+'"]');if(b)b.click();mark(a.dataset.v)}else if(a.dataset.h==='home')showHome(true);else{const b=document.querySelector('header nav button[data-v="about"]');if(b)b.click();mark('about');setTimeout(()=>{const f=$('#stFaq');if(f)f.scrollIntoView({behavior:'smooth'})},120)}});
-$('#stLogo').onclick=()=>showHome(true);
+window.showHome=showHome;$('#stLogo').onclick=()=>showHome(true);
 /* keep the nav underline in step with the site's own view changes */
 new MutationObserver(()=>{const on=document.querySelector('.view.on');if(!on)return;const v=on.id.slice(2);mark(v==='beat'?'beats':v)}).observe(caseEl,{subtree:true,attributes:true,attributeFilter:['class']});
 
