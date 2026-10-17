@@ -1704,6 +1704,7 @@ async function promoRender(){
   <h3 style="margin-top:22px">FRONT PAGE</h3>
   <label>HOT BEATS 🔥 (THE 3 BEATS AT THE TOP)</label>${[0,1,2].map(i=>{const ids=String(e.home_hot||'').split(',');return '<select id="p_hot'+i+'"><option value="">(newest beats)</option>'+beats.map(b=>'<option value="'+esc(b.id)+'"'+(String(ids[i])===String(b.id)?' selected':'')+'>'+esc(b.title)+'</option>').join('')+'</select>'}).join('')}
   <label>BIG FEATURED BLOCK (THE BLACK BAND)</label><select id="p_feat"><option value="">(first sample pack)</option>${packs.map(x=>'<option value="p:'+esc(x.id)+'"'+(e.home_feature==='p:'+x.id?' selected':'')+'>PACK: '+esc(x.title)+'</option>').join('')}${beats.map(x=>'<option value="b:'+esc(x.id)+'"'+(e.home_feature==='b:'+x.id?' selected':'')+'>BEAT: '+esc(x.title)+'</option>').join('')}</select>
+  <label>EDITOR'S PICKS (UP TO 4 SAMPLE PACKS UNDER THE FEATURED PACK; ALL EMPTY = SECTION HIDDEN)</label>${[0,1,2,3].map(i=>{const ids=String(e.home_picks||'').split(',');return '<select id="p_pick'+i+'"><option value="">(empty)</option>'+packs.map(x=>'<option value="'+esc(x.id)+'"'+(String(ids[i])===String(x.id)?' selected':'')+'>'+esc(x.title)+'</option>').join('')+'</select>'}).join('')}
   <label>BIG FEATURED IMAGE (OPTIONAL, SQUARE WORKS BEST; EMPTY = THE COVER)</label><input type="file" id="p_fimg" accept="image/*">
   ${e.home_feature_img?`<div class="cur">Current: ${esc(e.home_feature_img.split('/').pop())}</div><label class="chk" style="margin-top:6px"><input type="checkbox" id="p_frm"> REMOVE THIS IMAGE</label>`:''}
   <label>SAMPLE PACK "WAS" PRICE: HOW MUCH HIGHER THE CROSSED-OUT PRICE IS, IN % (0 = AUTOMATIC, ABOUT 25%)</label><input type="number" min="0" max="90" step="1" id="p_slash" value="${esc(e.slash_pct||0)}">
@@ -1722,7 +1723,7 @@ async function promoSave(ev){
   const f=$('#p_img').files[0],rm=$('#p_rm');
   if(f){msg.textContent='Uploading image...';newImg=await upload(f,'public-media','promo');row.promo_image_path=newImg;oldImg=cur}
   else if(rm&&rm.checked){row.promo_image_path=null;oldImg=cur}
-  {const hot=[0,1,2].map(i=>$('#p_hot'+i).value).filter(Boolean);row.home_hot=hot.join(',')||null;row.home_feature=$('#p_feat').value||null;row.slash_pct=parseFloat($('#p_slash').value)||0;row.drop_day=$('#p_dday').value===''?null:+$('#p_dday').value;row.drop_hour=+$('#p_dhr').value;
+  {const hot=[0,1,2].map(i=>$('#p_hot'+i).value).filter(Boolean);row.home_hot=hot.join(',')||null;row.home_feature=$('#p_feat').value||null;{const pk=[0,1,2,3].map(i=>$('#p_pick'+i).value).filter((v,k,a)=>v&&a.indexOf(v)===k);row.home_picks=pk.join(',')||null}row.slash_pct=parseFloat($('#p_slash').value)||0;row.drop_day=$('#p_dday').value===''?null:+$('#p_dday').value;row.drop_hour=+$('#p_dhr').value;
    const ff=$('#p_fimg').files[0],frm=$('#p_frm'),curF=(await sb.from('site_settings').select('*').eq('id',1).maybeSingle()).data?.home_feature_img||null;
    if(ff){msg.textContent='Uploading featured image...';row.home_feature_img=await upload(ff,'public-media','promo')}else if(frm&&frm.checked)row.home_feature_img=null}
   msg.textContent='Saving...';
@@ -1929,12 +1930,13 @@ window.slotsBoot=async function(){
 $('#slotBtn').onclick=async()=>{try{if(!window.slotsOpen)await loadScript('slots.js?v=4');await window.slotsOpen()}catch(e){toast('SLOTS FAILED TO LOAD')}};
 checkAdmin();loadAll();frame();
 </script>
-<script src="store.js?v=25"></script>
+<script src="store.js?v=28"></script>
 <script src="store2.js?v=7"></script>
 <script src="store3.js?v=2"></script>
 <script>try{history.scrollRestoration='manual'}catch(e){}</script>
-<script src="store4.js?v=11"></script>
+<script src="store4.js?v=12"></script>
 <script src="player.js?v=2"></script>
+<script src="fire.js?v=1"></script>
 <script>/* show the page once the right view is drawn: on the home page that means the home layout with its packs, not the Beats list underneath */
 (function(){var B=window.BASEPATH||"/",root=location.pathname===B&&!location.hash,adm=location.pathname.indexOf("/admin")>=0,t=Date.now();
  (function check(){var h=document.getElementById("v-home"),bo=document.getElementById("bo"),lg=document.getElementById("login");if(adm?((bo&&bo.classList.contains("on"))||(lg&&lg.classList.contains("on"))||Date.now()-t>6000):!root||(h&&h.classList.contains("on")&&h.querySelector(".st-sec,.st-feat"))||Date.now()-t>2500){document.documentElement.classList.add("ready")}else setTimeout(check,40)})()})()</script>
