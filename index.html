@@ -438,6 +438,7 @@ html.ready #mzLoad{opacity:0;visibility:hidden;pointer-events:none}
    <button class="on" data-v="beats">BEATS</button>
    <button data-v="kits">KITS</button>
    <button data-v="show">SHOW</button>
+   <button data-v="crate">CRATE DIG</button>
    <button data-v="about">ABOUT</button>
   </nav>
   <div class="tools">
@@ -457,6 +458,7 @@ html.ready #mzLoad{opacity:0;visibility:hidden;pointer-events:none}
  <div class="view" id="v-kits"><div class="kits-hd"><span class="kits-k">MZPRD SOUNDS</span><h1>Sample Packs</h1><p>Soul chops, vinyl textures, loops and one-shots made by MZPRD for producers. Every pack is royalty-free, ready for any DAW and downloads instantly after checkout.</p></div><div id="packs"></div></div>
  <div class="view" id="v-beat"><div id="bpage"></div></div>
  <div class="view" id="v-show"><div id="shRoot"></div></div>
+ <div class="view" id="v-crate"><div id="crHost"></div></div>
  <div class="view" id="v-about"><div class="about"><!--ABOUT:BOX--><h2>MZPRD (MEZTHEPROD)</h2><p>MZPRD is short for Meztheprod: a music producer making original beats and instrumentals for rap, hip hop and R&amp;B, plus sample packs, vinyl samples and producer loops for other producers.</p><p>Every beat has a preview you can play right here. When you find the one, pay securely with PayPal and download the full file straight away.</p><p><a href="about/" style="color:var(--gold)">Read more about MZPRD</a></p><!--/ABOUT:BOX--></div></div>
 </div>
 <!--SEO:CONTENT-->
@@ -494,7 +496,7 @@ html.ready #mzLoad{opacity:0;visibility:hidden;pointer-events:none}
 </div></div>
 
 <div id="bo">
- <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="promo">PROMO</button><button data-t="sales">SALES</button><button data-t="accounts">ACCOUNTS</button><button data-t="video">VIDEO STUDIO</button><button data-t="email">EMAIL</button><button data-t="show">SHOW MAKER</button><button data-t="mpc">MPC</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
+ <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="samples">SINGLE SAMPLES</button><button data-t="promo">PROMO</button><button data-t="sales">SALES</button><button data-t="accounts">ACCOUNTS</button><button data-t="video">VIDEO STUDIO</button><button data-t="email">EMAIL</button><button data-t="show">SHOW MAKER</button><button data-t="mpc">MPC</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
  <div id="pbk"></div>
  <div id="pbkBar" style="display:none;margin:0 0 16px"><button class="bo-btn" id="pbkOpen" type="button" style="border-color:var(--gold);color:var(--gold)">&#9733; PACK BUILDER: BUILD A PACK FASTER (DRAFTS USE NO CLOUD SPACE UNTIL YOU PUBLISH)</button></div>
  <div id="studio"></div>
@@ -706,7 +708,7 @@ async function freeDownload(x){
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=x.title.replace(/[^\w .-]+/g,'')+(u.match(/\.\w+$/)||['.mp3'])[0];document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
  catch(e){toast('DOWNLOAD FAILED')}
 }
-function lookup(k){const [t,id]=[k[0],k.slice(2)];return(t==='b'?beats:packs).find(x=>String(x.id)===id)}
+function lookup(k){const [t,id]=[k[0],k.slice(2)];return(t==='b'?beats:t==='s'?(window.MZSamplesAll||[]):packs).find(x=>String(x.id)===id)}
 const CROWN='<svg viewBox="0 0 24 16" width="24" height="16"><path d="M1 14L3 3l5 6 4-8 4 8 5-6 2 11z" fill="#e8b94a" stroke="#fff3c0" stroke-width="1" stroke-linejoin="round"/></svg>';
 function burst(btn){
  if(!btn||!btn.animate)return;
@@ -720,7 +722,7 @@ function burst(btn){
 }
 const LINES_B=['Good pick.',"That one's heavy.",'Smart move.','Crown approved.','Run it back.'],LINES_P=['That pack goes hard.',"Fresh sounds. Use 'em well.",'Straight from the vault.'];
 function say(t,ms){const e=$('#say');$('#sayT').textContent=t;e.classList.add('on');clearTimeout(say.t);say.t=setTimeout(()=>e.classList.remove('on'),ms||2400)}
-function toggleCart(k,btn){const had=cart.has(k);had?cart.delete(k):cart.add(k);syncCart();if(!had){burst(btn);say(rp(k[0]==='p'?LINES_P:LINES_B));nod=Math.max(nod,1.7)}else say('No stress.',1600)}
+function toggleCart(k,btn){const had=cart.has(k);had?cart.delete(k):cart.add(k);syncCart();if(!had){burst(btn);say(rp(k[0]==='b'?LINES_B:LINES_P));nod=Math.max(nod,1.7)}else say('No stress.',1600)}
 function syncCart(){
  [...document.querySelectorAll('#list .cart')].forEach((b,i)=>{const k='b:'+beats[i]?.id,on=cart.has(k);b.classList.toggle('in',on);b.textContent=on?'IN CART':'ADD TO CART'});
  [...document.querySelectorAll('#packs .card > .cart:not(.fd)')].forEach((b,i)=>{const k='p:'+packs[i]?.id,on=cart.has(k);b.classList.toggle('in',on);b.textContent=on?'IN CART':'ADD TO CART'});
@@ -882,12 +884,13 @@ async function openShow(){try{if(!window.MZShow)await loadScript('show.js?v=15')
 function showView(v){
  camT=v==='beat'?(pageKind==='p'?'kits':'beats'):v;
  {const pl=document.querySelector('.plc');if(pl)pl.style.display=v==='beats'?'':'none'}
- {const dl=$('#deals');if(dl)dl.style.display=(v==='about'||v==='show')?'none':''}
+ {const dl=$('#deals');if(dl)dl.style.display=(v==='about'||v==='show'||v==='crate')?'none':''}
  if(v==='show')openShow();else if(window.showPageClose)window.showPageClose();
+ if(v==='crate'){(window.MZCrate?Promise.resolve():loadScript('crate.js?v=11')).then(()=>MZCrate($('#crHost'))).catch(()=>toast('CRATE DIG FAILED TO LOAD'))}else if(window.MZCrateStop)MZCrateStop();
  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.v===(v==='beat'?'beats':v)));
  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
 }
-const VPATH={beats:'beats/',kits:'sample-packs/',show:'show/',about:'about/'},VTITLE={beats:'Rap, Hip Hop & R&B Beats and Instrumentals for Sale | MZPRD',kits:'Sample Packs, Vinyl Samples & Producer Loops | MZPRD',show:'Weekly Pixel Show | MZPRD',about:'About MZPRD (Meztheprod) | Beat Producer'};
+const VPATH={beats:'beats/',kits:'sample-packs/',show:'show/',crate:'crate-dig/',about:'about/'},VTITLE={crate:'Crate Dig: Single Samples | MZPRD',beats:'Rap, Hip Hop & R&B Beats and Instrumentals for Sale | MZPRD',kits:'Sample Packs, Vinyl Samples & Producer Loops | MZPRD',show:'Weekly Pixel Show | MZPRD',about:'About MZPRD (Meztheprod) | Beat Producer'};
 function pathView(){const p=location.pathname.slice(BASEPATH.length).replace(/\/?$/,'/');return Object.keys(VPATH).find(k=>VPATH[k]===p)||null}
 document.querySelectorAll('nav button[data-v]').forEach(b=>b.onclick=()=>{
  const v=b.dataset.v,u=BASEPATH+VPATH[v];
@@ -980,11 +983,12 @@ async function loadAll(){
  else{
   const st=await sb.from('site_settings').select('*').eq('id',1).maybeSingle();if(st.data)promo=st.data;
   const bq=await sb.from('bundles').select('*').eq('active',true).order('sort_order',{ascending:true});bundles=bq.data||[];
-  const [b,p]=await Promise.all([
+  const [b,p,sm]=await Promise.all([
    sb.from('beats').select('*').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
-   sb.from('packs').select('*').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false})]);
+   sb.from('packs').select('*').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
+   sb.from('samples').select('id,title,price,kind,bpm,musical_key,preview_path,free_download').eq('published',true)]);
   if(b.error||p.error)toast('COULD NOT LOAD STORE');
-  beats=b.data||[];packs=p.data||[];
+  beats=b.data||[];packs=p.data||[];window.MZSamplesAll=(sm&&sm.data)||[];
  }
  cur=-1;curPack=-1;renderBeats();renderPacks();renderDeals();syncLikes();setupPromo();route();
 }
@@ -1430,7 +1434,7 @@ async function checkAdmin(){
  LINK.textContent=isAdmin?'BACK OFFICE':'LOGIN';
  if(window.slotsBoot)window.slotsBoot();
 }
-const ADM=['beats','packs','promo','sales','accounts','video','email','show','mpc'],adminRel=()=>location.pathname.slice(BASEPATH.length).match(/^admin\/(?:([a-z]+)\/)?$/);
+const ADM=['beats','packs','samples','promo','sales','accounts','video','email','show','mpc'],adminRel=()=>location.pathname.slice(BASEPATH.length).match(/^admin\/(?:([a-z]+)\/)?$/);
 function syncBoTabs(){document.querySelectorAll('.bh [data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t===tab))}
 function goAdmin(t){if(!ADM.includes(t))t='beats';tab=t;editing=null;if(!adminRel()||adminRel()[1]!==t)history.pushState(null,'',BASEPATH+'admin/'+t+'/');syncBoTabs();openBO()}
 function leaveAdmin(){if(!document.getElementById('v-home')){location.href=BASEPATH;return}$('#bo').classList.remove('on');if(window.studioClose)studioClose();if(adminRel())history.pushState(null,'',BASEPATH);route()}
@@ -1458,6 +1462,7 @@ function openBO(){$('#bo').classList.add('on');boRender()}
 
 const FIELDS={
  beats:{table:'beats',title:'BEAT',files:[['cover_path','COVER IMAGE (optional: leave it empty to use the stock cover, which takes no storage)','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (tagged MP3/WAV, public)','audio/*','public-media','previews'],['audio_path','FULL FILE (private, for buyers, any size)','audio/*,.zip','private-files','beats']]},
+ samples:{table:'samples',title:'SINGLE SAMPLE',files:[['preview_path','PREVIEW AUDIO (public: a short, tagged MP3 people hear in the crate)','audio/*','public-media','sample-previews'],['file_path','FULL SAMPLE (WAV, private: what buyers download, stored in Cloudflare)','audio/*,.wav,.aif,.aiff,.zip','private-files','samples']]},
  packs:{table:'packs',title:'SAMPLE PACK',files:[['cover_path','PACK IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (optional, public)','audio/*','public-media','previews'],['file_path','PACK FILE (.zip, private, any size)','.zip,application/zip,audio/*','private-files','packs']]}
 };
 function loadScript(f){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+f;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
@@ -1486,7 +1491,8 @@ async function boRender(){
   ${tab==='beats'?'<div class="cur" style="margin:10px 0 4px">STOCK COVER (used when you do not upload a cover, nothing is stored):</div><img id="f_stk" alt="stock cover" style="width:190px;height:190px;display:block;border:1px solid #2a2a2e">':''}
   <label>DESCRIPTION (2 to 3 sentences using words people search, like dark hip hop beat)</label><textarea id="f_desc">${esc(e.description??'')}</textarea>
   ${beatBits}
-  <label>PRICE (USD)</label><input type="number" step="0.01" min="0" id="f_price" value="${esc(e.price??(tab==='beats'?29.99:19.99))}">
+  ${tab==='samples'?`<div class="two"><div><label>TYPE</label><select id="f_kind">${['Soul chop','Drum break','Vocal loop','Keys loop','Guitar loop','Horn stab','Bass loop','Strings','One-shot','FX'].map(k=>`<option${e.kind===k?' selected':''}>${k}</option>`).join('')}</select></div><div><label>BPM</label><input type="number" min="40" max="220" id="f_bpm" value="${esc(e.bpm??'')}" placeholder="90"></div></div><label>KEY</label><input type="text" id="f_key" value="${esc(e.musical_key??'')}" placeholder="C min" maxlength="12">`:''}
+  <label>PRICE (USD)</label><input type="number" step="0.01" min="0" id="f_price" value="${esc(e.price??(tab==='beats'?29.99:tab==='samples'?4.99:19.99))}">
   ${files}
   <div class="two"><div><label>SORT ORDER (0 = first)</label><input type="number" id="f_sort" value="${esc(e.sort_order??0)}"></div></div>
   <label class="chk"><input type="checkbox" id="f_pub" ${e.published===false?'':'checked'}> PUBLISHED (visible on the site)</label>
@@ -1509,7 +1515,7 @@ async function boRender(){
   d.className='bi bx';d.dataset.id=r.id;
   d.innerHTML=`<div class="dh" title="Drag to change the order" aria-label="Drag to reorder">&#9776;</div>${u?`<img src="${esc(u)}" alt="">`:'<div class="nc"></div>'}<div><b>${esc(r.title)}</b><span>${money(r.price)}${r.published?'':' <i class="draft">/ HIDDEN</i>'}${r.free_download?' / FREE DL':''}</span></div><div class="acts">${r.preview_path?'<button class="pv">&#9654; DEMO</button>':''}${r.slug?'<button class="vw">PAGE</button>':''}<button class="ed">EDIT</button><button class="del">DELETE</button></div>`;
   const pv=d.querySelector('.pv');if(pv)pv.onclick=()=>demoToggle(r,pv);
-  const vw=d.querySelector('.vw');if(vw)vw.onclick=()=>{$('#bo').classList.remove('on');goItem(tab==='packs'?'pack':'beat',r.slug);scrollTo(0,0)};
+  const vw=d.querySelector('.vw');if(vw)vw.onclick=()=>{$('#bo').classList.remove('on');if(tab==='samples'){history.pushState(null,'',BASEPATH+'crate-dig/');route();scrollTo(0,0);return}goItem(tab==='packs'?'pack':'beat',r.slug);scrollTo(0,0)};
   d.querySelector('.ed').onclick=()=>{editing=r;boRender();scrollTo(0,0)};
   d.querySelector('.del').onclick=()=>boDelete(r);
   bl.appendChild(d);
@@ -1768,6 +1774,7 @@ async function boSave(ev){
  const row={title:$('#f_title').value.trim(),description:$('#f_desc').value.trim()||null,price:parseFloat($('#f_price').value)||0,published:$('#f_pub').checked,free_download:$('#f_free').checked,sort_order:parseInt($('#f_sort').value)||0};
  if(!row.title){msg.textContent='Title is required.';btn.disabled=false;return}
  if(tab==='beats')row.tags=$('#f_tags').value.trim()||null;
+ if(tab==='samples'){row.kind=$('#f_kind').value||null;row.bpm=parseInt($('#f_bpm').value)||null;row.musical_key=$('#f_key').value.trim()||null;if(!editing&&!document.querySelector('#bf input[data-k="preview_path"]').files[0]){msg.textContent='Add a PREVIEW AUDIO file so people can hear it in the crate.';btn.disabled=false;return}}
  row.slug=slugify($('#f_slug').value||row.title)||null;
  const oldFiles=[],newUploaded=[];
  try{
@@ -1933,12 +1940,12 @@ window.slotsBoot=async function(){slotsLive=false;return;
 if($('#slotBtn'))$('#slotBtn').onclick=async()=>{try{if(!window.slotsOpen)await loadScript('slots.js?v=4');await window.slotsOpen()}catch(e){toast('SLOTS FAILED TO LOAD')}};
 checkAdmin();loadAll();frame();
 </script>
-<script src="store.js?v=31"></script>
+<script src="store.js?v=32"></script>
 <script src="store2.js?v=8"></script>
 <script src="store3.js?v=2"></script>
 <script>try{history.scrollRestoration='manual'}catch(e){}</script>
 <script src="store4.js?v=21"></script>
-<script src="player.js?v=3"></script>
+<script src="player.js?v=4"></script>
 <script src="fire.js?v=2"></script>
 <link rel="stylesheet" href="mobile.css?v=2">
 <script>/* show the page once the right view is drawn: on the home page that means the home layout with its packs, not the Beats list underneath */

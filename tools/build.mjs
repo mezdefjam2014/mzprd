@@ -168,7 +168,7 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity
 fs.mkdirSync(DIST, { recursive: true })
 for (const e of fs.readdirSync(DIST)) fs.rmSync(path.join(DIST, e), { recursive: true, force: true })
 for (const f of fs.readdirSync(path.join(ROOT, 'pl')).map(x => 'pl/' + x)) { fs.mkdirSync(path.join(DIST, 'pl'), { recursive: true }); fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f)) }
-for (const f of ['hero.jpg', 'store.css', 'store-a.css', 'store.js', 'store2.js', 'store3.js', 'store4.js', 'player.js', 'fire.js', 'mobile.css', 'sales.js', 'hero.webp', 'og.jpg', 'favicon.ico', 'favicon-32.png', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'site.webmanifest', 'girl.png', 'girl.webp', 'chain.png', 'studio.js', 'studio-skin.js', 'slots.js', 'show-stage.webp', 'packbuilder.js', 'show.js', 'showfx.js', 'mpc.js', 'mpc-skin.js', 'mpcgen.js', 'mpcpack.js', 'mpccomments.js', 'mpcyt.js', 'mpcdetect.js', 'showpage.js', 'showmaker.js', 'email.js', 'mix.js', 'thumbs.js', 'packphoto.js', 'mp4-muxer.js', 'CNAME']) {
+for (const f of ['hero.jpg', 'store.css', 'store-a.css', 'store.js', 'store2.js', 'store3.js', 'store4.js', 'player.js', 'fire.js', 'crate.js', 'crate-sleeve.jpg', 'crate-back.png', 'crate-front.png', 'mobile.css', 'sales.js', 'hero.webp', 'og.jpg', 'favicon.ico', 'favicon-32.png', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'site.webmanifest', 'girl.png', 'girl.webp', 'chain.png', 'studio.js', 'studio-skin.js', 'slots.js', 'show-stage.webp', 'packbuilder.js', 'show.js', 'showfx.js', 'mpc.js', 'mpc-skin.js', 'mpcgen.js', 'mpcpack.js', 'mpccomments.js', 'mpcyt.js', 'mpcdetect.js', 'showpage.js', 'showmaker.js', 'email.js', 'mix.js', 'thumbs.js', 'packphoto.js', 'mp4-muxer.js', 'CNAME']) {
   if (fs.existsSync(path.join(ROOT, f))) fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f))
 }
 if (fs.existsSync(path.join(ROOT, 'sfx'))) fs.cpSync(path.join(ROOT, 'sfx'), path.join(DIST, 'sfx'), { recursive: true })
@@ -233,6 +233,17 @@ function shortDesc(d) {
   return (out || t.slice(0, 237).replace(/\s+\S*$/, '') + '...').trim()
 }
 
+/* ----- crate dig (single samples) ----- */
+{
+  write('crate-dig', render({
+    path: 'crate-dig/', title: 'Crate Dig: Single Samples | MZPRD',
+    desc: 'Dig through the MZPRD crate: single samples, soul chops, drum breaks and loops. Flip through the records, drop one on the turntable and preview it.',
+    h1: 'Crate Dig', page: { kind: 'view', v: 'crate', title: 'Crate Dig: Single Samples | MZPRD' }, content: '',
+    ld: [crumbsLd([['Home', ''], ['Crate Dig', 'crate-dig/']])],
+  }))
+  addUrl('crate-dig/')
+}
+
 /* ----- about ----- */
 {
   const content = ''
@@ -246,7 +257,7 @@ function shortDesc(d) {
 }
 
 /* ----- back office pages (not indexed) ----- */
-for (const t of ['', 'beats', 'packs', 'bundles', 'promo', 'sales', 'video', 'email', 'show']) {
+for (const t of ['', 'beats', 'packs', 'samples', 'bundles', 'promo', 'sales', 'video', 'email', 'show']) {
   const rel = t ? 'admin/' + t : 'admin'
   write(rel, render({
     path: rel + '/', title: 'Back office | MZPRD', desc: 'Back office.', h1: 'Back office', noindex: true,

@@ -35,7 +35,7 @@ async function user(req: Request) {
   return data.user
 }
 async function itemPath(l: any) {
-  const table = l.t === 'b' ? 'beats' : 'packs'
+  const table = l.t === 'b' ? 'beats' : l.t === 's' ? 'samples' : 'packs'
   const col = l.t === 'b' ? 'audio_path' : 'file_path'
   const { data } = await sb.from(table).select(col).eq('id', l.id).maybeSingle()
   return data ? ((data as any)[col] as string | null) : null

@@ -62,10 +62,12 @@ async function priceLines(items: any[]) {
   if (!Array.isArray(items) || items.length < 1 || items.length > 25) throw new Error('Your cart is empty.')
   const bIds = [...new Set(items.filter((i) => i.t === 'b').map((i) => String(i.id)))]
   const pIds = [...new Set(items.filter((i) => i.t === 'p').map((i) => String(i.id)))]
-  const [st, bs, ps]: any[] = await Promise.all([
+  const sIds = [...new Set(items.filter((i) => i.t === 's').map((i) => String(i.id)))]
+  const [st, bs, ps, ss]: any[] = await Promise.all([
     sb.from('site_settings').select('*').eq('id', 1).maybeSingle(),
     bIds.length ? sb.from('beats').select('id,title,price').in('id', bIds).eq('published', true) : Promise.resolve({ data: [] }),
     pIds.length ? sb.from('packs').select('id,title,price').in('id', pIds).eq('published', true) : Promise.resolve({ data: [] }),
+    sIds.length ? sb.from('samples').select('id,title,price').in('id', sIds).eq('published', true) : Promise.resolve({ data: [] }),
   ])
   const promoOn = !!(st.data && st.data.promo_enabled)
   const lines: any[] = []
@@ -78,6 +80,11 @@ async function priceLines(items: any[]) {
     const p = (ps.data || []).find((x: any) => x.id === id)
     if (!p) throw new Error('A sample pack in your cart is no longer available.')
     lines.push({ t: 'p', id, title: p.title, price: Number(p.price) })
+  }
+  for (const id of sIds) {
+    const s = (ss.data || []).find((x: any) => x.id === id)
+    if (!s) throw new Error('A sample in your cart is no longer available.')
+    lines.push({ t: 's', id, title: s.title, price: Number(s.price) })
   }
   return lines
 }
@@ -149,7 +156,7 @@ async function releaseCoupon(o: any) {
 }
 
 async function itemPath(l: any) {
-  const table = l.t === 'b' ? 'beats' : 'packs'
+  const table = l.t === 'b' ? 'beats' : l.t === 's' ? 'samples' : 'packs'
   const col = l.t === 'b' ? 'audio_path' : 'file_path'
   const { data } = await sb.from(table).select(col).eq('id', l.id).maybeSingle()
   return data ? ((data as any)[col] as string | null) : null

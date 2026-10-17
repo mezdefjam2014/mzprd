@@ -26,6 +26,7 @@ function clip(el,o){el.innerHTML='<div class="wc-h"><span></span></div><div clas
  return{draw,pos,refresh,el}}
 
 const clips=new Set();let raf=0;
+window.MZClip=(el,o)=>{const c=clip(el,o);clips.add(c);requestAnimationFrame(()=>c.refresh());return c};
 function tick(){clips.forEach(c=>c.el.isConnected?c.pos():clips.delete(c));if(!au.paused)raf=requestAnimationFrame(tick)}
 const all=f=>clips.forEach(c=>c.el.isConnected?f(c):clips.delete(c));
 au.addEventListener('loadedmetadata',()=>all(c=>c.refresh()));au.addEventListener('play',()=>{all(c=>c.refresh());cancelAnimationFrame(raf);raf=requestAnimationFrame(tick)});
