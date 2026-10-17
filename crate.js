@@ -70,6 +70,7 @@ function plSync(){if(!host)return;const x=items[deck],A=MA(),on=deck>=0&&A&&!A.p
 let clipC=null;
 function paint(){if(!host)return;host.querySelectorAll('.sl').forEach(s=>s.classList.toggle('playing',isOn(+s.dataset.i)));plSync();const b=host.querySelector('#crPlay');if(b)b.classList.toggle('on',isOn(cur))}
 {const A=MA();if(A)['play','pause','ended','emptied'].forEach(ev=>A.addEventListener(ev,paint))}
+window.MZCratePlaying=()=>{const x=items[deck],A=MA();return !!(x&&A&&A.src===x.audio)};
 window.MZCrateStop=()=>{document.body.classList.remove('on-crate')};
 
 async function fetchSamples(){try{const {data,error}=await sb.from('samples').select('*').eq('published',true).order('sort_order',{ascending:true}).order('created_at',{ascending:false});if(error||!data)return[];

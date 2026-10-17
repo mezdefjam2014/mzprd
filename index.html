@@ -588,7 +588,7 @@ function play(i){
 }
 function go(d){if(curPack>=0){goPack(d);return}if(!beats.length)return;play(cur<0?0:(cur+d+beats.length)%beats.length)}
 au.onplay=()=>{playing=true;ui()};au.onpause=()=>{playing=false;hits=[];ui()};
-au.onended=()=>{if(curPack>=0){playing=false;hits=[];ui()}else go(1)};
+au.onended=()=>{/* packs and Crate Dig samples just stop at the end; beats roll on to the next beat */if(curPack>=0||(window.MZCratePlaying&&MZCratePlaying())){playing=false;hits=[];ui()}else go(1)};
 function ui(){
  const bpEl=document.querySelector('.bp');if(bpEl)bpEl.classList.toggle('play',pageIdx>=0&&((pageKind==='b'&&pageIdx===cur)||(pageKind==='p'&&pageIdx===curPack))&&playing);
  document.querySelectorAll('.row').forEach((e,i)=>e.classList.toggle('play',i===cur&&playing));
@@ -886,7 +886,7 @@ function showView(v){
  {const pl=document.querySelector('.plc');if(pl)pl.style.display=v==='beats'?'':'none'}
  {const dl=$('#deals');if(dl)dl.style.display=(v==='about'||v==='show'||v==='crate')?'none':''}
  if(v==='show')openShow();else if(window.showPageClose)window.showPageClose();
- if(v==='crate'){(window.MZCrate?Promise.resolve():loadScript('crate.js?v=12')).then(()=>MZCrate($('#crHost'))).catch(()=>toast('CRATE DIG FAILED TO LOAD'))}else if(window.MZCrateStop)MZCrateStop();
+ if(v==='crate'){(window.MZCrate?Promise.resolve():loadScript('crate.js?v=13')).then(()=>MZCrate($('#crHost'))).catch(()=>toast('CRATE DIG FAILED TO LOAD'))}else if(window.MZCrateStop)MZCrateStop();
  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.v===(v==='beat'?'beats':v)));
  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
 }
