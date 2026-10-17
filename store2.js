@@ -35,7 +35,7 @@ function related(){const bp=$('#bpage');if(!bp||!bp.firstElementChild||!$('#v-be
  const show=j=>{sl.forEach((e,q)=>{e.classList.remove('in','out');if(q===at&&q!==j){e.classList.add('out');setTimeout(()=>e.classList.remove('out'),650)}});dots.forEach((d,q)=>d.classList.toggle('on',q===j));at=j;void sl[j].offsetWidth;sl[j].classList.add('in')};
  show(0);clearInterval(related.t);if(sl.length>1)related.t=setInterval(()=>{if(!document.body.contains(box)){clearInterval(related.t);return}if(!box.matches(':hover'))show((at+1)%sl.length)},4200);
  dots.forEach(d=>d.onclick=()=>show(+d.dataset.j));
- sl.forEach(c=>{const k=c.dataset.k,x=(k==='b'?BS():PS())[+c.dataset.i];c.onclick=e=>{e.preventDefault();try{goItem(k==='b'?'beat':'pack',bslug(x));scrollTo({top:0,behavior:'smooth'})}catch(er){location.href=c.href}}})}
+ sl.forEach(c=>{const k=c.dataset.k,x=(k==='b'?BS():PS())[+c.dataset.i];c.onclick=e=>{e.preventDefault();try{goItem(k==='b'?'beat':'pack',bslug(x));scrollTo({top:0,behavior:'instant'})}catch(er){location.href=c.href}}})}
 
 /* 7. bundle deals: a banner on the front page and a nudge in the cart */
 function bundles(){const bl=(G('bundles')||[]).filter(b=>b.active!==false);const home=$('#v-home');

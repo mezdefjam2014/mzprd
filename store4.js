@@ -17,6 +17,8 @@ const css=document.createElement('style');css.textContent=`#cpStrip{position:rel
 #cpStrip .cp-r b{color:#fff}#cpStrip .cp-e{color:#e0242f}#cpStrip .cp-go{color:#fff;border-bottom:1px solid #e0242f;padding-bottom:2px}#cpStrip .cp-go:hover{color:#e0242f}
 .st-pr s.was,.prc s.was,.p s.was,s.was{font:500 13px Inter,sans-serif!important;color:#77777d!important;margin-left:8px;vertical-align:middle;text-decoration-color:#e0242f}
 .st-feat .d{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-width:520px}
+.pdesc{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}.pdesc.open{display:block;-webkit-line-clamp:unset}
+.rmore{background:none;border:0;border-bottom:1px solid #e0242f;color:#fff;font:800 10px Inter,sans-serif;letter-spacing:.18em;padding:0 0 3px;margin:10px 0 18px;cursor:pointer}.rmore:hover{color:#e0242f}
 @media(max-width:600px){#cpStrip{gap:8px;font-size:10px}#cpStrip .cp-go{display:none}}`;document.head.appendChild(css);
 load();
 
