@@ -50,8 +50,10 @@ async function show(){const body=$('#sdBody');if(!body)return;document.querySele
   $('#sdCheck').onclick=()=>{$('#acct').classList.remove('on');$('#cartBtn').click()};
   $('#sdBeats').onclick=()=>{show.rb=!RB;show()};
   try{localStorage.setItem(SEEN,String(Date.now()))}catch(e){}counts();const t=document.querySelector('.sd-tabs [data-t="new"] i');if(t)t.remove();return}
- if(tab==='saved'){const lk=G('liked')||new Set(),it=[...lk].map(k=>{try{const x=lookup(k);if(!x)return null;const arr=k[0]==='b'?BS():PS();return[k[0],x,arr.indexOf(x)]}catch(e){return null}}).filter(Boolean);
-  body.innerHTML=it.length?grid(it):'<p class="sd-empty">Tap the heart on any beat or pack to save it here.</p>';wireGrid(body)}}
+ if(tab==='saved'){const lk=G('liked')||new Set(),it=[...lk].filter(k=>k[0]!=='s').map(k=>{try{const x=lookup(k);if(!x)return null;const arr=k[0]==='b'?BS():PS();return[k[0],x,arr.indexOf(x)]}catch(e){return null}}).filter(Boolean);
+  const ss=[...lk].filter(k=>k[0]==='s').map(k=>{try{return lookup(k)}catch(e){return null}}).filter(Boolean);
+  body.innerHTML=(it.length?grid(it):'')+(ss.length?'<h4 class="sd-sh">SAVED SAMPLES</h4>'+ss.map(x=>'<div class="sd-srow"><button class="sd-sp" data-sp="'+x.id+'" aria-label="Play">&#9654;</button><b>'+String(x.title).replace(/[<>&]/g,'')+'</b><span>'+(x.kind||'')+'</span><em>$'+Number(x.price).toFixed(2)+'</em></div>').join(''):'')||'<p class="sd-empty">Tap the heart on any beat, pack or crate sample to save it here.</p>';wireGrid(body);
+  body.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{try{playSample(lookup('s:'+b.dataset.sp))}catch(e){}})}}
 
 function buyList(o){return(OC&&OC.rd===false?'<p class="sd-empty">Re-downloads are switched off right now.</p>':'')+o.map(ord=>'<div class="sd-order"><div class="sd-date">'+new Date(ord.paid_at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})+'</div>'+ord.items.map(x=>{const f=findItem(x.title);return '<div class="sd-buy"><div class="sd-bc">'+(f?cover(f[1],f[0],f[2]):'')+'</div><div class="sd-bt"><b>'+esc(x.title)+'</b><span>'+(f?(f[0]==='p'?'Sample pack':'Beat'):'')+'</span></div>'+(x.available?'<button class="sd-dl" data-t="'+esc(ord.token)+'" data-i="'+x.i+'">Download</button>':'<em>—</em>')+'</div>'}).join('')+'</div>').join('')}
 function wireBuys(root){try{paintArt(root)}catch(e){}root.querySelectorAll('.sd-dl').forEach(d=>d.onclick=async()=>{d.disabled=true;d.textContent='…';
@@ -64,3 +66,4 @@ const orig=G('acctRender');if(typeof orig==='function'){window.acctRender=async 
 window.MZDashOpen=async()=>{$('#acct').classList.add('on');await window.acctRender()};
 setTimeout(counts,3000);setInterval(counts,60000);
 })();
+(function(){const c=document.createElement('style');c.textContent='.sd-sh{font:800 10px Inter,sans-serif;letter-spacing:.22em;color:#e0242f;margin:20px 0 8px}.sd-srow{display:grid;grid-template-columns:34px 1fr auto auto;gap:12px;align-items:center;padding:9px 10px;border:1px solid #1d1d20;margin-bottom:4px}.sd-srow b{font:700 13px Inter,sans-serif;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sd-srow span{font:600 11px Inter,sans-serif;color:#8a8a90}.sd-srow em{font:400 16px Anton,sans-serif;color:#e0242f;font-style:normal}.sd-sp{width:30px;height:30px;border-radius:50%;border:0;background:#fff;color:#000;cursor:pointer;font-size:11px}';document.head.appendChild(c)})();

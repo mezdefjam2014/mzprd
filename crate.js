@@ -34,7 +34,8 @@ function shell(){host.innerHTML=`<div class="cr">
   </div>
   </div>
 </div>`}
-function sleeves(){const R=host.querySelector('#crRecs');R.innerHTML=items.map((x,i)=>`<div class="sl" data-i="${i}"><div class="sl-in"><div class="sl-print"><span class="sl-no">MZ-${String(i+1).padStart(3,'0')}</span><b>${esc(x.title)}</b><span class="sl-sub">${esc(x.kind)} &middot; ${x.bpm} BPM &middot; ${esc(x.key)}</span></div><div class="sl-wear"></div></div><div class="sl-vinyl"></div></div>`).join('');
+function sleeves(){const R=host.querySelector('#crRecs');R.innerHTML=items.map((x,i)=>`<div class="sl" data-i="${i}"><div class="sl-in"><div class="sl-print"><span class="sl-no">MZ-${String(i+1).padStart(3,'0')}</span><div class="sl-row"><b>${esc(x.title)}</b>${x.demo?'':`<button class="sl-lk${G(()=>liked.has('s:'+x.id),false)?' on':''}" data-lk="${esc(x.id)}" aria-label="Save ${esc(x.title)}"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 5.3 3.2 1.7-2 3.2-3.2 5.3-3.2 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg></button>`}</div><span class="sl-sub">${esc(x.kind)} &middot; ${x.bpm} BPM &middot; ${esc(x.key)}</span></div><div class="sl-wear"></div></div><div class="sl-vinyl"></div></div>`).join('');
+ R.querySelectorAll('.sl-lk').forEach(h=>h.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();G(()=>toggleLike('s:'+h.dataset.lk),0);syncHearts()}));
  R.querySelectorAll('.sl').forEach(s=>s.addEventListener('click',()=>{const i=+s.dataset.i;if(i!==cur){go(i);return}load(i)}));host.querySelector('#crCount').textContent=items.length+' RECORDS'}
 
 /* ---------- crate flipping ---------- */
@@ -68,6 +69,8 @@ function plSync(){if(!host)return;const x=items[deck],A=MA(),on=deck>=0&&A&&!A.p
  host.querySelector('#crPlT').textContent=x?x.title:'Pick a record';host.querySelector('#crPlS').textContent=x?x.kind+' / $'+x.price.toFixed(2):'Tap the front record in the crate';
  host.querySelector('#crPl').classList.toggle('on',!!on);if(clipC)clipC.refresh()}
 let clipC=null;
+function syncHearts(){if(!host)return;host.querySelectorAll('.sl-lk').forEach(h=>h.classList.toggle('on',G(()=>liked.has('s:'+h.dataset.lk),false)))}
+window.MZCrateHearts=syncHearts;
 function paint(){if(!host)return;host.querySelectorAll('.sl').forEach(s=>s.classList.toggle('playing',isOn(+s.dataset.i)));plSync();const b=host.querySelector('#crPlay');if(b)b.classList.toggle('on',isOn(cur))}
 {const A=MA();if(A)['play','pause','ended','emptied'].forEach(ev=>A.addEventListener(ev,paint))}
 window.MZCratePlaying=()=>{const x=items[deck],A=MA();return !!(x&&A&&A.src===x.audio)};
@@ -116,7 +119,9 @@ body.on-crate #bar{display:none!important}body.on-crate #mCart{bottom:16px!impor
 .sl{position:absolute;inset:0;transform-origin:50% 100%;transition:transform .55s cubic-bezier(.22,.8,.2,1),opacity .4s,filter .4s;will-change:transform;cursor:pointer}
 .sl-in{position:absolute;inset:0;background:url(crate-sleeve.jpg) center/cover,radial-gradient(circle at 50% 50%,#050505 0 18%,#0b0b0c 19% 22%,#070707 23% 60%,rgba(200,200,205,.10) 61% 63%,#080808 64%),#0a0a0b;overflow:hidden;border-radius:2px;box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 -10px 30px rgba(0,0,0,.6)}.sl-in img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 .sl-wear{position:absolute;inset:0;background:radial-gradient(circle at 70% 20%,rgba(255,255,255,.1),transparent 40%),linear-gradient(180deg,rgba(255,255,255,.04),rgba(0,0,0,.25));pointer-events:none}
-.sl-print{position:absolute;left:8%;right:8%;top:7%;display:flex;flex-direction:column;gap:4px;color:#ece6da;text-shadow:0 1px 0 rgba(0,0,0,.6);mix-blend-mode:screen;opacity:.92}.sl-print b{font:400 clamp(16px,2.1vw,24px)/1 Anton,sans-serif;letter-spacing:.06em;text-transform:uppercase}.sl-no{font:700 10px 'Courier New',monospace;letter-spacing:.2em;color:#c9c2b4}.sl-sub{font:700 9px 'Courier New',monospace;letter-spacing:.14em;color:#a8a296;text-transform:uppercase}
+.sl-print{position:absolute;left:8%;right:8%;top:7%;display:flex;flex-direction:column;gap:4px;color:#ece6da;text-shadow:0 1px 0 rgba(0,0,0,.6);opacity:.95;z-index:2}.sl-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.sl-row b{flex:1;min-width:0}
+.sl-lk{flex:none;width:34px;height:34px;margin:-4px -4px 0 0;border:0;background:none;cursor:pointer;display:grid;place-items:center;pointer-events:auto;mix-blend-mode:normal;opacity:1}.sl-lk svg{width:22px;height:22px;fill:none;stroke:#ece6da;stroke-width:1.8;transition:transform .2s,fill .2s,stroke .2s;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7))}.sl-lk:hover svg{transform:scale(1.12)}.sl-lk.on svg{fill:#e0242f;stroke:#e0242f}.sl-lk.on svg{animation:slPop .35s ease}@keyframes slPop{50%{transform:scale(1.3)}}
+.sl-print b{font:400 clamp(16px,2.1vw,24px)/1 Anton,sans-serif;letter-spacing:.06em;text-transform:uppercase}.sl-no{font:700 10px 'Courier New',monospace;letter-spacing:.2em;color:#c9c2b4}.sl-sub{font:700 9px 'Courier New',monospace;letter-spacing:.14em;color:#a8a296;text-transform:uppercase}
 .sl-tag{display:none;position:absolute;left:10px;top:10px;font:800 9px Inter;letter-spacing:.16em;color:#fff;background:rgba(0,0,0,.6);padding:5px 7px;text-transform:uppercase;opacity:0;transition:opacity .3s}
 .sl.front .sl-tag{opacity:1}.sl-vinyl{position:absolute;top:4%;left:6%;width:88%;aspect-ratio:1;border-radius:50%;background:repeating-radial-gradient(circle,#111 0 1px,#1c1c1e 1px 2px);z-index:-1;transition:transform .55s cubic-bezier(.22,.8,.2,1)}
 .sl.front .sl-vinyl{transform:translateY(-14%)}.sl.front .sl-in{box-shadow:0 0 0 1px rgba(224,36,47,.55),0 20px 50px rgba(0,0,0,.7),0 0 40px rgba(224,36,47,.2)}
