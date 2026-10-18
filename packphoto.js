@@ -151,7 +151,7 @@ function P2(x,W,H,X,fn){const K=wideKit(x,W,H,X),k=K.k,L=W>H;
  const fill=(img,ax,ay,dark)=>{if(!img)return;const s=Math.max(W/img.width,H/img.height);photo(img,W/2+(ax||0)*(img.width*s-W)/2,H/2+(ay||0)*(img.height*s-H)/2,s,dark)};
  const shade=()=>{if(L){const g=x.createLinearGradient(0,0,W*.55,0);g.addColorStop(0,'rgba(6,6,8,.92)');g.addColorStop(1,'rgba(6,6,8,0)');x.fillStyle=g;x.fillRect(0,0,W,H)}else{const g=x.createLinearGradient(0,H*.55,0,H);g.addColorStop(0,'rgba(6,6,8,0)');g.addColorStop(.35,'rgba(6,6,8,.9)');g.addColorStop(1,'rgba(6,6,8,.98)');x.fillStyle=g;x.fillRect(0,0,W,H)}};
  const text=()=>{if(L){K.kick(W*.05,H*.26);const y=K.title(W*.05,H*.26+130*k,{maxW:W*.42,size:150});K.tag(W*.05,y+34*k);K.foot(W*.05)}
-  else{const y0=H*.7;K.kick(W/2,y0,null,'center');const y=K.title(W/2,y0+130*k,{align:'center',maxW:W*.88,size:170,lines:2});K.tag(W/2,y+34*k,{align:'center'});K.foot(W/2,null,'center')}};
+  else{const y0=H*.7;K.kick(W/2,y0-80*k,null,'center');const y=K.title(W/2,y0+130*k,{align:'center',maxW:W*.88,size:170,lines:2});K.tag(W/2,y+34*k,{align:'center'});K.foot(W/2,null,'center')}};
  const shot=(img,cx,cy,s,sh)=>{if(!img)return;x.save();x.shadowColor='rgba(0,0,0,.75)';x.shadowBlur=(sh||50)*k;x.shadowOffsetY=18*k;x.drawImage(img,cx-img.width*s/2,cy-img.height*s/2,img.width*s,img.height*s);x.restore()};
  fn({K,k,L,photo,fill,shade,text,shot})}
 const PD=[
