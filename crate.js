@@ -148,7 +148,10 @@ body.on-crate #bar{display:none!important}body.on-crate #mCart{bottom:16px!impor
 .sl-print b{font:400 clamp(16px,2.1vw,24px)/1 Anton,sans-serif;letter-spacing:.06em;text-transform:uppercase}.sl-no{font:700 10px 'Courier New',monospace;letter-spacing:.2em;color:#c9c2b4}.sl-sub{font:700 9px 'Courier New',monospace;letter-spacing:.14em;color:#a8a296;text-transform:uppercase}
 .sl-tag{display:none;position:absolute;left:10px;top:10px;font:800 9px Inter;letter-spacing:.16em;color:#fff;background:rgba(0,0,0,.6);padding:5px 7px;text-transform:uppercase;opacity:0;transition:opacity .3s}
 .sl.front .sl-tag{opacity:1}.sl-vinyl{position:absolute;top:4%;left:6%;width:88%;aspect-ratio:1;border-radius:50%;background:url(crate-record.webp?v=1) center/contain no-repeat;z-index:-1;transition:transform .55s cubic-bezier(.22,.8,.2,1);filter:drop-shadow(0 4px 10px rgba(0,0,0,.6))}
-.sl.front .sl-vinyl{transform:translateY(-26%)}.sl.front .sl-in{box-shadow:0 0 0 1px rgba(224,36,47,.55),0 20px 50px rgba(0,0,0,.7),0 0 40px rgba(224,36,47,.2)}
+.sl-vinyl{--ty:0%;transform:translateY(var(--ty))}.sl.front .sl-vinyl{--ty:-26%}
+.sl.playing .sl-vinyl{--ty:-26%;animation:vSpin 1.8s linear infinite}.sl.front.playing .sl-vinyl{--ty:-40%}
+@keyframes vSpin{from{transform:translateY(var(--ty)) rotate(0deg)}to{transform:translateY(var(--ty)) rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.sl.playing .sl-vinyl{animation:none}}.sl.front .sl-in{box-shadow:0 0 0 1px rgba(224,36,47,.55),0 20px 50px rgba(0,0,0,.7),0 0 40px rgba(224,36,47,.2)}
 
 
 /* the crate: pine slats like a real produce crate, graded for a dark room with warm light and a red bounce */
