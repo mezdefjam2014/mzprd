@@ -147,8 +147,8 @@ body.on-crate #bar{display:none!important}body.on-crate #mCart{bottom:16px!impor
 .sl-lk{flex:none;width:34px;height:34px;margin:-4px -4px 0 0;border:0;background:none;cursor:pointer;display:grid;place-items:center;pointer-events:auto;mix-blend-mode:normal;opacity:1}.sl-lk svg{width:22px;height:22px;fill:none;stroke:#ece6da;stroke-width:1.8;transition:transform .2s,fill .2s,stroke .2s;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7))}.sl-lk:hover svg{transform:scale(1.12)}.sl-lk.on svg{fill:#e0242f;stroke:#e0242f}.sl-lk.on svg{animation:slPop .35s ease}@keyframes slPop{50%{transform:scale(1.3)}}
 .sl-print b{font:400 clamp(16px,2.1vw,24px)/1 Anton,sans-serif;letter-spacing:.06em;text-transform:uppercase}.sl-no{font:700 10px 'Courier New',monospace;letter-spacing:.2em;color:#c9c2b4}.sl-sub{font:700 9px 'Courier New',monospace;letter-spacing:.14em;color:#a8a296;text-transform:uppercase}
 .sl-tag{display:none;position:absolute;left:10px;top:10px;font:800 9px Inter;letter-spacing:.16em;color:#fff;background:rgba(0,0,0,.6);padding:5px 7px;text-transform:uppercase;opacity:0;transition:opacity .3s}
-.sl.front .sl-tag{opacity:1}.sl-vinyl{position:absolute;top:4%;left:6%;width:88%;aspect-ratio:1;border-radius:50%;background:repeating-radial-gradient(circle,#111 0 1px,#1c1c1e 1px 2px);z-index:-1;transition:transform .55s cubic-bezier(.22,.8,.2,1)}
-.sl.front .sl-vinyl{transform:translateY(-14%)}.sl.front .sl-in{box-shadow:0 0 0 1px rgba(224,36,47,.55),0 20px 50px rgba(0,0,0,.7),0 0 40px rgba(224,36,47,.2)}
+.sl.front .sl-tag{opacity:1}.sl-vinyl{position:absolute;top:4%;left:6%;width:88%;aspect-ratio:1;border-radius:50%;background:url(crate-record.webp?v=1) center/contain no-repeat;z-index:-1;transition:transform .55s cubic-bezier(.22,.8,.2,1);filter:drop-shadow(0 4px 10px rgba(0,0,0,.6))}
+.sl.front .sl-vinyl{transform:translateY(-26%)}.sl.front .sl-in{box-shadow:0 0 0 1px rgba(224,36,47,.55),0 20px 50px rgba(0,0,0,.7),0 0 40px rgba(224,36,47,.2)}
 
 
 /* the crate: pine slats like a real produce crate, graded for a dark room with warm light and a red bounce */
