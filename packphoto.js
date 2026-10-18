@@ -144,7 +144,7 @@ T.push(
 );
 /* PHOTO SET 2 (your own photos, cut out): studio desk, MPC One, keys, speakers, DAW blur, mixer art, channel rack,
    floating windows, waveform strip, MZPRD logo. Packs + single samples only. Each works in 16:9 and 9:16. */
-const A2={},F2={desk:'desk.jpg',mpc:'mpc.webp',keys:'keys.webp',speaker:'speaker.webp',dawblur:'dawblur.jpg',mixer:'mixer.jpg',rack:'rack.jpg',floaty:'floaty.webp',wave:'wave.jpg',logo:'logo.png'};let boot2=null;
+const A2={},F2={desk:'desk.jpg',mpc:'mpc.webp',keys:'keys.webp',speaker:'speaker.webp',dawblur:'dawblur.jpg',mixer:'mixer.jpg',rack:'rack.jpg',floaty:'floaty.webp',wave:'wave.jpg',logo:'logo.png',broken:'../pk3/broken.webp',halfrec:'../pk3/halfrec.webp',sleeve:'../pk3/sleeve.webp',stack:'../pk3/stack.webp',nano:'../pk3/ipodnano.webp',price:'../pk3/price.webp',crate:'../pk3/crate.webp',ipod:'../pk3/ipod.webp'};let boot2=null;
 function load2(){return boot2=boot2||Promise.all(Object.entries(F2).map(([n,f])=>new Promise(r=>{const i=new Image();i.onload=()=>{A2[n]=i;r()};i.onerror=()=>r();i.src=new URL('mpc/pk2/'+f+'?v=1',document.baseURI).href})))}
 function P2(x,W,H,X,fn){const K=wideKit(x,W,H,X),k=K.k,L=W>H;
  const photo=(img,cx,cy,s,dark)=>{if(!img)return;x.drawImage(img,cx-img.width*s/2,cy-img.height*s/2,img.width*s,img.height*s);if(dark){x.fillStyle='rgba(6,6,8,'+dark+')';x.fillRect(0,0,W,H)}};
@@ -237,7 +237,27 @@ const PD3=[
  /* DAW + RECORD: channel rack backdrop, record peeking from the cover */
  P3((x,W,H,X,{K,k,L,ax,ay,as,fill,shade,text})=>{fill(A2.rack,L?.3:0,0,.62);K.glowR(ax,ay,as);const s=as*.85;K.record(ax+s*.32,ay,s*.94,.4);K.cover(ax-s*.08,ay,s);shade();text()})
 ];
-const PD3N=['VINYL SPIN','SPOTLIGHT','TILE WALL','RED FRAME','POLAROID','MIRROR FLOOR','DIAGONAL SLASH','CINEMA','DUOTONE','RECORD FAN','MPC + RECORD','STUDIO PAIR','NEON RING','FILM STRIP','CRT','WAVE FLOOR','ZOOM CUT','GLASS CARD','TILT 3D','DAW + RECORD'];
+
+/* SET 4: your vinyl/iPod/crate photos, cut out. All kinds, both sizes. */
+PD3.push(
+ /* BROKEN RECORD */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text,shot})=>{K.bg(55,.28);K.glowR(ax,ay,as);const b=A2.broken;if(b)shot(b,ax+as*.22,ay-as*.02,as*1.05/b.width,40);K.cover(ax-as*.14,ay,as*.78,-.04);shade();text()}),
+ /* HALF RECORD out of the cover */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text,shot})=>{K.bg(55,.28);K.glowR(ax,ay,as);const s=as*.86,h=A2.halfrec;const cx=ax-s*.16;if(h){const sc=s*1.02/h.height;shot(h,cx+s*.34+h.width*sc/2,ay,sc,40)}K.cover(cx,ay,s);shade();text()}),
+ /* OLD SLEEVE with the cover leaning in front */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text,shot})=>{K.bg(55,.3);K.glowR(ax,ay,as);const sl=A2.sleeve;if(sl)shot(sl,ax+as*.12,ay-as*.06,as*1.05/sl.width,40);K.cover(ax-as*.22,ay+as*.12,as*.62,-.08);shade();text()}),
+ /* RECORD STACK with the cover on top */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text,shot})=>{K.bg(55,.3);K.glowR(ax,ay,as);const st=A2.stack;if(st)shot(st,ax,ay+as*.14,as*1.0/st.width,40);K.cover(ax,ay-as*.2,as*.6,.07);shade();text()}),
+ /* iPOD NANO next to the cover */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text,shot})=>{K.bg(55,.28);K.glowR(ax,ay,as);K.cover(ax-as*.14,ay,as*.8);const n=A2.nano;if(n)shot(n,ax+as*.38,ay+as*.12,as*.85/n.height,40);shade();text()}),
+ /* PRICE TAG stuck on the cover */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text,shot})=>{K.bg(55,.28);K.glowR(ax,ay,as);K.cover(ax,ay,as*.88,.03);const pr=A2.price;if(pr){x.save();x.translate(ax+as*.3,ay+as*.36);x.rotate(-.12);shot(pr,0,0,as*.48/pr.width,20);x.restore()}shade();text()}),
+ /* MILK CRATE: the cover rising out of the crate */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text,shot})=>{K.bg(55,.3);K.glowR(ax,ay,as);const c=A2.crate,cw=as*.95;if(c){const sc=cw/c.width,ch=c.height*sc,top=ay+as*.5-ch;K.cover(ax+cw*.06,top+ch*.05,as*.6,.05);shot(c,ax,top+ch/2,sc,40)}else K.cover(ax,ay,as*.8);shade();text()}),
+ /* iPOD CLASSIC: the cover on its screen */
+ P3((x,W,H,X,{K,k,ax,ay,as,cv,shade,text,shot})=>{K.bg(55,.28);K.glowR(ax,ay,as);const ip=A2.ipod;if(ip){const sc=as*1.3/ip.height,w=ip.width*sc,h=ip.height*sc,ox=ax-w/2,oy=ay-h/2;coverIn(x,cv,ox+w*.5,oy+h*.235,w*.88,h*.4);shot(ip,ax,ay,sc,50)}shade();text()})
+);
+const PD3N=['VINYL SPIN','SPOTLIGHT','TILE WALL','RED FRAME','POLAROID','MIRROR FLOOR','DIAGONAL SLASH','CINEMA','DUOTONE','RECORD FAN','MPC + RECORD','STUDIO PAIR','NEON RING','FILM STRIP','CRT','WAVE FLOOR','ZOOM CUT','GLASS CARD','TILT 3D','DAW + RECORD','BROKEN RECORD','HALF RECORD','OLD SLEEVE','RECORD STACK','IPOD NANO','PRICE TAG','MILK CRATE','IPOD CLASSIC'];
 PD3.forEach((fn,j)=>T.push({n:PD3N[j],photo3:1,f(x,W,H,k0,X){fn(x,W,H,X)}}));
 const BEAT_T=T.filter(t=>!t.photo2);
 function make(i,W,H,X){const c=cvs(W,H);c.ready=load().then(()=>load2()).then(()=>recImg()).then(r=>{RECIMG=r;CURLABEL=X.label||'SAMPLE PACK';const k=W/1280,x=c.getContext('2d'),XX={beat:X.kind==='beats',label:X.label||'SAMPLE PACK',name:String(X.title||'SAMPLE PACK').toUpperCase(),cover:X.cover&&(X.cover.naturalWidth||X.cover.width)?X.cover:null};XX.tone=tone(XX);
