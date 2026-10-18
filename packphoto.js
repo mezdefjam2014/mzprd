@@ -74,7 +74,27 @@ const T=[
  {n:'DAW CLIPS',f(x,W,H,k,X){bgDaw(x,W,H,k,.55);const S=360*k;x.save();x.shadowColor='rgba(224,36,47,.9)';x.shadowBlur=50*k;x.fillStyle='#000';x.fillRect(70*k,50*k,S,S);x.restore();x.drawImage(coverSq(X,700),70*k,50*k,S,S);
   if(A.clips){x.save();x.shadowColor='rgba(0,0,0,.7)';x.shadowBlur=30*k;x.drawImage(A.clips,520*k,110*k,738*.95*k,315*.95*k);x.restore()}arrow(x,475*k,240*k,160*k,.95);title(x,W,H,k,X.name,{bottom:70*k,w:1150*k,size:150*k,maxH:H*.3})}}
 ];
+/* 9:16 (Shorts / Reels / TikTok): a real vertical layout instead of cropping the 16:9 one */
+let REC=null;const recImg=()=>REC||(REC=new Promise(ok=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>ok(im);im.onerror=()=>ok(null);im.src=new URL('crate-record.webp?v=1',document.baseURI).href}));
+function portrait(x,W,H,XX,i,rec){const v=((i%3)+3)%3,cv=XX.cover,k=W/1080;
+ x.fillStyle='#08080a';x.fillRect(0,0,W,H);
+ if(cv){const s=Math.max(W/cv.width,H/cv.height)*1.15;x.save();try{x.filter='blur('+Math.round(46*k)+'px) brightness(.42) saturate(1.2)'}catch(e){}x.drawImage(cv,(W-cv.width*s)/2,(H-cv.height*s)/2,cv.width*s,cv.height*s);x.restore()}
+ let g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(8,8,10,.55)');g.addColorStop(.45,'rgba(8,8,10,.15)');g.addColorStop(.72,'rgba(8,8,10,.75)');g.addColorStop(1,'rgba(8,8,10,.96)');x.fillStyle=g;x.fillRect(0,0,W,H);
+ g=x.createRadialGradient(W/2,H*1.02,0,W/2,H*1.02,W*.9);g.addColorStop(0,'rgba(224,36,47,.35)');g.addColorStop(1,'rgba(224,36,47,0)');x.fillStyle=g;x.fillRect(0,0,W,H);
+ const sz=W*.7,cx=W/2,cy=H*.36;
+ if(rec&&v!==2){const rs=sz*.96,off=(v===0?1:-1)*sz*.34;x.save();x.shadowColor='rgba(0,0,0,.7)';x.shadowBlur=50*k;x.translate(cx+off,cy);x.rotate((v===0?1:-1)*.5);x.drawImage(rec,-rs/2,-rs/2,rs,rs);x.restore()}
+ x.save();x.translate(cx-(v===0?sz*.08:v===1?-sz*.08:0),cy);if(v===2)x.rotate(-.05);x.shadowColor='rgba(0,0,0,.75)';x.shadowBlur=70*k;x.shadowOffsetY=30*k;
+ if(cv)x.drawImage(cv,-sz/2,-sz/2,sz,sz);else{x.fillStyle='#1a1a1e';x.fillRect(-sz/2,-sz/2,sz,sz)}x.shadowColor='transparent';x.strokeStyle='rgba(255,255,255,.12)';x.lineWidth=2*k;x.strokeRect(-sz/2,-sz/2,sz,sz);x.restore();
+ x.textAlign='center';x.textBaseline='alphabetic';x.fillStyle=RED;x.font='800 '+Math.round(34*k)+'px '+B;x.letterSpacing=Math.round(10*k)+'px';
+ x.fillText('NEW SAMPLE PACK',W/2,H*.075);x.letterSpacing='0px';
+ const name=XX.name.replace(/\s*SAMPLE PACK\s*$/,'')||XX.name,words=name.split(/\s+/),maxW=W*.86;let fs=Math.round(210*k),lines;
+ const wrap=()=>{x.font=fs+'px '+F;lines=[];let cur='';for(const w of words){const t=cur?cur+' '+w:w;if(x.measureText(t).width>maxW&&cur){lines.push(cur);cur=w}else cur=t}if(cur)lines.push(cur)};
+ wrap();while((lines.length>3||Math.max(...lines.map(l=>x.measureText(l).width))>maxW)&&fs>70*k){fs-=6*k;wrap()}
+ let y=H*.665+fs*.82;x.fillStyle='#fff';x.shadowColor='rgba(0,0,0,.6)';x.shadowBlur=24*k;for(const l of lines){x.fillText(l,W/2,y);y+=fs*.92}x.shadowBlur=0;
+ const tag='SAMPLE PACK';x.font='800 '+Math.round(38*k)+'px '+B;x.letterSpacing=Math.round(8*k)+'px';const tw=x.measureText(tag).width+70*k,th=74*k,ty=y-fs*.92+48*k;
+ x.fillStyle=RED;x.fillRect(W/2-tw/2,ty,tw,th);x.fillStyle='#fff';x.fillText(tag,W/2,ty+th*.66);
+ x.fillStyle='rgba(255,255,255,.75)';x.font='700 '+Math.round(30*k)+'px '+B;x.letterSpacing=Math.round(8*k)+'px';x.fillText('MZPRD.COM',W/2,H*.955);x.letterSpacing='0px'}
 function make(i,W,H,X){const c=cvs(W,H);c.ready=load().then(()=>{const k=W/1280,x=c.getContext('2d'),XX={name:String(X.title||'SAMPLE PACK').toUpperCase(),cover:X.cover&&(X.cover.naturalWidth||X.cover.width)?X.cover:null};XX.tone=tone(XX);
-  const t=T[((i%T.length)+T.length)%T.length];if(Math.abs(W/H-16/9)<.02)t.f(x,W,H,k,XX);else{const o=cvs(1280,720);t.f(o.getContext('2d'),1280,720,1,XX);x.fillStyle='#08080a';x.fillRect(0,0,W,H);const s=Math.max(W/1280,H/720);x.drawImage(o,(W-1280*s)/2,(H-720*s)/2,1280*s,720*s)}return c}).catch(e=>{console.warn(e);return c});return c}
+  const t=T[((i%T.length)+T.length)%T.length];if(Math.abs(W/H-16/9)<.02)t.f(x,W,H,k,XX);else if(H>W*1.2)return recImg().then(rec=>{portrait(x,W,H,XX,i,rec);return c});else{const o=cvs(1280,720);t.f(o.getContext('2d'),1280,720,1,XX);x.fillStyle='#08080a';x.fillRect(0,0,W,H);const s=Math.max(W/1280,H/720);x.drawImage(o,(W-1280*s)/2,(H-720*s)/2,1280*s,720*s)}return c}).catch(e=>{console.warn(e);return c});return c}
 window.MZPackPhoto={make,load,count:T.length,names:T.map(t=>t.n)};
 })();
