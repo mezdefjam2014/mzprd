@@ -109,7 +109,7 @@ function html(){
  return `<div class="sg">
  <div>
   <div class="pn"><h4>1. SELECT ITEM</h4>
-   <div class="seg"><button data-k="beats" class="on">BEATS</button><button data-k="packs">PACKS</button></div>
+   <div class="seg"><button data-k="beats" class="on">BEATS</button><button data-k="packs">PACKS</button><button data-k="samples">SAMPLES</button></div>
    <div class="il" id="sl"></div>
    <h4>2. COVER ART</h4>
    <input type="file" id="sCov" accept="image/*"><div class="msg" id="sCovM"></div>
@@ -271,7 +271,7 @@ function frame(cv,t,dur){
 }
 let ec=null,heroImg=null;
 function sellCard(c,W,H,tt,ecd){
- const land=W>H,k=land?H/1080:W/1080,it=S.item||{},isPack=S.kind==='packs'||it._k==='packs',ease=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),3),fi=ease(tt/.6);
+ const land=W>H,k=land?H/1080:W/1080,it=S.item||{},isSmp=S.kind==='samples'||it._k==='samples',isPack=S.kind==='packs'||it._k==='packs'||isSmp,ease=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),3),fi=ease(tt/.6);
  const F="Anton, Impact, 'Arial Narrow Bold', sans-serif",B="Inter, 'Helvetica Neue', Arial, sans-serif";
  c.save();c.globalAlpha=fi;c.fillStyle='#070708';c.fillRect(0,0,W,H);
  const g=c.createRadialGradient(W*.3,H*.5,0,W*.3,H*.5,W*.6);g.addColorStop(0,'rgba(224,36,47,.16)');g.addColorStop(1,'rgba(224,36,47,0)');c.fillStyle=g;c.fillRect(0,0,W,H);
@@ -280,11 +280,11 @@ function sellCard(c,W,H,tt,ecd){
  const tx=land?W*.53:W*.08,mw=land?W*.4:W*.84;let y=land?H*.27:H*.6;
  const line=(d,fn)=>{const a=ease((tt-d)/.5);if(a<=0)return;c.save();c.globalAlpha=fi*a;c.translate((1-a)*40*k,0);fn();c.restore()};
  c.textBaseline='top';c.textAlign='left';
- line(.35,()=>{c.fillStyle='#e0242f';c.fillRect(tx,y,6*k,26*k);c.font=`800 ${22*k}px ${B}`;c.fillStyle='#e0242f';c.fillText(isPack?'GET THIS PACK':'LICENSE THIS BEAT',tx+18*k,y+2*k)});y+=50*k;
+ line(.35,()=>{c.fillStyle='#e0242f';c.fillRect(tx,y,6*k,26*k);c.font=`800 ${22*k}px ${B}`;c.fillStyle='#e0242f';c.fillText(isSmp?'GET THIS SAMPLE':isPack?'GET THIS PACK':'LICENSE THIS BEAT',tx+18*k,y+2*k)});y+=50*k;
  const title=String(it.title||'').toUpperCase();let ts=110*k;c.font=`${ts}px ${F}`;while(c.measureText(title).width>mw&&ts>40*k){ts-=4*k;c.font=`${ts}px ${F}`}
  line(.5,()=>{c.font=`${ts}px ${F}`;c.fillStyle='#fff';c.fillText(title,tx,y)});y+=ts*1.08;
  const price=Number(it.price);if(price>0){line(.7,()=>{c.font=`${30*k}px ${F}`;c.fillStyle='#9a9aa2';c.fillText(isPack?'':'LEASES FROM',tx,y+12*k);const w=isPack?0:c.measureText('LEASES FROM ').width;c.font=`${64*k}px ${F}`;c.fillStyle='#fff';c.fillText('$'+price.toFixed(price%1?2:0),tx+w,y)});y+=86*k}
- line(.85,()=>{c.font=`700 ${24*k}px ${B}`;c.fillStyle='#c9c9cf';c.fillText(isPack?'ROYALTY-FREE  ·  INSTANT DOWNLOAD':'INSTANT DOWNLOAD  ·  FULL QUALITY FILES',tx,y)});y+=64*k;
+ line(.85,()=>{c.font=`700 ${24*k}px ${B}`;c.fillStyle='#c9c9cf';c.fillText(isSmp?'ROYALTY-FREE  ·  CRATE DIG ON MZPRD.COM':isPack?'ROYALTY-FREE  ·  INSTANT DOWNLOAD':'INSTANT DOWNLOAD  ·  FULL QUALITY FILES',tx,y)});y+=64*k;
  line(1.05,()=>{const bw=Math.min(mw,560*k),bh=92*k,pul=.5+.5*Math.sin(tt*4);c.fillStyle='#e0242f';c.fillRect(tx,y,bw,bh);c.strokeStyle='rgba(224,36,47,'+(.5*pul)+')';c.lineWidth=3*k;c.strokeRect(tx-8*k*pul,y-8*k*pul,bw+16*k*pul,bh+16*k*pul);
   c.font=`${46*k}px ${F}`;c.fillStyle='#fff';c.textBaseline='middle';c.fillText('MZPRD.COM',tx+28*k,y+bh/2+2*k);c.textAlign='right';c.font=`800 ${18*k}px ${B}`;c.fillText('LINK IN DESCRIPTION ↓',tx+bw-24*k,y+bh/2+2*k)});y+=130*k;
  line(1.3,()=>{c.textBaseline='top';c.textAlign='left';c.font=`700 ${20*k}px ${B}`;c.fillStyle='#6f6f76';c.fillText('SUBSCRIBE FOR NEW BEATS EVERY WEEK',tx,y)});
@@ -399,7 +399,7 @@ function audioCtx(){
  A={ctx,an,out,rec,playing:false,src:null,t0:0};return A;
 }
 async function decode(arr){const a=audioCtx();return await a.ctx.decodeAudioData(arr)}
-async function loadPreview(){
+async function loadPreview(){if(S.item&&window.MZPrime)try{await MZPrime([S.item.preview_path])}catch(e){}
  const it=S.item;S.buf=null;msg('');setAudM('');
  if(!it||!it.preview_path){setAudM('This item has no preview audio. Pick "my full beat file" and choose a file.');redraw();return}
  try{setAudM('Loading preview...');const r=await fetch(pub(it.preview_path));if(!r.ok)throw 0;S.buf=await decode(await r.arrayBuffer());S.srcLabel='preview';setAudM('Preview loaded ('+fmt(S.buf.duration)+').')}
@@ -537,11 +537,21 @@ async function renderRT(){
 }
 
 /* ---------- UI ---------- */
+/* a crate-style cover for a single sample: the worn sleeve with its name printed on it, the red-label record sliding out */
+let SMPIMG=null;const smpImgs=()=>SMPIMG||(SMPIMG=Promise.all(['crate-sleeve.jpg','crate-record.webp?v=1'].map(n=>new Promise(ok=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>ok(im);im.onerror=()=>ok(null);im.src=BASEPATH+n}))));
+async function sampleCover(it){const [sl,rc]=await smpImgs(),N=1024,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');
+ x.fillStyle='#0a0a0b';x.fillRect(0,0,N,N);const g=x.createRadialGradient(N*.7,N*.5,0,N*.7,N*.5,N*.7);g.addColorStop(0,'rgba(224,36,47,.28)');g.addColorStop(1,'rgba(224,36,47,0)');x.fillStyle=g;x.fillRect(0,0,N,N);
+ const sz=N*.74,sx=N*.08,sy=(N-sz)/2;if(rc){x.save();x.shadowColor='rgba(0,0,0,.7)';x.shadowBlur=40;x.translate(sx+sz*.78,N/2);x.rotate(.4);x.drawImage(rc,-sz*.48,-sz*.48,sz*.96,sz*.96);x.restore()}
+ x.save();x.shadowColor='rgba(0,0,0,.8)';x.shadowBlur=50;x.shadowOffsetY=18;if(sl)x.drawImage(sl,sx,sy,sz,sz);else{x.fillStyle='#111';x.fillRect(sx,sy,sz,sz)}x.restore();
+ x.fillStyle='#ece6da';x.textBaseline='alphabetic';x.font="700 26px 'Courier New',monospace";x.fillText('MZPRD · SINGLE SAMPLE',sx+50,sy+80);
+ let fs=96;const t=String(it.title||'SAMPLE').toUpperCase();x.font=fs+"px Anton,Impact,sans-serif";while(x.measureText(t).width>sz-100&&fs>40){fs-=4;x.font=fs+"px Anton,Impact,sans-serif"}x.fillText(t,sx+50,sy+80+fs+10);
+ x.font="700 24px 'Courier New',monospace";x.fillStyle='#a8a296';x.fillText([it.kind,it.bpm&&it.bpm+' BPM',it.musical_key].filter(Boolean).join('  ·  ').toUpperCase(),sx+50,sy+80+fs+56);
+ return c.toDataURL('image/jpeg',.92)}
 function setItem(it){
  S.item=it;S.cover=null;S.bd=null;S.buf=null;
- const isB=S.kind==='beats',info=[];if(it.bpm)info.push(it.bpm+' BPM');if(it.musical_key)info.push(it.musical_key);
- S.tx.title.text=it.title||'';S.tx.info.text=info.length?info.join('  |  '):(isB?'':'SAMPLE PACK');S.tx.intro.text=isB?'NEW BEAT':'NEW SAMPLE PACK';
- buildTx();ytText(true);loadCover(it.cover_path?pub(it.cover_path):(S.kind==='beats'?stockCover(it.title,1024):''));
+ const isB=S.kind==='beats',isS=S.kind==='samples',info=[];if(isS&&it.kind)info.push(it.kind);if(it.bpm)info.push(it.bpm+' BPM');if(it.musical_key)info.push(it.musical_key);
+ S.tx.title.text=it.title||'';S.tx.info.text=info.length?info.join('  |  '):(isB?'':isS?'SINGLE SAMPLE':'SAMPLE PACK');S.tx.intro.text=isB?'NEW BEAT':isS?'NEW SAMPLE':'NEW SAMPLE PACK';
+ buildTx();ytText(true);if(isS)sampleCover(it).then(u=>{if(S.item===it)loadCover(u)});else loadCover(it.cover_path?pub(it.cover_path):(S.kind==='beats'?stockCover(it.title,1024):''));
  if(S.src==='preview')loadPreview();else{S.buf=null;redraw()}
  document.querySelectorAll('#studio .it').forEach(e=>e.classList.toggle('on',e.dataset.id===String(it.id)));
 }
@@ -561,7 +571,7 @@ function ytCtx(){
   art=(($s('#yA')||{}).value||'').trim(),mood=(($s('#yM')||{}).value||'').trim()||tags[1]||'Hard',genre=tags[0]||'Hip Hop',
   bpm=it.bpm?it.bpm+' BPM':'',key=it.musical_key||'',info=[bpm,key].filter(Boolean).join(' '),
   A=art?art+' Type Beat':mood+' '+genre+' Type Beat';
- return{it,isB,tags,art,mood,genre,bpm,key,info,A,T:it.title||'',url:SITE+'/'+(isB?'beat':'pack')+'/'+(it.slug||String(it.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||it.id)+'/',Y:YEAR,gtag:genre.toLowerCase().replace(/[^a-z0-9]/g,'')};
+ return{it,isB,tags,art,mood,genre,bpm,key,info,A,T:it.title||'',url:S.kind==='samples'?SITE+'/crate-dig/':SITE+'/'+(isB?'beat':'pack')+'/'+(it.slug||String(it.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||it.id)+'/',Y:YEAR,gtag:genre.toLowerCase().replace(/[^a-z0-9]/g,'')};
 }
 function cut(str,n){str=str.replace(/\s+/g,' ').replace(/\s+\|\s+\|/g,' |').replace(/\(\s*\)/g,'').trim();if(str.length<=n)return str;const c=str.slice(0,n),i=c.lastIndexOf(' ');return(i>n*.6?c.slice(0,i):c).replace(/[|\-,(\s]+$/,'')}
 const TITLES_B=[
@@ -740,15 +750,15 @@ function thDl(i,f){
 async function thAll(){for(const i of TH.sel){await thDl(i,'16:9');await new Promise(r=>setTimeout(r,350));await thDl(i,'9:16');await new Promise(r=>setTimeout(r,350))}}
 function renderList(){
  const l=$s('#sl'),rows=S.items.filter(i=>i._k===S.kind);
- l.innerHTML=rows.length?rows.map(r=>`<div class="it" data-id="${e2(r.id)}">${r.cover_path?`<img src="${e2(pub(r.cover_path))}" alt="">`:(r._k==='beats'?`<img src="${e2(stockCover(r.title,96))}" alt="">`:'<i></i>')}<div><b>${e2(r.title)}</b><span>${[r.bpm&&r.bpm+' BPM',r.musical_key,r.preview_path?'':'NO PREVIEW'].filter(Boolean).join(' / ')||'&nbsp;'}</span></div></div>`).join(''):'<div class="msg" style="padding:12px">Nothing here yet.</div>';
+ l.innerHTML=rows.length?rows.map(r=>`<div class="it" data-id="${e2(r.id)}">${r._k==='samples'?`<img src="${e2(BASEPATH+'crate-sleeve.jpg')}" alt="">`:r.cover_path?`<img src="${e2(pub(r.cover_path))}" alt="">`:(r._k==='beats'?`<img src="${e2(stockCover(r.title,96))}" alt="">`:'<i></i>')}<div><b>${e2(r.title)}</b><span>${[r.bpm&&r.bpm+' BPM',r.musical_key,r.preview_path?'':'NO PREVIEW'].filter(Boolean).join(' / ')||'&nbsp;'}</span></div></div>`).join(''):'<div class="msg" style="padding:12px">Nothing here yet.</div>';
  l.querySelectorAll('.it').forEach(e=>e.onclick=()=>{stopPlay();setItem(rows.find(r=>String(r.id)===e.dataset.id))});
 }
 function syncUi(){const p=S.fmt==='9:16',mx=$s('#sMax');if(!mx)return;
  mx.max=p?SHORT_MAX:'';mx.placeholder=p?SHORT_DEF+' (max '+SHORT_MAX+')':(S.buf?'auto ('+Math.round(S.buf.duration)+'s)':'auto');
  $s('#sMaxL').textContent=p?'LENGTH IN SECONDS (SHORTS: 60 DEFAULT, 120 MAX)':'MAX LENGTH IN SECONDS (empty = whole audio)'}
 async function loadItems(){
- const [b,p]=await Promise.all([sb.from('beats').select('*').order('created_at',{ascending:false}),sb.from('packs').select('*').order('created_at',{ascending:false})]);
- S.items=[...(b.data||[]).map(x=>({...x,_k:'beats'})),...(p.data||[]).map(x=>({...x,_k:'packs'}))];
+ const [b,p,sm]=await Promise.all([sb.from('beats').select('*').order('created_at',{ascending:false}),sb.from('packs').select('*').order('created_at',{ascending:false}),sb.from('samples').select('*').order('created_at',{ascending:false})]);
+ S.items=[...(b.data||[]).map(x=>({...x,_k:'beats'})),...(p.data||[]).map(x=>({...x,_k:'packs'})),...((sm&&sm.data)||[]).map(x=>({...x,_k:'samples'}))];
 }
 function wire(){
  const q=s=>$s(s);
