@@ -5,7 +5,7 @@
 'use strict';
 const RED='#e0242f',F="Anton, Impact, 'Arial Narrow Bold', sans-serif",B="Inter, 'Helvetica Neue', Arial, sans-serif";
 const A={},files=['box','cd','vinyl','tape1','tape2','sd','mpc','daw','clips','arrow'];let boot=null;
-function load(){return boot=boot||Promise.all(files.map(n=>new Promise(r=>{const i=new Image();i.onload=()=>{A[n]=i;r()};i.onerror=()=>r();i.src=new URL('mpc/pk/'+n+'.webp',document.baseURI).href})))}
+function load(){return boot=boot||Promise.all(files.map(n=>new Promise(r=>{const i=new Image();i.onload=()=>{A[n]=i;r()};i.onerror=()=>r();i.src=new URL('mpc/pk/'+n+'.webp?v=2',document.baseURI).href})))}
 const cvs=(w,h,fn)=>{const c=document.createElement('canvas');c.width=w;c.height=h;if(fn)fn(c.getContext('2d'),w,h);return c};
 function sq(img){const iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height,m=Math.min(iw,ih);return[(iw-m)/2,(ih-m)/2,m]}
 /* ---------- perspective warp: homography from the unit square onto a quad, drawn as many small affine triangles ---------- */
@@ -56,7 +56,7 @@ const T=[
   x.save();x.globalCompositeOperation='screen';const gl=x.createLinearGradient(m([243,22])[0],m([243,22])[1],m([553,640])[0],m([553,640])[1]);gl.addColorStop(0,'rgba(255,255,255,.22)');gl.addColorStop(.35,'rgba(255,255,255,0)');x.fillStyle=gl;x.beginPath();[[243,22],[553,72],[553,640],[243,693]].map(m).forEach((p,i)=>i?x.lineTo(...p):x.moveTo(...p));x.fill();x.restore();
   x.fillStyle='#07080a';const yb=m([0,700])[1];x.fillRect(0,yb,W,H-yb);arrow(x,650*k,330*k,230*k,-2.0);title(x,W,H,k,X.name,{bottom:70*k,w:640*k,size:130*k,maxH:H*.36})}},
  {n:'CD CASE',f(x,W,H,k,X){bgCover(x,W,H,k,X,.5);glow(x,920*k,360*k,420*k,.5);const s=.62*k,m=put(x,A.cd,610*k,50*k,s,{shadow:'rgba(0,0,0,.8)',blur:50*k});
-  const c=m([530,495]),r=395*s,h=150*s;x.save();x.beginPath();x.arc(c[0],c[1],r,0,6.283);x.arc(c[0],c[1],h,0,6.283,true);x.clip();x.drawImage(coverSq(X,900),c[0]-r,c[1]-r,r*2,r*2);x.restore();
+  const c=m([493,503]),r=357*s,h=142*s;x.save();x.beginPath();x.arc(c[0],c[1],r,0,6.283);x.arc(c[0],c[1],h,0,6.283,true);x.clip();x.drawImage(coverSq(X,900),c[0]-r,c[1]-r,r*2,r*2);x.restore();
   x.save();x.globalCompositeOperation='screen';x.globalAlpha=.45;x.drawImage(A.cd,610*k,50*k,A.cd.width*s,A.cd.height*s);x.restore();title(x,W,H,k,X.name,{w:540*k})}},
  {n:'VINYL',f(x,W,H,k,X){const g=x.createRadialGradient(W*.6,H*.55,0,W*.6,H*.55,W*.7);g.addColorStop(0,'#3b2a20');g.addColorStop(1,'#0b0806');x.fillStyle=g;x.fillRect(0,0,W,H);
   const S=440*k,sx=560*k,sy=200*k,vs=S*1.02/350;x.save();x.shadowColor='rgba(0,0,0,.7)';x.shadowBlur=30*k;x.drawImage(A.vinyl,sx+S*.42,sy+S/2-175*vs,350*vs,350*vs);x.restore();
