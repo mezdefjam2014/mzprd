@@ -77,7 +77,7 @@ const T=[
 /* 9:16 (Shorts / Reels / TikTok): a real vertical layout instead of cropping the 16:9 one */
 let REC=null;const recImg=()=>REC||(REC=new Promise(ok=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>ok(im);im.onerror=()=>ok(null);im.src=new URL('crate-record.webp?v=1',document.baseURI).href}));
 /* 8 vertical layouts; cards cycle through them (layout 4 uses the real product photos, so it varies again by photo) */
-function portrait(x,W,H,XX,i,rec){const nP=XX.beat?8:8+PD.length,LL=((i%nP)+nP)%nP;if(LL>=8){PD[LL-8](x,W,H,XX);return}const k=W/1080,cv=XX.cover,L=LL,name=(XX.name.replace(/\s*SAMPLE PACK\s*$/,'')||XX.name);
+function portrait(x,W,H,XX,i,rec){const PL=XX.beat?PD3:PD.concat(PD3),nP=8+PL.length,LL=((i%nP)+nP)%nP;if(LL>=8){PL[LL-8](x,W,H,XX);return}const k=W/1080,cv=XX.cover,L=LL,name=(XX.name.replace(/\s*SAMPLE PACK\s*$/,'')||XX.name);
  const bg=(blur,br)=>{x.fillStyle='#08080a';x.fillRect(0,0,W,H);if(cv){const s=Math.max(W/cv.width,H/cv.height)*1.12;x.save();try{x.filter='blur('+Math.round(blur*k)+'px) brightness('+br+') saturate(1.2)'}catch(e){}x.drawImage(cv,(W-cv.width*s)/2,(H-cv.height*s)/2,cv.width*s,cv.height*s);x.restore()}};
  const fade=(a,b,c)=>{const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(8,8,10,'+a+')');g.addColorStop(.5,'rgba(8,8,10,'+b+')');g.addColorStop(1,'rgba(8,8,10,'+c+')');x.fillStyle=g;x.fillRect(0,0,W,H)};
  const redGlow=(y)=>{const g=x.createRadialGradient(W/2,y,0,W/2,y,W*.9);g.addColorStop(0,'rgba(224,36,47,.38)');g.addColorStop(1,'rgba(224,36,47,0)');x.fillStyle=g;x.fillRect(0,0,W,H)};
@@ -189,7 +189,58 @@ const PD=[
 ];
 const PDN=['STUDIO DESK','MPC SCREEN','KEYS','SPEAKERS','DAW BLUR','MIXER','CHANNEL RACK','FLOATING WINDOWS','WAVEFORM','MZPRD LOGO'];
 const BASE_T=T.length;PD.forEach((fn,j)=>T.push({n:PDN[j],photo2:1,f(x,W,H,k0,X){fn(x,W,H,X)}}));
+
+/* SET 3: 20 more looks for packs, single samples AND beats. Art lives right (16:9) or top (9:16); text never shares that space. */
+const P3=fn=>(x,W,H,X)=>P2(x,W,H,X,o=>{const L=o.L,k=o.k;o.ax=L?W*.71:W/2;o.ay=L?H*.5:H*.31;o.as=L?H*.62:W*.66;o.cv=X.cover;fn(x,W,H,X,o)});
+const coverIn=(x,cv,cx,cy,w,h)=>{if(!cv){x.fillStyle='#1a1a1e';x.fillRect(cx-w/2,cy-h/2,w,h);return}const s=Math.max(w/cv.width,h/cv.height);x.save();x.beginPath();x.rect(cx-w/2,cy-h/2,w,h);x.clip();x.drawImage(cv,cx-cv.width*s/2,cy-cv.height*s/2,cv.width*s,cv.height*s);x.restore()};
+const PD3=[
+ /* VINYL SPIN: cover as the record label */
+ P3((x,W,H,X,{K,k,ax,ay,as,cv,shade,text})=>{K.bg(60,.25);K.glowR(ax,ay,as);const rs=as*1.25;K.record(ax,ay,rs,.3);if(cv){const ls=rs*.36;x.save();x.beginPath();x.arc(ax,ay,ls/2,0,6.283);x.clip();x.drawImage(cv,ax-ls/2,ay-ls/2,ls,ls);x.restore();x.fillStyle='#0b0b0d';x.beginPath();x.arc(ax,ay,6*k,0,6.283);x.fill()}shade();text()}),
+ /* SPOTLIGHT: one hard light from above */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text})=>{x.fillStyle='#050506';x.fillRect(0,0,W,H);x.save();const g=x.createLinearGradient(0,0,0,ay+as*.7);g.addColorStop(0,'rgba(255,240,225,.28)');g.addColorStop(1,'rgba(255,240,225,0)');x.fillStyle=g;x.beginPath();x.moveTo(ax-as*.12,0);x.lineTo(ax+as*.12,0);x.lineTo(ax+as*.8,ay+as*.7);x.lineTo(ax-as*.8,ay+as*.7);x.fill();x.restore();
+  const f=x.createRadialGradient(ax,ay+as*.62,0,ax,ay+as*.62,as*.8);f.addColorStop(0,'rgba(255,255,255,.12)');f.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=f;x.fillRect(0,0,W,H);K.cover(ax,ay,as*.9);shade();text()}),
+ /* TILE WALL: the cover repeated, dim, behind the main cover */
+ P3((x,W,H,X,{K,k,L,ax,ay,as,cv,shade,text})=>{x.fillStyle='#08080a';x.fillRect(0,0,W,H);const t=as*.42;x.save();x.globalAlpha=.22;x.translate(ax,ay);x.rotate(-.18);for(let i=-4;i<=4;i++)for(let j=-4;j<=4;j++)coverIn(x,cv,i*(t+8*k),j*(t+8*k),t,t);x.restore();K.vign();K.glowR(ax,ay,as*.9);K.cover(ax,ay,as*.92);shade();text()}),
+ /* RED FRAME: thick red mat around the cover */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text})=>{K.bg(50,.25);K.vign();const m=as*.1;x.save();x.shadowColor='rgba(0,0,0,.7)';x.shadowBlur=50*k;x.shadowOffsetY=20*k;x.fillStyle=RED;x.fillRect(ax-as/2-m,ay-as/2-m,as+2*m,as+2*m);x.restore();K.cover(ax,ay,as);shade();text()}),
+ /* POLAROID: white instant-photo frame, tilted */
+ P3((x,W,H,X,{K,k,ax,ay,as,cv,shade,text})=>{K.bg(45,.3);K.glowR(ax,ay,as);const s=as*.86,b=s*.06;x.save();x.translate(ax,ay);x.rotate(-.06);x.shadowColor='rgba(0,0,0,.7)';x.shadowBlur=50*k;x.shadowOffsetY=20*k;x.fillStyle='#f3f1ec';x.fillRect(-s/2-b,-s/2-b,s+2*b,s+b*4.5);x.shadowColor='transparent';coverIn(x,cv,0,0,s,s);x.restore();shade();text()}),
+ /* MIRROR FLOOR: cover standing on a glossy floor */
+ P3((x,W,H,X,{K,k,ax,ay,as,cv,shade,text})=>{x.fillStyle='#060607';x.fillRect(0,0,W,H);K.glowR(ax,ay-as*.1,as);const s=as*.8,y=ay-as*.1;K.cover(ax,y,s);if(cv){x.save();x.translate(ax,y+s);x.scale(1,-1);x.globalAlpha=.25;coverIn(x,cv,0,s/2,s,s);x.restore();const g=x.createLinearGradient(0,y+s/2,0,y+s*1.1);g.addColorStop(0,'rgba(6,6,7,.4)');g.addColorStop(1,'rgba(6,6,7,1)');x.fillStyle=g;x.fillRect(ax-s/2-2,y+s/2,s+4,s*.7)}shade();text()}),
+ /* DIAGONAL SLASH: a red slash behind the cover */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text})=>{K.bg(50,.25);x.save();x.translate(ax,ay);x.rotate(-.5);x.fillStyle=RED;x.fillRect(-W,-as*.28,W*2,as*.56);x.fillStyle='rgba(0,0,0,.35)';x.fillRect(-W,as*.28,W*2,6*k);x.restore();K.cover(ax,ay,as*.85,.04);shade();text()}),
+ /* CINEMA: letterbox bars over a blurred cover */
+ P3((x,W,H,X,{K,k,L,ax,ay,as,shade,text})=>{K.bg(30,.45);K.vign();K.cover(ax,ay,as*.9);x.fillStyle='#000';const bh=L?H*.09:H*.04;x.fillRect(0,0,W,bh);x.fillRect(0,H-bh,W,bh);shade();text()}),
+ /* DUOTONE: cover full bleed in black + red */
+ P3((x,W,H,X,{K,k,L,ax,ay,as,cv,shade,text})=>{x.fillStyle='#08080a';x.fillRect(0,0,W,H);if(cv){x.save();try{x.filter='grayscale(1) contrast(1.25) brightness(1.25)'}catch(e){}const w=L?W*.62:W,h=L?H:H*.62;coverIn(x,cv,L?W-w/2:W/2,L?H/2:h/2,w,h);x.restore();x.save();x.globalCompositeOperation='multiply';x.fillStyle=RED;x.fillRect(L?W-w:0,0,w,h);x.restore()}
+  const g=L?x.createLinearGradient(W*.38,0,W*.6,0):x.createLinearGradient(0,H*.45,0,H*.62);g.addColorStop(0,'rgba(8,8,10,1)');g.addColorStop(1,'rgba(8,8,10,0)');x.fillStyle=g;L?x.fillRect(W*.38,0,W*.23,H):x.fillRect(0,H*.45,W,H*.18);if(L){x.fillStyle='#08080a';x.fillRect(0,0,W*.38,H)}shade();text()}),
+ /* RECORD FAN: three records fanned behind the cover */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text})=>{K.bg(55,.28);K.glowR(ax,ay,as);const rs=as*.9;K.record(ax+as*.42,ay-as*.06,rs,.2);K.record(ax+as*.28,ay,rs,.9);K.record(ax+as*.14,ay+as*.04,rs,1.6);K.cover(ax-as*.12,ay,as*.85);shade();text()}),
+ /* MPC + RECORD: the MPC photo with a record behind */
+ P3((x,W,H,X,{K,k,L,ax,ay,as,shade,text,shot})=>{K.bg(55,.3);K.glowR(ax,ay,as);K.record(ax+as*.22,ay-as*.14,as*.8,.5);K.cover(ax+as*.14,ay-as*.2,as*.58,.06);const m=A2.mpc;if(m)shot(m,ax-as*.2,ay+as*.1,as*.8/m.width);shade();text()}),
+ /* STUDIO PAIR: speakers and keys around the cover */
+ P3((x,W,H,X,{K,k,L,ax,ay,as,shade,text,shot})=>{K.bg(55,.3);K.glowR(ax,ay,as);const sp=A2.speaker,kb=A2.keys;K.cover(ax,ay-as*.08,as*.62);if(sp){const s=as*.42/sp.height;shot(sp,ax-as*.52,ay+as*.04,s);x.save();x.translate(ax+as*.52,0);x.scale(-1,1);shot(sp,0,ay+as*.04,s);x.restore()}if(kb)shot(kb,ax,ay+as*.42,as*.95/kb.width);shade();text()}),
+ /* NEON RING: red glow ring around a round crop */
+ P3((x,W,H,X,{K,k,ax,ay,as,cv,shade,text})=>{x.fillStyle='#060607';x.fillRect(0,0,W,H);K.glowR(ax,ay,as*.9);const r=as*.46;x.save();x.shadowColor=RED;x.shadowBlur=60*k;x.strokeStyle='#ff4a55';x.lineWidth=10*k;x.beginPath();x.arc(ax,ay,r+16*k,0,6.283);x.stroke();x.restore();x.save();x.beginPath();x.arc(ax,ay,r,0,6.283);x.clip();coverIn(x,cv,ax,ay,r*2,r*2);x.restore();shade();text()}),
+ /* FILM STRIP: the cover in a strip of frames */
+ P3((x,W,H,X,{K,k,L,ax,ay,as,cv,shade,text})=>{K.bg(50,.25);const f=as*.5,gap=f*.12,sw=f*1.3;x.save();x.translate(ax,ay);x.rotate(L?-.12:.1);x.fillStyle='#0d0d0f';x.fillRect(-sw/2,-H,sw,H*2);x.fillStyle='rgba(255,255,255,.75)';for(let y=-H;y<H;y+=f*.16){x.fillRect(-sw/2+f*.04,y,f*.06,f*.08);x.fillRect(sw/2-f*.1,y,f*.06,f*.08)}for(let j=-3;j<=3;j++)coverIn(x,cv,0,j*(f+gap),f,f);x.restore();K.vign();shade();text()}),
+ /* CRT: cover on an old screen with scanlines */
+ P3((x,W,H,X,{K,k,ax,ay,as,cv,shade,text})=>{x.fillStyle='#070708';x.fillRect(0,0,W,H);K.glowR(ax,ay,as);const w=as*1.1,h=as*.82,r=40*k;x.save();x.shadowColor='rgba(0,0,0,.8)';x.shadowBlur=50*k;x.fillStyle='#1b1b1e';x.beginPath();x.roundRect(ax-w/2-26*k,ay-h/2-26*k,w+52*k,h+52*k,r);x.fill();x.restore();x.save();x.beginPath();x.roundRect(ax-w/2,ay-h/2,w,h,r*.6);x.clip();coverIn(x,cv,ax,ay,w,h);x.fillStyle='rgba(0,0,0,.28)';for(let y=ay-h/2;y<ay+h/2;y+=4*k)x.fillRect(ax-w/2,y,w,2*k);const g=x.createRadialGradient(ax,ay,h*.2,ax,ay,w*.7);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.6)');x.fillStyle=g;x.fillRect(ax-w/2,ay-h/2,w,h);x.restore();shade();text()}),
+ /* WAVE FLOOR: waveform strip under the cover */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text,shot})=>{K.bg(55,.28);K.glowR(ax,ay,as);K.cover(ax,ay-as*.12,as*.75);const w=A2.wave;if(w){x.save();x.globalAlpha=.9;shot(w,ax,ay+as*.42,as*1.15/w.width,30);x.restore()}shade();text()}),
+ /* ZOOM CUT: a huge crop of the cover behind the full cover */
+ P3((x,W,H,X,{K,k,ax,ay,as,cv,shade,text})=>{x.fillStyle='#08080a';x.fillRect(0,0,W,H);if(cv){x.save();x.globalAlpha=.35;try{x.filter='blur('+Math.round(4*k)+'px)'}catch(e){}const s=Math.max(W,H)*1.6/cv.width;x.drawImage(cv,ax-cv.width*s*.35,ay-cv.height*s*.45,cv.width*s,cv.height*s);x.restore()}K.vign();K.cover(ax,ay,as*.82,-.03);shade();text()}),
+ /* GLASS CARD: cover on a frosted panel */
+ P3((x,W,H,X,{K,k,ax,ay,as,shade,text})=>{K.bg(40,.45);K.glowR(ax-as*.3,ay-as*.3,as);const w=as*1.08;x.save();x.shadowColor='rgba(0,0,0,.5)';x.shadowBlur=40*k;x.fillStyle='rgba(255,255,255,.08)';x.beginPath();x.roundRect(ax-w/2,ay-w/2,w,w,28*k);x.fill();x.restore();x.strokeStyle='rgba(255,255,255,.22)';x.lineWidth=2*k;x.beginPath();x.roundRect(ax-w/2,ay-w/2,w,w,28*k);x.stroke();K.cover(ax,ay,as*.86);shade();text()}),
+ /* TILT 3D: cover in perspective on the mixer photo */
+ P3((x,W,H,X,{K,k,L,ax,ay,as,fill,shade,text})=>{fill(A2.mixer,L?0:.9,0,.5);K.glowR(ax,ay,as);const s=as*.95,q=[[ax-s*.5,ay-s*.42],[ax+s*.44,ay-s*.52],[ax+s*.44,ay+s*.52],[ax-s*.5,ay+s*.42]];x.save();x.shadowColor='rgba(0,0,0,.8)';x.shadowBlur=60*k;x.fillStyle='#000';x.beginPath();q.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.fill();x.restore();warp(x,coverSq(X,800),q,16);shade();text()}),
+ /* DAW + RECORD: channel rack backdrop, record peeking from the cover */
+ P3((x,W,H,X,{K,k,L,ax,ay,as,fill,shade,text})=>{fill(A2.rack,L?.3:0,0,.62);K.glowR(ax,ay,as);const s=as*.85;K.record(ax+s*.32,ay,s*.94,.4);K.cover(ax-s*.08,ay,s);shade();text()})
+];
+const PD3N=['VINYL SPIN','SPOTLIGHT','TILE WALL','RED FRAME','POLAROID','MIRROR FLOOR','DIAGONAL SLASH','CINEMA','DUOTONE','RECORD FAN','MPC + RECORD','STUDIO PAIR','NEON RING','FILM STRIP','CRT','WAVE FLOOR','ZOOM CUT','GLASS CARD','TILT 3D','DAW + RECORD'];
+PD3.forEach((fn,j)=>T.push({n:PD3N[j],photo3:1,f(x,W,H,k0,X){fn(x,W,H,X)}}));
+const BEAT_T=T.filter(t=>!t.photo2);
 function make(i,W,H,X){const c=cvs(W,H);c.ready=load().then(()=>load2()).then(()=>recImg()).then(r=>{RECIMG=r;CURLABEL=X.label||'SAMPLE PACK';const k=W/1280,x=c.getContext('2d'),XX={beat:X.kind==='beats',label:X.label||'SAMPLE PACK',name:String(X.title||'SAMPLE PACK').toUpperCase(),cover:X.cover&&(X.cover.naturalWidth||X.cover.width)?X.cover:null};XX.tone=tone(XX);
-  const nT=X.kind==='beats'?BASE_T:T.length,t=T[((i%nT)+nT)%nT];if(Math.abs(W/H-16/9)<.02)t.f(x,W,H,k,XX);else if(H>W*1.2)return recImg().then(rec=>{portrait(x,W,H,XX,i,rec);return c});else{const o=cvs(1280,720);t.f(o.getContext('2d'),1280,720,1,XX);x.fillStyle='#08080a';x.fillRect(0,0,W,H);const s=Math.max(W/1280,H/720);x.drawImage(o,(W-1280*s)/2,(H-720*s)/2,1280*s,720*s)}return c}).catch(e=>{console.warn(e);return c});return c}
+  const TL=X.kind==='beats'?BEAT_T:T,nT=TL.length,t=TL[((i%nT)+nT)%nT];if(Math.abs(W/H-16/9)<.02)t.f(x,W,H,k,XX);else if(H>W*1.2)return recImg().then(rec=>{portrait(x,W,H,XX,i,rec);return c});else{const o=cvs(1280,720);t.f(o.getContext('2d'),1280,720,1,XX);x.fillStyle='#08080a';x.fillRect(0,0,W,H);const s=Math.max(W/1280,H/720);x.drawImage(o,(W-1280*s)/2,(H-720*s)/2,1280*s,720*s)}return c}).catch(e=>{console.warn(e);return c});return c}
 window.MZPackPhoto={make,load,count:T.length,names:T.map(t=>t.n)};
 })();
