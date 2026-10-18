@@ -504,7 +504,7 @@ async function renderFast(o){
   OFF=null;await venc.flush();await aenc.flush();if(err)throw err;muxer.finalize();
  }finally{OFF=null;try{venc.close()}catch(e){}try{aenc.close()}catch(e){}removeEventListener('beforeunload',beforeUnload)}
  const blob=new Blob([target.buffer],{type:'video/mp4'}),url=URL.createObjectURL(blob);
- dl.href=url;dl.download=((S.item&&S.item.slug)||'video')+'-'+(S.fmt==='16:9'?'16x9':'9x16')+'.mp4';dl.textContent='DOWNLOAD '+S.fmt+' VIDEO';dl.style.display='block';
+ dl.href=url;dl.download=((S.item&&(S.item.slug||String(S.item.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')))||'video')+'-'+(S.fmt==='16:9'?'16x9':'9x16')+'.mp4';dl.textContent='DOWNLOAD '+S.fmt+' VIDEO';dl.style.display='block';
  R.busy=false;root.classList.remove('busy');btn.disabled=false;badge();$s('#sProg').style.width='100%';
  msg(tag+'Done in '+Math.round((performance.now()-t0)/1000)+'s. '+(blob.size/1048576).toFixed(1)+' MB MP4. Click DOWNLOAD VIDEO.');
  try{toast('VIDEO READY: '+dl.download)}catch(e){}
@@ -526,7 +526,7 @@ async function renderRT(){
  btn.disabled=true;msg('Rendering... keep this tab open.');$s('#sProg').style.width='0';
  rc.onstop=()=>{
   const blob=new Blob(chunks,{type:mime||'video/webm'}),url=URL.createObjectURL(blob);
-  dl.href=url;dl.download=((S.item&&S.item.slug)||'video')+'-'+(S.fmt==='16:9'?'16x9':'9x16')+'.'+ext;dl.style.display='block';
+  dl.href=url;dl.download=((S.item&&(S.item.slug||String(S.item.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')))||'video')+'-'+(S.fmt==='16:9'?'16x9':'9x16')+'.'+ext;dl.style.display='block';
   btn.disabled=false;msg('Done. '+(blob.size/1048576).toFixed(1)+' MB '+ext.toUpperCase()+'. Click DOWNLOAD VIDEO.');$s('#sProg').style.width='100%';
   stopPlay();redraw();
  };
@@ -646,11 +646,13 @@ TAGS_P.push(
  x=>['free sample pack preview','vinyl sample pack','dusty samples','boom bap samples',x.genre+' sample pack',x.T,'MZPRD'],
  x=>['buy sample packs','sample packs for sale','producer sounds','drum and sample pack',x.T,'MZPRD','Meztheprod']);
 function fitTags(a){const seen=new Set(),out=[];let len=0;for(const t of a.map(x=>String(x||'').trim()).filter(Boolean)){const k=t.toLowerCase();if(seen.has(k))continue;if(len+t.length+(out.length?2:0)>500)break;seen.add(k);out.push(t);len+=t.length+(out.length>1?2:0)}return out.join(', ')}
+/* single samples reuse the pack wording, said for one sample */
+const smpWords=t=>String(t||'').replace(/sample\s*packs?/gi,m=>/^S/.test(m)?'Sample':'sample').replace(/sample\s*kits?/gi,m=>/^S/.test(m)?'Sample':'sample').replace(/\b(this|the|a) pack\b/gi,'$1 sample').replace(/\bpacks\b/g,'samples').replace(/\bpack\b/g,'sample').replace(/\bPack\b/g,'Sample').replace(/\/pack\//g,'/crate-dig/').replace(/type beat/gi,'sample');
 function ytText(reset){try{ygKeep()}catch(e){}
  const it=S.item;if(!it||!$s('#yT'))return;if(reset===true){yi.t=yi.d=yi.g=0}
  const x=ytCtx(),T=x.isB?TITLES_B:TITLES_P,D=x.isB?DESCS_B:DESCS_P,G=x.isB?TAGS_B:TAGS_P;
  yi.t%=T.length;yi.d%=D.length;yi.g%=G.length;
- $s('#yT').value=cut(T[yi.t](x),100);$s('#yD').value=D[yi.d](x).slice(0,5000);$s('#yG').value=fitTags(G[yi.g](x));
+ const sm=S.kind==='samples'?smpWords:(t=>t);$s('#yT').value=cut(sm(T[yi.t](x)),100);$s('#yD').value=sm(D[yi.d](x)).slice(0,5000);$s('#yG').value=fitTags(sm(G[yi.g](x)));
  $s('#yTi').textContent='('+(yi.t+1)+'/'+T.length+')';$s('#yDi').textContent='('+(yi.d+1)+'/'+D.length+')';$s('#yGi').textContent='('+(yi.g+1)+'/'+G.length+')';
  ytCount();const lk=$s('#yLink');if(lk)lk.innerHTML='Link used in the description: <a href="'+e2(x.url)+'" target="_blank" rel="noopener" style="color:#e8b94a">'+e2(x.url)+'</a>';
 }
@@ -662,14 +664,14 @@ const ygKeep=()=>{const it=S.item;if(it!==ygKeep.it){ygKeep.it=it;YG.list=[];YG.
 const YG_MPC=['mpc','challenge','series'],YG_BAD=/mpc|pad performance|1988|sp-?1200|drum machine|no computer|hardware|on a machine/i;
 const YG={n:25,angle:'',seed:1,sort:'score',fav:[],open:-1,list:[]};let ygP=null;
 const ygLoad=()=>ygP=ygP||Promise.all([thLoad(),...['mpcyt.js?v=14','mpcgen.js?v=5','mpcpack.js?v=3'].map(f=>new Promise((ok,no)=>{const n=f.split('?')[0];if(document.querySelector('script[data-yg="'+n+'"]'))return ok();const sc=document.createElement('script');sc.src=new URL(f,document.baseURI).href;sc.dataset.yg=n;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)}))]);
-function ygInfo(){const it=S.item;if(!it)return null;const pk=S.kind==='packs',sl=it.slug||String(it.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+function ygInfo(){const it=S.item;if(!it)return null;const pk=S.kind!=='beats',sl=it.slug||String(it.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
  const SS={dur:S.buf?S.buf.duration:120,bpm:+it.bpm||0,key:it.musical_key||'',title:it.title,vibe:''};
  return{beat:it,S:SS,title:it.title,bpm:+it.bpm||0,key:it.musical_key||'',mins:Math.max(1,Math.round(SS.dur/60)),link:SITE+'/'+(pk?'pack':'beat')+'/'+sl+'/',seedBase:String(it.id).length*17+String(it.title).length}}
 function ygST(){return{artist:(($s('#yA')||{}).value||'').trim(),yt:{mode:'',v:0,when:''},gen:YG}}
 function ygThumb(p,i,w,h){const n=window.MZThumbs.count||12,v=S.kind==='packs'?(i+YG.seed):(i*5+YG.seed*3)%n,X=Object.assign(thCtx(v),{w:window.MZThumbs.words(p.thumb||S.item.title),seed:YG.seed*101+i*17});return window.MZThumbs.make(v,w,h,X)}
 const ygCopy=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){return false}};
 const ygAll=p=>p.title+'\n\nTHUMBNAIL TEXT: '+p.thumb+'\n\nDESCRIPTION\n'+p.desc+'\n\nTAGS\n'+p.tags+'\n\nPINNED COMMENT\n'+p.pin+(p.shorts?'\n\nSHORTS\n'+p.shorts.title+'\n'+p.shorts.desc:'');
-function ygRender(){const el=$s('#ygN');if(!el)return;const G=window.MZMpcGen,pk=S.kind==='packs';
+function ygRender(){const el=$s('#ygN');if(!el)return;const G=window.MZMpcGen,pk=S.kind!=='beats';
  if(!G){el.innerHTML='<div class="msg">Loading…</div>';ygLoad().then(ygRender,()=>{el.innerHTML='<div class="msg">Could not load the package tools.</div>'});return}
  const opts=Object.entries(G.ANGLES).filter(([k])=>pk||!YG_MPC.includes(k)).map(([k,v])=>`<option value="${k}"${YG.angle===k?' selected':''}>${v.n} only</option>`).join('');
  const view=YG.list.map((p,i)=>[p,i]).filter(([p])=>YG.sort!=='fav'||YG.fav.includes(p.title)).sort((a,b)=>YG.sort==='order'?a[1]-b[1]:b[0].score-a[0].score);
@@ -683,7 +685,7 @@ function ygRender(){const el=$s('#ygN');if(!el)return;const G=window.MZMpcGen,pk
  const say=t=>{$s('#ygM').textContent=t};
  const run=more=>{const inf=ygInfo();if(!inf){say('Pick a beat or pack first (step 01).');return}YG.seed=more?YG.seed+1:YG.seed;const ST=ygST();
   const only=YG.angle?[YG.angle]:(pk?null:Object.keys(G.ANGLES).filter(k=>!YG_MPC.includes(k)));let L=(pk&&window.MZMpcPack?MZMpcPack.generate(ST,inf,YG.n*3,YG.seed,only,G):G.generate(ST,inf,YG.n*3,YG.seed,only,window.MZMpcYT))||[];
-  const clean=t=>String(t||'').split('\n').filter(l=>!YG_BAD.test(l)).join('\n');L=L.filter(p=>!YG_BAD.test(p.title+' '+p.thumb)).map(p=>Object.assign(p,{desc:clean(p.desc),pin:clean(p.pin),tags:String(p.tags||'').split(',').filter(t=>!YG_BAD.test(t)).join(',')}));YG.list=L.slice(0,YG.n);YG.open=-1;ygRender();$s('#ygM').textContent=YG.list.length+' packages. Best score '+(YG.list.length?Math.max(...YG.list.map(p=>p.score)):0)+'.'};
+  const clean=t=>String(t||'').split('\n').filter(l=>!YG_BAD.test(l)).join('\n');L=L.filter(p=>!YG_BAD.test(p.title+' '+p.thumb)).map(p=>Object.assign(p,{desc:clean(p.desc),pin:clean(p.pin),tags:String(p.tags||'').split(',').filter(t=>!YG_BAD.test(t)).join(',')}));if(S.kind==='samples')L=L.map(p=>Object.assign(p,{title:smpWords(p.title),thumb:smpWords(p.thumb),desc:smpWords(p.desc),tags:smpWords(p.tags),pin:smpWords(p.pin)}));YG.list=L.slice(0,YG.n);YG.open=-1;ygRender();$s('#ygM').textContent=YG.list.length+' packages. Best score '+(YG.list.length?Math.max(...YG.list.map(p=>p.score)):0)+'.'};
  $s('#ygGo').onclick=()=>run(false);$s('#ygMore').onclick=()=>run(true);
  $s('#ygC').onchange=e=>{YG.n=+e.target.value};$s('#ygA').onchange=e=>{YG.angle=e.target.value};$s('#ygS').onchange=e=>{YG.sort=e.target.value;ygRender()};
  el.onclick=async e=>{const th=e.target.closest('[data-th]');if(th){const i=+th.dataset.th,cv=S.fmt==='9:16'?ygThumb(YG.list[i],i,1080,1920):ygThumb(YG.list[i],i,1280,720),lb=document.createElement('div');lb.className='yglb';if(S.fmt==='9:16')setTimeout(()=>{const bx=lb.querySelector('.yglbx');if(bx)bx.classList.add('v9')},0);lb.innerHTML='<div class="yglbx"><button class="yglbc" title="Close">×</button><b></b><div class="yglbr"><button class="btn" data-lbdl>DOWNLOAD 16:9</button><button class="btn" data-lbdl9>DOWNLOAD 9:16</button><button class="btn" data-lbct>COPY TITLE</button></div></div>';lb.querySelector('b').textContent=YG.list[i].title;lb.querySelector('.yglbx').insertBefore(cv,lb.querySelector('b'));document.body.appendChild(lb);const close=()=>{lb.remove();removeEventListener('keydown',kd)},kd=ev=>{if(ev.key==='Escape')close()};addEventListener('keydown',kd);lb.onclick=async ev=>{if(ev.target===lb||ev.target.closest('.yglbc'))return close();if(ev.target.closest('[data-lbct]'))return ygCopy(YG.list[i].title);if(ev.target.closest('[data-lbdl]')){if(cv.ready)await cv.ready;cv.toBlob(bl=>{const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=(S.item.title||'thumb')+' - thumbnail '+(i+1)+'.png';a.click()})}
@@ -706,9 +708,9 @@ const TH={seed:0,pf:'16:9',ord:null,page:0,sel:[],rr:{}},TH_N=6,THMODAL=`<div id
  <div id="thGrid"></div><div class="msg" id="thMsg">40 looks, 6 at a time. The type line follows SOUNDS LIKE (artist). Every card downloads in 16:9 (1280x720) and 9:16 (1080x1920).</div>
  <button class="btn" id="thAll" style="display:none;margin-top:8px">DOWNLOAD THIS SET (12 FILES)</button>
 </div></div>`;
-function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=16',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
+function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=17',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
 /* the type line (ARTIST TYPE BEAT) comes from the same SOUNDS LIKE / MOOD boxes the YouTube text uses */
-function thCtx(i){const it=S.item||{},Y=S.item?ytCtx():{};return{title:it.title||'',w:window.MZThumbs.words(S.tx.title.text||it.title),cover:S.cover,bpm:it.bpm,key:it.musical_key,kind:S.kind,seed:TH.seed+(TH.rr[i]||0)*13,art:Y.art||'',mood:Y.mood||'',genre:Y.genre||''}}
+function thCtx(i){const it=S.item||{},Y=S.item?ytCtx():{};return{title:it.title||'',w:window.MZThumbs.words(S.tx.title.text||it.title),cover:S.cover,bpm:it.bpm,key:it.musical_key,kind:S.kind==='samples'?'packs':S.kind,label:S.kind==='samples'?'SINGLE SAMPLE':'',seed:TH.seed+(TH.rr[i]||0)*13,art:Y.art||'',mood:Y.mood||'',genre:Y.genre||''}}
 const thSize=f=>f==='16:9'?[1280,720]:[1080,1920];
 function thOpen(){const m=$s('#thModal');m.classList.add('on');m.setAttribute('aria-hidden','false');document.addEventListener('keydown',thKey);thMake(false)}
 function thShut(){const m=$s('#thModal');if(m){m.classList.remove('on');m.setAttribute('aria-hidden','true')}document.removeEventListener('keydown',thKey)}
