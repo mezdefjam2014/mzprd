@@ -110,6 +110,20 @@ async function bundleSavings(lines: any[]) {
     }
   }
   for (const b of bundles.filter((x) => x.kind !== 'fixed').sort((a, c) => c.qty - a.qty)) {
+    if (b.kind === 'free_samples') {
+      // every N single samples, the cheapest one is free
+      const n = Number(b.qty) || 0
+      if (n < 2) continue
+      let pool = rest.filter((l) => l.t === 's').sort((a, c) => c.price - a.price)
+      while (pool.length >= n) {
+        const grp = pool.slice(0, n)
+        savings += grp[n - 1].price
+        names.push(b.name)
+        rest = rest.filter((l) => !grp.includes(l))
+        pool = pool.slice(n)
+      }
+      continue
+    }
     const t = b.kind === 'any_packs' ? 'p' : 'b'
     const n = Number(b.qty) || 0
     if (n < 2) continue

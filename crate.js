@@ -30,6 +30,7 @@ function shell(){host.innerHTML=`<div class="cr">
  <div class="cr-pl" id="crPl"><div class="cr-pl-t"><b id="crPlT">Pick a record</b><span id="crPlS">Tap the front record in the crate</span></div>
   <div class="cr-pl-c"><button class="cr-pl-b" id="crPlPrev" aria-label="Previous record">&lt;</button><button class="cr-pl-pp" id="crPlPP" aria-label="Play or pause"><i></i></button><button class="cr-pl-b" id="crPlNext" aria-label="Next record">&gt;&gt;</button></div>
   <div class="cr-pl-w" id="crPlW"></div><input class="cr-pl-v" id="crPlV" type="range" min="0" max="1" step=".01" aria-label="Volume"></div>
+ <div class="cr-deal" id="crDeal" hidden></div>
  <div class="cr-dig"><div class="cr-dig-hd"><b>THE CRATE</b><span id="crCount"></span><span class="cr-hint">Scroll, swipe or use the arrows to flip &middot; tap the front record to play it</span><button class="cr-shuf" id="crShuf" type="button" aria-label="Shuffle the crate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c2.2 0 3.6 1 4.8 2.9l2.4 4.2c1.2 1.9 2.6 2.9 4.8 2.9H21M17 14l4 3-4 3M3 17h3.5c1.4 0 2.5-.4 3.4-1.2M14.1 8.2c.9-.8 2-1.2 3.4-1.2H21M17 4l4 3-4 3"/></svg><span>SHUFFLE</span></button></div>
   <div class="crate" id="crCrate" tabindex="0" aria-label="Record crate">
    <div class="crate-box"><img class="cb-back" src="crate-back.png?v=1" alt="" draggable="false"><div class="crate-recs" id="crRecs"></div><img class="cb-front" src="crate-front.png?v=1" alt="" draggable="false"><div class="cr-info" id="crInfo"></div></div>
@@ -94,6 +95,10 @@ function plSync(){if(!host)return;const x=items[deck],A=MA(),on=deck>=0&&A&&!A.p
 let clipC=null;
 function syncHearts(){if(!host)return;host.querySelectorAll('.sl-lk').forEach(h=>h.classList.toggle('on',G(()=>liked.has('s:'+h.dataset.lk),false)))}
 window.MZCrateHearts=syncHearts;
+/* CRATE DEAL: pick N samples, the cheapest is free; shows progress as samples go in the cart */
+function dealSync(){if(!host)return;const el=host.querySelector('#crDeal');const b=G(()=>bundles.find(x=>x.kind==='free_samples'&&x.active!==false),null);if(!b||!(+b.qty>1)){el.hidden=true;return}
+ const n=+b.qty,c=G(()=>[...cart].filter(k=>k[0]==='s').length,0),free=Math.floor(c/n),rem=c%n;el.hidden=false;
+ el.innerHTML=`<div class="cd-t"><b>CRATE DEAL</b><span>Pick any ${n} samples, the cheapest one is free${free?` &middot; <em>${free} free in your cart</em>`:''}</span></div><div class="cd-dots">${Array.from({length:n},(_,i)=>`<i class="${i<rem||(!rem&&c>0&&free)?'on':''}${i===n-1?' fr':''}">${i===n-1?'FREE':''}</i>`).join('')}</div><span class="cd-n">${rem}/${n}</span>`}
 function paint(){if(!host)return;host.querySelectorAll('.sl').forEach(s=>s.classList.toggle('playing',isOn(+s.dataset.i)));plSync();const b=host.querySelector('#crPlay');if(b)b.classList.toggle('on',isOn(cur))}
 {const A=MA();if(A)['play','pause','ended','emptied'].forEach(ev=>A.addEventListener(ev,paint))}
 window.MZCratePlaying=()=>{const x=items[deck],A=MA();return !!(x&&A&&A.src===x.audio)};
@@ -108,7 +113,7 @@ window.MZCrate=async function(el){if(host===el&&el.querySelector('.cr')){layout(
  host.querySelector('#crPlPrev').onclick=()=>step(-1);host.querySelector('#crPlNext').onclick=()=>step(1);
  host.querySelector('#crPlPP').onclick=()=>{const A=MA();if(deck<0){load(cur);return}if(A.paused)A.play().catch(()=>{});else A.pause()};
  {const V=host.querySelector('#crPlV'),A=MA(),mv=document.getElementById('vol');V.value=A?A.volume:.8;V.oninput=()=>{if(A)A.volume=+V.value;if(mv){mv.value=V.value}}}
- document.body.classList.add('on-crate');plSync();
+ document.body.classList.add('on-crate');plSync();dealSync();{const bd=document.getElementById('badge');if(bd)new MutationObserver(dealSync).observe(bd,{childList:true,characterData:true,subtree:true})}dealSync();
  const C=host.querySelector('#crCrate');C.addEventListener('wheel',wheel,{passive:false});drag(C);
  C.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();go(cur+1)}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1)}if(e.key==='Enter')load(cur)});
  host.querySelector('#crShuf').onclick=shuffleCrate;
@@ -119,6 +124,12 @@ const css=document.createElement('style');css.textContent=`
 .cr-k{display:block;font:800 10px Inter,sans-serif;letter-spacing:.24em;color:#e0242f;margin-bottom:8px}
 .cr-hd h1{font:400 clamp(44px,6vw,76px)/.92 Anton,sans-serif;color:#fff;margin:0;text-transform:uppercase}.cr-hd p{max-width:560px;margin:14px 0 0;color:#a2a2a8;font-size:15px;line-height:1.6}
 /* crate */
+.cr-deal{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:-8px 0 22px;padding:14px 18px;border:1px solid rgba(224,36,47,.45);border-radius:12px;background:linear-gradient(90deg,rgba(224,36,47,.14),rgba(224,36,47,.03));box-shadow:0 0 30px rgba(224,36,47,.08) inset}
+.cr-deal[hidden]{display:none}.cd-t{flex:1;min-width:200px}.cd-t b{display:block;font:400 22px Anton,sans-serif;letter-spacing:.06em;color:#fff}.cd-t span{display:block;margin-top:3px;font:600 12px Inter,sans-serif;color:#b4b4ba}.cd-t em{font-style:normal;color:#6fd08c}
+.cd-dots{display:flex;gap:6px}.cd-dots i{width:42px;height:42px;border-radius:50%;border:2px dashed #3a3a40;display:grid;place-items:center;font:800 8px Inter;letter-spacing:.1em;color:#6c6c72;font-style:normal;transition:.25s}
+.cd-dots i.on{border:2px solid #e0242f;background:radial-gradient(circle,#e0242f 0 18%,#111 20% 100%);box-shadow:0 0 14px rgba(224,36,47,.5)}.cd-dots i.fr{border-color:#6fd08c;color:#6fd08c}.cd-dots i.fr.on{background:radial-gradient(circle,#6fd08c 0 18%,#111 20% 100%);color:transparent}
+.cd-n{font:400 26px Anton,sans-serif;color:#fff;min-width:44px;text-align:right}
+@media(max-width:820px){.cd-dots i{width:32px;height:32px;font-size:7px}.cr-deal{gap:12px}}
 .crate.shuffling{overflow:visible}.crate.shuffling .sl{transition:none!important}
 .cr-shuf{display:inline-flex;align-items:center;gap:8px;background:none;border:1px solid #e0242f;color:#fff;font:800 10px Inter,sans-serif;letter-spacing:.2em;padding:9px 14px 9px 11px;border-radius:999px;cursor:pointer;transition:background .2s,box-shadow .2s;margin-left:14px}
 .cr-shuf svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .5s}

@@ -746,6 +746,8 @@ function bundleCalc(lines){
   if(hit.every(Boolean)){const sum=hit.reduce((t,l)=>t+l.price,0);if(Number(b.price)<sum){savings+=sum-Number(b.price);names.push(b.name);rest=rest.filter(l=>!hit.includes(l))}}
  }
  for(const b of bundles.filter(x=>x.kind!=='fixed').sort((x,y)=>y.qty-x.qty)){
+  if(b.kind==='free_samples'){const n=Number(b.qty)||0;if(n<2)continue;let pool=rest.filter(l=>l.t==='s').sort((x,y)=>y.price-x.price);
+   while(pool.length>=n){const grp=pool.slice(0,n);savings+=grp[n-1].price;names.push(b.name);rest=rest.filter(l=>!grp.includes(l));pool=pool.slice(n)}continue}
   const t=b.kind==='any_packs'?'p':'b',n=Number(b.qty)||0;if(n<2)continue;
   let pool=rest.filter(l=>l.t===t).sort((x,y)=>y.price-x.price);
   while(pool.length>=n){const grp=pool.slice(0,n),sum=grp.reduce((q,l)=>q+l.price,0);if(Number(b.price)>=sum)break;savings+=sum-Number(b.price);names.push(b.name);rest=rest.filter(l=>!grp.includes(l));pool=pool.slice(n)}
@@ -754,6 +756,7 @@ function bundleCalc(lines){
 }
 function bundleHint(lines){
  for(const b of bundles.filter(x=>x.kind!=='fixed')){
+  if(b.kind==='free_samples'){const n=Number(b.qty)||0,c=lines.filter(l=>l.t==='s').length;if(n<2||!c)continue;const rem=c%n;if(!rem)continue;const need=n-rem;return 'ADD '+need+' MORE SAMPLE'+(need>1?'S':'')+' AND ONE IS FREE'}
   const t=b.kind==='any_packs'?'p':'b',n=Number(b.qty)||0;if(n<2)continue;
   const mine=lines.filter(l=>l.t===t),c=mine.length;if(!c)continue;const rem=c%n;if(!rem)continue;
   const need=n-rem,avg=mine.reduce((q,l)=>q+l.price,0)/c;
@@ -763,7 +766,7 @@ function bundleHint(lines){
 }
 function renderDeals(){
  const el=$('#deals');if(!el)return;
- el.innerHTML=bundles.map(b=>{const m=money(b.price).replace(/\.00$/,'');const txt=b.kind==='any_beats'?'ANY '+b.qty+' BEATS FOR '+m:b.kind==='any_packs'?'ANY '+b.qty+' PACKS FOR '+m:String(b.name)+': '+m;return '<span>'+esc(txt)+'</span>'}).join('');
+ el.innerHTML=bundles.map(b=>{const m=money(b.price).replace(/\.00$/,'');const txt=b.kind==='free_samples'?'PICK ANY '+b.qty+' SAMPLES, 1 FREE':b.kind==='any_beats'?'ANY '+b.qty+' BEATS FOR '+m:b.kind==='any_packs'?'ANY '+b.qty+' PACKS FOR '+m:String(b.name)+': '+m;return '<span>'+esc(txt)+'</span>'}).join('');
 }
 /* slot-machine coupon = a percent off the single most expensive beat; sample pack code (e.g. MZPRD10) = a percent off every pack (the server uses the same rules) */
 function couponDisc(lines,bd){
@@ -894,7 +897,7 @@ function showView(v){
  {const pl=document.querySelector('.plc');if(pl)pl.style.display=v==='beats'?'':'none'}
  {const dl=$('#deals');if(dl)dl.style.display=(v==='about'||v==='show'||v==='crate')?'none':''}
  if(v==='show')openShow();else if(window.showPageClose)window.showPageClose();
- if(v==='crate'){(window.MZCrate?Promise.resolve():loadScript('crate.js?v=25')).then(()=>MZCrate($('#crHost'))).catch(()=>toast('CRATE DIG FAILED TO LOAD'))}else if(window.MZCrateStop)MZCrateStop();
+ if(v==='crate'){(window.MZCrate?Promise.resolve():loadScript('crate.js?v=26')).then(()=>MZCrate($('#crHost'))).catch(()=>toast('CRATE DIG FAILED TO LOAD'))}else if(window.MZCrateStop)MZCrateStop();
  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.v===(v==='beat'?'beats':v)));
  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
 }
@@ -1562,7 +1565,7 @@ async function bundlesRender(){
  const opts=[...(bl.data||[]).map(x=>['b:'+x.id,'BEAT: '+x.title]),...(pk.data||[]).map(x=>['p:'+x.id,'PACK: '+x.title])];
  $('#bf2').innerHTML='<h3>'+(editing?'EDIT':'ADD')+' BUNDLE</h3>'+
   '<label>NAME (shown to shoppers)</label><input type="text" id="g_name" value="'+esc(e.name)+'" placeholder="3 Beat Pack" required>'+
-  '<label>TYPE</label><select id="g_kind"><option value="any_beats"'+(e.kind==='any_beats'?' selected':'')+'>ANY N BEATS FOR ONE PRICE</option><option value="any_packs"'+(e.kind==='any_packs'?' selected':'')+'>ANY N PACKS FOR ONE PRICE</option><option value="fixed"'+(e.kind==='fixed'?' selected':'')+'>SPECIFIC ITEMS TOGETHER (e.g. a pack + a beat)</option></select>'+
+  '<label>TYPE</label><select id="g_kind"><option value="any_beats"'+(e.kind==='any_beats'?' selected':'')+'>ANY N BEATS FOR ONE PRICE</option><option value="any_packs"'+(e.kind==='any_packs'?' selected':'')+'>ANY N PACKS FOR ONE PRICE</option><option value="free_samples"'+(e.kind==='free_samples'?' selected':'')+'>BUY N SINGLE SAMPLES, CHEAPEST ONE FREE (PRICE IGNORED)</option><option value="fixed"'+(e.kind==='fixed'?' selected':'')+'>SPECIFIC ITEMS TOGETHER (e.g. a pack + a beat)</option></select>'+
   '<div id="g_qtyw"><label>HOW MANY ITEMS</label><input type="number" id="g_qty" min="2" value="'+esc(e.qty||3)+'"></div>'+
   '<div id="g_itemsw"><label>PICK THE ITEMS (need at least 2)</label><div class="chks">'+(opts.length?opts.map(o=>'<div><input type="checkbox" value="'+esc(o[0])+'"'+((e.item_keys||[]).includes(o[0])?' checked':'')+'><span>'+esc(o[1])+'</span></div>').join(''):'<div>Add beats or packs first.</div>')+'</div></div>'+
   '<label>BUNDLE PRICE (USD, for the whole set)</label><input type="number" step="0.01" min="0" id="g_price" value="'+esc(e.price)+'">'+
@@ -1574,7 +1577,7 @@ async function bundlesRender(){
  const L=$('#bl2');L.innerHTML=(bn.data&&bn.data.length)?'':'<div class="bi"><span>No bundles yet. The shopper gets the best deal automatically when their cart qualifies.</span></div>';
  (bn.data||[]).forEach(r=>{
   const d=document.createElement('div');d.className='bi';
-  const what=r.kind==='fixed'?(r.item_keys||[]).length+' specific items':'any '+r.qty+(r.kind==='any_packs'?' packs':' beats');
+  const what=r.kind==='fixed'?(r.item_keys||[]).length+' specific items':r.kind==='free_samples'?'any '+r.qty+' single samples, cheapest free':'any '+r.qty+(r.kind==='any_packs'?' packs':' beats');
   d.innerHTML='<div class="nc"></div><div><b>'+esc(r.name)+'</b><span>'+money(r.price)+' / '+esc(what)+(r.active?'':' <i class="draft">/ OFF</i>')+'</span></div><div class="acts"><button class="ed">EDIT</button><button class="del">DELETE</button></div>';
   d.querySelector('.ed').onclick=()=>{editing=r;bundlesRender();scrollTo(0,0)};
   d.querySelector('.del').onclick=async()=>{if(!(await askConfirm('DELETE "'+String(r.name).toUpperCase()+'"?','This removes the bundle deal. Your beats and packs are not touched.')))return;const x=await sb.from('bundles').delete().eq('id',r.id);if(x.error){toast('DELETE FAILED: '+x.error.message);return}toast('BUNDLE DELETED');editing=null;await loadAll();bundlesRender()};
