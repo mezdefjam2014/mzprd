@@ -77,7 +77,7 @@ const T=[
 /* 9:16 (Shorts / Reels / TikTok): a real vertical layout instead of cropping the 16:9 one */
 let REC=null;const recImg=()=>REC||(REC=new Promise(ok=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>ok(im);im.onerror=()=>ok(null);im.src=new URL('crate-record.webp?v=1',document.baseURI).href}));
 /* 8 vertical layouts; cards cycle through them (layout 4 uses the real product photos, so it varies again by photo) */
-function portrait(x,W,H,XX,i,rec){const k=W/1080,cv=XX.cover,L=((i%8)+8)%8,name=(XX.name.replace(/\s*SAMPLE PACK\s*$/,'')||XX.name);
+function portrait(x,W,H,XX,i,rec){const nP=XX.beat?8:8+PD.length,LL=((i%nP)+nP)%nP;if(LL>=8){PD[LL-8](x,W,H,XX);return}const k=W/1080,cv=XX.cover,L=LL,name=(XX.name.replace(/\s*SAMPLE PACK\s*$/,'')||XX.name);
  const bg=(blur,br)=>{x.fillStyle='#08080a';x.fillRect(0,0,W,H);if(cv){const s=Math.max(W/cv.width,H/cv.height)*1.12;x.save();try{x.filter='blur('+Math.round(blur*k)+'px) brightness('+br+') saturate(1.2)'}catch(e){}x.drawImage(cv,(W-cv.width*s)/2,(H-cv.height*s)/2,cv.width*s,cv.height*s);x.restore()}};
  const fade=(a,b,c)=>{const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(8,8,10,'+a+')');g.addColorStop(.5,'rgba(8,8,10,'+b+')');g.addColorStop(1,'rgba(8,8,10,'+c+')');x.fillStyle=g;x.fillRect(0,0,W,H)};
  const redGlow=(y)=>{const g=x.createRadialGradient(W/2,y,0,W/2,y,W*.9);g.addColorStop(0,'rgba(224,36,47,.38)');g.addColorStop(1,'rgba(224,36,47,0)');x.fillStyle=g;x.fillRect(0,0,W,H)};
@@ -142,7 +142,54 @@ T.push(
   const {fs,lines}=K.fit(W*.58,230,3);x.font=fs+'px '+F;x.textAlign='left';x.textBaseline='alphabetic';let y=H*.18+fs*.82;for(const l of lines){x.lineWidth=3*k;x.strokeStyle='rgba(255,255,255,.85)';x.strokeText(l,W*.05,y);y+=fs*.9}
   K.kick(W*.05,H*.82,'#fff');K.tag(W*.05,H*.835+4*k);K.foot(W*.62,'rgba(255,255,255,.5)')}}
 );
-function make(i,W,H,X){const c=cvs(W,H);c.ready=load().then(()=>recImg()).then(r=>{RECIMG=r;CURLABEL=X.label||'SAMPLE PACK';const k=W/1280,x=c.getContext('2d'),XX={label:X.label||'SAMPLE PACK',name:String(X.title||'SAMPLE PACK').toUpperCase(),cover:X.cover&&(X.cover.naturalWidth||X.cover.width)?X.cover:null};XX.tone=tone(XX);
-  const t=T[((i%T.length)+T.length)%T.length];if(Math.abs(W/H-16/9)<.02)t.f(x,W,H,k,XX);else if(H>W*1.2)return recImg().then(rec=>{portrait(x,W,H,XX,i,rec);return c});else{const o=cvs(1280,720);t.f(o.getContext('2d'),1280,720,1,XX);x.fillStyle='#08080a';x.fillRect(0,0,W,H);const s=Math.max(W/1280,H/720);x.drawImage(o,(W-1280*s)/2,(H-720*s)/2,1280*s,720*s)}return c}).catch(e=>{console.warn(e);return c});return c}
+/* PHOTO SET 2 (your own photos, cut out): studio desk, MPC One, keys, speakers, DAW blur, mixer art, channel rack,
+   floating windows, waveform strip, MZPRD logo. Packs + single samples only. Each works in 16:9 and 9:16. */
+const A2={},F2={desk:'desk.jpg',mpc:'mpc.webp',keys:'keys.webp',speaker:'speaker.webp',dawblur:'dawblur.jpg',mixer:'mixer.jpg',rack:'rack.jpg',floaty:'floaty.webp',wave:'wave.jpg',logo:'logo.png'};let boot2=null;
+function load2(){return boot2=boot2||Promise.all(Object.entries(F2).map(([n,f])=>new Promise(r=>{const i=new Image();i.onload=()=>{A2[n]=i;r()};i.onerror=()=>r();i.src=new URL('mpc/pk2/'+f+'?v=1',document.baseURI).href})))}
+function P2(x,W,H,X,fn){const K=wideKit(x,W,H,X),k=K.k,L=W>H;
+ const photo=(img,cx,cy,s,dark)=>{if(!img)return;x.drawImage(img,cx-img.width*s/2,cy-img.height*s/2,img.width*s,img.height*s);if(dark){x.fillStyle='rgba(6,6,8,'+dark+')';x.fillRect(0,0,W,H)}};
+ const fill=(img,ax,ay,dark)=>{if(!img)return;const s=Math.max(W/img.width,H/img.height);photo(img,W/2+(ax||0)*(img.width*s-W)/2,H/2+(ay||0)*(img.height*s-H)/2,s,dark)};
+ const shade=()=>{if(L){const g=x.createLinearGradient(0,0,W*.55,0);g.addColorStop(0,'rgba(6,6,8,.92)');g.addColorStop(1,'rgba(6,6,8,0)');x.fillStyle=g;x.fillRect(0,0,W,H)}else{const g=x.createLinearGradient(0,H*.55,0,H);g.addColorStop(0,'rgba(6,6,8,0)');g.addColorStop(.35,'rgba(6,6,8,.9)');g.addColorStop(1,'rgba(6,6,8,.98)');x.fillStyle=g;x.fillRect(0,0,W,H)}};
+ const text=()=>{if(L){K.kick(W*.05,H*.26);const y=K.title(W*.05,H*.26+130*k,{maxW:W*.42,size:150});K.tag(W*.05,y+34*k);K.foot(W*.05)}
+  else{const y0=H*.7;K.kick(W/2,y0,null,'center');const y=K.title(W/2,y0+130*k,{align:'center',maxW:W*.88,size:170,lines:2});K.tag(W/2,y+34*k,{align:'center'});K.foot(W/2,null,'center')}};
+ const shot=(img,cx,cy,s,sh)=>{if(!img)return;x.save();x.shadowColor='rgba(0,0,0,.75)';x.shadowBlur=(sh||50)*k;x.shadowOffsetY=18*k;x.drawImage(img,cx-img.width*s/2,cy-img.height*s/2,img.width*s,img.height*s);x.restore()};
+ fn({K,k,L,photo,fill,shade,text,shot})}
+const PD=[
+ /* STUDIO DESK: the cover on the monitor */
+ (x,W,H,X)=>P2(x,W,H,X,({K,k,L,shade,text})=>{const d=A2.desk;K.bg(50,.3);if(d){const mc=[777,338],s=L?H*1.1/d.height:W*1.35/814,ox=(L?W*.6:W/2)-mc[0]*s,oy=(L?H/2:H*.33)-mc[1]*s;x.drawImage(d,ox,oy,d.width*s,d.height*s);
+  const q=[[424,164],[1180,96],[1184,580],[370,556]].map(p=>[ox+p[0]*s,oy+p[1]*s]);x.save();x.globalAlpha=.96;warp(x,coverSq(X,900),q,16);x.restore();
+  x.save();x.globalCompositeOperation='screen';x.globalAlpha=.12;x.drawImage(d,ox,oy,d.width*s,d.height*s);x.restore()}shade();text()}),
+ /* MPC ONE: the cover on its screen */
+ (x,W,H,X)=>P2(x,W,H,X,({K,k,L,shade,text})=>{K.bg(45,.3);K.glowR(L?W*.7:W/2,L?H*.5:H*.33,W*.5);const m=A2.mpc;if(m){const s=L?H*.9/m.height:W*.84/m.width,cx=L?W*.7:W/2,cy=L?H/2:H*.35,ox=cx-m.width*s/2,oy=cy-m.height*s/2;
+  x.save();x.shadowColor='rgba(0,0,0,.75)';x.shadowBlur=60*k;x.shadowOffsetY=24*k;x.drawImage(m,ox,oy,m.width*s,m.height*s);x.restore();
+  const sx=ox+20*s,sy=oy+70*s,sw=406*s,sh=222*s,cv=X.cover;if(cv){const r=Math.max(sw/cv.width,sh/cv.height);x.save();x.beginPath();x.rect(sx,sy,sw,sh);x.clip();x.drawImage(cv,sx+sw/2-cv.width*r/2,sy+sh/2-cv.height*r/2,cv.width*r,cv.height*r);
+   const g=x.createLinearGradient(sx,sy,sx+sw,sy+sh);g.addColorStop(0,'rgba(255,255,255,.16)');g.addColorStop(.45,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(sx,sy,sw,sh);x.restore()}}shade();text()}),
+ /* KEYS: cover floating above the keyboard */
+ (x,W,H,X,)=>P2(x,W,H,X,({K,k,L,shade,text,shot})=>{K.bg(50,.32);K.glowR(L?W*.72:W/2,L?H*.6:H*.45,W*.5);const kb=A2.keys;
+  if(L){K.cover(W*.72,H*.36,H*.52,-.05);if(kb)shot(kb,W*.72,H*.78,W*.5/kb.width)}else{K.cover(W/2,H*.27,W*.62,-.04);if(kb)shot(kb,W/2,H*.52,W*.92/kb.width)}shade();text()}),
+ /* SPEAKERS: a pair of monitors either side of the cover */
+ (x,W,H,X)=>P2(x,W,H,X,({K,k,L,shade,text,shot})=>{K.bg(50,.3);K.glowR(L?W*.7:W/2,L?H*.5:H*.33,W*.5);const sp=A2.speaker;
+  if(L){if(sp){const s=H*.55/sp.height;shot(sp,W*.5,H*.66,s);x.save();x.translate(W*.92,H*.66);x.scale(-1,1);shot(sp,0,0,s);x.restore()}K.cover(W*.71,H*.46,H*.62)}
+  else{if(sp){const s=H*.2/sp.height;shot(sp,W*.2,H*.52,s);x.save();x.translate(W*.8,H*.52);x.scale(-1,1);shot(sp,0,0,s);x.restore()}K.cover(W/2,H*.3,W*.64)}shade();text()}),
+ /* DAW BLUR: framed cover over the blurred session */
+ (x,W,H,X)=>P2(x,W,H,X,({K,k,L,fill,shade,text})=>{fill(A2.dawblur,0,0,.45);K.glowR(L?W*.7:W/2,L?H*.5:H*.33,W*.5);const sz=L?H*.68:W*.7,cx=L?W*.7:W/2,cy=L?H/2:H*.33;K.cover(cx,cy,sz,L?.02:0);x.strokeStyle=RED;x.lineWidth=5*k;x.strokeRect(cx-sz/2-10*k,cy-sz/2-10*k,sz+20*k,sz+20*k);shade();text()}),
+ /* MIXER: the dark plugin/mixer artwork behind the cover */
+ (x,W,H,X)=>P2(x,W,H,X,({K,k,L,fill,shade,text})=>{fill(A2.mixer,L?0:.9,0,.15);K.glowR(L?W*.68:W/2,L?H*.5:H*.33,W*.45);K.cover(L?W*.66:W/2,L?H*.5:H*.33,L?H*.6:W*.62,L?-.03:0);shade();text()}),
+ /* CHANNEL RACK: the step sequencer floating behind the cover */
+ (x,W,H,X)=>P2(x,W,H,X,({K,k,L,shade,text})=>{K.bg(55,.25);K.glowR(L?W*.7:W/2,L?H*.45:H*.3,W*.5);const r=A2.rack;if(r){const w=L?W*.62:W*1.02,h=w*r.height/r.width,cx=L?W*.68:W/2,cy=L?H*.32:H*.17,t=L?.07:.05;
+  const q=[[cx-w/2,cy-h/2+h*t],[cx+w/2,cy-h/2],[cx+w/2,cy+h/2],[cx-w/2,cy+h/2-h*t]];x.save();x.shadowColor='rgba(0,0,0,.8)';x.shadowBlur=40*k;x.fillStyle='#000';x.beginPath();q.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.fill();x.restore();warp(x,r,q,10)}
+  K.cover(L?W*.72:W/2,L?H*.62:H*.42,L?H*.5:W*.56,L?.04:0);shade();text()}),
+ /* FLOATING WINDOWS: piano roll + waveforms around the cover */
+ (x,W,H,X)=>P2(x,W,H,X,({K,k,L,shade,text,shot})=>{K.bg(55,.28);K.glowR(L?W*.68:W/2,L?H*.45:H*.3,W*.55);const f=A2.floaty;if(f)shot(f,L?W*.7:W/2,L?H*.36:H*.22,(L?W*.6:W*1.05)/f.width,40);K.cover(L?W*.6:W/2,L?H*.64:H*.44,L?H*.46:W*.56,L?-.06:-.03);shade();text()}),
+ /* WAVEFORM: the waveform strip under the cover */
+ (x,W,H,X)=>P2(x,W,H,X,({K,k,L,shade,text,shot})=>{K.bg(55,.3);K.glowR(L?W*.7:W/2,L?H*.45:H*.3,W*.5);K.cover(L?W*.72:W/2,L?H*.4:H*.28,L?H*.56:W*.62);const w=A2.wave;if(w){x.save();x.translate(L?W*.72:W/2,L?H*.84:H*.56);x.rotate(-.025);shot(w,0,0,(L?W*.5:W*.92)/w.width,30);x.restore()}shade();text()}),
+ /* MZPRD LOGO: the logo big, then the cover */
+ (x,W,H,X)=>P2(x,W,H,X,({K,k,L,shade,text})=>{x.fillStyle='#070708';x.fillRect(0,0,W,H);K.glowR(L?W*.7:W/2,L?H*.3:H*.12,W*.6);const lg=A2.logo;
+  if(lg){const lw=L?W*.36:W*.7,lh=lw*lg.height/lg.width;x.drawImage(lg,L?W*.7-lw/2:W/2-lw/2,L?H*.08:H*.06,lw,lh)}K.cover(L?W*.7:W/2,L?H*.62:H*.4,L?H*.5:W*.6);shade();text()})
+];
+const PDN=['STUDIO DESK','MPC SCREEN','KEYS','SPEAKERS','DAW BLUR','MIXER','CHANNEL RACK','FLOATING WINDOWS','WAVEFORM','MZPRD LOGO'];
+const BASE_T=T.length;PD.forEach((fn,j)=>T.push({n:PDN[j],photo2:1,f(x,W,H,k0,X){fn(x,W,H,X)}}));
+function make(i,W,H,X){const c=cvs(W,H);c.ready=load().then(()=>load2()).then(()=>recImg()).then(r=>{RECIMG=r;CURLABEL=X.label||'SAMPLE PACK';const k=W/1280,x=c.getContext('2d'),XX={beat:X.kind==='beats',label:X.label||'SAMPLE PACK',name:String(X.title||'SAMPLE PACK').toUpperCase(),cover:X.cover&&(X.cover.naturalWidth||X.cover.width)?X.cover:null};XX.tone=tone(XX);
+  const nT=X.kind==='beats'?BASE_T:T.length,t=T[((i%nT)+nT)%nT];if(Math.abs(W/H-16/9)<.02)t.f(x,W,H,k,XX);else if(H>W*1.2)return recImg().then(rec=>{portrait(x,W,H,XX,i,rec);return c});else{const o=cvs(1280,720);t.f(o.getContext('2d'),1280,720,1,XX);x.fillStyle='#08080a';x.fillRect(0,0,W,H);const s=Math.max(W/1280,H/720);x.drawImage(o,(W-1280*s)/2,(H-720*s)/2,1280*s,720*s)}return c}).catch(e=>{console.warn(e);return c});return c}
 window.MZPackPhoto={make,load,count:T.length,names:T.map(t=>t.n)};
 })();
