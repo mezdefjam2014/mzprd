@@ -1504,7 +1504,7 @@ async function boRender(){
   <label>DESCRIPTION (2 to 3 sentences using words people search, like dark hip hop beat)</label><textarea id="f_desc">${esc(e.description??'')}</textarea>
   ${beatBits}
   ${tab==='samples'?`<div class="two"><div><label>TYPE</label><select id="f_kind">${['Soul chop','Drum break','Vocal loop','Keys loop','Guitar loop','Horn stab','Bass loop','Strings','One-shot','FX'].map(k=>`<option${e.kind===k?' selected':''}>${k}</option>`).join('')}</select></div><div><label>BPM</label><input type="number" min="40" max="220" id="f_bpm" value="${esc(e.bpm??'')}" placeholder="90"></div></div><label>KEY</label><input type="text" id="f_key" value="${esc(e.musical_key??'')}" placeholder="C min" maxlength="12">`:''}
-  <label>PRICE (USD)</label><input type="number" step="0.01" min="0" id="f_price" value="${esc(e.price??(tab==='beats'?29.99:tab==='samples'?4.99:19.99))}">
+  <label>PRICE (USD)</label><input type="number" step="0.01" min="0" id="f_price" value="${esc(e.price??(tab==='beats'?29.99:tab==='samples'?((Number(promo.sample_price)>0?Number(promo.sample_price):4.99).toFixed(2)):19.99))}">
   ${files}
   <div class="two"><div><label>SORT ORDER (0 = first)</label><input type="number" id="f_sort" value="${esc(e.sort_order??0)}"></div></div>
   <label class="chk"><input type="checkbox" id="f_pub" ${e.published===false?'':'checked'}> PUBLISHED (visible on the site)</label>
@@ -1532,7 +1532,7 @@ async function boRender(){
   d.querySelector('.del').onclick=()=>boDelete(r);
   bl.appendChild(d);
  });
- if(tab==='samples'){(window.MZSamplesBO?Promise.resolve():loadScript('samplesbo.js?v=3')).then(()=>MZSamplesBO()).catch(()=>toast('SAMPLE TOOLS FAILED TO LOAD'))}
+ if(tab==='samples'){(window.MZSamplesBO?Promise.resolve():loadScript('samplesbo.js?v=4')).then(()=>MZSamplesBO()).catch(()=>toast('SAMPLE TOOLS FAILED TO LOAD'))}
  if(rows.length){
   dragSort(bl,async()=>{const ids=[...bl.querySelectorAll('.bi[data-id]')].map(x=>x.dataset.id),byId=Object.fromEntries(rows.map(r=>[String(r.id),r]));let n=0,bad=0;
    for(let i=0;i<ids.length;i++){const r=byId[ids[i]];if(r&&Number(r.sort_order)!==i+1){const {error:e}=await sb.from(F.table).update({sort_order:i+1}).eq('id',r.id);if(e)bad++;else{r.sort_order=i+1;n++}}}

@@ -43,18 +43,21 @@ function wireForm(){const full=$('#bf input[data-k="file_path"]'),prev=$('#bf in
   catch(e){note.textContent='Could not make a preview: '+(e.message||e)+'. Choose a preview file yourself.'}finally{if(save)save.disabled=false}})}
 
 /* ---------- bulk upload + price for all (top of the list) ---------- */
-function panels(){const bl=$('#bl');if(!bl||bl.querySelector('.smp-bulk'))return;
+/* your default price for new single samples (set by PRICE FOR ALL) */
+const defPrice=()=>{try{const v=Number(promo&&promo.sample_price);return v>0?v:4.99}catch(e){return 4.99}};
+function panels(){const bl=$('#bl');if(!bl||bl.querySelector('.smp-bulk'))return;const dp=defPrice().toFixed(2);
  const KINDS=['Soul chop','Drum break','Vocal loop','Keys loop','Guitar loop','Horn stab','Bass loop','Strings','One-shot','FX'];
- const g=document.createElement('div');g.className='bi gp smp-price';g.innerHTML='<div><b>PRICE FOR ALL SINGLE SAMPLES</b><span>Sets every single sample to one price.</span></div><div class="acts"><input type="number" step="0.01" min="0" id="smpAllP" value="4.99"><button id="smpAllGo">APPLY TO ALL</button></div>';
+ const g=document.createElement('div');g.className='bi gp smp-price';g.innerHTML='<div><b>PRICE FOR ALL SINGLE SAMPLES</b><span>Sets every single sample to one price, and makes it the default for new uploads.</span></div><div class="acts"><input type="number" step="0.01" min="0" id="smpAllP" value="'+dp+'"><button id="smpAllGo">APPLY TO ALL</button></div>';
  const u=document.createElement('div');u.className='bi smp-bulk';u.style.display='block';
  u.innerHTML=`<b>BULK UPLOAD SINGLE SAMPLES</b><span style="display:block;margin:6px 0 12px">Pick many audio files at once. Each one gets its title from the file name (plus BPM and key when the name has them), a preview made from the full sample, and the type and price below.</span>
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end"><div><label>TYPE FOR THIS BATCH</label><select id="smpBK">${KINDS.map(k=>`<option>${k}</option>`).join('')}</select></div><div><label>PRICE FOR THIS BATCH (USD)</label><input type="number" step="0.01" min="0" id="smpBP" value="4.99"></div></div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end"><div><label>TYPE FOR THIS BATCH</label><select id="smpBK">${KINDS.map(k=>`<option>${k}</option>`).join('')}</select></div><div><label>PRICE FOR THIS BATCH (USD)</label><input type="number" step="0.01" min="0" id="smpBP" value="${dp}"></div></div>
  <label class="chk" style="margin-top:8px"><input type="checkbox" id="smpBPub" checked> PUBLISH THEM STRAIGHT AWAY</label>
  <label class="bo-btn" style="display:block;text-align:center;margin-top:10px;cursor:pointer">CHOOSE AUDIO FILES<input type="file" id="smpBF" accept="audio/*,.wav,.aif,.aiff,.mp3,.flac" multiple hidden></label><div id="smpBL" style="margin-top:10px;display:grid;gap:4px;font-size:12px"></div>`;
  bl.insertBefore(u,bl.firstChild);bl.insertBefore(g,bl.firstChild);
  g.querySelector('#smpAllGo').onclick=async()=>{const v=parseFloat(g.querySelector('#smpAllP').value);if(!(v>=0)){toast('Enter a price');return}
   const ok=window.askConfirm?await askConfirm('SET EVERY SINGLE SAMPLE TO $'+v.toFixed(2)+'?','This changes the price of all single samples on the site.','SET PRICE'):true;if(!ok)return;
-  const {error}=await sb.from('samples').update({price:v}).not('id','is',null);if(error){toast('COULD NOT SAVE: '+error.message);return}toast('ALL SINGLE SAMPLES NOW $'+v.toFixed(2));try{await loadAll()}catch(e){}boRender()};
+  const {error}=await sb.from('samples').update({price:v}).not('id','is',null);if(error){toast('COULD NOT SAVE: '+error.message);return}
+  await sb.from('site_settings').update({sample_price:v}).eq('id',1);try{promo.sample_price=v}catch(e){}toast('ALL SINGLE SAMPLES NOW $'+v.toFixed(2));try{await loadAll()}catch(e){}boRender()};
  u.querySelector('#smpBF').onchange=async ev=>{const files=[...ev.target.files].filter(f=>/^audio\//.test(f.type)||/\.(wav|aif|aiff|mp3|flac)$/i.test(f.name));ev.target.value='';if(!files.length)return;
   const list=u.querySelector('#smpBL'),kind=u.querySelector('#smpBK').value,price=parseFloat(u.querySelector('#smpBP').value)||0,pub=u.querySelector('#smpBPub').checked;
   list.innerHTML=files.map((f,i)=>`<div data-r="${i}" style="display:flex;justify-content:space-between;gap:10px;border:1px solid #26262a;padding:7px 10px"><span>${(f.name||'').replace(/[<>&]/g,'')}</span><em style="font-style:normal;color:#8a8a90">waiting</em></div>`).join('');
