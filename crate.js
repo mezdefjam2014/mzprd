@@ -98,7 +98,7 @@ window.MZCrateHearts=syncHearts;
 /* CRATE DEAL: pick N samples, the cheapest is free; shows progress as samples go in the cart */
 function dealSync(){if(!host)return;const el=host.querySelector('#crDeal');const b=G(()=>bundles.find(x=>x.kind==='free_samples'&&x.active!==false),null);if(!b||!(+b.qty>1)){el.hidden=true;return}
  const n=+b.qty,c=G(()=>[...cart].filter(k=>k[0]==='s').length,0),free=Math.floor(c/n),rem=c%n;el.hidden=false;
- el.innerHTML=`<div class="cd-t"><b>CRATE DEAL</b><span>Pick any ${n} samples, the cheapest one is free${free?` &middot; <em>${free} free in your cart</em>`:''}</span></div><div class="cd-dots">${Array.from({length:n},(_,i)=>`<i class="${i<rem||(!rem&&c>0&&free)?'on':''}${i===n-1?' fr':''}">${i===n-1?'FREE':''}</i>`).join('')}</div><span class="cd-n">${rem}/${n}</span>`}
+ el.innerHTML=`<div class="cd-t"><b>CRATE DEAL</b><span>Pick any ${n} samples, the cheapest one is free${free?` &middot; <em>${free} free in your cart</em>`:''}</span></div><div class="cd-dots">${Array.from({length:n},(_,i)=>`<i class="${i<rem||(!rem&&c>0&&free)?'on':''}${i===n-1?' fr':''}">${i===n-1?'FREE':''}</i>`).join('')}</div><span class="cd-n">${rem||(c?n:0)}/${n}</span>`}
 function paint(){if(!host)return;host.querySelectorAll('.sl').forEach(s=>s.classList.toggle('playing',isOn(+s.dataset.i)));plSync();const b=host.querySelector('#crPlay');if(b)b.classList.toggle('on',isOn(cur))}
 {const A=MA();if(A)['play','pause','ended','emptied'].forEach(ev=>A.addEventListener(ev,paint))}
 window.MZCratePlaying=()=>{const x=items[deck],A=MA();return !!(x&&A&&A.src===x.audio)};
