@@ -134,7 +134,7 @@ T.push(
   if(K.cv){const ls=rs*.36;x.save();x.beginPath();x.arc(cx,cy,ls/2,0,6.283);x.clip();x.drawImage(K.cv,cx-ls/2,cy-ls/2,ls,ls);x.restore();x.fillStyle='#0b0b0d';x.beginPath();x.arc(cx,cy,7*k,0,6.283);x.fill()}
   K.kick(W*.58,H*.26);const y=K.title(W*.58,H*.26+130*k,{maxW:W*.38,size:140});K.tag(W*.58,y+34*k);K.foot(W*.58)}},
  {n:'COVER STACK',f(x,W,H,k0,X){const K=wideKit(x,W,H,X),k=K.k;K.bg(45,.32);K.vign();K.glowR(W*.7,H*.55,W*.45);const sz=H*.62;K.cover(W*.6,H*.5,sz,-.16);K.cover(W*.82,H*.52,sz,.14);K.cover(W*.71,H*.55,sz*1.05,-.02);
-  K.kick(W*.05,H*.26);const y=K.title(W*.05,H*.26+130*k,{maxW:W*.42,size:150});K.tag(W*.05,y+34*k);K.foot(W*.05)}},
+  K.kick(W*.05,H*.26);const y=K.title(W*.05,H*.26+130*k,{maxW:W*.36,size:150});K.tag(W*.05,y+34*k);K.foot(W*.05)}},
  {n:'FULL BLEED',f(x,W,H,k0,X){const K=wideKit(x,W,H,X),k=K.k;x.fillStyle='#08080a';x.fillRect(0,0,W,H);if(K.cv){const s=Math.max((W*.62)/K.cv.width,H/K.cv.height);x.drawImage(K.cv,W-K.cv.width*s,(H-K.cv.height*s)/2,K.cv.width*s,K.cv.height*s)}
   const g=x.createLinearGradient(W*.3,0,W*.62,0);g.addColorStop(0,'rgba(8,8,10,1)');g.addColorStop(1,'rgba(8,8,10,0)');x.fillStyle=g;x.fillRect(0,0,W,H);x.fillStyle='#08080a';x.fillRect(0,0,W*.3,H);
   K.kick(W*.05,H*.26);const y=K.title(W*.05,H*.26+130*k,{maxW:W*.44,size:150});K.tag(W*.05,y+34*k);K.foot(W*.05)}},
@@ -150,7 +150,7 @@ function P2(x,W,H,X,fn){const K=wideKit(x,W,H,X),k=K.k,L=W>H;
  const photo=(img,cx,cy,s,dark)=>{if(!img)return;x.drawImage(img,cx-img.width*s/2,cy-img.height*s/2,img.width*s,img.height*s);if(dark){x.fillStyle='rgba(6,6,8,'+dark+')';x.fillRect(0,0,W,H)}};
  const fill=(img,ax,ay,dark)=>{if(!img)return;const s=Math.max(W/img.width,H/img.height);photo(img,W/2+(ax||0)*(img.width*s-W)/2,H/2+(ay||0)*(img.height*s-H)/2,s,dark)};
  const shade=()=>{if(L){const g=x.createLinearGradient(0,0,W*.55,0);g.addColorStop(0,'rgba(6,6,8,.92)');g.addColorStop(1,'rgba(6,6,8,0)');x.fillStyle=g;x.fillRect(0,0,W,H)}else{const g=x.createLinearGradient(0,H*.55,0,H);g.addColorStop(0,'rgba(6,6,8,0)');g.addColorStop(.35,'rgba(6,6,8,.9)');g.addColorStop(1,'rgba(6,6,8,.98)');x.fillStyle=g;x.fillRect(0,0,W,H)}};
- const text=()=>{if(L){K.kick(W*.05,H*.26);const y=K.title(W*.05,H*.26+130*k,{maxW:W*.42,size:150});K.tag(W*.05,y+34*k);K.foot(W*.05)}
+ const text=()=>{if(L){K.kick(W*.05,H*.26);const y=K.title(W*.05,H*.26+130*k,{maxW:W*.36,size:150});K.tag(W*.05,y+34*k);K.foot(W*.05)}
   else{const y0=H*.7;K.kick(W/2,y0-80*k,null,'center');const y=K.title(W/2,y0+130*k,{align:'center',maxW:W*.88,size:170,lines:2});K.tag(W/2,y+34*k,{align:'center'});K.foot(W/2,null,'center')}};
  const shot=(img,cx,cy,s,sh)=>{if(!img)return;x.save();x.shadowColor='rgba(0,0,0,.75)';x.shadowBlur=(sh||50)*k;x.shadowOffsetY=18*k;x.drawImage(img,cx-img.width*s/2,cy-img.height*s/2,img.width*s,img.height*s);x.restore()};
  fn({K,k,L,photo,fill,shade,text,shot})}
