@@ -10,7 +10,8 @@ const PRESETS={clean:{grain:false,vig:true},grunge:{grain:true,vig:true},film:{g
  vinyl:{grain:true,vig:true,font:'Impact',color:'#ffffff',vis:'none',visColor:'#e0242f',glow:false},
  archive:{grain:true,vig:true,font:'Impact',color:'#efe9df',vis:'none',visColor:'#efe9df',glow:false},
  smoke:{grain:true,vig:true,font:'Impact',color:'#f3ece4',vis:'waveform',visColor:'#c9302c',glow:false},
- stage:{grain:true,vig:true,font:'Impact',color:'#ffffff',vis:'bars',visColor:'#d8d8d8',glow:false}};
+ stage:{grain:true,vig:true,font:'Impact',color:'#ffffff',vis:'bars',visColor:'#d8d8d8',glow:false},
+ crate:{grain:true,vig:true,vis:'none'},ipod:{grain:true,vig:true,vis:'none'},sleeve:{grain:true,vig:true,vis:'none'},stack:{grain:true,vig:true,vis:'none'},shatter:{grain:true,vig:true,vis:'none'},mpc:{grain:true,vig:true,vis:'none'},speakers:{grain:true,vig:true,vis:'none'},'price tag':{grain:true,vig:true,vis:'none'}};
 const FONTS={'Impact':'Impact, Haettenschweiler, sans-serif','Montserrat':'Montserrat, sans-serif','Press Start':"'Press Start 2P', monospace",'Serif':'Georgia, serif','Brush':"'Brush Script MT', cursive"};
 const VIS=['waveform','bars','circle','none'],ANIM=['zoom','pan','none'];
 const S={items:[],kind:'beats',item:null,cover:null,bd:null,fmt:'16:9',layout:'fit',preset:'clean',anim:'zoom',grain:false,vig:true,
@@ -245,11 +246,11 @@ function frame(cv,t,dur){
    if(!S.bd||S.bd.width!==W||S.bd.height!==H)S.bd=makeBackdrop(W,H);
    c.save();c.translate(W/2+pan*.5,H/2);c.scale(1+(zoom-1)*.6,1+(zoom-1)*.6);c.drawImage(S.bd,-W/2,-H/2);c.restore();
    const z=(S.anim==='zoom'?1+.04*p:1)*pulse,s=cs*z;
-   if(S.preset==='vinyl')vinylDisc(c,cx,cy,s,t,d);
+   if(SCN[S.preset]){scnLoad();SCN[S.preset](c,cx,cy-s*(land?.05:.03),s*(land?.95:.82),t,d)}else{if(S.preset==='vinyl')vinylDisc(c,cx,cy,s,t,d);
    c.save();c.shadowColor='rgba(0,0,0,.75)';c.shadowBlur=60*H/1080;c.shadowOffsetY=18*H/1080;
    const iw=S.cover.naturalWidth,ih=S.cover.naturalHeight,sc=Math.max(s/iw,s/ih),sw=s/sc,sh=s/sc;
    c.beginPath();c.rect(cx-s/2,cy-s/2,s,s);c.fillStyle='#000';c.fill();c.shadowColor='transparent';c.clip();
-   c.drawImage(S.cover,(iw-sw)/2,(ih-sh)/2,sw,sh,cx-s/2,cy-s/2,s,s);c.restore();
+   c.drawImage(S.cover,(iw-sw)/2,(ih-sh)/2,sw,sh,cx-s/2,cy-s/2,s,s);c.restore();}
   }
  }
  effects(c,W,H,t,d);
@@ -259,13 +260,14 @@ function frame(cv,t,dur){
  const k=land?H:W;
  if(land){
   drawVis(c,d,W,H,H*.955,cx,cy,cs/2*1.04);
-  drawText(c,'intro',t,W,H,H*.075,H*.06);drawText(c,'title',t,W,H,H*.835,H*.095);drawText(c,'info',t,W,H,H*.905,H*.034);
+  drawText(c,'intro',t,W,H,H*.075,H*.06);drawText(c,'title',t,W,H,H*.835,H*.095);if(!SCN[S.preset])drawText(c,'info',t,W,H,H*.905,H*.034);
   drawText(c,'tag',t,W,H,H*.07,H*.026,'right',W*.97);
  }else{
   drawVis(c,d,W,H,H*.93,cx,cy,cs/2*1.04);
   drawText(c,'intro',t,W,H,H*.085,W*.06);drawText(c,'title',t,W,H,H*.74,W*.115);drawText(c,'info',t,W,H,H*.8,W*.04);
   drawText(c,'tag',t,W,H,H*.045,W*.032,'right',W*.96);
  }
+ if(SCN[S.preset])scBar(c,W,H,t,dur);
  if(S.preset==='film'){c.fillStyle='#000';const b=H*(land?.085:.05);c.fillRect(0,0,W,b);c.fillRect(0,H-b,W,b)}
  const ecd=Math.min(6,dur*.5);if(S.end&&dur&&t>dur-ecd)endCard(c,W,H,t-(dur-ecd),ecd);
 }
@@ -343,6 +345,50 @@ function vinylTexture(D){
  x.strokeStyle='rgba(0,0,0,.5)';x.lineWidth=D*.003;x.beginPath();x.arc(0,0,L,0,6.283);x.stroke();
  x.fillStyle='#d9d9dc';x.beginPath();x.arc(0,0,R*.03,0,6.283);x.fill();x.fillStyle='#000';x.beginPath();x.arc(0,0,R*.018,0,6.283);x.fill();
  return vinylTex=cv}
+
+/* SCENE PRESETS: animated scenes built from the thumbnail photo cut-outs (mpc/pk2, mpc/pk3). Same art box as the cover,
+   so the text/visualizer zones never change. Every scene: intro ease in the first ~1.4s, then a slow loop + bass pulse. */
+const SCI={},SCF={crate:'pk3/crate.webp',ipod:'pk3/ipod.webp',sleeve:'pk3/sleeve.webp',stack:'pk3/stack.webp',broken:'pk3/broken.webp',price:'pk3/price.webp',mpc:'pk2/mpc.webp',speaker:'pk2/speaker.webp'};let scnP=null;
+function scnLoad(){scnP=scnP||Promise.all(Object.entries(SCF).map(([n,f])=>new Promise(r=>{const i=new Image();i.onload=()=>{SCI[n]=i;r()};i.onerror=r;i.src=new URL('mpc/'+f+'?v=1',document.baseURI).href})))}
+const scE=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),3),scB=x=>{x=Math.min(1,Math.max(0,x));const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+function scShot(c,img,x,y,w,rot,a){if(!img)return;const h=img.height*w/img.width;c.save();c.globalAlpha*=a==null?1:a;c.translate(x,y);if(rot)c.rotate(rot);c.shadowColor='rgba(0,0,0,.75)';c.shadowBlur=w*.08;c.shadowOffsetY=w*.03;c.drawImage(img,-w/2,-h/2,w,h);c.restore()}
+function scCover(c,x,y,sz,rot,a,clipFn){const cv=S.cover;if(!cv)return;const iw=cv.naturalWidth,ih=cv.naturalHeight,m=Math.min(iw,ih);c.save();c.globalAlpha*=a==null?1:a;c.translate(x,y);if(rot)c.rotate(rot);c.shadowColor='rgba(0,0,0,.75)';c.shadowBlur=sz*.1;c.shadowOffsetY=sz*.035;c.fillStyle='#000';c.fillRect(-sz/2,-sz/2,sz,sz);c.shadowColor='transparent';c.drawImage(cv,(iw-m)/2,(ih-m)/2,m,m,-sz/2,-sz/2,sz,sz);c.strokeStyle='rgba(255,255,255,.14)';c.lineWidth=Math.max(1,sz*.004);c.strokeRect(-sz/2,-sz/2,sz,sz);c.restore()}
+function scSpin(c,x,y,R,t,a){const D=Math.min(2048,Math.round(R*2)),tex=vinylTexture(D);c.save();c.globalAlpha*=a==null?1:a;c.translate(x,y);c.shadowColor='rgba(0,0,0,.8)';c.shadowBlur=R*.14;c.beginPath();c.arc(0,0,R,0,6.283);c.fillStyle='#000';c.fill();c.shadowColor='transparent';c.rotate(t*3.49);c.drawImage(tex,-R,-R,R*2,R*2);
+ const cv=S.cover;if(cv){const m=Math.min(cv.naturalWidth,cv.naturalHeight),lr=R*.34;c.beginPath();c.arc(0,0,lr,0,6.283);c.clip();c.drawImage(cv,(cv.naturalWidth-m)/2,(cv.naturalHeight-m)/2,m,m,-lr,-lr,lr*2,lr*2)}c.restore();c.fillStyle='#0b0b0d';c.beginPath();c.arc(x,y,R*.025,0,6.283);c.fill()}
+function scGlow(c,x,y,r,a){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(224,36,47,'+a+')');g.addColorStop(1,'rgba(224,36,47,0)');c.fillStyle=g;c.fillRect(x-r,y-r,r*2,r*2)}
+/* player bar for the scene presets: red header with the title, the whole track's waveform, played part bright */
+let scPk=null,scPkB=null;
+function scPeaks(n){const b=S.buf;if(!b)return null;if(scPkB===b&&scPk&&scPk.length===n)return scPk;const ch=b.getChannelData(0),step=Math.floor(ch.length/n),out=new Float32Array(n);let mx=0;for(let i=0;i<n;i++){let m=0;for(let j=i*step,e=j+step;j<e;j+=8){const v=Math.abs(ch[j]);if(v>m)m=v}out[i]=m;if(m>mx)mx=m}for(let i=0;i<n;i++)out[i]/=mx||1;scPk=out;scPkB=b;return out}
+function scBar(c,W,H,t,dur){const land=W>H,k=land?H/1080:W/1080,bw=land?W*.9:W*.88,bh=land?H*.11:H*.07,x=(W-bw)/2,y=land?H*.875:H*.83,hh=bh*.32,n=Math.round(bw/(3*k)),pk=scPeaks(n),pr=dur?Math.min(1,t/dur):0,e=Math.min(1,t/.8);
+ c.save();c.globalAlpha=e;c.fillStyle='rgba(8,8,10,.82)';c.fillRect(x,y,bw,bh);c.fillStyle='#e0242f';c.fillRect(x,y,bw,hh);c.strokeStyle='#e0242f';c.lineWidth=3*k;c.strokeRect(x,y,bw,bh);
+ c.fillStyle='#fff';c.textBaseline='middle';c.textAlign='left';c.font=`800 ${hh*.62}px Inter, Arial, sans-serif`;c.fillText('▶  '+String((S.item&&S.item.title)||'').toUpperCase(),x+hh*.45,y+hh*.54);
+ const wy=y+hh+(bh-hh)/2,wa=(bh-hh)*.42,px=x+bw*pr;for(let i=0;i<n;i++){const v=pk?pk[i]:.35+.55*Math.abs(Math.sin(i*.37)*Math.sin(i*.071+1)),xx=x+6*k+i*(bw-12*k)/n,a=Math.max(1*k,v*wa);c.fillStyle=xx<=px?'#fff':'rgba(255,255,255,.38)';c.fillRect(xx,wy-a,Math.max(1,2*k),a*2)}
+ c.fillStyle='#e0242f';c.fillRect(px-1.5*k,y+hh,3*k,bh-hh);c.restore()}
+const MPCPAD=[83,348,277,282];
+const SCN={
+ /* CRATE: the crate rises in, the cover lifts out of it and floats */
+ crate(c,cx,cy,s,t,d){const I=SCI.crate,b=d.bass||0,e=scE(t/1.1),e2=scE((t-.7)/1.1);scGlow(c,cx,cy,s*.9,.3+b*.2);const cw=s*1.02;if(!I){scCover(c,cx,cy,s);return}const ch=I.height*cw/I.width,base=cy+s*.5,top=base-ch+(1-e)*s*.9;
+  const fl=Math.sin(t*1.6)*s*.015-b*s*.035;scCover(c,cx+cw*.06,top+ch*.22-e2*s*.12+fl,s*.5*(1+b*.02),.05+Math.sin(t*.9)*.015,e);scShot(c,I,cx,top+ch/2,cw,0,e)},
+ /* IPOD: the iPod slides up, the cover lights up on its screen */
+ ipod(c,cx,cy,s,t,d){const I=SCI.ipod,b=d.bass||0,e=scE(t/1.2);scGlow(c,cx,cy,s*.9,.28+b*.25);if(!I){scCover(c,cx,cy,s);return}const h=s*.97,w=I.width*h/I.height,x=cx,y=cy+(1-e)*s*1.2+Math.sin(t*1.2)*s*.01,ox=x-w/2,oy=y-h/2,on=scE((t-.9)/.6);
+  c.save();c.globalAlpha=e;c.fillStyle='#000';c.fillRect(ox+w*.06,oy+h*.04,w*.88,h*.39);c.restore();if(S.cover){const cv=S.cover,sw=w*.86,sh=h*.38,sc=Math.max(sw/cv.naturalWidth,sh/cv.naturalHeight);c.save();c.globalAlpha=e*on;c.beginPath();c.rect(ox+w*.07,oy+h*.045,sw,sh);c.clip();const z=1+.05*Math.sin(t*.5);c.translate(ox+w/2,oy+h*.235);c.scale(z,z);c.drawImage(cv,-cv.naturalWidth*sc/2,-cv.naturalHeight*sc/2,cv.naturalWidth*sc,cv.naturalHeight*sc);c.restore()}
+  scShot(c,I,x,y,w,0,e);if(d.td&&on>0){const bx=ox+w*.12,bw=w*.76,by=oy+h*.4,c2=c;c2.save();c2.globalAlpha=e*on;c2.fillStyle='rgba(0,0,0,.55)';c2.fillRect(ox+w*.07,by-h*.045,w*.86,h*.07);c2.strokeStyle='#fff';c2.lineWidth=Math.max(1,w*.006);c2.beginPath();for(let i=0;i<64;i++){const v=(d.td[i*16]-128)/128,px=bx+bw*i/63,py=by-h*.012+v*h*.02;i?c2.lineTo(px,py):c2.moveTo(px,py)}c2.stroke();const pr=S.buf&&S.buf.duration?Math.min(1,t/S.buf.duration):(t%30)/30;c2.fillStyle='rgba(255,255,255,.3)';c2.fillRect(bx,by+h*.012,bw,h*.006);c2.fillStyle='#e0242f';c2.fillRect(bx,by+h*.012,bw*pr,h*.006);c2.restore()}c.save();c.globalAlpha=e*(.15+b*.5);c.globalCompositeOperation='screen';scGlow(c,x,oy+h*.735,w*.2,.9);c.restore()},
+ /* SLEEVE: a record slides out of the old sleeve and spins, the cover leans in front */
+ sleeve(c,cx,cy,s,t,d){const I=SCI.sleeve,b=d.bass||0,e=scE(t/1),e2=scE((t-.6)/1.3),e3=scB((t-1.2)/.8);scGlow(c,cx,cy,s,.28+b*.2);const sw=s*1.15,sx=cx-s*.18+(1-e)*-s*.6,R=sw*.38;
+  scSpin(c,sx+e2*s*.52,cy-s*.04,R*(1+b*.01),t,e);if(I)scShot(c,I,sx,cy-s*.04,sw,0,e);scCover(c,cx-s*.42,cy+s*.2,s*.55*e3,-.08,Math.min(1,e3))},
+ /* STACK: the cover drops onto a stack of records and settles */
+ stack(c,cx,cy,s,t,d){const I=SCI.stack,b=d.bass||0,e=scE(t/1),dr=scB((t-.5)/.9);scGlow(c,cx,cy,s,.28+b*.2);if(I)scShot(c,I,cx,cy+s*.2+(1-e)*s*.4,s*.9,0,e);const y=cy-s*.12-(1-dr)*s*1.2;scCover(c,cx,y+Math.sin(t*1.4)*s*.012,s*.5*(1+b*.02),.07*dr-.02+Math.sin(t*.8)*.012,Math.min(1,dr*2))},
+ /* SHATTER: the broken record turns slowly behind the cover, the cover hits on the bass */
+ shatter(c,cx,cy,s,t,d){const I=SCI.broken,b=d.bass||0,e=scE(t/1.2),e2=scB((t-.5)/.8);scGlow(c,cx,cy,s,.3+b*.3);if(I){const w=s*1.3*(.85+.15*e);c.save();c.translate(cx+s*.2,cy);c.rotate(t*.12-.3*(1-e));scShot(c,I,0,0,w,0,e);c.restore()}const sh=b>.55?(Math.random()-.5)*s*.012:0;scCover(c,cx-s*.16+sh,cy+sh,s*.76*e2*(1+b*.03),-.04,Math.min(1,e2))},
+ /* MPC: the MPC slides in, the cover on its screen, a record turning behind */
+ mpc(c,cx,cy,s,t,d){const I=SCI.mpc,b=d.bass||0,e=scE(t/1.1),e2=scE((t-.5)/1.2);scGlow(c,cx,cy,s,.3+b*.2);scSpin(c,cx+s*.32*e2,cy-s*.1,s*.4,t,e2);if(!I){scCover(c,cx,cy,s);return}const w=s*.95,h=I.height*w/I.width,x=cx-s*.12,y=cy+(1-e)*s*1.1,ox=x-w/2,oy=y-h/2,sc=w/649;
+  scShot(c,I,x,y,w,0,e);if(S.cover){const cv=S.cover,sx=ox+20*sc,sy=oy+70*sc,sw=406*sc,sh=222*sc,r=Math.max(sw/cv.naturalWidth,sh/cv.naturalHeight);c.save();c.globalAlpha=e*scE((t-.8)/.5);c.beginPath();c.rect(sx,sy,sw,sh);c.clip();c.drawImage(cv,sx+sw/2-cv.naturalWidth*r/2,sy+sh/2-cv.naturalHeight*r/2,cv.naturalWidth*r,cv.naturalHeight*r);c.fillStyle='rgba(255,255,255,'+(.04+b*.1)+')';c.fillRect(sx,sy,sw,sh);c.restore()}
+  if(d.fd){const px=ox+MPCPAD[0]*sc,py=oy+MPCPAD[1]*sc,pw=MPCPAD[2]*sc,ph=MPCPAD[3]*sc,cw=pw/4,chh=ph/4;c.save();c.globalCompositeOperation='screen';for(let r=0;r<4;r++)for(let q=0;q<4;q++){const n=r*4+q,v=d.fd[4+n*6]/255,on=Math.max(0,v-.55)/.45;if(on<=0)continue;c.globalAlpha=e*on;c.fillStyle='#ff3040';c.shadowColor='#ff3040';c.shadowBlur=cw*.5;c.fillRect(px+q*cw+cw*.1,py+r*chh+chh*.1,cw*.8,chh*.8)}c.restore()}},
+ /* SPEAKERS: two monitors either side pump with the kick */
+ speakers(c,cx,cy,s,t,d){const I=SCI.speaker,b=d.bass||0,e=scE(t/1),e2=scB((t-.4)/.8);scGlow(c,cx,cy,s,.3+b*.35);if(I){const h=s*.62*(1+b*.035),w=I.width*h/I.height,dx=Math.min(s*.62,c.canvas.width/2-w*.55)+(1-e)*s*.5;scShot(c,I,cx-dx,cy+s*.12,w,0,e);c.save();c.translate(cx+dx,0);c.scale(-1,1);scShot(c,I,0,cy+s*.12,w,0,e);c.restore()}scCover(c,cx,cy,s*.72*e2*(1+b*.025),0,Math.min(1,e2))},
+ /* PRICE TAG: the cover settles, then the tag slaps onto its corner */
+ 'price tag'(c,cx,cy,s,t,d){const I=SCI.price,b=d.bass||0,e=scB(t/.9),p=scB((t-1.1)/.5);scGlow(c,cx,cy,s,.28+b*.2);const sz=s*.86*(1+b*.02);scCover(c,cx,cy+Math.sin(t*1.2)*s*.01,sz*Math.min(1.05,e),.02,Math.min(1,e*1.5));if(I&&t>1.1){const sc=1+(1-p)*1.4;c.save();c.translate(cx+sz*.34,cy+sz*.38);c.rotate(-.13+(1-p)*.4);c.scale(sc,sc);scShot(c,I,0,0,s*.46,0,Math.min(1,p*2));c.restore()}}
+};
 function vinylDisc(c,cx,cy,s,t,d){
  const e=Math.min(1,t/1.4),ease=1-Math.pow(1-e,3),R=s*.48,x=cx+s*.5*ease,D=Math.min(2048,Math.round(R*2)),tex=vinylTexture(D);
  c.save();c.translate(x,cy);c.shadowColor='rgba(0,0,0,.85)';c.shadowBlur=s*.07;c.shadowOffsetY=s*.02;c.beginPath();c.arc(0,0,R,0,6.283);c.fillStyle='#000';c.fill();c.shadowColor='transparent';
@@ -766,7 +812,7 @@ function wire(){
  const q=s=>$s(s);
  document.querySelectorAll('#studio .seg [data-k]').forEach(b=>b.onclick=()=>{S.kind=b.dataset.k;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderList()});
  document.querySelectorAll('#studio [data-f]').forEach(b=>{if(b.tagName==='BUTTON')b.onclick=()=>{S.fmt=b.dataset.f;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));try{if(YG.list&&YG.list.length)ygRender()}catch(e){}S.bd=null;stopPlay();syncUi();redraw()}});
- q('#sPre').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.preset=b.dataset.p;const d=PRESETS[S.preset];S.grain=d.grain;S.vig=d.vig;q('#sGrain').checked=d.grain;q('#sVig').checked=d.vig;
+ q('#sPre').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.preset=b.dataset.p;if(SCN[S.preset]){scnLoad();scnP.then(()=>redraw())}const d=PRESETS[S.preset];S.grain=d.grain;S.vig=d.vig;q('#sGrain').checked=d.grain;q('#sVig').checked=d.vig;
   [['font','#sFont'],['color','#sCol'],['vis','#sVis'],['visColor','#sVc']].forEach(([k,id])=>{if(d[k]!=null){S[k]=d[k];q(id).value=d[k]}});if(d.glow!=null){S.glow=d.glow;q('#sGlow').checked=d.glow}
   q('#sPre').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));redraw()};
  const bind=(id,key,fn)=>{const el=q(id);el.oninput=el.onchange=()=>{S[key]=fn?fn(el):el.value;if(key==='layout')S.bd=null;redraw()}};
