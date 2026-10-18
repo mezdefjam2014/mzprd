@@ -359,7 +359,7 @@ function scGlow(c,x,y,r,a){const g=c.createRadialGradient(x,y,0,x,y,r);g.addColo
 /* player bar for the scene presets: red header with the title, the whole track's waveform, played part bright */
 let scPk=null,scPkB=null;
 function scPeaks(n){const b=S.buf;if(!b)return null;if(scPkB===b&&scPk&&scPk.length===n)return scPk;const ch=b.getChannelData(0),step=Math.floor(ch.length/n),out=new Float32Array(n);let mx=0;for(let i=0;i<n;i++){let m=0;for(let j=i*step,e=j+step;j<e;j+=8){const v=Math.abs(ch[j]);if(v>m)m=v}out[i]=m;if(m>mx)mx=m}for(let i=0;i<n;i++)out[i]/=mx||1;scPk=out;scPkB=b;return out}
-function scLay(W,H){const land=W>H,m=SCM[S.preset]||{},R=m.right&&land;return{land,R,red:!!m.red,tx:land?(R?W*.56:W*.055):W/2,tw:land?W*.39:W*.86,cx:land?(R?W*.27:W*.71):W/2,cy:land?H*.47:H*.29,s:land?H*.68:W*.74}}
+function scLay(W,H){const land=W>H,m=SCM[S.preset]||{},R=m.right&&land;return{land,R,red:!!m.red,tx:land?(R?W*.56:W*.055):W/2,tw:land?W*.36:W*.86,cx:land?(R?W*.27:W*.71):W/2,cy:land?H*.47:H*.29,s:land?H*.68:W*.74}}
 function scBar(c,W,H,t,dur){const L=scLay(W,H),land=L.land,k=land?H/1080:W/1080,bw=land?L.tw:W*.86,bh=land?H*.095:H*.062,x=land?L.tx:(W-bw)/2,y=land?H*.795:H*.835,hh=bh*.34,n=Math.round(bw/(3*k)),pr=dur?Math.min(1,t/dur):0,e=io((t-1)/.8);if(e<=0)return;
  const pk=scPeaks(n),dark=L.red;c.save();c.globalAlpha=e;c.fillStyle=dark?'rgba(11,11,13,.92)':'rgba(8,8,10,.82)';c.fillRect(x,y,bw,bh);c.fillStyle=dark?'#0b0b0d':'#e0242f';c.fillRect(x,y,bw,hh);c.strokeStyle=dark?'#0b0b0d':'#e0242f';c.lineWidth=3*k;c.strokeRect(x,y,bw,bh);
  c.fillStyle='#fff';c.textBaseline='middle';c.textAlign='left';c.font=`800 ${hh*.6}px Inter, Arial, sans-serif`;c.fillText('\u25B6  '+String((S.item&&S.item.title)||'').toUpperCase(),x+hh*.45,y+hh*.54);
@@ -369,8 +369,9 @@ function scBar(c,W,H,t,dur){const L=scLay(W,H),land=L.land,k=land?H/1080:W/1080,
 function scLabel(){const it=S.item||{},kd=it._k||S.kind;return kd==='samples'?'SINGLE SAMPLE':kd==='beats'?'TYPE BEAT':'SAMPLE PACK'}
 function scText(c,W,H,t){const L=scLay(W,H),land=L.land,k=land?W/1280:W/1080,F="Anton, Impact, 'Arial Narrow Bold', sans-serif",B="Inter, 'Helvetica Neue', Arial, sans-serif",fg=L.red?'#0b0b0d':'#fff',acc=L.red?'#0b0b0d':'#e0242f',al=land?'left':'center',x0=L.tx,
  name=String((S.item&&S.item.title)||'').toUpperCase(),ws=name.split(/\s+/);let fs=(land?150:170)*k,lines;const wrap=()=>{c.font=fs+'px '+F;lines=[];let cur='';for(const w of ws){const s2=cur?cur+' '+w:w;if(c.measureText(s2).width>L.tw&&cur){lines.push(cur);cur=w}else cur=s2}if(cur)lines.push(cur)};
- wrap();while((lines.length>(land?3:2)||Math.max(...lines.map(l=>c.measureText(l).width))>L.tw)&&fs>54*k){fs-=4*k;wrap()}
- const y0=land?H*.25:H*.565;c.save();c.textAlign=al;c.textBaseline='alphabetic';
+ const y0=land?H*.25:H*.565,avail=(land?H*.795:H*.835)-y0-34*k-50*k-30*k;
+ wrap();while((lines.length>(land?3:2)||Math.max(...lines.map(l=>c.measureText(l).width))>L.tw||lines.length*fs*.92+fs*.08>avail)&&fs>40*k){fs-=3*k;wrap()}
+c.save();c.textAlign=al;c.textBaseline='alphabetic';
  const ek=io((t-.2)/.9);c.globalAlpha=ek;c.fillStyle=acc;c.font='800 '+Math.round(24*k)+'px '+B;c.letterSpacing=Math.round((8+10*(1-ek))*k)+'px';c.fillText('NEW '+scLabel(),x0,y0);c.letterSpacing='0px';c.globalAlpha=1;
  let y=y0+fs*.98;lines.forEach((l,i)=>{const e=xo((t-.35-i*.12)/1.1);if(e<=0){y+=fs*.92;return}c.save();c.beginPath();c.rect(0,y-fs*.95,W,fs*1.02);c.clip();c.font=fs+'px '+F;c.fillStyle=fg;if(!L.red){c.shadowColor='rgba(0,0,0,.55)';c.shadowBlur=18*k}c.fillText(l,x0,y+(1-e)*fs);c.restore();y+=fs*.92});
  y=y-fs*.92+34*k;const lab=scLabel();c.font='800 '+Math.round(26*k)+'px '+B;c.letterSpacing=Math.round(6*k)+'px';const tw=c.measureText(lab).width+44*k,th=50*k,te=xo((t-.9)/.9),bx=land?x0:x0-tw/2;
@@ -427,13 +428,13 @@ const SCN={
   scHero(c,cx-s*.18,cy+(1-e2)*s*.1,s*.82*(1+b*.012),-.03,t,e2)})},
 
  mpc(c,cx,cy,s,t,d){const I=SCI.mpc,b=d.bass||0,e=xo(t/1.6),e2=io((t-.4)/1.8);scGlow(c,cx,cy,s,.26+b*.12);scCam(c,cx,cy,t,()=>{
-  scSpin(c,cx+s*.3*e2,cy-s*.08,s*.42,t,e2);if(!I){scHero(c,cx,cy,s*.8,0,t,1);return}const w=s*1.02,h=I.height*w/I.width,x=cx-s*.1,y=cy+(1-e)*s*.3,ox=x-w/2,oy=y-h/2,sc=w/649;
+  scSpin(c,cx+s*.3*e2,cy-s*.08,s*.42,t,e2);if(!I){scHero(c,cx,cy,s*.8,0,t,1);return}const w=s*1.02,h=I.height*w/I.width,x=cx+s*.02,y=cy+(1-e)*s*.3,ox=x-w/2,oy=y-h/2,sc=w/649;
   scFloor(c,x,y+h/2,w*1.3,e);scShot(c,I,x,y,w,0,e);
   if(S.cover){const cv=S.cover,sx=ox+20*sc,sy=oy+70*sc,sw=406*sc,sh=222*sc,r=Math.max(sw/cv.naturalWidth,sh/cv.naturalHeight);c.save();c.globalAlpha=e*io((t-.9)/.8);c.beginPath();c.rect(sx,sy,sw,sh);c.clip();c.drawImage(cv,sx+sw/2-cv.naturalWidth*r/2,sy+sh/2-cv.naturalHeight*r/2,cv.naturalWidth*r,cv.naturalHeight*r);c.restore()}
   if(d.fd){const px=ox+MPCPAD[0]*sc,py=oy+MPCPAD[1]*sc,pw=MPCPAD[2]*sc,ph=MPCPAD[3]*sc,cw=pw/4,chh=ph/4;c.save();c.globalCompositeOperation='screen';for(let r=0;r<4;r++)for(let q=0;q<4;q++){const n=r*4+q,v=d.fd[4+n*6]/255,on=Math.max(0,v-.55)/.45;if(on<=0)continue;c.globalAlpha=e*on*.85;c.fillStyle='#ff3040';c.shadowColor='#ff3040';c.shadowBlur=cw*.5;c.fillRect(px+q*cw+cw*.1,py+r*chh+chh*.08,cw*.8,chh*.72)}c.restore()}})},
  /* SPEAKERS: monitors slide in from the sides, cones breathe with the kick, big cover centre */
  speakers(c,cx,cy,s,t,d){const I=SCI.speaker,b=d.bass||0,e=xo(t/1.7),e2=xo((t-.4)/1.6);scGlow(c,cx,cy,s*1.1,.26+b*.15);scCam(c,cx,cy,t,()=>{
-  if(I){const h=s*.66*(1+b*.012),w=I.width*h/I.height,dx=Math.min(s*.66,c.canvas.width-cx-w*.55,cx-w*.55)+(1-e)*s*.25;scShot(c,I,cx-dx,cy+s*.12,w,0,e);c.save();c.translate(cx+dx,0);c.scale(-1,1);scShot(c,I,0,cy+s*.12,w,0,e);c.restore()}
+  if(I){const h=s*.66*(1+b*.012),w=I.width*h/I.height,dx=Math.min(s*.56,c.canvas.width-cx-w*.55,cx-w*.55)+(1-e)*s*.25;scShot(c,I,cx-dx,cy+s*.12,w,0,e);c.save();c.translate(cx+dx,0);c.scale(-1,1);scShot(c,I,0,cy+s*.12,w,0,e);c.restore()}
   scHero(c,cx,cy+(1-e2)*s*.1,s*.8*(1+b*.012),0,t,e2)})},
  /* PRICE TAG: big cover settles, the tag eases onto the corner */
  'price tag'(c,cx,cy,s,t,d){const I=SCI.price,b=d.bass||0,e=xo(t/1.6),p=xo((t-1.2)/1.2);scGlow(c,cx,cy,s,.24+b*.12);scCam(c,cx,cy,t,()=>{
@@ -655,13 +656,9 @@ async function renderRT(){
 /* ---------- UI ---------- */
 /* a crate-style cover for a single sample: the worn sleeve with its name printed on it, the red-label record sliding out */
 let SMPIMG=null;const smpImgs=()=>SMPIMG||(SMPIMG=Promise.all(['crate-sleeve.jpg','crate-record.webp?v=1'].map(n=>new Promise(ok=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>ok(im);im.onerror=()=>ok(null);im.src=BASEPATH+n}))));
-async function sampleCover(it){const [sl,rc]=await smpImgs(),N=1024,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');
- x.fillStyle='#0a0a0b';x.fillRect(0,0,N,N);const g=x.createRadialGradient(N*.7,N*.5,0,N*.7,N*.5,N*.7);g.addColorStop(0,'rgba(224,36,47,.28)');g.addColorStop(1,'rgba(224,36,47,0)');x.fillStyle=g;x.fillRect(0,0,N,N);
- const sz=N*.74,sx=N*.08,sy=(N-sz)/2;if(rc){x.save();x.shadowColor='rgba(0,0,0,.7)';x.shadowBlur=40;x.translate(sx+sz*.78,N/2);x.rotate(.4);x.drawImage(rc,-sz*.48,-sz*.48,sz*.96,sz*.96);x.restore()}
- x.save();x.shadowColor='rgba(0,0,0,.8)';x.shadowBlur=50;x.shadowOffsetY=18;if(sl)x.drawImage(sl,sx,sy,sz,sz);else{x.fillStyle='#111';x.fillRect(sx,sy,sz,sz)}x.restore();
- x.fillStyle='#ece6da';x.textBaseline='alphabetic';x.font="700 26px 'Courier New',monospace";x.fillText('MZPRD · SINGLE SAMPLE',sx+50,sy+80);
- let fs=96;const t=String(it.title||'SAMPLE').toUpperCase();x.font=fs+"px Anton,Impact,sans-serif";while(x.measureText(t).width>sz-100&&fs>40){fs-=4;x.font=fs+"px Anton,Impact,sans-serif"}x.fillText(t,sx+50,sy+80+fs+10);
- x.font="700 24px 'Courier New',monospace";x.fillStyle='#a8a296';x.fillText([it.kind,it.bpm&&it.bpm+' BPM',it.musical_key].filter(Boolean).join('  ·  ').toUpperCase(),sx+50,sy+80+fs+56);
+/* single samples use the real blank sleeve (crate-sleeve.jpg) as their cover, untouched */
+async function sampleCover(it){const [sl]=await smpImgs(),N=1024,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.fillStyle='#0a0a0b';x.fillRect(0,0,N,N);
+ if(sl){const m=Math.min(sl.width,sl.height);x.drawImage(sl,(sl.width-m)/2,(sl.height-m)/2,m,m,0,0,N,N)}
  return c.toDataURL('image/jpeg',.92)}
 function setItem(it){
  S.item=it;S.cover=null;S.bd=null;S.buf=null;
