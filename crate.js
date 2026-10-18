@@ -18,7 +18,10 @@ function demo(){const ps=G(()=>packs,[]).filter(p=>p.preview_path);const out=[];
   bpm:[84,88,90,92,94,96,98][n%7],key:KEYS[n%KEYS.length],kind:KINDS[n%KINDS.length],price:[2.99,3.99,4.99][n%3],demo:true})}});return out}
 
 /* ---------- sound: tiny synthesized record flip ---------- */
-let ac=null;function flipSnd(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const t=ac.currentTime,n=ac.createBufferSource(),b=ac.createBuffer(1,ac.sampleRate*.06,ac.sampleRate),d=b.getChannelData(0);
+/* browsers only allow sound after a click / tap / key press, so the flip sound wakes up on the first one and retries every flip */
+let ac=null;const sndCtx=()=>{try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume().catch(()=>{})}catch(e){}return ac};
+['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,sndCtx,{capture:true,passive:true}));
+function flipSnd(){try{sndCtx();if(!ac||ac.state!=='running')return;const t=ac.currentTime,n=ac.createBufferSource(),b=ac.createBuffer(1,ac.sampleRate*.06,ac.sampleRate),d=b.getChannelData(0);
  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,3);n.buffer=b;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=1400;f.Q.value=.8;const g=ac.createGain();g.gain.value=.12;n.connect(f).connect(g).connect(ac.destination);n.start(t)}catch(e){}}
 
 /* ---------- markup ---------- */
