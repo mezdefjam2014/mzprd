@@ -27,7 +27,7 @@ function shell(){host.innerHTML=`<div class="cr">
  <div class="cr-pl" id="crPl"><div class="cr-pl-t"><b id="crPlT">Pick a record</b><span id="crPlS">Tap the front record in the crate</span></div>
   <div class="cr-pl-c"><button class="cr-pl-b" id="crPlPrev" aria-label="Previous record">&lt;</button><button class="cr-pl-pp" id="crPlPP" aria-label="Play or pause"><i></i></button><button class="cr-pl-b" id="crPlNext" aria-label="Next record">&gt;&gt;</button></div>
   <div class="cr-pl-w" id="crPlW"></div><input class="cr-pl-v" id="crPlV" type="range" min="0" max="1" step=".01" aria-label="Volume"></div>
- <div class="cr-dig"><div class="cr-dig-hd"><b>THE CRATE</b><span id="crCount"></span><span class="cr-hint">Scroll, swipe or use the arrows to flip &middot; tap the front record to play it</span></div>
+ <div class="cr-dig"><div class="cr-dig-hd"><b>THE CRATE</b><span id="crCount"></span><span class="cr-hint">Scroll, swipe or use the arrows to flip &middot; tap the front record to play it</span><button class="cr-shuf" id="crShuf" type="button" aria-label="Shuffle the crate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c2.2 0 3.6 1 4.8 2.9l2.4 4.2c1.2 1.9 2.6 2.9 4.8 2.9H21M17 14l4 3-4 3M3 17h3.5c1.4 0 2.5-.4 3.4-1.2M14.1 8.2c.9-.8 2-1.2 3.4-1.2H21M17 4l4 3-4 3"/></svg><span>SHUFFLE</span></button></div>
   <div class="crate" id="crCrate" tabindex="0" aria-label="Record crate">
    <div class="crate-box"><img class="cb-back" src="crate-back.png?v=1" alt="" draggable="false"><div class="crate-recs" id="crRecs"></div><img class="cb-front" src="crate-front.png?v=1" alt="" draggable="false"><div class="cr-info" id="crInfo"></div></div>
    <button class="crate-nav prev" id="crPrev" aria-label="Previous record">&#8249;</button><button class="crate-nav next" id="crNext" aria-label="Next record">&#8250;</button>
@@ -47,6 +47,24 @@ function layout(){const S=host.querySelectorAll('.sl');S.forEach((s,i)=>{const d
  const x=items[cur];host.querySelector('#crInfo').innerHTML=x?`<b>${esc(x.title)}</b><div class="cr-acts"><em>$${x.price.toFixed(2)}</em><button class="cr-buy" id="crBuy">ADD TO CART</button></div>`:'';
  if(x){const B=host.querySelector('#crBuy'),k='s:'+x.id,inC=()=>G(()=>cart.has(k),false);B.textContent=inC()?'IN CART':'ADD TO CART';B.classList.toggle('in',inC());
   B.onclick=()=>{if(x.demo){G(()=>toast('PREVIEW RECORD: NOT FOR SALE'),0);return}G(()=>toggleCart(k,B),0);B.textContent=inC()?'IN CART':'ADD TO CART';B.classList.toggle('in',inC())}}}
+/* SHUFFLE: records lift out in a wave, reshuffle in the air, drop back in from back to front */
+let shuffling=false;
+async function shuffleCrate(){if(shuffling||!host||items.length<2)return;shuffling=true;const btn=host.querySelector('#crShuf');btn.classList.add('on');
+ const RM=matchMedia('(prefers-reduced-motion: reduce)').matches,box=host.querySelector('.crate-box');
+ const vis=[...host.querySelectorAll('.sl')].filter(s=>{const d=+s.dataset.i-cur;return d>=0&&d<=8});
+ const rnd=(a,b)=>a+Math.random()*(b-a),wait=ms=>new Promise(r=>setTimeout(r,ms));
+ if(!RM){/* lift-off: front record first, a wave toward the back, fanning out and spinning up */
+  host.querySelector('.crate').classList.add('shuffling');
+  vis.forEach((s,k)=>{const el=s,base=s.style.transform||'',dir=k%2?1:-1;setTimeout(flipSnd,k*45);
+   el.animate([{transform:base,opacity:1},{transform:`${base} translate(${dir*rnd(18,46)}%,-${rnd(70,110)}%) rotate(${dir*rnd(8,22)}deg) scale(.92)`,opacity:.95,offset:.7},{transform:`${base} translate(${dir*rnd(30,60)}%,-${rnd(120,150)}%) rotate(${dir*rnd(18,34)}deg) scale(.85)`,opacity:0}],{duration:560,delay:k*45,easing:'cubic-bezier(.3,.6,.2,1)',fill:'forwards'})});
+  await wait(560+vis.length*45)}
+ const keep=items[deck];items=shuffle(items);cur=0;if(keep){deck=items.indexOf(keep)}sleeves();layout();paint&&paint();
+ if(!RM){const now=[...host.querySelectorAll('.sl')].filter(s=>{const d=+s.dataset.i-cur;return d>=0&&d<=8}).reverse();
+  now.forEach((s,k)=>{const el=s,base=s.style.transform||'',dir=k%2?1:-1;setTimeout(flipSnd,k*55);
+   el.animate([{transform:`${base} translate(${dir*rnd(10,30)}%,-${rnd(130,160)}%) rotate(${dir*rnd(10,24)}deg) scale(.9)`,opacity:0},{transform:`${base} translate(0,6%) rotate(0deg) scale(1)`,opacity:1,offset:.78},{transform:base,opacity:1}],{duration:520,delay:k*55,easing:'cubic-bezier(.2,.8,.25,1)',fill:'backwards'})});
+  setTimeout(()=>{if(box)box.animate([{transform:'translateX(-50%) translateY(0)'},{transform:'translateX(-50%) translateY(5px)'},{transform:'translateX(-50%) translateY(0)'}],{duration:260,easing:'ease-out'})},now.length*55+380);
+  await wait(now.length*55+560)}
+ host.querySelector('.crate').classList.remove('shuffling');btn.classList.remove('on');shuffling=false}
 function go(n){const v=Math.max(0,Math.min(items.length-1,n));if(v===cur)return;cur=v;layout();flipSnd()}
 let wheelT=0,acc=0;function wheel(e){e.preventDefault();acc+=e.deltaY||e.deltaX;const now=performance.now();if(Math.abs(acc)>40&&now-wheelT>110){go(cur+(acc>0?1:-1));acc=0;wheelT=now}}
 function drag(el){let y0=null,x0=0,moved=0;el.addEventListener('pointerdown',e=>{y0=e.clientY;x0=e.clientX;moved=0});
@@ -88,6 +106,7 @@ window.MZCrate=async function(el){if(host===el&&el.querySelector('.cr')){layout(
  document.body.classList.add('on-crate');plSync();
  const C=host.querySelector('#crCrate');C.addEventListener('wheel',wheel,{passive:false});drag(C);
  C.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();go(cur+1)}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1)}if(e.key==='Enter')load(cur)});
+ host.querySelector('#crShuf').onclick=shuffleCrate;
  host.querySelector('#crPrev').onclick=e=>{e.stopPropagation();go(cur-1)};host.querySelector('#crNext').onclick=e=>{e.stopPropagation();go(cur+1)};};
 
 const css=document.createElement('style');css.textContent=`
@@ -95,6 +114,11 @@ const css=document.createElement('style');css.textContent=`
 .cr-k{display:block;font:800 10px Inter,sans-serif;letter-spacing:.24em;color:#e0242f;margin-bottom:8px}
 .cr-hd h1{font:400 clamp(44px,6vw,76px)/.92 Anton,sans-serif;color:#fff;margin:0;text-transform:uppercase}.cr-hd p{max-width:560px;margin:14px 0 0;color:#a2a2a8;font-size:15px;line-height:1.6}
 /* crate */
+.crate.shuffling{overflow:visible}.crate.shuffling .sl{transition:none!important}
+.cr-shuf{display:inline-flex;align-items:center;gap:8px;background:none;border:1px solid #e0242f;color:#fff;font:800 10px Inter,sans-serif;letter-spacing:.2em;padding:9px 14px 9px 11px;border-radius:999px;cursor:pointer;transition:background .2s,box-shadow .2s;margin-left:14px}
+.cr-shuf svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .5s}
+.cr-shuf:hover{background:#e0242f;box-shadow:0 0 24px rgba(224,36,47,.45)}.cr-shuf.on{background:#e0242f;pointer-events:none}.cr-shuf.on svg{animation:shufSpin .7s linear infinite}@keyframes shufSpin{to{transform:rotate(360deg)}}
+@media(max-width:820px){.cr-shuf{margin-left:auto}}
 body.on-crate #bar{display:none!important}body.on-crate #mCart{bottom:16px!important}
 .cr-pl{display:flex;align-items:center;gap:18px;background:#0b0b0d;border:1px solid #1d1d20;border-radius:16px;padding:12px 18px;margin:0 0 26px;box-shadow:0 18px 40px rgba(0,0,0,.45)}
 .cr-pl-t{width:190px;flex:none;min-width:0}.cr-pl-t b{display:block;font:800 15px Inter,sans-serif;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cr-pl-t span{display:block;margin-top:4px;font:500 12px Inter,sans-serif;color:#8a8a90;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

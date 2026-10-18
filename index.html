@@ -894,7 +894,7 @@ function showView(v){
  {const pl=document.querySelector('.plc');if(pl)pl.style.display=v==='beats'?'':'none'}
  {const dl=$('#deals');if(dl)dl.style.display=(v==='about'||v==='show'||v==='crate')?'none':''}
  if(v==='show')openShow();else if(window.showPageClose)window.showPageClose();
- if(v==='crate'){(window.MZCrate?Promise.resolve():loadScript('crate.js?v=15')).then(()=>MZCrate($('#crHost'))).catch(()=>toast('CRATE DIG FAILED TO LOAD'))}else if(window.MZCrateStop)MZCrateStop();
+ if(v==='crate'){(window.MZCrate?Promise.resolve():loadScript('crate.js?v=17')).then(()=>MZCrate($('#crHost'))).catch(()=>toast('CRATE DIG FAILED TO LOAD'))}else if(window.MZCrateStop)MZCrateStop();
  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.v===(v==='beat'?'beats':v)));
  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
 }
