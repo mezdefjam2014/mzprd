@@ -624,7 +624,8 @@ const WITH0=[true,false,true,false,true, true,true,true,true,true,true,true,true
 const NAMES=NAMES0.slice(0,PACKBOX).concat(Array(Math.max(0,PACKBOX-NAMES0.length)).fill('STYLE')).concat(['PACK BOX']),WITH=WITH0.slice(0,PACKBOX).concat(Array(Math.max(0,PACKBOX-WITH0.length)).fill(false)).concat([false]);
 function order(seed){const a=V.map((_,i)=>i),r=rnd((seed|0)+11);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}return a}
 function make(i,W,H,X){
- if(X&&X.kind==='packs'&&window.MZPackPhoto)return window.MZPackPhoto.make(i,W,H,X);
+ /* beats now use the same designs as packs (old beat looks below are kept but no longer used), labelled TYPE BEAT */
+ if(X&&window.MZPackPhoto&&(X.kind==='packs'||X.kind==='beats'))return window.MZPackPhoto.make(i,W,H,X.kind==='beats'?Object.assign({},X,{label:X.label||tline(X)}):X);
  const c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');
  const seed=(X.seed||0)+i,P=palette(X.cover,seed);
  const xx={...X,w:X.w||words(X.title),hook:(HOOKS[X.kind]||HOOKS.beats)[(seed+i)%5],char:WITH[i%V.length]};
