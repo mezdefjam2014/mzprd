@@ -92,8 +92,8 @@ function portrait(x,W,H,XX,i,rec){const k=W/1080,cv=XX.cover,L=((i%8)+8)%8,name=
  const kicker=(y,col,align)=>{x.textAlign=align||'center';x.fillStyle=col||RED;x.font='800 '+Math.round(34*k)+'px '+B;x.letterSpacing=Math.round(10*k)+'px';x.fillText('NEW '+(XX.label||'SAMPLE PACK'),align==='left'?W*.07:W/2,y);x.letterSpacing='0px'};
  const foot=(col)=>{x.textAlign='center';x.fillStyle=col||'rgba(255,255,255,.75)';x.font='700 '+Math.round(30*k)+'px '+B;x.letterSpacing=Math.round(8*k)+'px';x.fillText('MZPRD.COM  ·  ROYALTY-FREE',W/2,H*.955);x.letterSpacing='0px'};
  x.textBaseline='alphabetic';
- if(L===0){/* cover + record */bg(46,.42);fade(.55,.15,.95);redGlow(H*1.02);const v=(i>>3)%2;record(W/2+(v?-1:1)*W*.24,H*.36,W*.67,v?-.5:.5);cover(W/2+(v?1:-1)*W*.05,H*.36,W*.7);kicker(H*.075);const y=title(H*.665+150*k);tag(y+48*k);foot()}
- else if(L===1){/* big title on top, tilted cover below */bg(60,.35);fade(.9,.4,.9);redGlow(H*.72);kicker(H*.08);const y=title(H*.08+200*k,{size:230,lines:3});tag(y+44*k);record(W*.62,H*.7,W*.62,.3);cover(W*.42,H*.69,W*.62,-.07);foot()}
+ if(L===0){/* cover + record */bg(46,.42);fade(.55,.15,.95);redGlow(H*1.02);const v=(i>>3)%2;record(W/2+(v?1:-1)*W*.05+(v?-1:1)*W*.7*.36,H*.36,W*.7*.94,v?-.5:.5);cover(W/2+(v?1:-1)*W*.05,H*.36,W*.7);kicker(H*.075);const y=title(H*.665+150*k);tag(y+48*k);foot()}
+ else if(L===1){/* big title on top, tilted cover below */bg(60,.35);fade(.9,.4,.9);redGlow(H*.72);kicker(H*.08);const y=title(H*.08+200*k,{size:230,lines:3});tag(y+44*k);record(W*.42+W*.62*.36,H*.69,W*.62*.94,.3);cover(W*.42,H*.69,W*.62,-.07);foot()}
  else if(L===2){/* full-bleed cover with the title over a fade */x.fillStyle='#08080a';x.fillRect(0,0,W,H);if(cv){const s=Math.max(W/cv.width,(H*.72)/cv.height);x.drawImage(cv,(W-cv.width*s)/2,0,cv.width*s,cv.height*s)}
   const g=x.createLinearGradient(0,H*.35,0,H*.8);g.addColorStop(0,'rgba(8,8,10,0)');g.addColorStop(1,'rgba(8,8,10,1)');x.fillStyle=g;x.fillRect(0,0,W,H);x.fillStyle='#08080a';x.fillRect(0,H*.8,W,H*.2);
   kicker(H*.62,RED,'left');const y=title(H*.62+170*k,{align:'left',size:200,lines:3});tag(y+44*k,{align:'left'});foot()}
@@ -127,7 +127,7 @@ function wideKit(x,W,H,X){const k=W/1280,cv=X.cover,name=(X.name.replace(/\s*SAM
  const foot=(tx,col,align)=>{x.textAlign=align||'left';x.fillStyle=col||'rgba(255,255,255,.7)';x.font='700 '+Math.round(20*k)+'px '+B;x.letterSpacing=Math.round(6*k)+'px';x.fillText('MZPRD.COM  ·  ROYALTY-FREE',tx,H*.93);x.letterSpacing='0px'};
  return{k,cv,name,bg,vign,glowR,cover,record,fit,title,tag,kick,foot}}
 T.push(
- {n:'COVER + RECORD',f(x,W,H,k0,X){const K=wideKit(x,W,H,X),k=K.k;K.bg(40,.4);K.vign();K.glowR(W*.72,H*.5,W*.45);K.record(W*.8,H*.5,H*.86,.4);K.cover(W*.66,H*.5,H*.8);K.kick(W*.06,H*.24);const y=K.title(W*.06,H*.24+130*k,{maxW:W*.46,size:150});K.tag(W*.06,y+34*k);K.foot(W*.06)}},
+ {n:'COVER + RECORD',f(x,W,H,k0,X){const K=wideKit(x,W,H,X),k=K.k;K.bg(40,.4);K.vign();K.glowR(W*.72,H*.5,W*.45);{const cs=H*.8;K.record(W*.66+cs*.36,H*.5,cs*.94,.4);K.cover(W*.66,H*.5,cs)}K.kick(W*.06,H*.24);const y=K.title(W*.06,H*.24+130*k,{maxW:W*.46,size:150});K.tag(W*.06,y+34*k);K.foot(W*.06)}},
  {n:'RED SPLIT',f(x,W,H,k0,X){const K=wideKit(x,W,H,X),k=K.k;x.fillStyle=RED;x.fillRect(0,0,W,H);if(K.cv){x.save();x.beginPath();x.rect(W*.5,0,W*.5,H);x.clip();const s=Math.max((W*.5)/K.cv.width,H/K.cv.height);x.drawImage(K.cv,W*.75-K.cv.width*s/2,H/2-K.cv.height*s/2,K.cv.width*s,K.cv.height*s);x.restore()}
   x.fillStyle='rgba(0,0,0,.2)';x.fillRect(W*.5-4*k,0,6*k,H);K.kick(W*.05,H*.22,'#0b0b0d');const y=K.title(W*.05,H*.22+130*k,{maxW:W*.42,size:150,color:'#0b0b0d'});K.tag(W*.05,y+34*k,{bg:'#0b0b0d'});K.foot(W*.05,'rgba(11,11,13,.8)')}},
  {n:'GIANT RECORD',f(x,W,H,k0,X){const K=wideKit(x,W,H,X),k=K.k;K.bg(55,.3);K.vign();K.glowR(W*.28,H*.5,W*.4);const rs=H*1.18,cx=W*.28,cy=H*.5;K.record(cx,cy,rs,.25);
