@@ -168,7 +168,7 @@ body.on-crate #bar{display:none!important}body.on-crate #mCart{bottom:16px!impor
 .crate:after{content:'';position:absolute;left:50%;bottom:-6%;width:min(700px,100%);height:16%;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(0,0,0,.75),transparent 70%);z-index:1;pointer-events:none}
 .crate-box{position:absolute;left:50%;bottom:3%;width:min(820px,98%);aspect-ratio:520/244;transform:translateX(-50%)}
 .cb-back,.cb-front{position:absolute;left:0;width:100%;pointer-events:none;user-select:none;filter:drop-shadow(0 30px 34px rgba(0,0,0,.75))}
-.cb-back{bottom:0;height:100%;z-index:1}.cb-front{bottom:0;height:84.8%;z-index:3}
+.cb-back{bottom:0;height:100%;z-index:1}.cb-front{bottom:0;height:84.8%;z-index:3;pointer-events:auto!important}
 .crate-recs{position:absolute;left:50%;bottom:15%;width:56%;aspect-ratio:1;transform:translateX(-50%);z-index:2;perspective:1100px;perspective-origin:50% 0%}
 .crate-box:before{content:'';position:absolute;left:8%;right:8%;top:-60%;bottom:20%;background:radial-gradient(ellipse at 50% 60%,rgba(255,200,140,.10),transparent 65%);z-index:0;pointer-events:none}
 .crate-nav{position:absolute;top:34%;z-index:500;width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:rgba(14,14,16,.7);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;font:400 28px/1 Inter,sans-serif;cursor:pointer}.crate-nav:hover{background:#e0242f;border-color:#e0242f}.crate-nav.prev{left:4%}.crate-nav.next{right:4%}
