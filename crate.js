@@ -66,8 +66,10 @@ async function shuffleCrate(){if(shuffling||!host||items.length<2)return;shuffli
   await wait(now.length*55+560)}
  host.querySelector('.crate').classList.remove('shuffling');btn.classList.remove('on');shuffling=false}
 function go(n){const v=Math.max(0,Math.min(items.length-1,n));if(v===cur)return;cur=v;layout();flipSnd()}
-let wheelT=0,acc=0;function wheel(e){e.preventDefault();acc+=e.deltaY||e.deltaX;const now=performance.now();if(Math.abs(acc)>40&&now-wheelT>110){go(cur+(acc>0?1:-1));acc=0;wheelT=now}}
-function drag(el){let y0=null,x0=0,moved=0;el.addEventListener('pointerdown',e=>{y0=e.clientY;x0=e.clientX;moved=0});
+let wheelT=0,acc=0;/* only the records themselves take the wheel; everywhere else the page scrolls */
+const onRec=e=>!!(e.target&&e.target.closest&&e.target.closest('.sl'));
+function wheel(e){if(!onRec(e))return;e.preventDefault();acc+=e.deltaY||e.deltaX;const now=performance.now();if(Math.abs(acc)>40&&now-wheelT>110){go(cur+(acc>0?1:-1));acc=0;wheelT=now}}
+function drag(el){let y0=null,x0=0,moved=0;el.addEventListener('pointerdown',e=>{if(!onRec(e)){y0=null;return}y0=e.clientY;x0=e.clientX;moved=0});
  el.addEventListener('pointermove',e=>{if(y0==null)return;const dy=e.clientY-y0,dx=e.clientX-x0,d=Math.abs(dy)>Math.abs(dx)?dy:dx;if(Math.abs(d)>46){go(cur+(d<0?1:-1));y0=e.clientY;x0=e.clientX;moved=1}});
  const end=()=>{y0=null};el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);el.addEventListener('pointerleave',end);
  el.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault();moved=0}},true)}
@@ -136,11 +138,11 @@ body.on-crate #bar{display:none!important}body.on-crate #mCart{bottom:16px!impor
 .cr-note{font-size:12px;color:#6c6c72;margin:14px 0 0}
 .sl.playing .sl-in{box-shadow:0 0 0 2px #e0242f,0 20px 50px rgba(0,0,0,.7),0 0 50px rgba(224,36,47,.45)!important}
 .cr-dig-hd{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;border-bottom:1px solid #1d1d20;padding-bottom:12px;margin-bottom:8px}.cr-dig-hd b{font:400 30px Anton,sans-serif;color:#fff;letter-spacing:.03em}.cr-dig-hd span{font:800 10px Inter;letter-spacing:.2em;color:#7c7c82}.cr-hint{margin-left:auto}
-.crate{position:relative;height:clamp(500px,58vw,640px);outline:none;touch-action:none;user-select:none;overflow:hidden;cursor:grab}
+.crate{position:relative;height:clamp(500px,58vw,640px);outline:none;touch-action:pan-y;user-select:none;overflow:hidden;cursor:grab}
 .crate:active{cursor:grabbing}
 
 
-.sl{position:absolute;inset:0;transform-origin:50% 100%;transition:transform .55s cubic-bezier(.22,.8,.2,1),opacity .4s,filter .4s;will-change:transform;cursor:pointer}
+.sl{touch-action:none;position:absolute;inset:0;transform-origin:50% 100%;transition:transform .55s cubic-bezier(.22,.8,.2,1),opacity .4s,filter .4s;will-change:transform;cursor:pointer}
 .sl-in{position:absolute;inset:0;background:url(crate-sleeve.jpg) center/cover,radial-gradient(circle at 50% 50%,#050505 0 18%,#0b0b0c 19% 22%,#070707 23% 60%,rgba(200,200,205,.10) 61% 63%,#080808 64%),#0a0a0b;overflow:hidden;border-radius:2px;box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 -10px 30px rgba(0,0,0,.6)}.sl-in img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 .sl-wear{position:absolute;inset:0;background:radial-gradient(circle at 70% 20%,rgba(255,255,255,.1),transparent 40%),linear-gradient(180deg,rgba(255,255,255,.04),rgba(0,0,0,.25));pointer-events:none}
 .sl-print{position:absolute;left:8%;right:8%;top:7%;display:flex;flex-direction:column;gap:4px;color:#ece6da;text-shadow:0 1px 0 rgba(0,0,0,.6);opacity:.95;z-index:2}.sl-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.sl-row b{flex:1;min-width:0}
