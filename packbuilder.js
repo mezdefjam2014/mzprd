@@ -209,7 +209,7 @@ async function publish(){
   const pf=(p,k)=>{$q('#pbProg').style.width=p+'%';msg('Uploading '+k+' '+p+'%')};
   const zp=await upload(file,'private-files','packs',p=>pf(p,'pack'));up.push(['private-files',zp]);
   const cp=await upload(new File([d.cover],'cover.jpg',{type:d.cover.type||'image/jpeg'}),'public-media','covers',p=>pf(p,'cover'));up.push(['public-media',cp]);
-  const ext=d.previewExt||'m4a',pp=await upload(new File([d.preview],'preview.'+ext,{type:d.preview.type||'audio/mp4'}),'public-media','previews',p=>pf(p,'preview'));up.push(['public-media',pp]);
+  const ext=d.previewExt||'m4a',pp=await upload(new File([d.preview],'preview.'+ext,{type:d.preview.type||'audio/mp4'}),'private-files','previews',p=>pf(p,'preview'));up.push(['private-files',pp]);
   const row={title:d.title,description:d.desc||null,price:Math.max(0,d.price||0),published:true,free_download:!!d.free,sort_order:0,slug:slugify(d.title)||null,cover_path:cp,preview_path:pp,file_path:zp,size_bytes:z.size+d.cover.size+d.preview.size};
   msg('Saving the pack page...');
   let r;if(d.cloud&&d.cloud.packId)r=await sb.from('packs').update(row).eq('id',d.cloud.packId).select('id').maybeSingle();else r=await sb.from('packs').insert(row).select('id').maybeSingle();
