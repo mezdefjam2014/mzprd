@@ -70,13 +70,21 @@ async function makeCover(d,art){
  return await new Promise(r=>c.toBlob(r,'image/jpeg',.9));
 }
 /* ---------- preview maker (m4a/AAC when possible, small WAV otherwise) ---------- */
+function demoList(d){return d.files.filter(f=>f.demo&&AUDIO.test(f.name)&&!f.bad)}
+function rDemo(){const d=S.cur,el=$q('#pbDemoInfo');if(!el)return;const L=demoList(d);el.innerHTML=L.length?`Demo order: ${L.map((f,i)=>`<b style="color:#fff">${i+1}.</b> ${esc(f.newName||f.name)}`).join('  ')}<br>${L.length} sounds, about ${Math.round(L.reduce((s,f)=>s+Math.min(20,f.dur||20),0))} seconds. Each plays up to 20 seconds, fades out over 0.3 seconds, then the next one starts.`:'Tick DEMO next to the sounds you want in the demo (use PLAY to listen first). The order follows the table. If none are ticked, it picks loops for you.'}
+function mzPlayer(el){const a=el.querySelector('audio'),bt=el.querySelector('.pbPP'),bar=el.querySelector('.pbBar'),fill=bar.querySelector('b'),tm=el.querySelector('.pbTm'),ft=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+ const up=()=>{const d=a.duration||0;fill.style.width=(d?a.currentTime/d*100:0)+'%';tm.textContent=ft(a.currentTime)+(d?' / '+ft(d):'')};a.onloadedmetadata=up;a.ontimeupdate=up;a.onended=()=>{bt.innerHTML='&#9654;';el.classList.remove('on')};
+ bt.onclick=()=>{if(a.paused){if(PB.a){PB.a.pause();PB.id=null;rTbl()}a.play();bt.innerHTML='&#10074;&#10074;';el.classList.add('on')}else{a.pause();bt.innerHTML='&#9654;';el.classList.remove('on')}};
+ bar.onclick=e=>{const r=bar.getBoundingClientRect();if(a.duration)a.currentTime=(e.clientX-r.left)/r.width*a.duration}}
+/* one player for every uploaded sound, so you can hear what goes in the demo */
+const PB={a:null,id:null,u:null};function playOne(f){if(PB.a){PB.a.pause();URL.revokeObjectURL(PB.u)}const same=PB.id===f.id;PB.a=null;PB.id=null;if(!same){PB.u=URL.createObjectURL(f.blob);PB.a=new Audio(PB.u);PB.id=f.id;PB.a.onended=()=>{PB.id=null;rTbl()};PB.a.play().catch(()=>{PB.id=null;rTbl()})}rTbl()}
 async function makePreview(d,onp){
- const pool=d.files.filter(f=>f.use&&AUDIO.test(f.name)&&!f.bad),loops=pool.filter(f=>f.kind==='loop').sort((a,b)=>b.dur-a.dur),shots=pool.filter(f=>f.kind==='shot');
- let pick=(loops.length?loops:shots).slice(0,8);if(!pick.length)throw new Error('Add some audio files first.');
- const SR=48000,seg=loops.length?6:1.2,fade=.35,xf=.5;let T=0;const placed=[];
- for(const f of pick){const buf=await decode(f.blob),len=Math.min(buf.duration,seg);placed.push({buf,t:T,len});T+=len-xf;if(T>58)break}
- const total=Math.min(60,T+xf+.2),oc=new OfflineAudioContext(2,Math.ceil(total*SR),SR),comp=oc.createDynamicsCompressor();comp.connect(oc.destination);
- placed.forEach(p=>{const s=oc.createBufferSource();s.buffer=p.buf;const g=oc.createGain();g.gain.setValueAtTime(0,p.t);g.gain.linearRampToValueAtTime(.9,p.t+fade);g.gain.setValueAtTime(.9,Math.max(p.t+fade,p.t+p.len-fade));g.gain.linearRampToValueAtTime(0,p.t+p.len);s.connect(g);g.connect(comp);s.start(p.t,0,p.len)});
+ const chosen=demoList(d),pool=d.files.filter(f=>f.use&&AUDIO.test(f.name)&&!f.bad),loops=pool.filter(f=>f.kind==='loop').sort((a,b)=>b.dur-a.dur),shots=pool.filter(f=>f.kind==='shot');
+ const pick=chosen.length?chosen:(loops.length?loops:shots).slice(0,6);if(!pick.length)throw new Error('Add some audio files first.');
+ const SR=48000,SEG=20,FADE=.3;let T=0;const placed=[];
+ for(const f of pick){const buf=await decode(f.blob),len=Math.min(buf.duration,SEG);placed.push({buf,t:T,len});T+=len}
+ const total=T+.05,oc=new OfflineAudioContext(2,Math.ceil(total*SR),SR),comp=oc.createDynamicsCompressor();comp.threshold.value=-10;comp.ratio.value=3;comp.connect(oc.destination);
+ placed.forEach(p=>{const s=oc.createBufferSource();s.buffer=p.buf;const g=oc.createGain(),f=Math.min(FADE,p.len/2);g.gain.setValueAtTime(.9,p.t);g.gain.setValueAtTime(.9,p.t+p.len-f);g.gain.linearRampToValueAtTime(0,p.t+p.len);s.connect(g);g.connect(comp);s.start(p.t,0,p.len)});
  const rb=await oc.startRendering();
  if(window.AudioEncoder&&window.Mp4Muxer){
   try{const cfg={codec:'mp4a.40.2',sampleRate:SR,numberOfChannels:2,bitrate:128000},sup=await AudioEncoder.isConfigSupported(cfg);
@@ -93,7 +101,15 @@ async function makePreview(d,onp){
 /* ---------- ui ---------- */
 function css(){
  if(document.getElementById('pbCss'))return;const s=document.createElement('style');s.id='pbCss';
- s.textContent=`#pbk{display:none;position:fixed;inset:0;z-index:76;background:rgba(5,5,8,.97);overflow:auto;padding:20px clamp(12px,3vw,40px) 60px}#pbk.on{display:block}
+ s.textContent=`#pbk .pbCard{margin-top:12px;border:1.5px solid #2a2a30;border-left:3px solid #e0242f;background:linear-gradient(180deg,#0e0e11,#09090b);padding:12px 14px}#pbk .pbCardH{font:800 10px Montserrat;letter-spacing:.24em;color:#e0242f;margin-bottom:4px}
+#pbk .pbPlayer{display:flex;align-items:center;gap:12px;margin-top:10px;border:1.5px solid #2a2a30;background:#0a0a0c;padding:10px 12px}#pbk .pbPlayer.on{border-color:#e0242f;box-shadow:0 0 18px rgba(224,36,47,.25)}
+#pbk .pbPP{flex:0 0 40px;height:40px;border:0;border-radius:50%;background:#e0242f;color:#fff;font-size:13px;cursor:pointer;box-shadow:0 0 14px rgba(224,36,47,.45)}#pbk .pbPP:hover{background:#ff3341}
+#pbk .pbTrk{flex:1;min-width:0}#pbk .pbTt{font:800 11px Montserrat;letter-spacing:.14em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:7px}#pbk .pbTt span{color:#e0242f;margin-left:6px}
+#pbk .pbBar{height:6px;background:#26262b;cursor:pointer;position:relative}#pbk .pbBar b{position:absolute;left:0;top:0;bottom:0;width:0;background:#e0242f;box-shadow:0 0 8px rgba(224,36,47,.6)}
+#pbk .pbTm{font:600 11px Montserrat;color:#a9a9ae;letter-spacing:.06em;white-space:nowrap}
+#pbk .pbPl{border-color:#e0242f!important;color:#e0242f!important}#pbk .pbPl:hover{background:#e0242f!important;color:#fff!important}
+#pbk input[data-f=demo]{accent-color:#e0242f;width:16px;height:16px}
+#pbk{display:none;position:fixed;inset:0;z-index:76;background:rgba(5,5,8,.97);overflow:auto;padding:20px clamp(12px,3vw,40px) 60px}#pbk.on{display:block}
 #pbk .hd{display:flex;align-items:center;gap:12px;margin-bottom:14px;border-bottom:2px solid var(--red);padding-bottom:12px}#pbk .hd h2{font:400 13px 'Press Start 2P';color:#fff;margin-right:auto}
 #pbk .btn{background:transparent;border:1.5px solid #4a4a50;color:#fff;font:600 10px Montserrat;letter-spacing:.16em;padding:10px 12px;cursor:pointer}#pbk .btn:hover{border-color:#fff}
 #pbk .btn.go{background:var(--red);border-color:var(--red);font:700 12px Montserrat;letter-spacing:.2em;padding:14px 18px}#pbk .btn:disabled{opacity:.45}
@@ -128,12 +144,85 @@ async function home(){
  el.innerHTML=S.drafts.length?S.drafts.map(d=>`<div class="dr" data-id="${d.id}"><b>${esc(d.title||'Untitled pack')}<span class="tag ${d.cloud?'p':'d'}">${d.cloud?'PUBLISHED':'DRAFT'}</span><br><span>${d.files.length} files / ${mb(draftSize(d))} on this computer${d.cloud?' / cloud: '+mb(d.cloud.size||0):''}</span></b><button class="btn" data-a="open">OPEN</button><button class="btn" data-a="del">DELETE DRAFT</button></div>`).join(''):'<div class="msg">No drafts yet. Start a new pack.</div>';
  el.querySelectorAll('.dr').forEach(r=>{const d=S.drafts.find(x=>x.id===r.dataset.id);r.querySelectorAll('button').forEach(b=>b.onclick=async()=>{if(b.dataset.a==='open'){S.cur=d;editor()}else{if(!(await askConfirm('DELETE THIS DRAFT?',d.cloud?'This only removes the copy on this computer. The published pack stays online until you unpublish it.':'The files in this draft are removed from this computer.')))return;await db.del(d.id);home()}})})
 }
+/* ---------- description generator: reads the pack name (mood) and the file names (instruments, loops vs one-shots) and writes a
+   two-paragraph store description from large phrase banks. These are finished, ready-to-use compositions, so it never talks about
+   chopping or BPM. Every result is remembered on this computer and never given twice. ---------- */
+const DG=(()=>{
+ const R=a=>a[Math.floor(Math.random()*a.length)],cap=s=>s.charAt(0).toUpperCase()+s.slice(1),sh=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
+ const MOODS=[
+  [/soul|motown|70s|seventies|sweet|love|heart/i,['soulful','warm','heartfelt','golden-era'],['soul','classic hip hop'],['old records spinning in a dim room','a Sunday afternoon on the block','the warmth of a classic soul session']],
+  [/dust|vinyl|crate|digg|record|wax|old|vintage|retro|classic/i,['dusty','vintage','warm','analog'],['boom bap','sample-based hip hop'],['records pulled from the back of the crate','a basement session in the 90s','tape hiss and late nights']],
+  [/jazz|blue|smoke|lounge|night|midnight|late/i,['jazzy','smoky','late-night','moody'],['jazz rap','soulful hip hop'],['a smoky lounge after midnight','city lights through a rainy window','the last set of the night']],
+  [/gospel|church|choir|praise|holy|spirit/i,['uplifting','gospel-rooted','spiritual','powerful'],['soul','gospel rap'],['a Sunday choir in full voice','light breaking through stained glass','raw emotion and faith']],
+  [/dark|evil|demon|ghost|shadow|grim|haunt|horror|blood/i,['dark','eerie','haunting','sinister'],['dark trap','underground rap'],['an empty street at 3am','something moving in the shadows','cold air and bad intentions']],
+  [/king|queen|royal|crown|gold|luxury|rich|money|cash|boss/i,['regal','luxurious','triumphant','bold'],['luxury rap','street rap'],['a throne built from the ground up','gold chains and long nights','winning after the struggle']],
+  [/street|block|hood|trap|grind|hustle|ny|bronx|harlem|brooklyn|griselda/i,['gritty','raw','street-ready','hard-hitting'],['street rap','boom bap'],['corners, concrete and real stories','the grind that never stops','the sound of the city at night']],
+  [/drill|uk|chicago|opp/i,['menacing','cold','aggressive','sliding'],['drill','UK drill'],['cold nights and colder bars','tension that never lets up']],
+  [/lofi|lo-fi|chill|rain|study|cozy|sleep|calm/i,['mellow','hazy','laid-back','cozy'],['lo-fi','chillhop'],['rain on the window and headphones on','a slow morning with nowhere to be']],
+  [/rnb|r&b|slow|silk|velvet|honey|vibe/i,['silky','smooth','sultry','lush'],['R&B','neo soul'],['candlelight and slow conversations','late-night drives with the windows down']],
+  [/cinema|movie|film|epic|orchestra|score|war/i,['cinematic','epic','orchestral','dramatic'],['cinematic rap','trap'],['the final scene of a film','a big moment that needs a big sound']],
+  [/hot|fire|heat|flame|burn/i,['fiery','high-energy','bold','heated'],['hip hop','trap'],['summer heat and loud speakers','a room that catches fire when the beat drops']]];
+ const DEF=[['soulful','warm','melodic','vintage','moody','rich'],['hip hop','boom bap','R&B'],['a classic record crate','late-night studio sessions','the golden era of sampling']];
+ const INST=[[/piano|keys|rhodes|wurli|epiano/i,'keys and piano'],[/guitar|gtr/i,'guitars'],[/bass(?!.*drum)/i,'basslines'],[/string|violin|cello|orch/i,'strings'],[/horn|brass|trumpet|sax|trombone/i,'horns'],[/flute|woodwind/i,'flutes'],[/vox|vocal|choir|voice|chant/i,'vocals'],[/synth|pad|lead/i,'synths and pads'],[/organ/i,'organs'],[/bell|chime|music ?box/i,'bells'],[/harp/i,'harps'],[/drum|kick|snare|hat|perc|clap/i,'drums']];
+ const P1=[
+  '{N} is {n} {a1} compositions made for {g1} and {g2} producers who want records that feel finished from the first play.',
+  'Introducing {N}, a collection of {n} {a1}, fully arranged sounds built to drop straight into your next {g1} beat.',
+  '{N} brings together {n} {a1} compositions with a {a2} character you can hear in every note.',
+  'With {N} you get {n} original, {a1} compositions crafted for {g1} records that need real feeling.',
+  '{N} delivers {n} {a1} pieces that capture {img}.',
+  'Step into {N}: {n} {a1} compositions inspired by {img}.',
+  '{N} is a {a2} collection of {n} {a1} compositions, written and produced to give your {g1} beats instant depth.',
+  'Built around {img}, {N} gives you {n} {a1} compositions ready to become your next {g1} record.'];
+ const P2=[
+  'Every piece is arranged, mixed and ready to use as it is, so you can build a full beat around it in minutes.',
+  'These are complete musical ideas, not scraps, so the song is already there the moment you load one in.',
+  'Each composition is mixed with care and sits right on top of your drums without fighting for space.',
+  'Everything arrives polished and ready, so your time goes into the beat, not into fixing sounds.',
+  'Load any file, add your drums and you already have a record worth finishing.'];
+ const P3I=[
+  'Expect {inst} layered with {a2} textures and real musical movement.',
+  'Inside you will hear {inst}, all blended into {a2}, cohesive arrangements.',
+  'The palette leans on {inst}, giving every piece a {a1}, full-bodied sound.'];
+ const P3=[
+  'Expect rich harmony, memorable melodies and {a2} textures that make a beat feel complete.',
+  'The sound is {a1} and full, with melodies that stay in your head long after the session ends.',
+  'Warm low end, detailed tops and {a2} melodies give each piece a professional, record-ready finish.'];
+ const Q1=[
+  'Perfect for {g1}, {g2} and anyone chasing that {a1} sound for their artists.',
+  'Made for producers who want a {a1}, signature sound without starting from a blank session.',
+  'Whether you are making beats for artists, placements or your own project, {N} gives you a strong starting point every time.',
+  'Use them to start new beats, break writer’s block, or give your catalog a fresh {a2} direction.',
+  'Ideal for beatmakers, artists and songwriters who need {a1} ideas that sound like finished records.'];
+ const Q2=[
+  'Every file is clearly named and organized so you can find the right piece fast.',
+  'All files come in high quality and clearly labelled, ready for any DAW.',
+  'Everything is organized and labelled, so the pack is easy to work through from start to finish.'];
+ const Q3=[
+  '100% royalty-free for use in your releases.',
+  'Royalty-free for your beats, songs and placements.',
+  'Instant download and 100% royalty-free.',
+  'Royalty-free. Instant download. Ready when you are.'];
+ const KEY='mzprd_desc_used_v2';let used;try{used=new Set(JSON.parse(localStorage.getItem(KEY)||'[]'))}catch(e){used=new Set()}
+ const hash=s=>{let h=5381;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return h.toString(36)};
+ const list=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+ return function(name,n,d){const N=String(name).trim(),u=(d&&d.files||[]).filter(f=>f.use&&AUDIO.test(f.name)),names=u.map(f=>(f.rel||'')+' '+f.name+' '+(f.newName||'')).join(' ')+' '+N;
+  const mood=MOODS.filter(m=>m[0].test(N)),adj=[...new Set(mood.length?mood.flatMap(m=>m[1]):DEF[0])],gen=[...new Set(mood.length?mood.flatMap(m=>m[2]).concat(['hip hop']):DEF[1])],imgs=[...new Set(mood.length?mood.flatMap(m=>m[3]):DEF[2])];
+  const inst=sh(INST.filter(i=>i[0].test(names)).map(i=>i[1])).slice(0,3);
+  const pick2=a=>{const x=R(a);let y=R(a),i=0;while((y===x||y.includes(x)||x.includes(y))&&i++<12)y=R(a);return[x,y]};
+  for(let tries=0;tries<500;tries++){const[a1,a2]=pick2(adj),[g1,g2]=pick2(gen),img=R(imgs);
+   const fill=s=>s.replace(/\{N\}/g,N).replace(/\{n\}/g,n).replace(/\{a1\}/g,a1).replace(/\{a2\}/g,a2).replace(/\{g1\}/g,g1).replace(/\{g2\}/g,g2).replace(/\{img\}/g,img).replace(/\{inst\}/g,list(inst));
+   const para1=[R(P1),inst.length?R(P3I):R(P3),R(P2)].map(fill),para2=[R(Q1),R(Q2),R(Q3)].map(fill);
+   const out=para1.map(s=>cap(s)).join(' ')+'\n\n'+para2.map(s=>cap(s)).join(' ');const h=hash(out.toLowerCase());
+   if(!used.has(h)){used.add(h);try{localStorage.setItem(KEY,JSON.stringify([...used].slice(-5000)))}catch(e){}return out}}
+  return N+' is '+n+' new compositions, royalty-free.'}})();
+function genDesc(name,n,d){return DG(name,n,d)}
+
 const LIC='LICENSE (MZPRD)\n\nYou may use these sounds in your own music, including commercial releases.\nYou may not resell, share or redistribute the sounds on their own, as a pack or as samples.\nCredit is appreciated: Prod. MZPRD.\n';
 function editor(){
  const d=S.cur;$q('#pbBack').style.display='inline-block';
- $q('#pbBody').innerHTML=`<div class="pn"><h4>1. PACK DETAILS</h4><div class="g"><div><label>TITLE</label><input type="text" id="pbTitle"></div><div><label>PRICE (USD)</label><input type="number" id="pbPrice" step="0.01" min="0"></div><div><label>&nbsp;</label><label style="display:flex;gap:8px;align-items:center;letter-spacing:.1em;margin:14px 0 0"><input type="checkbox" id="pbFree" style="width:auto"> OFFER THE PREVIEW AS A FREE DOWNLOAD</label></div></div><label>DESCRIPTION</label><textarea id="pbDesc" placeholder="What is in this pack? Genres, vibes, how many loops and one-shots."></textarea></div>
+ $q('#pbBody').innerHTML=`<div class="pn"><h4>1. PACK DETAILS</h4><div class="g"><div><label>TITLE</label><input type="text" id="pbTitle"></div><div><label>PRICE (USD)</label><input type="number" id="pbPrice" step="0.01" min="0"></div><div><label>&nbsp;</label><label style="display:flex;gap:8px;align-items:center;letter-spacing:.1em;margin:14px 0 0"><input type="checkbox" id="pbFree" style="width:auto"> OFFER THE PREVIEW AS A FREE DOWNLOAD</label></div></div><label>DESCRIPTION</label><textarea id="pbDesc" placeholder="What is in this pack? Genres, vibes, how many loops and one-shots."></textarea><div class="pbCard"><div class="pbCardH">DESCRIPTION GENERATOR</div><div class="g" style="align-items:end"><div><label>PACK NAME</label><input type="text" id="pbDgName" placeholder="Uses the title if empty"></div><div><label>HOW MANY SAMPLES</label><input type="number" id="pbDgN" min="1" placeholder="Counts your sounds if empty"></div><div><button class="btn go" id="pbDgGo">GENERATE DESCRIPTION</button></div></div></div></div>
  <div class="pn"><h4>2. YOUR SOUNDS</h4><div class="drop" id="pbDrop">DROP FILES OR A FOLDER HERE, OR CLICK TO CHOOSE<input type="file" id="pbFiles" multiple style="display:none"></div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pbFolder">CHOOSE A FOLDER</button><button class="btn" id="pbAuto">AUTO-NAME ALL</button><button class="btn" id="pbDet">DETECT MISSING BPM (LOOPS)</button></div><input type="file" id="pbDir" webkitdirectory multiple style="display:none"><div id="pbTbl" style="margin-top:10px;overflow:auto;max-height:420px"></div><div class="msg" id="pbSum"></div></div>
- <div class="pn"><h4>3. COVER AND PREVIEW</h4><div class="g"><div><button class="btn" id="pbCov">MAKE A COVER</button> <button class="btn" id="pbCovUp">USE MY OWN IMAGE</button><input type="file" id="pbCovIn" accept="image/*" style="display:none"><div id="pbCovBox"></div></div><div><button class="btn" id="pbPrev">MAKE A PREVIEW (UP TO 60 SECONDS)</button> <button class="btn" id="pbPrevUp">USE MY OWN AUDIO</button><input type="file" id="pbPrevIn" accept="audio/*" style="display:none"><div id="pbPrevBox"></div></div><div><label>LICENSE TEXT (INCLUDED IN THE ZIP)</label><textarea id="pbLic" style="min-height:130px"></textarea><label style="display:flex;gap:8px;align-items:center;letter-spacing:.1em"><input type="checkbox" id="pbLicOn" style="width:auto" checked> INCLUDE LICENSE.TXT</label></div></div></div>
+ <div class="pn"><h4>3. COVER AND PREVIEW</h4><div class="g"><div><button class="btn" id="pbCov">MAKE A COVER</button> <button class="btn" id="pbCovUp">USE MY OWN IMAGE</button><input type="file" id="pbCovIn" accept="image/*" style="display:none"><div id="pbCovBox"></div></div><div><button class="btn" id="pbPrev">MAKE THE DEMO PREVIEW</button><div class="pbCard" style="margin-top:10px"><div class="pbCardH">DEMO PREVIEW</div><div class="msg" id="pbDemoInfo" style="margin:0"></div></div> <button class="btn" id="pbPrevUp">USE MY OWN AUDIO</button><input type="file" id="pbPrevIn" accept="audio/*" style="display:none"><div id="pbPrevBox"></div></div><div><label>LICENSE TEXT (INCLUDED IN THE ZIP)</label><textarea id="pbLic" style="min-height:130px"></textarea><label style="display:flex;gap:8px;align-items:center;letter-spacing:.1em"><input type="checkbox" id="pbLicOn" style="width:auto" checked> INCLUDE LICENSE.TXT</label></div></div></div>
  <div class="pn"><h4>4. BUILD AND PUBLISH</h4><div class="msg" id="pbSize" style="margin:0 0 8px"></div>
  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pbZipTest">BUILD THE ZIP ON MY COMPUTER (NO UPLOAD)</button><button class="btn go" id="pbPub">PUBLISH PACK (UPLOADS TO THE CLOUD)</button><button class="btn" id="pbUn" style="display:none">UNPUBLISH AND FREE CLOUD SPACE</button></div>
  <div class="bar"><b id="pbProg"></b></div><div class="msg" id="pbMsg"></div></div>`;
@@ -149,11 +238,12 @@ function editor(){
  $q('#pbCov').onclick=async()=>{sync();msg('Making the cover...');try{await new Promise(r=>setTimeout(r,30));d.cover=await makeCover(d,S.art);await save();rCov();msg('Cover made.')}catch(e){msg('Could not make the cover: '+e.message)}};
  $q('#pbCovUp').onclick=()=>$q('#pbCovIn').click();
  $q('#pbCovIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;d.cover=f;try{S.art=await createImageBitmap(f)}catch(x){}await save();rCov()};
- $q('#pbPrev').onclick=makePrev;$q('#pbPrevUp').onclick=()=>$q('#pbPrevIn').click();
+ $q('#pbPrev').onclick=async()=>{await makePrev();rDemo()};$q('#pbPrevUp').onclick=()=>$q('#pbPrevIn').click();
  $q('#pbPrevIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;d.preview=f;d.previewExt=(f.name.match(/\.[A-Za-z0-9]+$/)||['.mp3'])[0].slice(1).toLowerCase();await save();rPrev()};
  $q('#pbZipTest').onclick=async()=>{sync();try{const z=await buildZip(true);const a=document.createElement('a');a.href=URL.createObjectURL(z);a.download=(clean(d.title)||'pack')+'.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),8000);msg('Zip built: '+mb(z.size)+'. It was saved to your downloads, nothing was uploaded.')}catch(e){msg('Zip failed: '+e.message)}};
  $q('#pbPub').onclick=publish;$q('#pbUn').onclick=unpublish;
- rTbl();rCov();rPrev();rSize();
+ rTbl();rCov();rPrev();rSize();rDemo();
+ $q('#pbDgGo').onclick=()=>{sync();const nm=$q('#pbDgName').value.trim()||d.title.trim();if(!nm){msg('Type the pack name first.');return}const n=+$q('#pbDgN').value||d.files.filter(f=>f.use&&AUDIO.test(f.name)).length;if(!n){msg('Type how many samples.');return}d.desc=genDesc(nm,n,d);$q('#pbDesc').value=d.desc;save();msg('Description made. Press again for a different one.')};
 }
 async function readDrop(dt){
  const out=[];const walk=async(entry,path)=>{if(entry.isFile){await new Promise(r=>entry.file(f=>{f._rel=path+f.name;out.push(f);r()},r))}else if(entry.isDirectory){const rd=entry.createReader();const all=[];for(;;){const b=await new Promise(r=>rd.readEntries(r,()=>r([])));if(!b.length)break;all.push(...b)}for(const e of all)await walk(e,path+entry.name+'/')}};
@@ -172,15 +262,17 @@ async function detBpm(){
 }
 function rTbl(){
  const d=S.cur,el=$q('#pbTbl');
- el.innerHTML=d.files.length?`<table><tr><th></th><th>FILE</th><th>TYPE</th><th>BPM</th><th>KEY</th><th>LENGTH</th><th>SIZE</th><th>NAME IN THE ZIP</th><th></th></tr>${d.files.map((f,i)=>`<tr data-i="${i}"><td><input type="checkbox" data-f="use" ${f.use?'checked':''}></td><td title="${esc(f.rel||f.name)}">${esc(f.name.length>26?f.name.slice(0,24)+'..':f.name)}</td><td><select data-f="kind"><option value="loop"${f.kind==='loop'?' selected':''}>Loop</option><option value="shot"${f.kind==='shot'?' selected':''}>One-shot</option><option value="other"${f.kind==='other'?' selected':''}>Extra</option></select></td><td><input type="number" data-f="bpm" min="0" max="300" value="${f.bpm||''}" style="width:62px"></td><td><input type="text" data-f="key" value="${esc(f.key)}" style="width:56px"></td><td>${f.dur?f.dur.toFixed(1)+'s':'-'}</td><td>${mb(f.size)}</td><td><input type="text" data-f="newName" value="${esc(f.newName)}"></td><td><button class="btn" data-f="rm" style="padding:4px 8px">&times;</button></td></tr>`).join('')}</table>`:'<div class="msg">No sounds yet. Drop in your files above.</div>';
+ el.innerHTML=d.files.length?`<table><tr><th></th><th>PLAY</th><th>DEMO</th><th>FILE</th><th>TYPE</th><th>BPM</th><th>KEY</th><th>LENGTH</th><th>SIZE</th><th>NAME IN THE ZIP</th><th></th></tr>${d.files.map((f,i)=>`<tr data-i="${i}"><td><input type="checkbox" data-f="use" ${f.use?'checked':''}></td><td>${AUDIO.test(f.name)?`<button class="btn pbPl" data-f="play" style="padding:4px 9px">${PB.id===f.id?'&#9632;':'&#9654;'}</button>`:''}</td><td>${AUDIO.test(f.name)?`<input type="checkbox" data-f="demo" ${f.demo?'checked':''} title="Put this sound in the demo preview">${f.demo?'<b style="color:#e0242f;font-size:10px"> '+(demoList(d).indexOf(f)+1)+'</b>':''}`:''}</td><td title="${esc(f.rel||f.name)}">${esc(f.name.length>26?f.name.slice(0,24)+'..':f.name)}</td><td><select data-f="kind"><option value="loop"${f.kind==='loop'?' selected':''}>Loop</option><option value="shot"${f.kind==='shot'?' selected':''}>One-shot</option><option value="other"${f.kind==='other'?' selected':''}>Extra</option></select></td><td><input type="number" data-f="bpm" min="0" max="300" value="${f.bpm||''}" style="width:62px"></td><td><input type="text" data-f="key" value="${esc(f.key)}" style="width:56px"></td><td>${f.dur?f.dur.toFixed(1)+'s':'-'}</td><td>${mb(f.size)}</td><td><input type="text" data-f="newName" value="${esc(f.newName)}"></td><td><button class="btn" data-f="rm" style="padding:4px 8px">&times;</button></td></tr>`).join('')}</table>`:'<div class="msg">No sounds yet. Drop in your files above.</div>';
  el.querySelectorAll('tr[data-i]').forEach(r=>{const f=d.files[+r.dataset.i];r.querySelectorAll('[data-f]').forEach(c=>{const k=c.dataset.f;c.onchange=c.onclick=null;
   if(k==='rm')c.onclick=async()=>{d.files.splice(+r.dataset.i,1);await save();rTbl();rSize()};
+  else if(k==='play')c.onclick=()=>playOne(f);
+  else if(k==='demo')c.onchange=async()=>{f.demo=c.checked;await save();rTbl();rDemo()};
   else c.onchange=async()=>{f[k]=k==='use'?c.checked:k==='bpm'?(+c.value||0):c.value;if(k==='kind'||k==='bpm'||k==='key'){autoName(d)}await save();if(k==='kind'||k==='bpm'||k==='key'||k==='use')rTbl();rSize()}})});
  rSum();
 }
 function rSum(){const d=S.cur,u=d.files.filter(f=>f.use),nl=u.filter(f=>f.kind==='loop').length,ns=u.filter(f=>f.kind==='shot').length,no=u.length-nl-ns;$q('#pbSum').textContent=u.length?`${nl} loops, ${ns} one-shots${no?', '+no+' extras':''}  /  ${mb(u.reduce((s,f)=>s+f.size,0))}`:''}
 function rCov(){const d=S.cur,b=$q('#pbCovBox');if(d.cover){const u=URL.createObjectURL(d.cover);b.innerHTML=`<img class="pv" src="${u}" alt="cover">`}else b.innerHTML='<div class="msg">No cover yet.</div>'}
-function rPrev(){const d=S.cur,b=$q('#pbPrevBox');if(d.preview){const u=URL.createObjectURL(d.preview);b.innerHTML=`<audio controls src="${u}" style="width:100%;margin-top:8px"></audio><div class="msg">${mb(d.preview.size)} (${esc(d.previewExt||'')})</div>`}else b.innerHTML='<div class="msg">No preview yet.</div>'}
+function rPrev(){const d=S.cur,b=$q('#pbPrevBox');if(d.preview){const u=URL.createObjectURL(d.preview);b.innerHTML=`<div class="pbPlayer"><button class="pbPP" aria-label="Play">&#9654;</button><div class="pbTrk"><div class="pbTt">${esc((d.title||'Pack').toUpperCase())} <span>DEMO PREVIEW</span></div><div class="pbBar"><b></b></div></div><div class="pbTm">0:00</div><audio src="${u}" preload="metadata"></audio></div><div class="msg">${mb(d.preview.size)} (${esc(d.previewExt||'')})</div>`;mzPlayer(b.querySelector('.pbPlayer'))}else b.innerHTML='<div class="msg">No preview yet.</div>'}
 function rSize(){const d=S.cur,u=d.files.filter(f=>f.use),zs=u.reduce((s,f)=>s+f.size,0)+(d.licOn===false?0:2000),total=zs+(d.cover?d.cover.size:0)+(d.preview?d.preview.size:0);
  $q('#pbSize').innerHTML=`Cloud space this pack will use once published: <b style="color:#fff">${mb(total)}</b> (zip ${mb(zs)}, cover ${mb(d.cover?d.cover.size:0)}, preview ${mb(d.preview?d.preview.size:0)}). Until you publish: <b style="color:#fff">0 MB</b> in the cloud.${d.cloud?`<br>This pack is published right now (${mb(d.cloud.size||0)} in the cloud).`:''}`;
  $q('#pbUn').style.display=d.cloud?'inline-block':'none';$q('#pbPub').textContent=d.cloud?'REPUBLISH WITH CHANGES (REPLACES THE CLOUD FILES)':'PUBLISH PACK (UPLOADS TO THE CLOUD)'}
@@ -193,6 +285,7 @@ async function buildZip(local){
  const names=new Set(),entries=[];
  for(const f of u){let nm=(f.newName||f.name).replace(/[\\/:*?"<>|]+/g,'_'),path=folderOf(f)+'/'+nm,i=1;while(names.has(path.toLowerCase())){path=folderOf(f)+'/'+nm.replace(/(\.[^.]*)?$/,'_'+(++i)+'$1')}names.add(path.toLowerCase());entries.push({name:path,blob:f.blob})}
  if(d.licOn!==false&&d.license)entries.push({name:'LICENSE.txt',blob:new Blob([d.license],{type:'text/plain'})});
+ if(d.preview)entries.push({name:'PREVIEW - '+((clean(d.title)||'Pack').replace(/[\\/:*?"<>|]+/g,'_'))+'.'+(d.previewExt||'m4a'),blob:d.preview});
  return await zipBlob(entries,p=>{$q('#pbProg').style.width=p+'%';msg('Building the zip '+p+'%')});
 }
 async function publish(){
