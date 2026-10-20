@@ -15,17 +15,17 @@ const tx=async(mode,fn)=>{const d=await idb();return new Promise((ok,no)=>{const
 const db={all:()=>tx('readonly',s=>s.getAll()),put:o=>tx('readwrite',s=>s.put(o)),del:id=>tx('readwrite',s=>s.delete(id))};
 const draftSize=d=>d.files.reduce((s,f)=>s+f.size,0)+(d.cover?d.cover.size:0)+(d.preview?d.preview.size:0);
 async function save(){const d=S.cur;if(!d)return;d.updated=Date.now();try{await db.put(d)}catch(e){msg('Could not save the draft in this browser: '+(e.message||e))}}
-/* ---------- zip (store only, no compression, files are read lazily so big packs do not eat memory) ---------- */
+/* ---------- zip (deflate when it saves space, files are read lazily so big packs do not eat memory) ---------- */
 const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
 async function crcOf(blob,onp){let c=0xFFFFFFFF;const r=blob.stream().getReader();for(;;){const {done,value}=await r.read();if(done)break;for(let i=0;i<value.length;i++)c=CRC[(c^value[i])&255]^(c>>>8)}return (c^0xFFFFFFFF)>>>0}
 function dosStamp(){const d=new Date();return{t:(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1),d:((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate()}}
 async function zipBlob(entries,onp){
  const enc=new TextEncoder(),st=dosStamp(),parts=[],cd=[];let off=0;
- for(let i=0;i<entries.length;i++){const e=entries[i],nm=enc.encode(e.name),size=e.blob.size,crc=await crcOf(e.blob);if(onp)onp(Math.round((i+1)/entries.length*100));
-  const lh=new DataView(new ArrayBuffer(30));lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(8,0,true);lh.setUint16(10,st.t,true);lh.setUint16(12,st.d,true);lh.setUint32(14,crc,true);lh.setUint32(18,size,true);lh.setUint32(22,size,true);lh.setUint16(26,nm.length,true);lh.setUint16(28,0,true);
-  parts.push(lh.buffer,nm,e.blob);
-  const ch=new DataView(new ArrayBuffer(46));ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(10,0,true);ch.setUint16(12,st.t,true);ch.setUint16(14,st.d,true);ch.setUint32(16,crc,true);ch.setUint32(20,size,true);ch.setUint32(24,size,true);ch.setUint16(28,nm.length,true);ch.setUint32(42,off,true);
-  cd.push(ch.buffer,nm);off+=30+nm.length+size;if(off>4e9)throw new Error('This pack is over 4 GB. Remove some files.')}
+ for(let i=0;i<entries.length;i++){const e=entries[i],nm=enc.encode(e.name),size=e.blob.size,crc=await crcOf(e.blob),cz=/\.(mp3|m4a|aac|ogg|flac|zip|png|jpe?g|webp)$/i.test(e.name)?null:await deflate(e.blob),body=cz||e.blob,csize=body.size,meth=cz?8:0;if(onp)onp(Math.round((i+1)/entries.length*100));
+  const lh=new DataView(new ArrayBuffer(30));lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(8,meth,true);lh.setUint16(10,st.t,true);lh.setUint16(12,st.d,true);lh.setUint32(14,crc,true);lh.setUint32(18,csize,true);lh.setUint32(22,size,true);lh.setUint16(26,nm.length,true);lh.setUint16(28,0,true);
+  parts.push(lh.buffer,nm,body);
+  const ch=new DataView(new ArrayBuffer(46));ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(10,meth,true);ch.setUint16(12,st.t,true);ch.setUint16(14,st.d,true);ch.setUint32(16,crc,true);ch.setUint32(20,csize,true);ch.setUint32(24,size,true);ch.setUint16(28,nm.length,true);ch.setUint32(42,off,true);
+  cd.push(ch.buffer,nm);off+=30+nm.length+csize;if(off>4e9)throw new Error('This pack is over 4 GB. Remove some files.')}
  const cdSize=cd.reduce((s,b)=>s+(b.byteLength!=null?b.byteLength:b.length),0),end=new DataView(new ArrayBuffer(22));
  end.setUint32(0,0x06054b50,true);end.setUint16(8,entries.length,true);end.setUint16(10,entries.length,true);end.setUint32(12,cdSize,true);end.setUint32(16,off,true);
  return new Blob([...parts,...cd,end.buffer],{type:'application/zip'});
@@ -149,6 +149,30 @@ function css(){
 #pbk .g{gap:16px!important}
 #pbk .dr{background:#0f0f12;border:1px solid #1f1f24;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px}#pbk .dr b{flex:1;font:700 14px Montserrat;color:#fff}#pbk .dr b span{font:500 12px Montserrat;color:#8e8e94}
 #pbk .pbCard .g{grid-template-columns:1fr 1fr 1fr auto!important}@media(max-width:800px){#pbk .pbCard .g{grid-template-columns:1fr!important}}
+#pbk .pbChop .chTop{display:grid;grid-template-columns:1fr 280px;gap:10px;margin:8px 0 10px}@media(max-width:800px){#pbk .pbChop .chTop{grid-template-columns:1fr}}
+#pbk .chWrap{position:relative;height:180px;background:#08080a;border:1px solid #26262b}#pbk #chCv{width:100%;height:100%;display:block}#pbk .chEmpty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:600 12px Montserrat;color:#6f6f76;letter-spacing:.12em}
+#pbk .chScroll{width:100%;margin:6px 0 0;accent-color:#e0242f;height:14px}
+#pbk .chBar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}#pbk .chBar .btn{padding:9px 11px!important}#pbk .chSep{width:1px;height:24px;background:#2a2a30;margin:0 6px}
+#pbk .chV{font:700 10px Montserrat;letter-spacing:.16em;color:#8e8e94}#pbk .chNum{font:700 13px Montserrat;color:#fff;min-width:64px;text-align:center}
+#pbk .chI{display:flex!important;align-items:center;gap:8px;margin:0!important}#pbk .chI input{width:96px!important;padding:8px 10px!important}#pbk .chT.on{border-color:#e0242f!important;background:#1a0b0c}
+#pbk .chSeg{display:flex;border:1px solid #3a3a40}#pbk .chSeg button{background:transparent;border:0;color:#a9a9ae;font:700 11px Montserrat;padding:9px 14px;cursor:pointer}#pbk .chSeg button.on{background:#e0242f;color:#fff}
+#pbk .chBar .btn.go{width:auto!important;flex:0 0 auto;display:inline-block}#pbk .chBar .chI #chName{width:100%!important}#pbk .chBar select{width:auto!important;padding:9px 10px!important}
+#pbk .pbChop{padding:18px 20px!important}#pbk .chHead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}#pbk .chSrc{display:flex;gap:8px;align-items:center}#pbk .chSrc select{width:240px!important;padding:9px 10px!important;font-size:12px!important}
+#pbk .chWrap{height:200px!important;border-radius:6px;overflow:hidden;border:1px solid #232328!important}#pbk .chWrap.on{border-color:#e0242f!important;box-shadow:0 0 0 3px rgba(224,36,47,.2)}
+#pbk .chMini{display:block;width:100%;height:30px;margin-top:8px;border-radius:5px;cursor:grab;border:1px solid #1f1f24}#pbk .chMini:active{cursor:grabbing}
+#pbk .chRow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 4px;flex-wrap:wrap}#pbk .chGrp{display:flex;align-items:center;gap:8px}
+#pbk .chPlay{width:46px;height:46px;border-radius:50%;border:0;background:#e0242f;color:#fff;font-size:16px;cursor:pointer;box-shadow:0 6px 18px rgba(224,36,47,.35)}#pbk .chPlay.on{background:#fff;color:#e0242f}
+#pbk .chStopB{width:38px;height:38px;border-radius:50%;border:1px solid #3a3a40;background:transparent;color:#fff;font-size:12px;cursor:pointer}#pbk .chStopB:hover{border-color:#e0242f}
+#pbk .chTime{font:700 15px Montserrat;color:#fff;margin-left:6px;min-width:70px;letter-spacing:.04em}
+#pbk .chIc{width:32px;height:32px;border-radius:50%;border:1px solid #3a3a40;background:transparent;color:#fff;font:700 16px Montserrat;cursor:pointer}#pbk .chIc:hover{border-color:#e0242f}#pbk .chZ{font:700 12px Montserrat;color:#a9a9ae;min-width:40px;text-align:center}
+#pbk .chTx{border:1px solid #3a3a40;background:transparent;color:#fff;font:700 10px Montserrat;letter-spacing:.16em;padding:9px 12px;cursor:pointer;margin-left:6px}#pbk .chTx:hover{border-color:#e0242f}
+#pbk .chPanel{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end;margin-top:14px;padding-top:14px;border-top:1px solid #1d1d22}
+#pbk .chCol{display:flex;flex-direction:column;gap:7px}#pbk .chLbl{font:700 9px Montserrat;letter-spacing:.22em;color:#7d7d84}#pbk .chLine{display:flex;gap:10px;align-items:center}
+#pbk .chIn{width:110px!important;padding:9px 10px!important}#pbk #chName.chIn{width:100%!important}
+#pbk .chNudge{display:flex;align-items:center;border:1px solid #2c2c32;background:#0a0a0c}#pbk .chNudge button{width:30px;height:36px;border:0;background:transparent;color:#e0242f;font:700 18px Montserrat;cursor:pointer}#pbk .chNudge button:hover{background:#1a0b0c}#pbk .chNudge b{font:700 14px Montserrat;color:#fff;min-width:64px;text-align:center}
+#pbk .chBig{font:400 24px/1 Anton,Impact,sans-serif;color:#fff;letter-spacing:.02em}
+#pbk .chSeg{border-radius:4px;overflow:hidden}#pbk .chSeg button{padding:10px 14px!important}
+#pbk .pbChop .btn.go{width:auto!important;padding:12px 18px!important}
 `;
  document.head.appendChild(s);
 }
@@ -291,18 +315,114 @@ const DG=(()=>{
   return N+' is '+n+' new compositions, royalty-free.'}})();
 function genDesc(name,n,d,sty){return DG(name,n,d,sty)}
 
+/* ---------- smallest WAV that keeps the quality: 16-bit (CD quality) with light TPDF dither, mono when left = right,
+   sample rate untouched. Used for chopped loops and (optionally) every WAV in the pack. ---------- */
+function wav16(chans,sr){let nc=chans.length;if(nc===2){const L=chans[0],R=chans[1];let same=true;for(let i=0;i<L.length;i+=7)if(Math.abs(L[i]-R[i])>1/32768){same=false;break}if(same){chans=[L];nc=1}}
+ const n=chans[0].length,o=new DataView(new ArrayBuffer(44+n*nc*2)),w=(p,s)=>[...s].forEach((c,i)=>o.setUint8(p+i,c.charCodeAt(0)));
+ w(0,'RIFF');o.setUint32(4,36+n*nc*2,true);w(8,'WAVEfmt ');o.setUint32(16,16,true);o.setUint16(20,1,true);o.setUint16(22,nc,true);o.setUint32(24,sr,true);o.setUint32(28,sr*nc*2,true);o.setUint16(32,nc*2,true);o.setUint16(34,16,true);w(36,'data');o.setUint32(40,n*nc*2,true);
+ let p=44;for(let i=0;i<n;i++)for(let c=0;c<nc;c++){const dth=(Math.random()-Math.random())/32768,v=Math.max(-1,Math.min(1,chans[c][i]+dth));o.setInt16(p,v<0?Math.round(v*32768):Math.round(v*32767),true);p+=2}
+ return new Blob([o.buffer],{type:'audio/wav'})}
+/* reads PCM 16/24/32-bit and 32/64-bit float WAVs; returns a smaller 16-bit file when that helps, otherwise the original */
+async function optWav(blob){try{const ab=await blob.arrayBuffer(),v=new DataView(ab);if(v.getUint32(0,false)!==0x52494646||v.getUint32(8,false)!==0x57415645)return blob;
+ let p=12,fmt=null,data=null;while(p+8<=ab.byteLength){const id=v.getUint32(p,false),sz=v.getUint32(p+4,true);if(id===0x666d7420)fmt=p+8;else if(id===0x64617461){data=[p+8,Math.min(sz,ab.byteLength-p-8)];break}p+=8+sz+(sz&1)}
+ if(fmt==null||!data)return blob;let tag=v.getUint16(fmt,true);const nc=v.getUint16(fmt+2,true),sr=v.getUint32(fmt+4,true),bits=v.getUint16(fmt+14,true);if(tag===0xFFFE)tag=v.getUint16(fmt+24,true);
+ if(!(tag===1||tag===3)||nc<1||nc>2)return blob;const bps=bits/8,n=Math.floor(data[1]/(bps*nc)),ch=[...Array(nc)].map(()=>new Float32Array(n));
+ for(let i=0,q=data[0];i<n;i++)for(let c=0;c<nc;c++,q+=bps){let x;if(tag===3)x=bits===64?v.getFloat64(q,true):v.getFloat32(q,true);else if(bits===16)x=v.getInt16(q,true)/32768;else if(bits===24){let s=v.getUint8(q)|(v.getUint8(q+1)<<8)|(v.getInt8(q+2)<<16);x=s/8388608}else if(bits===32)x=v.getInt32(q,true)/2147483648;else if(bits===8)x=(v.getUint8(q)-128)/128;else return blob;ch[c][i]=x}
+ if(bits<=16&&tag===1&&nc===1)return blob;const out=wav16(ch,sr);return out.size<blob.size?out:blob}catch(e){console.warn("optWav",e);return blob}}
+/* deflate inside the zip when the browser can and when it actually saves space */
+async function deflate(blob){if(!window.CompressionStream)return null;try{const s=blob.stream().pipeThrough(new CompressionStream('deflate-raw'));const out=await new Response(s).blob();return out.size<blob.size*.97?out:null}catch(e){return null}}
+/* ---------- CHOP & LOOP: load a sound, set exact loop points (zero-cross snapped), detect the loop, zoom/scroll, play/stop/jump,
+   repeat 2/4/8 times and add the result to the pack as a WAV ---------- */
+const CH={buf:null,ac:null,src:null,zoom:1,off:0,s:0,e:0,ph:0,playing:false,t0:0,bpm:0,drag:null,raf:0,name:'',peaks:null};
+function chopHTML(){return `<div class="pbCard pbChop"><div class="chHead"><div class="pbCardH" style="margin:0">CHOP &amp; LOOP</div>
+ <div class="chSrc"><button class="btn" id="chDrop">LOAD A SOUND<input type="file" id="chIn" accept="audio/*" style="display:none"></button><select id="chPick"><option value="">or pick one of your sounds</option></select></div></div>
+ <div class="chWrap" id="chWrap"><canvas id="chCv"></canvas><div class="chEmpty" id="chEmpty">Drop a sound here or press LOAD A SOUND</div></div>
+ <canvas id="chMini" class="chMini"></canvas>
+ <div class="chRow"><div class="chGrp"><button class="chPlay" id="chPlay" aria-label="Play">&#9654;</button><button class="chStopB" id="chStop" aria-label="Stop">&#9632;</button><b id="chPos" class="chTime">0.000</b></div>
+  <div class="chGrp chRight"><button class="chIc" id="chZo" title="Zoom out">&minus;</button><span id="chZl" class="chZ">1x</span><button class="chIc" id="chZi" title="Zoom in">+</button><button class="chTx" id="chFit">FIT LOOP</button></div></div>
+ <div class="chPanel"><div class="chCol"><span class="chLbl">LOOP</span><div class="chLine"><button class="btn go" id="chDet">DETECT LOOP</button><div class="chSeg" id="chBarsSeg"><button data-b="1">1 BAR</button><button data-b="2" class="on">2 BARS</button><button data-b="4">4 BARS</button></div><select id="chBars" style="display:none"><option value="1">1</option><option value="2" selected>2</option><option value="4">4</option></select></div></div>
+  <div class="chCol"><span class="chLbl">BPM</span><input type="number" id="chBpm" class="chIn" min="40" max="240" step="0.01"></div>
+  <div class="chCol"><span class="chLbl">START</span><div class="chNudge"><button data-n="s,-1" title="Earlier (hold Shift for 10 ms)">&lsaquo;</button><b id="chS">0.000</b><button data-n="s,1" title="Later (hold Shift for 10 ms)">&rsaquo;</button></div></div>
+  <div class="chCol"><span class="chLbl">END</span><div class="chNudge"><button data-n="e,-1" title="Earlier (hold Shift for 10 ms)">&lsaquo;</button><b id="chE">0.000</b><button data-n="e,1" title="Later (hold Shift for 10 ms)">&rsaquo;</button></div></div>
+  <div class="chCol"><span class="chLbl">LENGTH</span><b id="chL" class="chBig">0.000s</b></div></div>
+ <div class="chPanel chOut"><div class="chCol"><span class="chLbl">REPEAT</span><div class="chSeg" id="chTimes"><button data-t="2" class="on">2x</button><button data-t="4">4x</button><button data-t="8">8x</button></div></div>
+  <div class="chCol" style="flex:1;min-width:200px"><span class="chLbl">NAME</span><input type="text" id="chName" class="chIn" placeholder="Name of the new loop"></div>
+  <div class="chCol" style="align-self:flex-end"><button class="btn go" id="chAdd">ADD TO PACK</button></div></div>
+ <div class="msg" id="chMsg" style="margin:10px 0 0"></div></div>`}
+function chMsg(t){const m=$q('#chMsg');if(m)m.textContent=t}
+function chAC(){return CH.ac||(CH.ac=new (window.AudioContext||window.webkitAudioContext)())}
+async function chLoad(blob,name){chStop();try{const ab=await blob.arrayBuffer();CH.buf=await chAC().decodeAudioData(ab.slice(0))}catch(e){chMsg('Could not read that file.');return}
+ CH.name=String(name||'Loop').replace(/\.[^.]+$/,'');CH.zoom=1;CH.off=0;CH.s=0;CH.e=CH.buf.duration;CH.ph=0;CH.bpm=0;CH.peaks=null;$q('#chName').value=CH.name+' Loop';$q('#chEmpty').style.display='none';chDetect();chDraw()}
+function chMono(){const b=CH.buf;if(CH.mono)return CH.mono.b===b?CH.mono.d:(CH.mono=null,chMono());const d=new Float32Array(b.length);for(let c=0;c<b.numberOfChannels;c++){const x=b.getChannelData(c);for(let i=0;i<d.length;i++)d[i]+=x[i]/b.numberOfChannels}CH.mono={b,d};return d}
+function chZC(t){const d=chMono(),sr=CH.buf.sampleRate;let i=Math.max(1,Math.min(d.length-2,Math.round(t*sr)));const W=Math.round(sr*.004);let best=i,bv=1e9;for(let k=Math.max(1,i-W);k<Math.min(d.length-1,i+W);k++){if((d[k-1]<=0&&d[k]>0)||(d[k-1]>=0&&d[k]<0)){const v=Math.abs(k-i);if(v<bv){bv=v;best=k}}}return best/sr}
+/* onset envelope + tempo by autocorrelation, start on the first strong hit, end on the hit closest to N bars later */
+function chDetect(){const b=CH.buf;if(!b)return;const d=chMono(),sr=b.sampleRate,hop=512,n=Math.floor(d.length/hop),en=new Float32Array(n);for(let i=0;i<n;i++){let s=0;for(let j=i*hop,e=j+hop;j<e;j++)s+=d[j]*d[j];en[i]=Math.sqrt(s/hop)}
+ const on=new Float32Array(n);for(let i=1;i<n;i++)on[i]=Math.max(0,en[i]-en[i-1]);let mx=0;for(const v of on)mx=Math.max(mx,v);
+ const fps=sr/hop;let best=0,bl=0;for(let bpm=70;bpm<=170;bpm+=.25){const lag=fps*60/bpm,L=Math.floor(lag);let s=0;for(let i=0;i+lag+1<n;i++){const f=lag-L;s+=on[i]*(on[i+L]*(1-f)+on[i+L+1]*f)}const w=1-Math.abs(bpm-95)/400;if(s*w>best){best=s*w;bl=bpm}}
+ let bpm=+$q('#chBpm').value||bl;if(!$q('#chBpm').value||CH.auto){bpm=bl;CH.auto=true}
+ let si=0;for(let i=0;i<n;i++)if(on[i]>mx*.35){si=i;break}
+ const peaks=[];for(let i=1;i<n-1;i++)if(on[i]>mx*.25&&on[i]>=on[i-1]&&on[i]>=on[i+1])peaks.push(i/fps);
+ let s=Math.max(0,si/fps-.01);const bars=+$q('#chBars').value,want=s+bars*4*60/bpm;let e=Math.min(b.duration,want);
+ const near=peaks.filter(t=>Math.abs(t-want)<want*.04).sort((x,y)=>Math.abs(x-want)-Math.abs(y-want))[0];let pk0=0;for(const v of d)pk0=Math.max(pk0,Math.abs(v));const hit=t=>{const a=Math.max(0,Math.round((t-1.5/fps)*sr)),z=Math.min(d.length,Math.round((t+1.5/fps)*sr));for(let k=a;k<z;k++)if(Math.abs(d[k])>pk0*.08)return k/sr;return t};const h0=hit(si/fps);s=Math.max(0,h0-.002);if(near!=null&&near<=b.duration){const span=hit(near)-h0;e=s+span;bpm=bars*4*60/span}else e=Math.min(b.duration,s+bars*4*60/bpm)
+ CH.bpm=bpm;$q('#chBpm').value=bpm.toFixed(2);CH.s=chZC(s);CH.e=chZC(Math.min(b.duration,e));CH.ph=CH.s;chFit();chMsg(`Loop found: ${bars} bar${bars>1?'s':''} at about ${bpm.toFixed(1)} BPM. Fine-tune with the arrows or drag the red markers.`)}
+function chView(){const D=CH.buf.duration,len=D/CH.zoom;CH.off=Math.max(0,Math.min(D-len,CH.off));return[CH.off,len]}
+function chFit(){if(!CH.buf)return;const D=CH.buf.duration,L=CH.e-CH.s;CH.zoom=Math.max(1,Math.min(400,D/(L*1.15)));CH.off=CH.s-L*.075;chDraw()}
+function chDraw(){const cv=$q('#chCv');if(!cv)return;const W=cv.clientWidth*devicePixelRatio,H=cv.clientHeight*devicePixelRatio;if(cv.width!==W)cv.width=W;if(cv.height!==H)cv.height=H;const x=cv.getContext('2d');x.fillStyle='#08080a';x.fillRect(0,0,W,H);
+ if(!CH.buf){chMini();return}const[o,len]=chView(),b=CH.buf,sr=b.sampleRate,d=chMono(),X=t=>(t-o)/len*W,mid=H*.55,amp=H*.42;
+ x.fillStyle='rgba(224,36,47,.07)';x.fillRect(X(CH.s),0,X(CH.e)-X(CH.s),H);
+ if(CH.bpm){const bt=60/CH.bpm;for(let k=-64;k<512;k++){const t=CH.s+k*bt;if(t<o)continue;if(t>o+len)break;x.fillStyle=k%4===0?'rgba(255,255,255,.18)':'rgba(255,255,255,.06)';x.fillRect(Math.round(X(t)),0,1,H)}}
+ const spp=len*sr/W;x.fillStyle='#e8e8ec';for(let px=0;px<W;px++){const a=Math.floor((o*sr)+px*spp),z=Math.min(d.length,Math.floor(a+Math.max(1,spp)));let lo=0,hi=0;for(let i=Math.max(0,a);i<z;i+=Math.max(1,Math.floor(spp/64))){const v=d[i];if(v<lo)lo=v;if(v>hi)hi=v}const t=o+px*len/W,inL=t>=CH.s&&t<=CH.e;x.fillStyle=inL?'#ffffff':'#55555c';x.fillRect(px,mid-hi*amp,1,Math.max(1,(hi-lo)*amp))}
+ x.fillStyle='rgba(0,0,0,.45)';x.fillRect(0,0,Math.max(0,X(CH.s)),H);x.fillRect(X(CH.e),0,W-X(CH.e),H);
+ [CH.s,CH.e].forEach((t,i)=>{const px=X(t);x.fillStyle='#e0242f';x.fillRect(px-1.5*devicePixelRatio,0,3*devicePixelRatio,H);x.beginPath();const hw=9*devicePixelRatio;x.moveTo(px,18*devicePixelRatio);x.lineTo(px+(i?-hw:hw),0);x.lineTo(px,0);x.fill()});
+ const pp=X(CH.ph);x.fillStyle='#fff';x.fillRect(pp-1,0,2*devicePixelRatio,H);
+ x.fillStyle='rgba(255,255,255,.55)';x.font=(10*devicePixelRatio)+'px Montserrat';x.fillText(o.toFixed(3)+'s',6,H-6);x.textAlign='right';x.fillText((o+len).toFixed(3)+'s',W-6,H-6);x.textAlign='left';
+ chMini();$q('#chPos').textContent=CH.ph.toFixed(3);
+ $q('#chS').textContent=CH.s.toFixed(3);$q('#chE').textContent=CH.e.toFixed(3);$q('#chL').textContent=(CH.e-CH.s).toFixed(3)+'s';$q('#chZl').textContent=(CH.zoom<10?CH.zoom.toFixed(1):Math.round(CH.zoom))+'x'}
+function chMini(){const cv=$q('#chMini');if(!cv)return;const W=cv.clientWidth*devicePixelRatio,H=cv.clientHeight*devicePixelRatio;if(cv.width!==W)cv.width=W;if(cv.height!==H)cv.height=H;const x=cv.getContext('2d');x.clearRect(0,0,W,H);x.fillStyle='#0b0b0e';x.fillRect(0,0,W,H);if(!CH.buf)return;
+ const D=CH.buf.duration,d=chMono(),spp=d.length/W,X=t=>t/D*W;if(!CH.mp||CH.mp.w!==W||CH.mp.b!==CH.buf){const pk=new Float32Array(W);for(let px=0;px<W;px++){let m=0;for(let i=Math.floor(px*spp),z=Math.floor((px+1)*spp);i<z;i+=4)m=Math.max(m,Math.abs(d[i]));pk[px]=m}CH.mp={w:W,b:CH.buf,pk}}
+ x.fillStyle='rgba(224,36,47,.22)';x.fillRect(X(CH.s),0,X(CH.e)-X(CH.s),H);x.fillStyle='#4a4a52';for(let px=0;px<W;px++){const a=CH.mp.pk[px]*H*.42;x.fillRect(px,H/2-a,1,Math.max(1,a*2))}
+ const[o,len]=chView(),vx=X(o),vw=Math.max(6*devicePixelRatio,X(o+len)-vx);x.fillStyle='rgba(255,255,255,.08)';x.fillRect(vx,0,vw,H);x.strokeStyle='#e0242f';x.lineWidth=2*devicePixelRatio;x.strokeRect(vx+1,1,vw-2,H-2);x.fillStyle='#fff';x.fillRect(X(CH.ph)-1,0,2,H)}
+function chPos(){return CH.s+((chAC().currentTime-CH.t0)%(CH.e-CH.s))}
+function chPlay(){if(!CH.buf)return;chStop(true);const ac=chAC();ac.resume();const s=ac.createBufferSource();s.buffer=CH.buf;s.loop=true;s.loopStart=CH.s;s.loopEnd=CH.e;s.connect(ac.destination);const from=Math.min(Math.max(CH.ph,CH.s),CH.e-.001);s.start(0,from);CH.src=s;CH.playing=true;CH.t0=ac.currentTime-(from-CH.s);
+ const tick=()=>{if(!CH.playing)return;CH.ph=chPos();chDraw();CH.raf=requestAnimationFrame(tick)};tick();$q('#chPlay').classList.add('on')}
+function chStop(keep){if(CH.src){try{CH.src.stop()}catch(e){}CH.src.disconnect();CH.src=null}CH.playing=false;cancelAnimationFrame(CH.raf);if(!keep){CH.ph=CH.s;chDraw()}const b=$q('#chPlay');if(b)b.classList.remove('on')}
+function chSet(k,t){if(!CH.buf)return;t=Math.max(0,Math.min(CH.buf.duration,t));if(k==='s')CH.s=Math.min(t,CH.e-.01);else CH.e=Math.max(t,CH.s+.01);if(CH.playing)chPlay();else{CH.ph=CH.s;chDraw()}}
+async function chAdd(){if(!CH.buf){chMsg('Load a sound first.');return}const times=+$q('#chTimes .on').dataset.t,b=CH.buf,sr=b.sampleRate,a=Math.round(CH.s*sr),z=Math.round(CH.e*sr),L=z-a,out=chAC().createBuffer(b.numberOfChannels,L*times,sr),F=Math.round(sr*.002);
+ for(let c=0;c<b.numberOfChannels;c++){const src=b.getChannelData(c).subarray(a,z),dst=out.getChannelData(c);for(let r=0;r<times;r++)dst.set(src,r*L);for(let i=0;i<F&&i<dst.length;i++){dst[i]*=i/F;dst[dst.length-1-i]*=i/F}}
+ const nm=($q('#chName').value.trim()||CH.name+' Loop').replace(/[\\/:*?"<>|]+/g,'_'),f=new File([wav16([...Array(out.numberOfChannels)].map((_,c)=>out.getChannelData(c)),sr)],nm+'.wav',{type:'audio/wav'});await addFiles([f]);const nf=S.cur.files.find(x=>x.name===f.name&&x.size===f.size);if(nf&&CH.bpm){nf.bpm=Math.round(CH.bpm);nf.kind='loop';autoName(S.cur);await save();rTbl()}
+ chMsg(`Added "${nm}.wav" to the pack: ${times}x loop, ${(L*times/sr).toFixed(2)} seconds.`)}
+function chWire(){const d=S.cur,cv=$q('#chCv'),pk=$q('#chPick');pk.innerHTML='<option value="">or pick one of your sounds</option>'+d.files.filter(f=>AUDIO.test(f.name)).map(f=>`<option value="${f.id}">${esc(f.newName||f.name)}</option>`).join('');
+ pk.onchange=()=>{const f=d.files.find(x=>x.id===pk.value);if(f)chLoad(f.blob,f.newName||f.name)};
+ $q('#chDrop').onclick=e=>{if(e.target.id!=='chIn')$q('#chIn').click()};$q('#chIn').onchange=e=>{const f=e.target.files[0];if(f)chLoad(f,f.name)};
+ $q('#chPlay').onclick=chPlay;$q('#chStop').onclick=()=>chStop();$q('#chDet').onclick=()=>{CH.auto=true;$q('#chBpm').value='';chDetect()};$q('#chBars').onchange=()=>{if(CH.buf){CH.auto=false;const bars=+$q('#chBars').value;chSet('e',chZC(CH.s+bars*4*60/(CH.bpm||90)));chFit()}};
+ $q('#chBpm').onchange=()=>{const v=+$q('#chBpm').value;if(CH.buf&&v>=40){CH.bpm=v;CH.auto=false;chSet('e',chZC(CH.s+(+$q('#chBars').value)*4*60/v));chFit()}};
+ $q('#chZi').onclick=()=>{const[o,len]=chView(),c=o+len/2;CH.zoom=Math.min(400,CH.zoom*1.6);CH.off=c-CH.buf.duration/CH.zoom/2;chDraw()};$q('#chZo').onclick=()=>{const[o,len]=chView(),c=o+len/2;CH.zoom=Math.max(1,CH.zoom/1.6);CH.off=c-CH.buf.duration/CH.zoom/2;chDraw()};$q('#chFit').onclick=chFit;
+ const mini=$q('#chMini');let md=null;const mT=e=>{const r=mini.getBoundingClientRect();return(e.clientX-r.left)/r.width*CH.buf.duration};
+ mini.onmousedown=e=>{if(!CH.buf)return;const[o,len]=chView(),t=mT(e);md=t>=o&&t<=o+len?t-o:len/2;CH.off=t-md;chDraw()};window.addEventListener('mousemove',e=>{if(md==null||!CH.buf)return;CH.off=mT(e)-md;chDraw()});window.addEventListener('mouseup',()=>{md=null});
+ $q('#chBarsSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;$q('#chBarsSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$q('#chBars').value=b.dataset.b;$q('#chBars').onchange()};
+ const wr=$q('#chWrap');wr.ondragover=e=>{e.preventDefault();wr.classList.add('on')};wr.ondragleave=()=>wr.classList.remove('on');wr.ondrop=e=>{e.preventDefault();wr.classList.remove('on');const f=e.dataTransfer.files[0];if(f)chLoad(f,f.name)};
+ document.querySelectorAll('.pbChop [data-n]').forEach(b=>b.onclick=e=>{const[k,v]=b.dataset.n.split(',');chSet(k,CH[k]+(+v)*(e.shiftKey?.01:.001))});
+ $q('#chTimes').onclick=e=>{const b=e.target.closest('button');if(!b)return;$q('#chTimes').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))};$q('#chAdd').onclick=chAdd;
+ const tAt=e=>{const r=cv.getBoundingClientRect(),[o,len]=chView();return o+(e.clientX-r.left)/r.width*len};
+ cv.onmousedown=e=>{if(!CH.buf)return;const t=tAt(e),[o,len]=chView(),tol=len*10/cv.clientWidth;if(Math.abs(t-CH.s)<tol)CH.drag='s';else if(Math.abs(t-CH.e)<tol)CH.drag='e';else{CH.ph=Math.min(Math.max(t,CH.s),CH.e-.001);if(CH.playing)chPlay();else chDraw()}};
+ cv.onmousemove=e=>{if(!CH.buf)return;const t=tAt(e),[o,len]=chView(),tol=len*10/cv.clientWidth;cv.style.cursor=CH.drag||Math.abs(t-CH.s)<tol||Math.abs(t-CH.e)<tol?'ew-resize':'pointer';if(CH.drag){if(CH.drag==='s')CH.s=Math.max(0,Math.min(t,CH.e-.01));else CH.e=Math.min(CH.buf.duration,Math.max(t,CH.s+.01));CH.ph=CH.s;chDraw()}};
+ window.addEventListener('mouseup',()=>{if(CH.drag){CH[CH.drag]=chZC(CH[CH.drag]);CH.drag=null;CH.auto=false;if(CH.playing)chPlay();else chDraw()}});
+ cv.onwheel=e=>{if(!CH.buf)return;e.preventDefault();const[o,len]=chView();if(!e.shiftKey&&Math.abs(e.deltaY)>=Math.abs(e.deltaX)){const t=tAt(e),f=e.deltaY<0?1.25:.8,nz=Math.max(1,Math.min(400,CH.zoom*f)),r=(t-o)/len;CH.zoom=nz;CH.off=t-r*CH.buf.duration/nz}else CH.off+=(e.deltaY+e.deltaX)/cv.clientWidth*len;chDraw()};
+ new ResizeObserver(()=>chDraw()).observe(cv);if($q('#chBars'))$q('#chBarsSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.b===$q('#chBars').value));if(CH.buf){$q('#chEmpty').style.display='none';chDraw()}}
+
+function chPickFill(){const pk=$q('#chPick');if(!pk||!S.cur)return;const v=pk.value;pk.innerHTML='<option value="">or pick one of your sounds</option>'+S.cur.files.filter(f=>AUDIO.test(f.name)).map(f=>`<option value="${f.id}">${esc(f.newName||f.name)}</option>`).join('');pk.value=v}
 const LIC='LICENSE (MZPRD)\n\nYou may use these sounds in your own music, including commercial releases.\nYou may not resell, share or redistribute the sounds on their own, as a pack or as samples.\nCredit is appreciated: Prod. MZPRD.\n';
 function editor(){
  const d=S.cur;$q('#pbBack').style.display='inline-block';
  $q('#pbBody').innerHTML=`<div class="pn"><div class="pbHd"><span class="pbN">1</span><div><h4>PACK DETAILS</h4><p>Name it, price it and write the description.</p></div></div><div class="g"><div><label>TITLE</label><input type="text" id="pbTitle"></div><div><label>PRICE (USD)</label><input type="number" id="pbPrice" step="0.01" min="0"></div><div><label>&nbsp;</label><label style="display:flex;gap:8px;align-items:center;letter-spacing:.1em;margin:14px 0 0"><input type="checkbox" id="pbFree" style="width:auto"> OFFER THE PREVIEW AS A FREE DOWNLOAD</label></div></div><label>DESCRIPTION</label><textarea id="pbDesc" placeholder="What is in this pack? Genres, vibes, how many loops and one-shots."></textarea><div class="pbCard"><div class="pbCardH">DESCRIPTION GENERATOR</div><div class="g" style="align-items:end"><div><label>PACK NAME</label><input type="text" id="pbDgName" placeholder="Uses the title if empty"></div><div><label>STYLE / VIBE</label><select id="pbDgSty"><option value="">Auto (from the pack name)</option>${DGSTY.map(s=>`<option>${s[0]}</option>`).join('')}</select></div><div><label>HOW MANY SAMPLES</label><input type="number" id="pbDgN" min="1" placeholder="Counts your sounds if empty"></div><div><button class="btn go" id="pbDgGo">GENERATE DESCRIPTION</button></div></div></div></div>
- <div class="pn"><div class="pbHd"><span class="pbN">2</span><div><h4>YOUR SOUNDS</h4><p>Drop your files, listen with play, tick DEMO for the preview.</p></div></div><div class="drop" id="pbDrop">DROP FILES OR A FOLDER HERE, OR CLICK TO CHOOSE<input type="file" id="pbFiles" multiple style="display:none"></div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pbFolder">CHOOSE A FOLDER</button><button class="btn" id="pbAuto">AUTO-NAME ALL</button><button class="btn" id="pbDet">DETECT MISSING BPM (LOOPS)</button></div><input type="file" id="pbDir" webkitdirectory multiple style="display:none"><div id="pbTbl" style="margin-top:10px;overflow:auto;max-height:420px"></div><div class="msg" id="pbSum"></div></div>
+ <div class="pn"><div class="pbHd"><span class="pbN">2</span><div><h4>YOUR SOUNDS</h4><p>Drop your files, listen with play, tick DEMO for the preview.</p></div></div><div class="drop" id="pbDrop">DROP FILES OR A FOLDER HERE, OR CLICK TO CHOOSE<input type="file" id="pbFiles" multiple style="display:none"></div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pbFolder">CHOOSE A FOLDER</button><button class="btn" id="pbAuto">AUTO-NAME ALL</button><button class="btn" id="pbDet">DETECT MISSING BPM (LOOPS)</button></div><input type="file" id="pbDir" webkitdirectory multiple style="display:none"><div id="pbTbl" style="margin-top:10px;overflow:auto;max-height:420px"></div><div class="msg" id="pbSum"></div>${chopHTML()}</div>
  <div class="pn"><div class="pbHd"><span class="pbN">3</span><div><h4>COVER AND PREVIEW</h4><p>Make the cover and the demo preview.</p></div></div><div class="g"><div><button class="btn" id="pbCov">MAKE A COVER</button> <button class="btn" id="pbCovUp">USE MY OWN IMAGE</button><input type="file" id="pbCovIn" accept="image/*" style="display:none"><div id="pbCovBox"></div></div><div><button class="btn" id="pbPrev">MAKE THE DEMO PREVIEW</button><div class="pbCard" style="margin-top:10px"><div class="pbCardH">DEMO PREVIEW</div><div class="msg" id="pbDemoInfo" style="margin:0"></div></div> <button class="btn" id="pbPrevUp">USE MY OWN AUDIO</button><input type="file" id="pbPrevIn" accept="audio/*" style="display:none"><div id="pbPrevBox"></div></div><div><details class="pbLicD"><summary>LICENSE (INCLUDED IN THE ZIP)</summary><textarea id="pbLic" style="min-height:130px"></textarea></details><label style="display:flex;gap:8px;align-items:center;letter-spacing:.1em"><input type="checkbox" id="pbLicOn" style="width:auto" checked> INCLUDE LICENSE.TXT</label></div></div></div>
- <div class="pn"><div class="pbHd"><span class="pbN">4</span><div><h4>BUILD AND PUBLISH</h4><p>Test the zip on your computer, then publish.</p></div></div><div class="msg" id="pbSize" style="margin:0 0 8px"></div>
+ <div class="pn"><div class="pbHd"><span class="pbN">4</span><div><h4>BUILD AND PUBLISH</h4><p>Test the zip on your computer, then publish.</p></div></div><div class="msg" id="pbSize" style="margin:0 0 8px"></div><label style="display:flex;gap:8px;align-items:center;letter-spacing:.1em;margin:0 0 12px!important"><input type="checkbox" id="pbOpt" style="width:auto" checked> MAKE THE PACK SMALLER: 16-BIT WAV (CD QUALITY), MONO WHEN LEFT = RIGHT, COMPRESSED ZIP</label>
  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pbZipTest">BUILD THE ZIP ON MY COMPUTER (NO UPLOAD)</button><button class="btn go" id="pbPub">PUBLISH PACK (UPLOADS TO THE CLOUD)</button><button class="btn" id="pbUn" style="display:none">UNPUBLISH AND FREE CLOUD SPACE</button></div>
  <div class="bar"><b id="pbProg"></b></div><div class="msg" id="pbMsg"></div></div>`;
- $q('#pbTitle').value=d.title;$q('#pbPrice').value=d.price;$q('#pbFree').checked=!!d.free;$q('#pbDesc').value=d.desc;$q('#pbLic').value=d.license;
- const sync=()=>{d.title=$q('#pbTitle').value;d.price=parseFloat($q('#pbPrice').value)||0;d.free=$q('#pbFree').checked;d.desc=$q('#pbDesc').value;d.license=$q('#pbLic').value;d.licOn=$q('#pbLicOn').checked};
- ['#pbTitle','#pbPrice','#pbFree','#pbDesc','#pbLic','#pbLicOn'].forEach(id=>$q(id).onchange=()=>{sync();save();rSize()});
+ $q('#pbTitle').value=d.title;$q('#pbPrice').value=d.price;$q('#pbFree').checked=!!d.free;$q('#pbDesc').value=d.desc;$q('#pbLic').value=d.license;$q('#pbOpt').checked=d.optimize!==false;
+ const sync=()=>{d.title=$q('#pbTitle').value;d.price=parseFloat($q('#pbPrice').value)||0;d.free=$q('#pbFree').checked;d.desc=$q('#pbDesc').value;d.license=$q('#pbLic').value;d.licOn=$q('#pbLicOn').checked;d.optimize=$q('#pbOpt').checked};
+ ['#pbTitle','#pbPrice','#pbFree','#pbDesc','#pbLic','#pbLicOn','#pbOpt'].forEach(id=>$q(id).onchange=()=>{sync();save();rSize()});
  const dz=$q('#pbDrop');dz.onclick=()=>$q('#pbFiles').click();$q('#pbFolder').onclick=()=>$q('#pbDir').click();
  dz.ondragover=e=>{e.preventDefault();dz.classList.add('on')};dz.ondragleave=()=>dz.classList.remove('on');
  dz.ondrop=async e=>{e.preventDefault();dz.classList.remove('on');const fl=await readDrop(e.dataTransfer);addFiles(fl)};
@@ -316,7 +436,7 @@ function editor(){
  $q('#pbPrevIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;d.preview=f;d.previewExt=(f.name.match(/\.[A-Za-z0-9]+$/)||['.mp3'])[0].slice(1).toLowerCase();await save();rPrev()};
  $q('#pbZipTest').onclick=async()=>{sync();try{const z=await buildZip(true);const a=document.createElement('a');a.href=URL.createObjectURL(z);a.download=(clean(d.title)||'pack')+'.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),8000);msg('Zip built: '+mb(z.size)+'. It was saved to your downloads, nothing was uploaded.')}catch(e){msg('Zip failed: '+e.message)}};
  $q('#pbPub').onclick=publish;$q('#pbUn').onclick=unpublish;
- rTbl();rCov();rPrev();rSize();rDemo();if(d.dgSty)$q('#pbDgSty').value=d.dgSty;
+ rTbl();rCov();rPrev();rSize();rDemo();chWire();if(d.dgSty)$q('#pbDgSty').value=d.dgSty;
  $q('#pbDgGo').onclick=()=>{sync();const nm=$q('#pbDgName').value.trim()||d.title.trim();if(!nm){msg('Type the pack name first.');return}const n=+$q('#pbDgN').value||d.files.filter(f=>f.use&&AUDIO.test(f.name)).length;if(!n){msg('Type how many samples.');return}d.dgSty=$q('#pbDgSty').value;d.desc=genDesc(nm,n,d,d.dgSty);$q('#pbDesc').value=d.desc;save();msg('Description made. Press again for a different one.')};
 }
 async function readDrop(dt){
@@ -344,7 +464,7 @@ function rTbl(){
   else c.onchange=async()=>{f[k]=k==='use'?c.checked:k==='bpm'?(+c.value||0):c.value;if(k==='kind'||k==='bpm'||k==='key'){autoName(d)}await save();if(k==='kind'||k==='bpm'||k==='key'||k==='use')rTbl();rSize()}})});
  rSum();
 }
-function rSum(){const d=S.cur,u=d.files.filter(f=>f.use),nl=u.filter(f=>f.kind==='loop').length,ns=u.filter(f=>f.kind==='shot').length,no=u.length-nl-ns;$q('#pbSum').textContent=u.length?`${nl} loops, ${ns} one-shots${no?', '+no+' extras':''}  /  ${mb(u.reduce((s,f)=>s+f.size,0))}`:''}
+function rSum(){chPickFill();const d=S.cur,u=d.files.filter(f=>f.use),nl=u.filter(f=>f.kind==='loop').length,ns=u.filter(f=>f.kind==='shot').length,no=u.length-nl-ns;$q('#pbSum').textContent=u.length?`${nl} loops, ${ns} one-shots${no?', '+no+' extras':''}  /  ${mb(u.reduce((s,f)=>s+f.size,0))}`:''}
 function rCov(){const d=S.cur,b=$q('#pbCovBox');if(d.cover){const u=URL.createObjectURL(d.cover);b.innerHTML=`<img class="pv" src="${u}" alt="cover">`}else b.innerHTML='<div class="msg">No cover yet.</div>'}
 function rPrev(){const d=S.cur,b=$q('#pbPrevBox');if(d.preview){const u=URL.createObjectURL(d.preview);b.innerHTML=`<div class="pbPlayer"><button class="pbPP" aria-label="Play">&#9654;</button><div class="pbTrk"><div class="pbTt">${esc((d.title||'Pack').toUpperCase())} <span>DEMO PREVIEW</span></div><div class="pbBar"><b></b></div></div><div class="pbTm">0:00</div><audio src="${u}" preload="metadata"></audio></div><div class="msg">${mb(d.preview.size)} (${esc(d.previewExt||'')})</div>`;mzPlayer(b.querySelector('.pbPlayer'))}else b.innerHTML='<div class="msg">No preview yet.</div>'}
 function rSize(){const d=S.cur,u=d.files.filter(f=>f.use),zs=u.reduce((s,f)=>s+f.size,0)+(d.licOn===false?0:2000),total=zs+(d.cover?d.cover.size:0)+(d.preview?d.preview.size:0);
@@ -357,7 +477,7 @@ function loadMuxer(){return window.Mp4Muxer?Promise.resolve():new Promise((ok,no
 async function buildZip(local){
  const d=S.cur,u=d.files.filter(f=>f.use);if(!u.length)throw new Error('Add some sounds first.');
  const names=new Set(),entries=[];
- for(const f of u){let nm=(f.newName||f.name).replace(/[\\/:*?"<>|]+/g,'_'),path=folderOf(f)+'/'+nm,i=1;while(names.has(path.toLowerCase())){path=folderOf(f)+'/'+nm.replace(/(\.[^.]*)?$/,'_'+(++i)+'$1')}names.add(path.toLowerCase());entries.push({name:path,blob:f.blob})}
+let oi=0;for(const f of u){if(d.optimize!==false&&/\.wav$/i.test(f.name)){oi++;msg('Making files smaller (16-bit, same quality) '+oi+' / '+u.length+'...')}const fb=d.optimize!==false&&/\.wav$/i.test(f.name)?await optWav(f.blob):f.blob;let nm=(f.newName||f.name).replace(/[\\/:*?"<>|]+/g,'_'),path=folderOf(f)+'/'+nm,i=1;while(names.has(path.toLowerCase())){path=folderOf(f)+'/'+nm.replace(/(\.[^.]*)?$/,'_'+(++i)+'$1')}names.add(path.toLowerCase());entries.push({name:path,blob:fb})}
  if(d.licOn!==false&&d.license)entries.push({name:'LICENSE.txt',blob:new Blob([d.license],{type:'text/plain'})});
  if(d.preview)entries.push({name:'PREVIEW - '+((clean(d.title)||'Pack').replace(/[\\/:*?"<>|]+/g,'_'))+'.'+(d.previewExt||'m4a'),blob:d.preview});
  return await zipBlob(entries,p=>{$q('#pbProg').style.width=p+'%';msg('Building the zip '+p+'%')});

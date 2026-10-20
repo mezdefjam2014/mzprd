@@ -1923,7 +1923,7 @@ function mzBid(){
  return b;
 }
 window.mzBid=mzBid;
-$('#pbkOpen').onclick=async()=>{try{if(!window.packBuilderOpen)await loadScript('packbuilder.js?v=7');await window.packBuilderOpen()}catch(e){toast('PACK BUILDER FAILED TO LOAD')}};
+$('#pbkOpen').onclick=async()=>{try{if(!window.packBuilderOpen)await loadScript('packbuilder.js?v=10');await window.packBuilderOpen()}catch(e){toast('PACK BUILDER FAILED TO LOAD')}};
 $('#fSub').onsubmit=async e=>{e.preventDefault();const sm=$('#fSm');sm.textContent='Saving...';
  try{const r=await (await fetch(SB_URL+'/functions/v1/site',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+SB_KEY},body:JSON.stringify({action:'subscribe',email:$('#fEm').value,website:$('#fHp').value,source:'site'})})).json();
   sm.textContent=r.ok?'You are on the list. Thank you!':(r.error||'Something went wrong.');if(r.ok)$('#fEm').value=''}catch(x){sm.textContent='Network problem. Try again.'}};
