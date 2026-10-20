@@ -126,11 +126,34 @@ function css(){
 #pbk .bar{height:6px;background:#1b1b20;margin-top:8px}#pbk .bar b{display:block;height:100%;width:0;background:var(--red)}
 #pbk .dr{display:flex;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #1d1d21;font:600 12px Montserrat;color:#d9d9dc}#pbk .dr b{flex:1}#pbk .dr span{font:500 11px Montserrat;color:#8e8e94}
 #pbk .tag{font:700 9px Montserrat;letter-spacing:.14em;padding:3px 7px;margin-left:6px}#pbk .tag.d{background:#3a3a44}#pbk .tag.p{background:#e0242f}
-#pbk .pv{max-width:240px;display:block;margin-top:8px;border:1px solid #2a2a2e}`;
+#pbk .pv{max-width:240px;display:block;margin-top:8px;border:1px solid #2a2a2e}
+#pbk{background:radial-gradient(1200px 500px at 50% -10%,rgba(224,36,47,.12),transparent 60%),#070708!important;padding:24px clamp(12px,3vw,40px) 120px!important}
+#pbk>*{max-width:1180px;margin-left:auto;margin-right:auto}
+#pbk .hd{border-bottom:1px solid #222227!important;padding-bottom:16px!important;margin-bottom:22px!important}
+#pbk .hd h2{font:400 clamp(28px,4vw,44px)/1 Anton,Impact,sans-serif!important;letter-spacing:.02em;color:#fff}#pbk .hd h2 span{color:#e0242f}
+#pbk .pn{background:linear-gradient(180deg,#0f0f12,#0a0a0c)!important;border:1px solid #1f1f24!important;padding:22px 24px!important;margin-bottom:18px!important;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#pbk .pbHd{display:flex;align-items:center;gap:14px;margin-bottom:16px}#pbk .pbN{flex:0 0 38px;height:38px;border-radius:50%;background:#e0242f;color:#fff;font:400 20px/38px Anton,Impact,sans-serif;text-align:center;box-shadow:0 0 18px rgba(224,36,47,.35)}
+#pbk .pbHd h4{font:400 24px/1 Anton,Impact,sans-serif!important;letter-spacing:.03em!important;color:#fff!important;margin:0 0 4px!important}#pbk .pbHd p{margin:0;font:500 12px Montserrat;color:#8e8e94}
+#pbk label{font:700 10px Montserrat!important;letter-spacing:.18em!important;color:#a9a9ae!important;margin:12px 0 6px!important}
+#pbk input[type=text],#pbk input[type=number],#pbk textarea,#pbk select{background:#0a0a0c!important;border:1px solid #2c2c32!important;padding:11px 12px!important;font:500 14px Montserrat!important;transition:border-color .15s}
+#pbk input:focus,#pbk textarea:focus,#pbk select:focus{outline:0;border-color:#e0242f!important;box-shadow:0 0 0 3px rgba(224,36,47,.15)}
+#pbk textarea#pbDesc{min-height:150px;line-height:1.6}
+#pbk .btn{border:1px solid #3a3a40!important;font:700 10px Montserrat!important;letter-spacing:.16em!important;padding:11px 14px!important;transition:all .15s}#pbk .btn:hover{border-color:#e0242f!important;color:#fff}
+#pbk .btn.go{background:#e0242f!important;border-color:#e0242f!important;font:700 12px Montserrat!important;padding:14px 22px!important;box-shadow:0 6px 20px rgba(224,36,47,.3)}#pbk .btn.go:hover{background:#ff3341!important}
+#pbk .drop{border:2px dashed #34343a!important;padding:34px!important;background:#0a0a0c;font:700 12px Montserrat!important;letter-spacing:.14em!important;transition:all .15s}#pbk .drop:hover,#pbk .drop.on{border-color:#e0242f!important;color:#fff;background:#120a0b}
+#pbk table{font:500 13px Montserrat!important}#pbk th{padding:10px 8px!important;border-bottom:1px solid #26262b;color:#7d7d84!important}#pbk td{padding:7px 8px!important;border-top:1px solid #18181c!important}
+#pbk tr:hover td{background:#121215}#pbk #pbTbl{border:1px solid #1f1f24;background:#08080a}
+#pbk .msg{font:500 13px/1.6 Montserrat!important}
+#pbk .pbCard{border:1px solid #26262b!important;border-left:3px solid #e0242f!important;padding:16px 18px!important;margin-top:16px!important}
+#pbk .pbLicD{border:1px solid #26262b;background:#0a0a0c;padding:10px 12px;margin-top:2px}#pbk .pbLicD summary{cursor:pointer;font:700 10px Montserrat;letter-spacing:.18em;color:#a9a9ae}#pbk .pbLicD[open] summary{color:#fff;margin-bottom:8px}
+#pbk .g{gap:16px!important}
+#pbk .dr{background:#0f0f12;border:1px solid #1f1f24;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px}#pbk .dr b{flex:1;font:700 14px Montserrat;color:#fff}#pbk .dr b span{font:500 12px Montserrat;color:#8e8e94}
+#pbk .pbCard .g{grid-template-columns:1fr 1fr 1fr auto!important}@media(max-width:800px){#pbk .pbCard .g{grid-template-columns:1fr!important}}
+`;
  document.head.appendChild(s);
 }
 const msg=t=>{const e=root&&root.querySelector('#pbMsg');if(e)e.textContent=t};
-function shell(){root.innerHTML=`<div class="hd"><h2>PACK BUILDER</h2><button class="btn" id="pbBack" style="display:none">&larr; ALL DRAFTS</button><button class="btn" id="pbClose">CLOSE</button></div><div id="pbBody"></div>`;
+function shell(){root.innerHTML=`<div class="hd"><h2>PACK <span>BUILDER</span></h2><button class="btn" id="pbBack" style="display:none">&larr; ALL DRAFTS</button><button class="btn" id="pbClose">CLOSE</button></div><div id="pbBody"></div>`;
  $q('#pbClose').onclick=close;$q('#pbBack').onclick=()=>{S.cur=null;home()}}
 function close(){root.classList.remove('on')}
 async function home(){
@@ -147,6 +170,57 @@ async function home(){
 /* ---------- description generator: reads the pack name (mood) and the file names (instruments, loops vs one-shots) and writes a
    two-paragraph store description from large phrase banks. These are finished, ready-to-use compositions, so it never talks about
    chopping or BPM. Every result is remembered on this computer and never given twice. ---------- */
+const DGSTY=[
+ ['Feel Good Soul',['soulful','feel-good','warm','uplifting'],['soul','hip hop'],['a sunny day with the windows down','smiles all around the room']],
+ ['Love and Soul',['romantic','soulful','tender','warm'],['soul','R&B'],['a slow dance in the living room','love letters and old records']],
+ ['Soul Deep',['deep','soulful','emotional','heartfelt'],['soul','soulful hip hop'],['feelings that run deep','a voice that cracks with emotion']],
+ ['Vibes',['smooth','easygoing','vibey','mellow'],['R&B','hip hop'],['good company and good music','a late-night hang with friends']],
+ ['Hard and Energetic',['hard-hitting','energetic','aggressive','loud'],['trap','street rap'],['a packed room ready to explode','adrenaline and bass']],
+ ['Dusty Boom Bap',['dusty','gritty','vintage','raw'],['boom bap','sample-based hip hop'],['a 90s basement session','tape hiss and late nights']],
+ ['Vintage Soul',['vintage','analog','warm','classic'],['soul','boom bap'],['records from the 60s and 70s','a classic soul session']],
+ ['Gospel and Church',['uplifting','gospel-rooted','spiritual','powerful'],['gospel rap','soul'],['a Sunday choir in full voice','light through stained glass']],
+ ['Jazzy Late Night',['jazzy','smoky','late-night','smooth'],['jazz rap','lo-fi'],['a smoky lounge after midnight','the last set of the night']],
+ ['Dark and Gritty',['dark','gritty','menacing','cold'],['street rap','underground rap'],['an empty street at 3am','concrete and shadows']],
+ ['Luxury and Boss',['luxurious','regal','confident','polished'],['luxury rap','hip hop'],['penthouse views and gold chains','a boss move made quietly']],
+ ['Street Stories',['raw','real','street-ready','gritty'],['street rap','boom bap'],['corners, concrete and real stories','the grind that never stops']],
+ ['Griselda Grit',['grimy','raw','cold','vintage'],['underground rap','boom bap'],['Buffalo winters and hard bars','cold rooms and loud speakers']],
+ ['Sad and Emotional',['sad','emotional','melancholic','heartbroken'],['emotional rap','R&B'],['rain on the window after a goodbye','memories you cannot shake']],
+ ['Heartbreak R&B',['heartbroken','sultry','moody','tender'],['R&B','neo soul'],['a text you never sent','a 2am drive alone']],
+ ['Smooth R&B',['silky','smooth','sultry','lush'],['R&B','neo soul'],['candlelight and slow conversations','velvet nights']],
+ ['Neo Soul',['organic','warm','jazzy','soulful'],['neo soul','R&B'],['a live band in a small room','incense and vinyl']],
+ ['Chill Lo-Fi',['mellow','hazy','laid-back','cozy'],['lo-fi','chillhop'],['rain and headphones','a slow morning with nowhere to be']],
+ ['Dreamy and Ethereal',['dreamy','ethereal','floating','airy'],['ambient rap','R&B'],['clouds at sunrise','a dream you do not want to end']],
+ ['Cinematic and Epic',['cinematic','epic','dramatic','grand'],['cinematic rap','trap'],['the final scene of a film','a big moment that needs a big sound']],
+ ['Triumphant',['triumphant','victorious','bold','uplifting'],['hip hop','trap'],['the moment you finally win','a crowd on its feet']],
+ ['Motivational',['inspiring','driven','uplifting','powerful'],['hip hop','motivational rap'],['the grind before the come up','early mornings and big goals']],
+ ['Nostalgic',['nostalgic','bittersweet','warm','vintage'],['boom bap','soul'],['old photos and better days','the summers you still remember']],
+ ['Summer Vibes',['sunny','bright','breezy','feel-good'],['hip hop','R&B'],['summer heat and loud speakers','a cookout that lasts all night']],
+ ['Night Drive',['moody','sleek','nocturnal','smooth'],['R&B','trap'],['city lights on an empty highway','a late drive with no destination']],
+ ['Haunting',['haunting','eerie','mysterious','dark'],['dark trap','underground rap'],['something moving in the shadows','a cold draft in an empty house']],
+ ['Horror',['sinister','eerie','terrifying','dark'],['horrorcore','dark trap'],['a horror film score','footsteps behind you']],
+ ['Drill',['menacing','sliding','cold','aggressive'],['drill','UK drill'],['cold nights and colder bars','tension that never lets up']],
+ ['Trap Bangers',['hard','bouncy','energetic','loud'],['trap','hip hop'],['a club shaking to the floor','bass you feel in your chest']],
+ ['West Coast',['funky','laid-back','sunny','smooth'],['West Coast rap','G-funk'],['lowriders on a sunny boulevard','palm trees and talk boxes']],
+ ['East Coast Classic',['classic','gritty','soulful','raw'],['East Coast hip hop','boom bap'],['New York in the 90s','subway trains and hard rhymes']],
+ ['Southern Soul',['soulful','country-rich','warm','bluesy'],['Southern hip hop','soul'],['a front porch at sunset','Sunday dinner down South']],
+ ['Bluesy',['bluesy','smoky','raw','soulful'],['blues rap','soul'],['a juke joint at midnight','a worn guitar and a story']],
+ ['Funky',['funky','groovy','bouncy','vintage'],['funk','hip hop'],['a dance floor in 1975','basslines that make you move']],
+ ['Psychedelic',['psychedelic','trippy','hazy','colorful'],['psych soul','alternative hip hop'],['a lava lamp glow','colors melting into sound']],
+ ['Spiritual and Healing',['peaceful','healing','spiritual','calm'],['soul','ambient rap'],['quiet prayer at dawn','a deep breath after a long fight']],
+ ['Peaceful and Calm',['calm','peaceful','gentle','soft'],['lo-fi','soul'],['still water at sunrise','a quiet room and a warm drink']],
+ ['Mafia and Mob',['cinematic','menacing','classy','dramatic'],['mafioso rap','boom bap'],['a back room deal in a smoky restaurant','old films and loyalty']],
+ ['Royal and Regal',['regal','majestic','grand','luxurious'],['luxury rap','cinematic rap'],['a throne built from the ground up','marble halls and crowns']],
+ ['Underground',['raw','unpolished','gritty','authentic'],['underground rap','boom bap'],['a packed basement show','mixtapes passed hand to hand']],
+ ['Old School',['classic','old-school','funky','vintage'],['old school hip hop','boom bap'],['block parties and turntables','the golden era of rap']],
+ ['Sexy and Seductive',['seductive','sultry','silky','intimate'],['R&B','slow jams'],['low lights and slow moves','a late-night slow jam']],
+ ['Party and Club',['energetic','bouncy','loud','fun'],['club rap','trap'],['a packed dance floor','the moment the bass drops']],
+ ['Aggressive',['aggressive','intense','raw','furious'],['hard rap','trap'],['a fight you refuse to lose','pure adrenaline']],
+ ['Mysterious',['mysterious','moody','shadowy','intriguing'],['alternative hip hop','dark R&B'],['a secret behind a closed door','fog over the city']],
+ ['Hopeful',['hopeful','uplifting','bright','warm'],['soul','hip hop'],['the first light after a storm','a fresh start']],
+ ['Reflective',['reflective','introspective','thoughtful','soulful'],['conscious rap','soul'],['looking back on how far you came','a quiet moment alone']],
+ ['Afro Soul',['rhythmic','warm','vibrant','soulful'],['Afrobeats','Afro soul'],['sunset in Lagos','drums and dancing in the street']],
+ ['Latin Soul',['passionate','warm','rhythmic','fiery'],['Latin soul','hip hop'],['a summer night in the barrio','guitars and heat']],
+ ['Vintage Movie Score',['cinematic','vintage','orchestral','dramatic'],['cinematic rap','boom bap'],['a 70s film score','a spy chase in old Europe']]];
 const DG=(()=>{
  const R=a=>a[Math.floor(Math.random()*a.length)],cap=s=>s.charAt(0).toUpperCase()+s.slice(1),sh=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
  const MOODS=[
@@ -205,8 +279,8 @@ const DG=(()=>{
  const KEY='mzprd_desc_used_v2';let used;try{used=new Set(JSON.parse(localStorage.getItem(KEY)||'[]'))}catch(e){used=new Set()}
  const hash=s=>{let h=5381;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return h.toString(36)};
  const list=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
- return function(name,n,d){const N=String(name).trim(),u=(d&&d.files||[]).filter(f=>f.use&&AUDIO.test(f.name)),names=u.map(f=>(f.rel||'')+' '+f.name+' '+(f.newName||'')).join(' ')+' '+N;
-  const mood=MOODS.filter(m=>m[0].test(N)),adj=[...new Set(mood.length?mood.flatMap(m=>m[1]):DEF[0])],gen=[...new Set(mood.length?mood.flatMap(m=>m[2]).concat(['hip hop']):DEF[1])],imgs=[...new Set(mood.length?mood.flatMap(m=>m[3]):DEF[2])];
+ return function(name,n,d,sty){const N=String(name).trim(),ST=DGSTY.find(x=>x[0]===sty),u=(d&&d.files||[]).filter(f=>f.use&&AUDIO.test(f.name)),names=u.map(f=>(f.rel||'')+' '+f.name+' '+(f.newName||'')).join(' ')+' '+N;
+  const mood=ST?[[/./,ST[1],ST[2],ST[3]]]:MOODS.filter(m=>m[0].test(N)),adj=[...new Set(mood.length?mood.flatMap(m=>m[1]):DEF[0])],gen=[...new Set(mood.length?mood.flatMap(m=>m[2]).concat(['hip hop']):DEF[1])],imgs=[...new Set(mood.length?mood.flatMap(m=>m[3]):DEF[2])];
   const inst=sh(INST.filter(i=>i[0].test(names)).map(i=>i[1])).slice(0,3);
   const pick2=a=>{const x=R(a);let y=R(a),i=0;while((y===x||y.includes(x)||x.includes(y))&&i++<12)y=R(a);return[x,y]};
   for(let tries=0;tries<500;tries++){const[a1,a2]=pick2(adj),[g1,g2]=pick2(gen),img=R(imgs);
@@ -215,15 +289,15 @@ const DG=(()=>{
    const out=para1.map(s=>cap(s)).join(' ')+'\n\n'+para2.map(s=>cap(s)).join(' ');const h=hash(out.toLowerCase());
    if(!used.has(h)){used.add(h);try{localStorage.setItem(KEY,JSON.stringify([...used].slice(-5000)))}catch(e){}return out}}
   return N+' is '+n+' new compositions, royalty-free.'}})();
-function genDesc(name,n,d){return DG(name,n,d)}
+function genDesc(name,n,d,sty){return DG(name,n,d,sty)}
 
 const LIC='LICENSE (MZPRD)\n\nYou may use these sounds in your own music, including commercial releases.\nYou may not resell, share or redistribute the sounds on their own, as a pack or as samples.\nCredit is appreciated: Prod. MZPRD.\n';
 function editor(){
  const d=S.cur;$q('#pbBack').style.display='inline-block';
- $q('#pbBody').innerHTML=`<div class="pn"><h4>1. PACK DETAILS</h4><div class="g"><div><label>TITLE</label><input type="text" id="pbTitle"></div><div><label>PRICE (USD)</label><input type="number" id="pbPrice" step="0.01" min="0"></div><div><label>&nbsp;</label><label style="display:flex;gap:8px;align-items:center;letter-spacing:.1em;margin:14px 0 0"><input type="checkbox" id="pbFree" style="width:auto"> OFFER THE PREVIEW AS A FREE DOWNLOAD</label></div></div><label>DESCRIPTION</label><textarea id="pbDesc" placeholder="What is in this pack? Genres, vibes, how many loops and one-shots."></textarea><div class="pbCard"><div class="pbCardH">DESCRIPTION GENERATOR</div><div class="g" style="align-items:end"><div><label>PACK NAME</label><input type="text" id="pbDgName" placeholder="Uses the title if empty"></div><div><label>HOW MANY SAMPLES</label><input type="number" id="pbDgN" min="1" placeholder="Counts your sounds if empty"></div><div><button class="btn go" id="pbDgGo">GENERATE DESCRIPTION</button></div></div></div></div>
- <div class="pn"><h4>2. YOUR SOUNDS</h4><div class="drop" id="pbDrop">DROP FILES OR A FOLDER HERE, OR CLICK TO CHOOSE<input type="file" id="pbFiles" multiple style="display:none"></div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pbFolder">CHOOSE A FOLDER</button><button class="btn" id="pbAuto">AUTO-NAME ALL</button><button class="btn" id="pbDet">DETECT MISSING BPM (LOOPS)</button></div><input type="file" id="pbDir" webkitdirectory multiple style="display:none"><div id="pbTbl" style="margin-top:10px;overflow:auto;max-height:420px"></div><div class="msg" id="pbSum"></div></div>
- <div class="pn"><h4>3. COVER AND PREVIEW</h4><div class="g"><div><button class="btn" id="pbCov">MAKE A COVER</button> <button class="btn" id="pbCovUp">USE MY OWN IMAGE</button><input type="file" id="pbCovIn" accept="image/*" style="display:none"><div id="pbCovBox"></div></div><div><button class="btn" id="pbPrev">MAKE THE DEMO PREVIEW</button><div class="pbCard" style="margin-top:10px"><div class="pbCardH">DEMO PREVIEW</div><div class="msg" id="pbDemoInfo" style="margin:0"></div></div> <button class="btn" id="pbPrevUp">USE MY OWN AUDIO</button><input type="file" id="pbPrevIn" accept="audio/*" style="display:none"><div id="pbPrevBox"></div></div><div><label>LICENSE TEXT (INCLUDED IN THE ZIP)</label><textarea id="pbLic" style="min-height:130px"></textarea><label style="display:flex;gap:8px;align-items:center;letter-spacing:.1em"><input type="checkbox" id="pbLicOn" style="width:auto" checked> INCLUDE LICENSE.TXT</label></div></div></div>
- <div class="pn"><h4>4. BUILD AND PUBLISH</h4><div class="msg" id="pbSize" style="margin:0 0 8px"></div>
+ $q('#pbBody').innerHTML=`<div class="pn"><div class="pbHd"><span class="pbN">1</span><div><h4>PACK DETAILS</h4><p>Name it, price it and write the description.</p></div></div><div class="g"><div><label>TITLE</label><input type="text" id="pbTitle"></div><div><label>PRICE (USD)</label><input type="number" id="pbPrice" step="0.01" min="0"></div><div><label>&nbsp;</label><label style="display:flex;gap:8px;align-items:center;letter-spacing:.1em;margin:14px 0 0"><input type="checkbox" id="pbFree" style="width:auto"> OFFER THE PREVIEW AS A FREE DOWNLOAD</label></div></div><label>DESCRIPTION</label><textarea id="pbDesc" placeholder="What is in this pack? Genres, vibes, how many loops and one-shots."></textarea><div class="pbCard"><div class="pbCardH">DESCRIPTION GENERATOR</div><div class="g" style="align-items:end"><div><label>PACK NAME</label><input type="text" id="pbDgName" placeholder="Uses the title if empty"></div><div><label>STYLE / VIBE</label><select id="pbDgSty"><option value="">Auto (from the pack name)</option>${DGSTY.map(s=>`<option>${s[0]}</option>`).join('')}</select></div><div><label>HOW MANY SAMPLES</label><input type="number" id="pbDgN" min="1" placeholder="Counts your sounds if empty"></div><div><button class="btn go" id="pbDgGo">GENERATE DESCRIPTION</button></div></div></div></div>
+ <div class="pn"><div class="pbHd"><span class="pbN">2</span><div><h4>YOUR SOUNDS</h4><p>Drop your files, listen with play, tick DEMO for the preview.</p></div></div><div class="drop" id="pbDrop">DROP FILES OR A FOLDER HERE, OR CLICK TO CHOOSE<input type="file" id="pbFiles" multiple style="display:none"></div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pbFolder">CHOOSE A FOLDER</button><button class="btn" id="pbAuto">AUTO-NAME ALL</button><button class="btn" id="pbDet">DETECT MISSING BPM (LOOPS)</button></div><input type="file" id="pbDir" webkitdirectory multiple style="display:none"><div id="pbTbl" style="margin-top:10px;overflow:auto;max-height:420px"></div><div class="msg" id="pbSum"></div></div>
+ <div class="pn"><div class="pbHd"><span class="pbN">3</span><div><h4>COVER AND PREVIEW</h4><p>Make the cover and the demo preview.</p></div></div><div class="g"><div><button class="btn" id="pbCov">MAKE A COVER</button> <button class="btn" id="pbCovUp">USE MY OWN IMAGE</button><input type="file" id="pbCovIn" accept="image/*" style="display:none"><div id="pbCovBox"></div></div><div><button class="btn" id="pbPrev">MAKE THE DEMO PREVIEW</button><div class="pbCard" style="margin-top:10px"><div class="pbCardH">DEMO PREVIEW</div><div class="msg" id="pbDemoInfo" style="margin:0"></div></div> <button class="btn" id="pbPrevUp">USE MY OWN AUDIO</button><input type="file" id="pbPrevIn" accept="audio/*" style="display:none"><div id="pbPrevBox"></div></div><div><details class="pbLicD"><summary>LICENSE (INCLUDED IN THE ZIP)</summary><textarea id="pbLic" style="min-height:130px"></textarea></details><label style="display:flex;gap:8px;align-items:center;letter-spacing:.1em"><input type="checkbox" id="pbLicOn" style="width:auto" checked> INCLUDE LICENSE.TXT</label></div></div></div>
+ <div class="pn"><div class="pbHd"><span class="pbN">4</span><div><h4>BUILD AND PUBLISH</h4><p>Test the zip on your computer, then publish.</p></div></div><div class="msg" id="pbSize" style="margin:0 0 8px"></div>
  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pbZipTest">BUILD THE ZIP ON MY COMPUTER (NO UPLOAD)</button><button class="btn go" id="pbPub">PUBLISH PACK (UPLOADS TO THE CLOUD)</button><button class="btn" id="pbUn" style="display:none">UNPUBLISH AND FREE CLOUD SPACE</button></div>
  <div class="bar"><b id="pbProg"></b></div><div class="msg" id="pbMsg"></div></div>`;
  $q('#pbTitle').value=d.title;$q('#pbPrice').value=d.price;$q('#pbFree').checked=!!d.free;$q('#pbDesc').value=d.desc;$q('#pbLic').value=d.license;
@@ -242,8 +316,8 @@ function editor(){
  $q('#pbPrevIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;d.preview=f;d.previewExt=(f.name.match(/\.[A-Za-z0-9]+$/)||['.mp3'])[0].slice(1).toLowerCase();await save();rPrev()};
  $q('#pbZipTest').onclick=async()=>{sync();try{const z=await buildZip(true);const a=document.createElement('a');a.href=URL.createObjectURL(z);a.download=(clean(d.title)||'pack')+'.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),8000);msg('Zip built: '+mb(z.size)+'. It was saved to your downloads, nothing was uploaded.')}catch(e){msg('Zip failed: '+e.message)}};
  $q('#pbPub').onclick=publish;$q('#pbUn').onclick=unpublish;
- rTbl();rCov();rPrev();rSize();rDemo();
- $q('#pbDgGo').onclick=()=>{sync();const nm=$q('#pbDgName').value.trim()||d.title.trim();if(!nm){msg('Type the pack name first.');return}const n=+$q('#pbDgN').value||d.files.filter(f=>f.use&&AUDIO.test(f.name)).length;if(!n){msg('Type how many samples.');return}d.desc=genDesc(nm,n,d);$q('#pbDesc').value=d.desc;save();msg('Description made. Press again for a different one.')};
+ rTbl();rCov();rPrev();rSize();rDemo();if(d.dgSty)$q('#pbDgSty').value=d.dgSty;
+ $q('#pbDgGo').onclick=()=>{sync();const nm=$q('#pbDgName').value.trim()||d.title.trim();if(!nm){msg('Type the pack name first.');return}const n=+$q('#pbDgN').value||d.files.filter(f=>f.use&&AUDIO.test(f.name)).length;if(!n){msg('Type how many samples.');return}d.dgSty=$q('#pbDgSty').value;d.desc=genDesc(nm,n,d,d.dgSty);$q('#pbDesc').value=d.desc;save();msg('Description made. Press again for a different one.')};
 }
 async function readDrop(dt){
  const out=[];const walk=async(entry,path)=>{if(entry.isFile){await new Promise(r=>entry.file(f=>{f._rel=path+f.name;out.push(f);r()},r))}else if(entry.isDirectory){const rd=entry.createReader();const all=[];for(;;){const b=await new Promise(r=>rd.readEntries(r,()=>r([])));if(!b.length)break;all.push(...b)}for(const e of all)await walk(e,path+entry.name+'/')}};
