@@ -18,7 +18,7 @@ function trust(){const tot=$('#modal .tot');if(tot&&!$('#modal .st-trust'))tot.i
  const bp=$('#bpage');if(bp&&!bp.querySelector('.st-trust')){const btn=bp.querySelector('.cart');if(btn)btn.parentElement.insertAdjacentHTML('afterend',TRUST)}}
 
 /* the new bottom player: cover art, glowing round play, gradient progress, a little equalizer */
-function player(){const bar=$('#bar');if(!bar)return;if(!bar.querySelector('.st-pcov')){bar.insertAdjacentHTML('afterbegin','<div class="st-pcov"><img alt=""></div>');bar.insertAdjacentHTML('beforeend','<div class="st-peq"><i></i><i></i><i></i><i></i><i></i></div>')}
+function player(){const bar=$('#bar');if(!bar)return;if(!bar.querySelector('.st-pcov')){bar.insertAdjacentHTML('afterbegin','<div class="st-pcov"><img loading="lazy" decoding="async" alt=""></div>');bar.insertAdjacentHTML('beforeend','<div class="st-peq"><i></i><i></i><i></i><i></i><i></i></div>')}
  let it=null;const c=G('cur'),cp=G('curPack');it=cp>=0?PS()[cp]:(c>=0?BS()[c]:null);
  const img=bar.querySelector('.st-pcov img');let u='';try{u=it?coverUrl(it,128):''}catch(e){}if(u&&img.getAttribute('src')!==u)img.src=u;bar.querySelector('.st-pcov').style.display=u?'':'none';
  bar.classList.toggle('st-playing',!!G('playing'))}
@@ -64,6 +64,6 @@ function drop(){const s=S(),tk=$('.st-tick');if(!tk)return;let el=$('#stDrop');i
 /* pack covers in grids: the record peeks out of the sleeve and spins */
 function sleeves(){const sel=['#packs .card .cv','.st-card[data-k="p"] .st-cv'];document.querySelectorAll(sel.join(',')).forEach(cv=>{if(cv.parentElement.classList.contains('st-vw'))return;
  const card=cv.closest('.card,.st-card');let art='';const im=cv.querySelector('img');if(im)art=im.getAttribute('src');
- const w=document.createElement('div');w.className='st-vw';cv.parentElement.insertBefore(w,cv);w.innerHTML='<div class="st-vrec"><img src="mpc/endvinyl.webp?v=1" alt="">'+(art?'<img class="st-vlab" src="'+esc(art)+'" alt="">':'')+'</div>';w.appendChild(cv);if(card)card.classList.add('st-hasvin')})}
+ const w=document.createElement('div');w.className='st-vw';cv.parentElement.insertBefore(w,cv);w.innerHTML='<div class="st-vrec"><img loading="lazy" decoding="async" src="mpc/endvinyl.webp?v=1" alt="">'+(art?'<img loading="lazy" decoding="async" class="st-vlab" src="'+esc(art)+'" alt="">':'')+'</div>';w.appendChild(cv);if(card)card.classList.add('st-hasvin')})}
 setInterval(()=>{for(const f of [trust,player,related,bundles,cartMem,drop,sleeves]){try{f()}catch(e){}}},500);
 })();

@@ -16,3 +16,4 @@ _*.html
 _preview/
 _*.js
 _loops/
+.thcache/

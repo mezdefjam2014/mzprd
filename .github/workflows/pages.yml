@@ -27,6 +27,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Cache small cover copies
+        uses: actions/cache@v4
+        with:
+          path: .thcache
+          key: thcache-${{ github.run_id }}
+          restore-keys: thcache-
+      - name: Install image tool
+        run: npm install --no-save --no-package-lock sharp@0.33.5
       - name: Build pages from the live store
         run: node tools/build.mjs
       - uses: actions/configure-pages@v5

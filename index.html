@@ -638,7 +638,7 @@ function stockCover(title,size){
  return _stk[key]=c.toDataURL('image/jpeg',.9);
 }
 const isBeatRow=x=>x&&('audio_path' in x||x._k==='beats'||x.bpm!==undefined&&!('file_path' in x));
-const coverUrl=(x,px)=>x&&x.cover_path?pub(x.cover_path):(isBeatRow(x)?stockCover(x.title,px||512):'');
+const thumbUrl=p=>window.MZTH&&MZTH.has(p)?BASEPATH+'th/'+String(p).replace(/[^\w.-]+/g,'_').replace(/\.\w+$/,'')+'.webp':'',coverUrl=(x,px)=>x&&x.cover_path?(thumbUrl(x.cover_path)||pub(x.cover_path)):(isBeatRow(x)?stockCover(x.title,px||512):'');
 /* one small hosted copy of the generated cover per beat (emails and link previews cannot use a drawn image).
    The file name carries a hash of the title, so a rename makes a fresh file and nothing shows a stale copy. */
 const stockH=t=>{const s=String(t||'BEAT').toUpperCase().replace(/\s+/g,' ').trim()||'BEAT';let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36)};
@@ -978,7 +978,7 @@ $('#vol').oninput=e=>{au.volume=+e.target.value};au.volume=.8;
 $('#pg').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();if(au.duration)au.currentTime=(e.clientX-r.left)/r.width*au.duration};
 function enterSite(){
  $('#enter').classList.add('off');try{localStorage.setItem('mzprd_seen','1')}catch(e){}
- setTimeout(()=>{loadPaypal().catch(()=>{});callCheckout({action:'ping'}).catch(()=>{})},1200);
+ setTimeout(()=>{callCheckout({action:'ping'}).catch(()=>{});const idle=window.requestIdleCallback||(f=>setTimeout(f,1));setTimeout(()=>idle(()=>loadPaypal().catch(()=>{})),8000)},1200);
 }
 /* the intro is for a first visit to the home page only; click anywhere to skip it */
 $('#go').onclick=()=>{initAudio();ac.resume();enterSite()};
@@ -986,7 +986,7 @@ $('#enter').onclick=e=>{if(e.target.id!=='go'){try{initAudio();ac.resume()}catch
 {let seen=false;try{seen=localStorage.getItem('mzprd_seen')==='1'}catch(e){}
  const P0=window.__PAGE,deep=!!(P0&&P0.kind!=='home');
  /* the ENTER intro is retired: the site opens straight away */
- if(true){$('#enter').classList.add('off');setTimeout(()=>{loadPaypal().catch(()=>{});callCheckout({action:'ping'}).catch(()=>{})},1200)}}
+ if(true){$('#enter').classList.add('off');setTimeout(()=>{callCheckout({action:'ping'}).catch(()=>{});const idle=window.requestIdleCallback||(f=>setTimeout(f,1));setTimeout(()=>idle(()=>loadPaypal().catch(()=>{})),8000)},1200)}}
 addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body){e.preventDefault();$('#pp').click()}});
 
 async function loadAll(){
@@ -1953,8 +1953,8 @@ window.slotsBoot=async function(){slotsLive=false;return;
 if($('#slotBtn'))$('#slotBtn').onclick=async()=>{try{if(!window.slotsOpen)await loadScript('slots.js?v=4');await window.slotsOpen()}catch(e){toast('SLOTS FAILED TO LOAD')}};
 checkAdmin();loadAll();frame();
 </script>
-<script src="store.js?v=33"></script>
-<script src="store2.js?v=8"></script>
+<script src="store.js?v=34"></script>
+<script src="store2.js?v=9"></script>
 <script src="store3.js?v=3"></script>
 <script>try{history.scrollRestoration='manual'}catch(e){}</script>
 <script src="store4.js?v=21"></script>

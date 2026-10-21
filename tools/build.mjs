@@ -114,7 +114,24 @@ function headHtml(s) {
   ].filter(Boolean).join('\n')
 }
 
+// Small cover copies: covers are uploaded at full size (often 1024px PNG, ~2 MB). The store shows them at ~300px, so the build
+// makes a 640px WebP of each (cached between builds in .thcache) and the page uses it, keeping the original for everything else.
+const TH = []
+try {
+  const sharp = (await import('sharp')).default
+  const CACHE = path.join(ROOT, '.thcache'); fs.mkdirSync(CACHE, { recursive: true })
+  const paths = [...new Set([...beats, ...packs].map((x) => x.cover_path).filter((p) => p && !/^(https?:|r2:)/.test(p)))]
+  for (const p of paths) {
+    const name = p.replace(/[^\w.-]+/g, '_').replace(/\.\w+$/, '') + '.webp', c = path.join(CACHE, name)
+    try {
+      if (!fs.existsSync(c)) { const r = await fetch(PUB + p); if (!r.ok) continue; fs.writeFileSync(c, await sharp(Buffer.from(await r.arrayBuffer())).resize(640, 640, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 80 }).toBuffer()) }
+      TH.push(p)
+    } catch (e) { console.warn('thumb failed', p, e.message) }
+  }
+  console.log('cover thumbs:', TH.length, '/', paths.length)
+} catch (e) { console.warn('cover thumbs skipped:', e.message) }
 let T = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')
+T = T.replace('<!--PAGEDATA-->', () => `<script>window.MZTH=new Set(${json(TH)})</script><!--PAGEDATA-->`)
 const aboutBox = () => `<h2>About MZPRD (Meztheprod)</h2>
 <p>MZPRD, short for Meztheprod, is a music producer making original beats and instrumentals for rap, hip hop and R&amp;B, plus sample packs, vinyl samples and producer loops for other producers.</p>
 <p>Every beat and sample pack has a preview you can play on the site, and you can record your own voice over a beat preview to see how it feels. When you find the one, pay securely with PayPal and download the full file straight away.</p>
@@ -173,6 +190,7 @@ for (const f of ['hero.jpg', 'store.css', 'store-a.css', 'store.js', 'store2.js'
 }
 if (fs.existsSync(path.join(ROOT, 'sfx'))) fs.cpSync(path.join(ROOT, 'sfx'), path.join(DIST, 'sfx'), { recursive: true })
 if (fs.existsSync(path.join(ROOT, 'mpc'))) fs.cpSync(path.join(ROOT, 'mpc'), path.join(DIST, 'mpc'), { recursive: true })
+if (TH.length) { fs.mkdirSync(path.join(DIST, 'th'), { recursive: true }); for (const p of TH) { const n = p.replace(/[^\w.-]+/g, '_').replace(/\.\w+$/, '') + '.webp'; fs.copyFileSync(path.join(ROOT, '.thcache', n), path.join(DIST, 'th', n)) } }
 const urls = []
 const addUrl = (rel, lastmod) => urls.push({ loc: SITE + '/' + rel, lastmod: lastmod || today })
 
