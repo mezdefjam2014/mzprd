@@ -59,7 +59,7 @@ function playlist(){
  if(M.repeat&&L.length){const base=L.slice(),dur=b=>M.dur[b.id]||180;let t=L.reduce((s,b)=>s+dur(b),0),i=0;while(t<600&&L.length<60){const b=base[i++%base.length];L.push(b);t+=dur(b)}}
  return L;
 }
-function layout(){let t=0;const cl=FM().clip;return playlist().map(b=>{const d0=M.dur[b.id]||0,d=b._mode?(d0?Math.min(SPM[b._mode].sec,d0/SPM[b._mode].rate):0):cl&&d0?Math.min(d0,cl):d0,o={b,start:t,dur:d};t+=d;return o})}
+function layout(){let t=0;const cl=FM().clip;return playlist().map(b=>{const d0=M.dur[b._sid||b.id]||0,d=b._mode?(d0?Math.min(SPM[b._mode].sec,d0/SPM[b._mode].rate):0):cl&&d0?Math.min(d0,cl):d0,o={b,start:t,dur:d};t+=d;return o})}
 const total=()=>layout().reduce((s,o)=>s+o.dur,0);
 
 /* ---------- drawing ---------- */
@@ -286,7 +286,7 @@ async function loadCover(b){
  if(M.cov[b.id])return;
  await new Promise(r=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{M.cov[b.id]=im;r()};im.onerror=r;im.src=artOf(b,1024)});
 }
-const PRB={};function probe(b){if(M.dur[b.id])return Promise.resolve();return PRB[b.id]||(PRB[b.id]=(async()=>{M.dur[b.id]=M.dur[b.id]||0;
+const PRB={};function probe(b){if(b&&b._sid){const src=M.beats.find(x=>String(x.id)===String(b._sid));if(src)return probe(src)}if(M.dur[b.id])return Promise.resolve();return PRB[b.id]||(PRB[b.id]=(async()=>{M.dur[b.id]=M.dur[b.id]||0;
  try{const s=await fetchBuf(b);M.dur[b.id]=s.duration;M.cs[b.id]={15:bestStart(s,15),20:bestStart(s,20),30:bestStart(s,30)}}catch(e){M.dur[b.id]=0;delete PRB[b.id]}
  await loadCover(b);ui();
 })())}
@@ -387,17 +387,17 @@ const pvMsg=t=>{const m=box&&box.querySelector('#mxMsg');if(m)m.textContent=t};c
 function preview(){
  if(!box)return;if(PV.on)return;const L=layout(),cv=$m('#mxPv'),c=cv.getContext('2d');
  if(!L.length){c.fillStyle='#000';c.fillRect(0,0,cv.width,cv.height);c.fillStyle='#8e8e94';c.font='14px Montserrat';c.textAlign='center';c.fillText('Pick '+K().many+' to preview the style',cv.width/2,cv.height/2);return}
- const k=Math.min(1,L.length-1),big=pvBig();const Ld=L.map(o=>({...o,dur:o.dur||(FM().clip||180)}));frameAny(big.getContext('2d'),ST[M.style],Ld,k,M.fmt==='mix'?12:M.fmt==='rate'?Ld[k].dur-.6:4,Ld[0].dur+4,Math.max(60,total()),fakeData(1.2),{outro:false});
+ const k=M.fmt==='speed'?Math.max(0,L.length-2):Math.min(1,L.length-1),big=pvBig();const Ld=L.map(o=>({...o,dur:o.dur||(FM().clip||180)}));frameAny(big.getContext('2d'),ST[M.style],Ld,k,M.fmt==='mix'?12:M.fmt==='rate'?Ld[k].dur-.6:4,Ld[0].dur+4,Math.max(60,total()),fakeData(1.2),{outro:false});
  c.drawImage(big,0,0,cv.width,cv.height);
 }
 let PVB=null;function pvBig(){if(!PVB){PVB=document.createElement('canvas');PVB.width=W;PVB.height=H}return PVB}
 /* PLAY: real audio through an analyser, the frame redrawn live; when a track ends the next one starts */
-async function pvPlay(k0,off0){k0=k0||0;off0=off0||0;const L=layout();if(!L.length){pvMsg('Pick '+K().many+' first.');return}pvStop(true);PV.on=true;$m('#mxPlay').classList.add('on');$m('#mxPlay').innerHTML='&#9632; STOP';
- const a=ctxA();try{await a.resume()}catch(e){}const go=async k=>{if(!PV.on)return;if(k>=L.length)k=0;PV.k=k;pvMsg('Loading '+L[k].b.title+'...');let buf;try{buf=await fetchBuf(L[k].b)}catch(e){pvMsg('Could not load the preview audio for '+L[k].b.title+'.');pvStop();return}if(!PV.on)return;pvMsg('');
-  const s=a.createBufferSource(),an=a.createAnalyser();an.fftSize=1024;an.smoothingTimeConstant=.7;s.buffer=buf;const MD=L[k].b._mode&&SPM[L[k].b._mode];if(MD)speedChain(a,s,MD,an);else s.connect(an);an.connect(a.destination);s.onended=()=>{if(PV.on&&PV.src===s)go(k+1)};PV.src=s;PV.an=an;PV.buf=buf;PV.t0=a.currentTime-(k===k0?off0:0);if(MD){const st0=bestStart(buf,Math.min(MD.sec*MD.rate,buf.duration)),o=k===k0?off0*MD.rate:0;s.start(0,st0+o,Math.max(.05,MD.sec*MD.rate-o))}else{const CL=FM().clip,cs=CL&&buf.duration>CL?((M.cs[L[k].b.id]||{})[CL]||0):0,o=k===k0?Math.min(off0,Math.max(0,(CL||buf.duration)-.05)):0;if(CL)s.start(0,cs+o,Math.max(.05,Math.min(CL,buf.duration)-o));else s.start(0,o)}if(k===k0)off0=0};
+async function pvPlay(k0,off0){k0=k0||0;off0=off0||0;const L=layout();if(!L.length){pvMsg('Pick '+K().many+' first.');return}pvStop(true);const GEN=PV.gen=(PV.gen||0)+1;PV.on=true;$m('#mxPlay').classList.add('on');$m('#mxPlay').innerHTML='&#9632; STOP';
+ const a=ctxA();try{await a.resume()}catch(e){}const go=async k=>{if(!PV.on||PV.gen!==GEN)return;if(k>=L.length)k=0;PV.k=k;pvMsg('Loading '+L[k].b.title+'...');let buf;try{buf=await fetchBuf(L[k].b)}catch(e){pvMsg('Could not load the preview audio for '+L[k].b.title+'.');pvStop();return}if(!PV.on||PV.gen!==GEN)return;pvMsg('');if(PV.src){try{PV.src.onended=null;PV.src.stop()}catch(e){}}
+  const s=a.createBufferSource(),an=a.createAnalyser();an.fftSize=1024;an.smoothingTimeConstant=.7;s.buffer=buf;const MD=L[k].b._mode&&SPM[L[k].b._mode];if(MD)speedChain(a,s,MD,an);else s.connect(an);an.connect(a.destination);s.onended=()=>{if(PV.on&&PV.src===s&&PV.gen===GEN)go(k+1)};PV.src=s;PV.an=an;PV.buf=buf;PV.t0=a.currentTime-(k===k0?off0:0);if(MD){const st0=bestStart(buf,Math.min(MD.sec*MD.rate,buf.duration)),o=k===k0?off0*MD.rate:0;s.start(0,st0+o,Math.max(.05,MD.sec*MD.rate-o))}else{const CL=FM().clip,cs=CL&&buf.duration>CL?((M.cs[L[k].b.id]||{})[CL]||0):0,o=k===k0?Math.min(off0,Math.max(0,(CL||buf.duration)-.05)):0;if(CL)s.start(0,cs+o,Math.max(.05,Math.min(CL,buf.duration)-o));else s.start(0,o)}if(k===k0)off0=0};
  await go(k0);
  const td=new Uint8Array(1024),fd=new Uint8Array(512),cv=$m('#mxPv'),c=cv.getContext('2d');let last=0;
- const loop=t=>{if(!PV.on)return;PV.raf=requestAnimationFrame(loop);if(t-last<33||!PV.an)return;last=t;PV.an.getByteTimeDomainData(td);PV.an.getByteFrequencyData(fd);let s=0;for(let i=0;i<8;i++)s+=fd[i];
+ const loop=t=>{if(!PV.on||PV.gen!==GEN)return;PV.raf=requestAnimationFrame(loop);if(t-last<33||!PV.an)return;last=t;PV.an.getByteTimeDomainData(td);PV.an.getByteFrequencyData(fd);let s=0;for(let i=0;i<8;i++)s+=fd[i];
   const Ld=layout().map(o=>({...o,dur:o.dur||(o.b.id===L[PV.k].b.id&&PV.buf?Math.min(PV.buf.duration,FM().clip||1e9):(FM().clip||180))}));const tl=a.currentTime-PV.t0,k=PV.k,tg=(Ld[k]?Ld[k].start:0)+tl,tot=Math.max(tg+1,total()||Ld.reduce((x,o)=>x+o.dur,0));
   frameAny(pvBig().getContext('2d'),ST[M.style],Ld,Math.min(k,Ld.length-1),tl,tg,tot,{td,fd,bass:s/8/255},{outro:false});c.drawImage(pvBig(),0,0,cv.width,cv.height);skDraw(tg,tot)};
  PV.raf=requestAnimationFrame(loop)}
@@ -406,7 +406,7 @@ function skDraw(tg,tot){if(!box)return;tot=tot||skTot();const f=$m('#mxSkF'),tt=
 function skTicks(){if(!box)return;const L=layout(),tot=skTot(),el=$m('#mxTicks');if(!el)return;el.innerHTML=tot?L.map((o,i)=>`<button data-i="${i}" style="left:${o.start/tot*100}%" title="${esc(o.b.title)}">${i+1}</button>`).join(''):'';el.onclick=e=>{const b=e.target.closest('button');if(b){const o=L[+b.dataset.i];pvSeek(o.start+.01)}};skDraw(PV.on?0:0,tot)}
 /* jump anywhere: click the bar (or a track number), playback starts right there */
 async function pvSeek(t){const L=layout();if(!L.length)return;await Promise.all(L.map(o=>probe(o.b).catch(()=>{})));const L2=layout();let k=L2.findIndex(o=>t>=o.start&&t<o.start+(o.dur||0));if(k<0)k=L2.length-1;const off=Math.max(0,t-L2[k].start);skDraw(t,skTot());pvPlay(k,off)}
-function pvStop(quiet){PV.on=false;cancelAnimationFrame(PV.raf);if(PV.src){try{PV.src.onended=null;PV.src.stop()}catch(e){}PV.src=null}const b=box&&$m('#mxPlay');if(b){b.classList.remove('on');b.innerHTML='&#9654; PLAY PREVIEW'}if(!quiet)preview()}
+function pvStop(quiet){PV.on=false;PV.gen=(PV.gen||0)+1;cancelAnimationFrame(PV.raf);if(PV.src){try{PV.src.onended=null;PV.src.stop()}catch(e){}PV.src=null}const b=box&&$m('#mxPlay');if(b){b.classList.remove('on');b.innerHTML='&#9654; PLAY PREVIEW'}if(!quiet)preview()}
 /* ---------- thumbnails + text ---------- */
 async function thLoad(){if(!window.MZThumbs){await new Promise((ok,no)=>{const s=document.createElement('script');s.src=new URL('thumbs.js?v=6',document.baseURI).href;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}await window.MZThumbs.load();hero=hero||(await new Promise(r=>{const i=new Image();i.src=new URL('hero.jpg',document.baseURI).href;i.onload=()=>r(i);i.onerror=()=>r(null)}))}
 function thCtx(){const L=playlist(),first=L[0]||M.beats[0],t=total();return{title:M.title,w:MZThumbs.words(M.title),cover:first&&M.cov[first._sid||first.id],kind:M.kind==='beats'?'beats':'packs',label:K().mix,tagText:M.fmt==='rate'?'RATED 1-10':M.fmt==='speed'?'SLOWED + SPED UP':M.fmt==='count'?'TOP '+M.sel.length:M.fmt==='vs'?'A VS B':M.fmt==='give'?'FREE LOOP':K().mix,infoText:L.length+' '+(L.length>1?K().MANY:K().ONE)+'   •   '+Math.max(1,Math.round(t/60))+' MIN',seed:M.seed}}
@@ -486,7 +486,7 @@ async function render(){
   aenc=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>{err=e}});aenc.configure({codec:acf.codec,sampleRate:SR,numberOfChannels:2,bitrate:160000});
   /* real durations first (cheap: already probed), then render track by track */
   msg('Measuring track lengths...');await Promise.all([...new Set(list)].map(b=>probe(b).catch(()=>{})));
-  const CL=FM().clip,dOf=b=>{if(b._mode)return Math.min(SPM[b._mode].sec,(M.dur[b.id]||1e9)/SPM[b._mode].rate);const d=M.dur[b.id]||180;return CL?Math.min(d,CL):d};const tot=list.reduce((s,b)=>s+dOf(b),0);let gUs=0,done=0;const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');
+  const CL=FM().clip,dOf=b=>{if(b._mode)return Math.min(SPM[b._mode].sec,(M.dur[b._sid]||1e9)/SPM[b._mode].rate);const d=M.dur[b.id]||180;return CL?Math.min(d,CL):d};const tot=list.reduce((s,b)=>s+dOf(b),0);let gUs=0,done=0;const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');
   const Lyt=[];let acc=0;for(const b of list){const d=dOf(b);Lyt.push({b,start:acc,dur:d});acc+=d}
   const t0=performance.now();
   for(let k=0;k<list.length;k++){
