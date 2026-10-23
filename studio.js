@@ -776,7 +776,7 @@ const ygKeep=()=>{const it=S.item;if(it!==ygKeep.it){ygKeep.it=it;YG.list=[];YG.
 /* YT STUDIO: the MPC package generator (titles, thumbnail words, description, tags, pinned comment, scored) with a matching thumbnail for every package, made by this studio's thumbnail engine */
 const YG_MPC=['mpc','challenge','series'],YG_BAD=/mpc|pad performance|1988|sp-?1200|drum machine|no computer|hardware|on a machine/i;
 const YG={n:25,angle:'',seed:1,sort:'score',fav:[],open:-1,list:[]};let ygP=null;
-const ygLoad=()=>ygP=ygP||Promise.all([thLoad(),...['mpcyt.js?v=14','mpcgen.js?v=5','mpcpack.js?v=3'].map(f=>new Promise((ok,no)=>{const n=f.split('?')[0];if(document.querySelector('script[data-yg="'+n+'"]'))return ok();const sc=document.createElement('script');sc.src=new URL(f,document.baseURI).href;sc.dataset.yg=n;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)}))]);
+const ygLoad=()=>ygP=ygP||Promise.all([thLoad(),...['mpcyt.js?v=14','mpcgen.js?v=5','mpcpack.js?v=5'].map(f=>new Promise((ok,no)=>{const n=f.split('?')[0];if(document.querySelector('script[data-yg="'+n+'"]'))return ok();const sc=document.createElement('script');sc.src=new URL(f,document.baseURI).href;sc.dataset.yg=n;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)}))]);
 function ygInfo(){const it=S.item;if(!it)return null;const pk=S.kind!=='beats',sl=it.slug||String(it.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
  const SS={dur:S.buf?S.buf.duration:120,bpm:+it.bpm||0,key:it.musical_key||'',title:it.title,vibe:''};
  return{beat:it,S:SS,title:it.title,bpm:+it.bpm||0,key:it.musical_key||'',mins:Math.max(1,Math.round(SS.dur/60)),link:SITE+'/'+(pk?'pack':'beat')+'/'+sl+'/',seedBase:String(it.id).length*17+String(it.title).length}}
