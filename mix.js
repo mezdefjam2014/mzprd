@@ -10,8 +10,20 @@ const ST={
  bit:{n:'8-BIT',acc:'#ffd34a',tint:'rgba(10,0,28,.62)',font:"'Press Start 2P'",grain:0,vis:'chunk',scan:1,pix:1},
  min:{n:'MINIMAL',acc:'#ffffff',tint:'rgba(0,0,0,.72)',font:'Oswald',grain:.05,vis:'line',center:1}
 };
-const M={beats:[],sel:[],dur:{},cov:{},style:'clean',fade:1.5,repeat:false,char:true,outro:true,title:'Hard Rap Beats Mix',seed:0,yt:0,busy:false,pf:null};
+const M={kind:'beats',lists:{},beats:[],sel:[],dur:{},cov:{},style:'clean',fade:1.5,repeat:false,char:true,outro:true,title:'Hard Rap Beats Mix',seed:0,yt:0,busy:false,pf:null};
 let box=null,ac=null,noise=null,hero=null,bdc={};
+/* what each kind is called, and where it links */
+const KW={beats:{one:'beat',many:'beats',ONE:'BEAT',MANY:'BEATS',mix:'BEAT MIX',url:b=>SITE+'/beat/'+slugOf(b)+'/',title:'Hard Rap Beats Mix'},
+ packs:{one:'sample pack',many:'sample packs',ONE:'PACK',MANY:'PACKS',mix:'SAMPLE PACK MIX',url:b=>SITE+'/pack/'+slugOf(b)+'/',title:'Soul Sample Packs Mix'},
+ samples:{one:'sample',many:'samples',ONE:'SAMPLE',MANY:'SAMPLES',mix:'SAMPLE MIX',url:()=>SITE+'/crate-dig/',title:'Soul Samples Mix'}};
+const K=()=>KW[M.kind];
+async function setKind(k){if(M.busy||k===M.kind&&M.lists[k])return;M.lists[M.kind]=M.beats;M.kind=k;
+ if(!M.lists[k]){try{const q=sb.from(k).select('*').order('created_at',{ascending:false});const r=k==='beats'?await q:await q.eq('published',true);M.lists[k]=r.data||[]}catch(e){M.lists[k]=[]}}
+ M.beats=M.lists[k];M.sel=[];M.title=K().title;M.yt=0;M.gen=null;if($m('#mxTitle'))$m('#mxTitle').value=M.title;
+ box.querySelectorAll('#mxKind button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));$m('#mxPick').textContent='1. PICK YOUR '+K().MANY;
+ M.beats.forEach(b=>loadCover(b));ui();preview();genAll()}
+const SLEEVE=()=>new URL('crate-sleeve.jpg',document.baseURI).href;
+const artOf=(b,px)=>b.cover_path?pub(b.cover_path):M.kind==='samples'?SLEEVE():M.kind==='beats'?stockCover(b.title,px):SLEEVE();
 const $m=s=>box.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return(h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0')};
@@ -72,7 +84,7 @@ function mixFrame(c,st,L,k,tl,tg,tot,d,opts){
  c.textBaseline='top';c.textAlign=al;
  /* header: mix title */
  let px=fitPx(c,M.title.toUpperCase(),font,center?W*.7:W*.46,center?44*u:40*u);c.font=px+'px '+font;c.fillStyle='rgba(255,255,255,.92)';c.shadowColor='rgba(0,0,0,.8)';c.shadowBlur=10;c.fillText(M.title.toUpperCase(),center?W/2:W*.06,H*.055);c.shadowColor='transparent';
- c.font='600 '+16*u+'px Oswald';if('letterSpacing' in c)c.letterSpacing='5px';c.fillStyle=st.acc;c.textAlign=center?'center':'left';c.fillText('MZPRD  •  '+L.length+' BEATS',center?W/2:W*.06,H*.055+px*1.15);
+ c.font='600 '+16*u+'px Oswald';if('letterSpacing' in c)c.letterSpacing='5px';c.fillStyle=st.acc;c.textAlign=center?'center':'left';c.fillText('MZPRD  •  '+L.length+' '+(L.length>1?K().MANY:K().ONE),center?W/2:W*.06,H*.055+px*1.15);
  /* now playing */
  c.textAlign=al;const ny=center?cy+cs+H*.04:H*.2;
  c.font='600 '+15*u+'px Oswald';c.fillStyle=st.acc;c.fillText('NOW PLAYING  '+String(k+1).padStart(2,'0')+' / '+String(L.length).padStart(2,'0'),tx,ny);
@@ -101,14 +113,14 @@ function mixFrame(c,st,L,k,tl,tg,tot,d,opts){
 }
 
 /* ---------- audio ---------- */
-async function fetchBuf(b){const r=await fetch(pub(b.preview_path));if(!r.ok)throw new Error('audio');return await ctxA().decodeAudioData(await r.arrayBuffer())}
+async function fetchBuf(b){if(window.MZPrime)try{await MZPrime([b.preview_path])}catch(e){}const r=await fetch(pub(b.preview_path));if(!r.ok)throw new Error('audio');return await ctxA().decodeAudioData(await r.arrayBuffer())}
 async function track48(b){
  const src=await fetchBuf(b),n=Math.ceil(src.duration*SR),oc=new OfflineAudioContext(2,n,SR),s=oc.createBufferSource();s.buffer=src;s.connect(oc.destination);s.start(0);
  const rb=await oc.startRendering();return{L:rb.getChannelData(0),R:rb.getChannelData(1),dur:src.duration};
 }
 async function loadCover(b){
  if(M.cov[b.id])return;
- await new Promise(r=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{M.cov[b.id]=im;r()};im.onerror=r;im.src=b.cover_path?pub(b.cover_path):stockCover(b.title,1024)});
+ await new Promise(r=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{M.cov[b.id]=im;r()};im.onerror=r;im.src=artOf(b,1024)});
 }
 async function probe(b){
  if(M.dur[b.id]!=null)return;M.dur[b.id]=0;
@@ -121,6 +133,7 @@ function css(){
  if(document.getElementById('mxCss'))return;const s=document.createElement('style');s.id='mxCss';
  s.textContent=`#mixModal{display:none;position:fixed;inset:0;z-index:85;background:rgba(0,0,0,.84);align-items:center;justify-content:center;padding:16px}
 #mixModal.on{display:flex}
+#mxKind{display:flex;gap:0;margin:0 0 10px;border:1px solid #3a3a40}#mxKind button{flex:1;background:transparent;border:0;color:#a9a9ae;font:700 10px Montserrat;letter-spacing:.14em;padding:10px 6px;cursor:pointer}#mxKind button.on{background:#e0242f;color:#fff}.mxTl{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;max-height:260px;overflow:auto}.mxTl button{display:flex;gap:8px;align-items:center;text-align:left;background:#0c0c0f;border:1px solid #26262b;color:#e9e9ec;font:500 12px Montserrat;padding:7px 9px;cursor:pointer}.mxTl button:hover,.mxTl button.on{border-color:#e0242f}.mxTl b{flex:0 0 30px;font:700 12px Montserrat;color:#0b0b0d;background:#e8b94a;text-align:center;padding:2px 0}.mxTl b.hi{background:#3ad07a}
 #mixModal .mb{position:relative;width:min(1180px,100%);max-height:94vh;overflow:auto;background:#0c0c0f;border:1.5px solid var(--red);box-shadow:0 0 50px rgba(224,36,47,.3);padding:20px}
 #mixModal .mx{position:absolute;top:8px;right:10px;width:40px;height:40px;background:transparent;border:1.5px solid #4a4a50;color:#fff;font:400 26px/1 Montserrat;padding:0}
 #mixModal .mx:hover{border-color:var(--red);color:var(--red)}
@@ -160,20 +173,20 @@ function build(){
  box.innerHTML=`<div class="mb" role="dialog" aria-label="Mix video"><button class="mx" id="mxX" aria-label="Close">&times;</button>
  <h3>MIX VIDEO (10 TO 15 MINUTES)</h3>
  <div class="mg">
-  <div><div class="pn"><h4>1. PICK YOUR BEATS</h4><div class="lst" id="mxAll"></div>
+  <div><div class="pn"><div class="mxK" id="mxKind"><button data-k="beats" class="on">BEATS</button><button data-k="packs">SAMPLE PACKS</button><button data-k="samples">SINGLE SAMPLES</button></div><h4 id="mxPick">1. PICK YOUR BEATS</h4><div class="lst" id="mxAll"></div>
    <h4>YOUR MIX (IN ORDER)</h4><div class="lst" id="mxSel"></div><div class="msg" id="mxTot"></div></div></div>
   <div><div class="pn"><h4>2. STYLE</h4><div class="st" id="mxSt"></div>
    <canvas id="mxPv" width="640" height="360"></canvas>
    <label>MIX TITLE</label><input type="text" id="mxTitle">
-   <div class="two"><div><label>FADE BETWEEN BEATS (SEC)</label><input type="number" id="mxFade" min="0" max="4" step="0.5"></div><div><label>&nbsp;</label><button class="btn" id="mxPrev">REFRESH PREVIEW</button></div></div>
+   <div class="two"><div><label>FADE BETWEEN TRACKS (SEC)</label><input type="number" id="mxFade" min="0" max="4" step="0.5"></div><div><label>&nbsp;</label><button class="btn" id="mxPrev">REFRESH PREVIEW</button></div></div>
    <label class="chk"><input type="checkbox" id="mxRep"> REPEAT THE LIST TO REACH 10 MINUTES</label>
    <label class="chk"><input type="checkbox" id="mxChar" checked> SHOW THE PRODUCER</label>
    <label class="chk"><input type="checkbox" id="mxOut" checked> 8-BIT SUBSCRIBE CARD AT THE END</label>
    <button class="go" id="mxRender">RENDER MIX VIDEO</button><div class="bar"><b id="mxProg"></b></div><div class="msg" id="mxMsg">Renders offline (faster than real time). A 15 minute mix is a large file, close other heavy tabs first.</div>
    <a id="mxDl" class="btn" style="display:none;text-align:center;margin-top:8px;text-decoration:none">DOWNLOAD MIX VIDEO</a></div></div>
   <div><div class="pn"><h4>3. PREMADE THUMBNAILS</h4><div class="two"><button class="btn" id="mxThGo">MAKE 5</button><button class="btn" id="mxThNew">NEW SET</button></div><div id="mxTh" style="margin-top:6px"></div>
-   <h4>4. YOUTUBE TEXT</h4><label>TITLE <span id="mxTi" style="color:#6c6c73"></span></label><input type="text" id="mxYt"><div class="two" style="margin-top:6px"><button class="btn" id="mxYc">COPY</button><button class="btn" id="mxYn">NEXT TITLE</button></div>
-   <label>DESCRIPTION WITH CHAPTERS AND LINKS</label><textarea id="mxYd" style="min-height:150px"></textarea><button class="btn" id="mxYdc" style="width:100%;margin-top:6px">COPY DESCRIPTION</button>
+   <h4>4. YOUTUBE TEXT</h4><button class="go" id="mxGen" style="margin:0 0 8px">GENERATE TITLES, DESCRIPTION + TAGS</button><div id="mxTl" class="mxTl"></div><label>TITLE <span id="mxTi" style="color:#6c6c73"></span></label><input type="text" id="mxYt"><div class="two" style="margin-top:6px"><button class="btn" id="mxYc">COPY</button><button class="btn" id="mxYn">NEXT TITLE</button></div>
+   <label>DESCRIPTION WITH CHAPTERS AND LINKS</label><textarea id="mxYd" style="min-height:150px"></textarea><div class="two" style="margin-top:6px"><button class="btn" id="mxYdc">COPY DESCRIPTION</button><button class="btn" id="mxYdn">NEW DESCRIPTION</button></div>
    <label>TAGS</label><textarea id="mxYg"></textarea><button class="btn" id="mxYgc" style="width:100%;margin-top:6px">COPY TAGS</button></div></div>
  </div></div>`;
  document.body.appendChild(box);
@@ -181,12 +194,13 @@ function build(){
  $m('#mxSt').innerHTML=Object.keys(ST).map(k=>`<button class="btn${k===M.style?' on':''}" data-s="${k}">${ST[k].n}</button>`).join('');
  $m('#mxSt').onclick=e=>{const b=e.target.closest('button');if(!b)return;M.style=b.dataset.s;$m('#mxSt').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));preview()};
  $m('#mxTitle').value=M.title;$m('#mxFade').value=M.fade;
- $m('#mxTitle').oninput=e=>{M.title=e.target.value||'Beat Mix';preview();yt()};
+ $m('#mxTitle').oninput=e=>{M.title=e.target.value||K().title;preview();genAll()};
  $m('#mxFade').oninput=e=>{M.fade=Math.max(0,Math.min(4,parseFloat(e.target.value)||0))};
  $m('#mxRep').onchange=e=>{M.repeat=e.target.checked;ui()};$m('#mxChar').onchange=e=>{M.char=e.target.checked;preview()};$m('#mxOut').onchange=e=>{M.outro=e.target.checked};
  $m('#mxPrev').onclick=preview;$m('#mxRender').onclick=render;
  $m('#mxThGo').onclick=()=>thumbs(false);$m('#mxThNew').onclick=()=>thumbs(true);
- $m('#mxYn').onclick=()=>{M.yt++;yt()};
+ $m('#mxYn').onclick=()=>{M.yt++;pickTitle()};$m('#mxGen').onclick=()=>{M.seed2=(M.seed2||0)+1;genAll()};$m('#mxYdn').onclick=()=>{M.dv=(M.dv||0)+1;yt()};
+ $m('#mxKind').onclick=e=>{const b=e.target.closest('button');if(b)setKind(b.dataset.k)};
  const cp=async(id,btn)=>{try{await navigator.clipboard.writeText($m(id).value);toast('COPIED')}catch(e){$m(id).select();document.execCommand('copy')}};
  $m('#mxYc').onclick=()=>cp('#mxYt');$m('#mxYdc').onclick=()=>cp('#mxYd');$m('#mxYgc').onclick=()=>cp('#mxYg');
 }
@@ -194,24 +208,24 @@ function shut(){box.classList.remove('on');box.setAttribute('aria-hidden','true'
 function key(e){if(e.key!=='Escape')return;const lb=document.getElementById('thLb');if(lb){lb.remove();return}shut()}
 function ui(){
  const all=$m('#mxAll'),sel=$m('#mxSel');
- all.innerHTML=M.beats.length?M.beats.map(b=>{const on=M.sel.includes(String(b.id));return`<div class="row" data-id="${esc(b.id)}">${b.cover_path?`<img src="${esc(pub(b.cover_path))}" alt="">`:`<img src="${esc(stockCover(b.title,96))}" alt="">`}<b>${esc(b.title)}${b.preview_path?'':' (no preview)'}</b><button data-a="${on?'rm':'add'}"${b.preview_path?'':' disabled'}>${on?'✓':'+'}</button></div>`}).join(''):'<div class="msg" style="padding:10px">No beats yet.</div>';
+ all.innerHTML=M.beats.length?M.beats.map(b=>{const on=M.sel.includes(String(b.id));return`<div class="row" data-id="${esc(b.id)}"><img src="${esc(artOf(b,96))}" alt=""><b>${esc(b.title)}${b.preview_path?'':' (no preview)'}</b><button data-a="${on?'rm':'add'}"${b.preview_path?'':' disabled'}>${on?'✓':'+'}</button></div>`}).join(''):'<div class="msg" style="padding:10px">No '+K().many+' yet.</div>';
  all.querySelectorAll('button').forEach(bt=>bt.onclick=()=>{const id=bt.parentNode.dataset.id;if(bt.dataset.a==='add'){M.sel.push(id);const b=M.beats.find(x=>String(x.id)===id);probe(b)}else M.sel=M.sel.filter(x=>x!==id);ui();preview();thumbsAuto();yt()});
  sel.innerHTML=M.sel.length?M.sel.map((id,i)=>{const b=M.beats.find(x=>String(x.id)===id);return`<div class="row" data-i="${i}"><span style="width:18px;color:#8e8e94">${i+1}</span><b>${esc(b.title)}</b><span style="color:#8e8e94">${M.dur[b.id]?fmt(M.dur[b.id]):'...'}</span><button data-m="-1">↑</button><button data-m="1">↓</button><button data-m="x">×</button></div>`}).join(''):'<div class="msg" style="padding:10px">Tap + to add beats.</div>';
  sel.querySelectorAll('button').forEach(bt=>bt.onclick=()=>{const i=+bt.parentNode.dataset.i,m=bt.dataset.m;if(m==='x')M.sel.splice(i,1);else{const j=i+ +m;if(j<0||j>=M.sel.length)return;[M.sel[i],M.sel[j]]=[M.sel[j],M.sel[i]]}ui();preview();yt()});
  const t=total(),n=playlist().length;
- const tl=$m('#mxTot');tl.textContent=n?n+' track'+(n>1?'s':'')+' / '+fmt(t)+(t<600?'  (under 10 min: add beats or tick REPEAT)':t>900?'  (over 15 min)':'  (good length)'):'';
+ const tl=$m('#mxTot');tl.textContent=n?n+' track'+(n>1?'s':'')+' / '+fmt(t)+(t<600?'  (under 10 min: add '+K().many+' or tick REPEAT)':t>900?'  (over 15 min)':'  (good length)'):'';
  tl.style.color=n&&t>=600&&t<=900?'#6fd08c':'#a9a9ae';
 }
 function preview(){
  if(!box)return;const L=layout(),cv=$m('#mxPv'),c=cv.getContext('2d');
- if(!L.length){c.fillStyle='#000';c.fillRect(0,0,640,360);c.fillStyle='#8e8e94';c.font='14px Montserrat';c.textAlign='center';c.fillText('Pick beats to preview the style',320,180);return}
+ if(!L.length){c.fillStyle='#000';c.fillRect(0,0,640,360);c.fillStyle='#8e8e94';c.font='14px Montserrat';c.textAlign='center';c.fillText('Pick '+K().many+' to preview the style',320,180);return}
  const k=Math.min(1,L.length-1),big=document.createElement('canvas');big.width=W;big.height=H;
  const Ld=L.map(o=>({...o,dur:o.dur||180}));mixFrame(big.getContext('2d'),ST[M.style],Ld,k,12,Ld[0].dur+12,Math.max(600,total()),fakeData(1.2),{outro:false});
  c.drawImage(big,0,0,640,360);
 }
 /* ---------- thumbnails + text ---------- */
 async function thLoad(){if(!window.MZThumbs){await new Promise((ok,no)=>{const s=document.createElement('script');s.src=new URL('thumbs.js?v=6',document.baseURI).href;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}await window.MZThumbs.load();hero=hero||(await new Promise(r=>{const i=new Image();i.src=new URL('hero.jpg',document.baseURI).href;i.onload=()=>r(i);i.onerror=()=>r(null)}))}
-function thCtx(){const L=playlist(),first=L[0]||M.beats[0],t=total();return{title:M.title,w:MZThumbs.words(M.title),cover:first&&M.cov[first.id],kind:'beats',tagText:'BEAT MIX',infoText:L.length+(L.length>1?' BEATS':' BEAT')+'   •   '+Math.max(1,Math.round(t/60))+' MIN',seed:M.seed}}
+function thCtx(){const L=playlist(),first=L[0]||M.beats[0],t=total();return{title:M.title,w:MZThumbs.words(M.title),cover:first&&M.cov[first.id],kind:M.kind==='beats'?'beats':'packs',label:K().mix,tagText:K().mix,infoText:L.length+' '+(L.length>1?K().MANY:K().ONE)+'   •   '+Math.max(1,Math.round(t/60))+' MIN',seed:M.seed}}
 let thT=0;function thumbsAuto(){if($m('#mxTh').children.length){clearTimeout(thT);thT=setTimeout(()=>thumbs(false),500)}}
 async function thumbs(bump){
  await thLoad();if(bump)M.seed+=7;const g=$m('#mxTh'),X=thCtx();g.innerHTML='';
@@ -220,21 +234,44 @@ async function thumbs(bump){
   bt.querySelectorAll('button').forEach((b,j)=>b.onclick=()=>{const [w,h]=j?[1080,1920]:[1280,720],c2=MZThumbs.make(i,w,h,thCtx());c2.toBlob(bl=>{if(!bl)return;const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='mix-thumb'+(i+1)+(j?'-9x16':'-16x9')+'.jpg';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)},'image/jpeg',.92)});
   card.append(cv,lab,bt);g.appendChild(card)}
 }
-const TT=[
- n=>'[FREE] Hard Rap Beats Mix '+YEAR+' | '+n+(n>1?' Beats':' Beat')+' | Prod. MZPRD',
- n=>M.title+' ('+n+(n>1?' Beats':' Beat')+') | Rap Instrumentals Mix '+YEAR,
- n=>'1 Hour? No. '+Math.round(total()/60)+' Minutes Of Heat | '+M.title+' | Prod. MZPRD',
- n=>M.title+' - Type Beat Mix | '+n+(n>1?' Rap Instrumentals':' Rap Instrumental')+' | MZPRD',
- n=>'Best Rap Beats '+YEAR+' | '+M.title+' | Hip Hop Instrumental Mix'
-];
+/* ---------- YouTube text generator for mixes (beats, sample packs, single samples) ----------
+   Formats from top compilation / bundle uploads: count + kit type early ("[12 IN 1]", "20 Samples"), runtime ("15 Minutes of..."),
+   year, a "sounds like" producer, "Royalty Free", "Bundle" / "Mega". Scored like the pack generator: short + keyword + year first. */
+const MXP=['Alchemist','Pete Rock','J Dilla','Madlib','Griselda','Daringer','Conductor Williams','Roc Marciano','Hit-Boy','DJ Premier'];
+const MXS={beats:['Hard Rap','Boom Bap','Dark','Soulful','Street','Old School','Gritty','Lo-Fi'],packs:['Soul','Vintage','Jazz','Boom Bap','Dusty','Lo-Fi','90s','Soulful'],samples:['Soul','Vintage','Jazz','Dusty','Boom Bap','Lo-Fi','Rare Soul','Gospel']};
+const MXT={
+ beats:['[FREE] {st} Beats Mix {y} | {n} Beats | Prod. MZPRD','{T} ({n} Beats) | Rap Instrumentals Mix {y}','{mins} Minutes of {st} Beats | {T} | Prod. MZPRD','{T} - Type Beat Mix | {n} Rap Instrumentals | MZPRD','Best {st} Beats {y} | {T} | Hip Hop Instrumental Mix',
+  '{st} Type Beat Mix {y} ({pr} Type) | {n} Beats','{n} {st} Beats in {mins} Minutes | {T}','{st} Instrumentals Mix {y} | {T} ({n} Beats)','1 Hour? No. {mins} Minutes of {st} Beats | {T}','{pr} Type Beats Mix {y} | {n} {st} Instrumentals'],
+ packs:['{n} Sample Packs in 1 | {T} ({y})','{st} Sample Pack Mix {y} - {n} Loop Kits ({mins} Min)','Sample Pack Bundle {y}: {n} {st} Loop Kits','{mins} Minutes of {st} Samples | {n} Sample Packs','[{n} IN 1] {st} Loop Kit / Sample Pack Bundle {y}','{T} | {n} {st} Sample Packs ({pr} Type)',
+  'Best {st} Sample Packs {y} ({n} Loop Kits, Royalty Free)','Mega {st} Sample Pack Bundle {y} - {T}','{st} Loop Kits {y}: {n} Packs for {pr} Type Beats','Royalty Free {st} Loop Kit Bundle {y} | {T}','{n} {st} Loop Kits You Need in {y}','{st} Sample Packs {y} | {n} Kits ({pr}, Boom Bap)',
+  '{T}: {n} {st} Loop Kits ({mins} Min Preview)','Loop Kit / Sample Pack Bundle {y} - "{T}" ({n} in 1)','{n} PreChopped {st} Sample Packs {y} ({pr} Type)','Every {st} Sample Pack {y} in One Video ({n} Kits)'],
+ samples:['{mins} Minutes of {st} Samples | {T} (Royalty Free)','{n} {st} Samples for Beats {y} ({pr} Type)','[{n} SAMPLES] {st} Sample Pack {y} - {T}','{st} Samples Mix {y} | {n} Loops ({pr} Type)','1 Hour? No. {mins} Minutes of {st} Loops | {T}','Rare {st} Samples for Hip Hop {y} | {T}',
+  '{n} Soul Chops / Loops {y} ({pr}, Boom Bap)','{st} Sample Chops Compilation {y} | {n} Samples','Royalty Free {st} Loops {y} - {n} Samples ({mins} Min)','{T} | {n} {st} Samples (Boom Bap, Jazz, Soul)','{n} {st} Samples {pr} Would Flip ({y})','{st} Loop Compilation {y} | {n} Royalty Free Samples',
+  '{n} PreChopped {st} Samples {y} ({pr} Type Soul/Jazz)','{st} Melody Loops {y} | {n} Samples for Beats','{T} - {n} {st} Samples ({mins} Minutes)','Vintage Soul Samples Mix {y} | {n} Loops ({pr} Type)']};
+function mxRng(s){let x=s|0||1;return()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return((x>>>0)%100000)/100000}}
+function mxScore(t,k){let s=50;const lo=t.toLowerCase(),L=t.length;if(L<=60)s+=14;else if(L<=70)s+=6;else if(L>100)s-=30;else s-=6;
+ if(k==='beats'?/beats|instrumental|type beat/.test(lo):/sample pack|loop kit|samples|loops|sample chops/.test(lo))s+=10;if(lo.includes(String(YEAR)))s+=6;if(/\b\d+\b/.test(t.replace(String(YEAR),'')))s+=6;if(/minutes|min\)/.test(lo))s+=3;if(/type|inspired/.test(lo))s+=3;if(/royalty free|bundle|in 1/.test(lo))s+=3;if(/^\[/.test(t))s+=2;return Math.max(0,Math.min(100,s))}
+function genAll(){if(!box)return;const L=layout(),n=new Set(L.map(o=>o.b.id)).size||M.sel.length,k=M.kind,r=mxRng(((M.seed2||0)+1)*7919+String(M.title).length*31+n);
+ const st=MXS[k],out=new Map(),TL=MXT[k].filter(x=>total()>=120||!/\{mins\}/.test(x));for(let g=0;g<200&&out.size<10;g++){const t=TL[Math.floor(r()*TL.length)].replace(/\{T\}/g,M.title).replace(/\{n\}/g,Math.max(1,n)).replace(/\{y\}/g,YEAR).replace(/\{mins\}/g,Math.max(1,Math.round(total()/60))).replace(/\{st\}/g,st[Math.floor(r()*st.length)]).replace(/\{pr\}/g,MXP[Math.floor(r()*MXP.length)]).replace(/\s+/g,' ').trim().slice(0,100);if(!out.has(t.toLowerCase()))out.set(t.toLowerCase(),{t,s:mxScore(t,k)})}
+ M.gen=[...out.values()].sort((a,b)=>b.s-a.s);M.genN=n;M.genM=Math.round(total()/60);M.yt=0;const tl=$m('#mxTl');tl.innerHTML=M.gen.map((x,i)=>`<button data-i="${i}"${i===0?' class="on"':''}><b class="${x.s>=85?'hi':''}">${x.s}</b><span>${esc(x.t)}</span></button>`).join('');
+ tl.onclick=e=>{const b=e.target.closest('button');if(!b)return;M.yt=+b.dataset.i;pickTitle()};pickTitle()}
+function pickTitle(){if(!M.gen||!M.gen.length){genAll();return}const i=M.yt%M.gen.length;$m('#mxYt').value=M.gen[i].t;$m('#mxTi').textContent='('+(i+1)+'/'+M.gen.length+', score '+M.gen[i].s+')';$m('#mxTl').querySelectorAll('button').forEach((b,j)=>b.classList.toggle('on',j===i));yt()}
 function yt(){
- if(!box)return;const L=layout(),n=L.length;if(!n){$m('#mxYt').value='';$m('#mxYd').value='';$m('#mxYg').value='';return}
- $m('#mxYt').value=TT[M.yt%TT.length](n).slice(0,100);$m('#mxTi').textContent='('+(M.yt%TT.length+1)+'/'+TT.length+')';
- const ch=L.map((o,i)=>fmt(o.start)+' '+o.b.title+(o.b.bpm?' ('+o.b.bpm+' BPM'+(o.b.musical_key?' '+o.b.musical_key:'')+')':'')).join('\n');
- const links=[...new Map(L.map(o=>[o.b.id,o.b])).values()].map(b=>b.title+': '+SITE+'/beat/'+slugOf(b)+'/').join('\n');
- $m('#mxYd').value=M.title+' | '+n+(n>1?' beats':' beat')+' by MZPRD (Meztheprod)\n\nTRACKLIST\n'+ch+'\n\nBUY OR DOWNLOAD ANY BEAT\n'+links+'\n\nAll beats and sample packs: '+SITE+'\n\nSubscribe for new beats every week.\n\n#typebeat #rapbeats #beatmix #mzprd';
+ if(!box)return;const L=layout(),n=L.length,k=M.kind,W=K();if(!n){$m('#mxYt').value='';$m('#mxYd').value='';$m('#mxYg').value='';$m('#mxTl').innerHTML='';return}
+ const d=M.dv||0,mins=Math.max(1,Math.round(total()/60)),u=new Set(L.map(o=>o.b.id)).size;if(!M.gen||M.genN!==u||M.genM!==Math.round(total()/60))return genAll();
+ const ch=L.map(o=>fmt(o.start)+' '+o.b.title+(o.b.bpm?' ('+o.b.bpm+' BPM'+(o.b.musical_key?' '+o.b.musical_key:'')+')':'')).join('\n');
+ const links=[...new Map(L.map(o=>[o.b.id,o.b])).values()].map(b=>b.title+': '+W.url(b)).join('\n');
+ const HOOK={beats:[M.title+' | '+u+' beats by MZPRD (Meztheprod), '+mins+' minutes, no ads between tracks.',mins+' minutes of '+M.title.toLowerCase()+': '+u+' beats back to back by MZPRD.'],
+  packs:[M.title+': '+u+' sample packs by MZPRD in one video, '+mins+' minutes of loops you can hear before you buy.',u+' royalty free sample packs, back to back. Every pack is linked below, jump with the chapters.'],
+  samples:[M.title+': '+u+' royalty free samples by MZPRD, '+mins+' minutes, every one ready for your next beat.',mins+' minutes of samples, '+u+' loops back to back. Every one is linked below.']}[k];
+ const BUY={beats:'BUY OR DOWNLOAD ANY BEAT',packs:'GET ANY SAMPLE PACK',samples:'GET ANY SAMPLE (CRATE DIG)'}[k],LIC=k==='beats'?'':'\n\nLICENSE\n100% royalty free for your beats and releases. No reselling the sounds as-is.';
+ const HT={beats:'#typebeat #rapbeats #beatmix #mzprd',packs:'#samplepack #loopkit #boombap',samples:'#samples #soulsamples #loopkit'}[k];
+ $m('#mxYd').value=HOOK[d%HOOK.length]+'\n\n'+(k==='beats'?'TRACKLIST':'CHAPTERS')+'\n'+ch+'\n\n'+BUY+'\n'+links+LIC+'\n\nAll beats and sample packs: '+SITE+'\n\n'+(k==='beats'?'Subscribe for new beats every week.':'Subscribe for new sample packs every week.')+'\n\n'+HT;
  const tg=[...new Set(L.flatMap(o=>(o.b.tags||'').split(/[\/,]/).map(x=>x.trim()).filter(Boolean)))];
- const all=['beat mix','rap beats mix','type beat mix','hip hop instrumentals','rap instrumentals','free beats',...tg,'MZPRD','Meztheprod',...L.map(o=>o.b.title)];let out=[],len=0;for(const t of [...new Set(all)]){if(len+t.length+2>500)break;out.push(t);len+=t.length+2}
+ const base={beats:['beat mix','rap beats mix','type beat mix','hip hop instrumentals','rap instrumentals','beats '+YEAR,'boom bap beats'],
+  packs:['sample pack bundle','loop kit bundle','sample pack '+YEAR,'loop kit '+YEAR,'sample packs','loop kits','royalty free samples','soul sample pack','vintage sample pack','boom bap sample pack','sample pack mix','loop kit / sample pack'],
+  samples:['soul samples','vintage samples','samples for beats','sample chops','soul loops','royalty free samples','samples '+YEAR,'jazz samples','boom bap samples','rare soul samples','loops for beats','melody loops']}[k];
+ const all=[...base,...tg,'MZPRD','Meztheprod',...L.map(o=>o.b.title)];let out=[],len=0;for(const t of [...new Set(all.map(x=>String(x).toLowerCase()))]){if(len+t.length+2>500)break;out.push(t);len+=t.length+2}
  $m('#mxYg').value=out.join(', ');
 }
 /* ---------- render ---------- */
@@ -244,7 +281,7 @@ function badge(p){const b=document.querySelector('.bh [data-t=video]');if(b)b.te
 const beforeUnload=e=>{if(M.busy){e.preventDefault();e.returnValue=''}};
 async function render(){
  if(M.busy)return;const msg=t=>$m('#mxMsg').textContent=t,btn=$m('#mxRender'),dl=$m('#mxDl');
- if(!playlist().length){msg('Pick at least one beat first.');return}
+ if(!playlist().length){msg('Pick at least one '+K().one+' first.');return}
  if(!(window.VideoEncoder&&window.AudioEncoder&&window.VideoFrame&&window.AudioData&&window.OfflineAudioContext)){msg('This browser cannot render long videos. Use Chrome or Edge.');return}
  M.busy=true;btn.disabled=true;dl.style.display='none';badge(0);addEventListener('beforeunload',beforeUnload);
  let err=null,venc,aenc;
@@ -280,7 +317,7 @@ async function render(){
    gUs+=Math.round(nf*1e6/FPS);done+=nf;
   }
   await venc.flush();await aenc.flush();if(err)throw err;muxer.finalize();
-  const blob=new Blob([target.buffer],{type:'video/mp4'});dl.href=URL.createObjectURL(blob);dl.download='mzprd-beat-mix.mp4';dl.style.display='block';$m('#mxProg').style.width='100%';
+  const blob=new Blob([target.buffer],{type:'video/mp4'});dl.href=URL.createObjectURL(blob);dl.download='mzprd-'+M.kind+'-mix.mp4';dl.style.display='block';$m('#mxProg').style.width='100%';
   msg('Done in '+Math.round((performance.now()-t0)/1000)+'s. '+(blob.size/1048576).toFixed(0)+' MB MP4, '+fmt(done/FPS)+' long. Click DOWNLOAD MIX VIDEO.');try{toast('MIX VIDEO READY')}catch(e){}
  }catch(e){console.warn(e);msg('Render failed: '+((e&&e.message)||e))}
  finally{try{venc&&venc.close()}catch(e){}try{aenc&&aenc.close()}catch(e){}M.busy=false;btn.disabled=false;badge();removeEventListener('beforeunload',beforeUnload)}
@@ -288,7 +325,7 @@ async function render(){
 window.mixOpen=async function(){
  if(!box){if(!M.beats.length){try{const r=await sb.from('beats').select('*').order('created_at',{ascending:false});M.beats=r.data||[]}catch(e){}}
   try{await thLoad()}catch(e){}build();M.beats.forEach(b=>loadCover(b))}
- box.classList.add('on');box.setAttribute('aria-hidden','false');document.addEventListener('keydown',key);ui();setTimeout(()=>{preview();yt()},300);
+ box.classList.add('on');box.setAttribute('aria-hidden','false');document.addEventListener('keydown',key);ui();setTimeout(()=>{preview();genAll()},300);
 };
 window.mixClose=function(){if(box)shut()};
 })();
