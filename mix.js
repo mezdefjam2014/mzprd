@@ -263,39 +263,57 @@ function speedFrame(c,st,L,k,tl,tg,tot,d){const T=thOf('speed'),th=thKey('speed'
 /* ---------- INSIDE THE SAMPLE: one sample taken apart and rebuilt on a DAW timeline ----------
    Steps: intro, part A, part B, full, chop (real transients, zero-cross snapped), new loop from the chops, slowed + reverb,
    reversed, sped up, the flip (medley), sales card. Every step's audio is rendered for real; editing sound effects are synthesised. */
+['mpc/pk3/bg_vinyl_red.webp','mpc/pk3/bg_vinyl_mono.webp'].forEach(f=>{const i=new Image();i.onload=()=>{SCI[f.split('/').pop().split('.')[0]]=i};i.src=new URL(f+'?v=1',document.baseURI).href});
 const INS_STEPS=['intro','a','b','full','chop','loop','slow','rev','fast','flip','outro'];
 const INS_LAB={intro:'INSIDE THE SAMPLE',a:'PART A',b:'PART B',full:'THE FULL SAMPLE',chop:'CHOP IT',loop:'NEW LOOP FROM THE CHOPS',slow:'SLOWED + REVERB',rev:'REVERSED',fast:'SPED UP',flip:'THE FLIP',outro:'GET THE SAMPLE'};
 const INT={fl:{n:'FL PLAYLIST',bg:'#1c2026',grid:'#262b33',lane:'#20252c',ca:['#ffb0b8','#a8323f'],cb:['#8ff0ff','#2f8fa8'],cc:['#c9a6ff','#5b3fa8'],ph:'#ffffff',acc:'#ff5a7a'},
  ableton:{n:'ABLETON GRID',bg:'#2b2b2b',grid:'#333333',lane:'#262626',ca:['#ffd23f','#9a7a12'],cb:['#3ee08f','#1d7a4a'],cc:['#ff7d3e','#99431c'],ph:'#ffffff',acc:'#ffd23f'},
  mpc:{n:'MPC SCREEN',bg:'#0a0a0c',grid:'#16161a',lane:'#121216',ca:['#ff4d5d','#7a1420'],cb:['#ffd34a','#7a5a10'],cc:['#ffffff','#555'],ph:'#ffd34a',acc:'#ff3040'}};
 THM.inside=()=>INT;
-const LEAD=.4,INS={};
+const LEAD=.4,INS={};window.__mzInsTest=(src,n)=>{const o=M.insN;M.insN=n;const r=insAnalyze('t',src);M.insN=o;return r};
 function insList(L){const b=L[0];if(!b)return[];return INS_STEPS.map(s=>Object.assign({},b,{id:b.id+'#'+s,_sid:b.id,_step:s}))}
 /* analysis: best loop window, real transients for the chops, a new order, waveform peaks */
 function insAnalyze(sid,src){const nCh=M.insN||8,sr=src.sampleRate,ch0=src.getChannelData(0),ch1=src.numberOfChannels>1?src.getChannelData(1):ch0,b=M.beats.find(x=>String(x.id)===String(sid))||{},bpm=+b.bpm||0;
  let L=bpm?Math.min(10,Math.max(4,(bpm>=110?8:4)*4*60/bpm)):Math.min(8,src.duration);L=Math.min(L,src.duration);const st0=bestStart(src,L);
- const hop=256,a0=Math.floor(st0*sr),n=Math.floor(L*sr/hop),env=new Float32Array(n);for(let i=0;i<n;i++){let s=0;for(let j=a0+i*hop,e=j+hop;j<e;j++){const v=(ch0[j]||0)+(ch1[j]||0);s+=v*v}env[i]=Math.sqrt(s/hop)}
- const fl=new Float32Array(n);for(let i=1;i<n;i++)fl[i]=Math.max(0,env[i]-env[i-1]*1.05);const minGap=Math.floor((L/nCh)*.45*sr/hop);
- const cand=[];for(let i=2;i<n-2;i++)if(fl[i]>0&&fl[i]>=fl[i-1]&&fl[i]>=fl[i+1])cand.push([i,fl[i]]);cand.sort((x,y)=>y[1]-x[1]);
- const pick=[0];for(const[i]of cand){if(pick.length>=nCh)break;if(pick.every(p=>Math.abs(p-i)>=minGap))pick.push(i)}
- if(pick.length<nCh){for(let q=1;q<nCh&&pick.length<nCh;q++){const i=Math.round(q*n/nCh);if(pick.every(p=>Math.abs(p-i)>=minGap*.5))pick.push(i)}}
- pick.sort((x,y)=>x-y);const zc=t=>{let i=Math.round(t*sr)+a0;for(let k=0;k<200;k++){const j=i-k;if(j>0&&((ch0[j-1]<=0&&ch0[j]>0)||(ch0[j-1]>=0&&ch0[j]<0)))return(j-a0)/sr}return(i-a0)/sr};
- const cuts=pick.map(i=>Math.max(0,zc(i*hop/sr-.008)));cuts[0]=0;const sl=cuts.map((c,i)=>[c,i<cuts.length-1?cuts[i+1]:L]).filter(s=>s[1]-s[0]>.04);
+ /* onsets: log-magnitude spectral flux (high bins weighted), adaptive median threshold, backtracked to the true attack */
+ const a0=Math.floor(st0*sr),N=1024,hop=128,n=Math.max(4,Math.floor((L*sr-N)/hop)),win=new Float64Array(N);for(let i=0;i<N;i++)win[i]=.5-.5*Math.cos(2*Math.PI*i/(N-1));
+ const mono=i=>((ch0[i]||0)+(ch1[i]||0))*.5,flux=new Float32Array(n),rms=new Float32Array(n);let prev=new Float32Array(N/2);
+ for(let f=0;f<n;f++){const re=new Float64Array(N),im=new Float64Array(N),o=a0+f*hop;let e2=0;for(let i=0;i<N;i++){const x=mono(o+i);re[i]=x*win[i];if(i<hop)e2+=x*x}rms[f]=Math.sqrt(e2/hop);fft(re,im);const mg=new Float32Array(N/2);let s=0;for(let k=1;k<N/2;k++){mg[k]=Math.log1p(20*Math.hypot(re[k],im[k]));const dd=mg[k]-prev[k];if(dd>0)s+=dd*(1+k/(N/8))}flux[f]=s;prev=mg}
+ let fmx=0;for(const v of flux)fmx=Math.max(fmx,v);const thr=new Float32Array(n),W8=10;for(let i=0;i<n;i++){const w=[];for(let j=Math.max(0,i-W8);j<=Math.min(n-1,i+W8);j++)w.push(flux[j]);w.sort((x,y)=>x-y);thr[i]=w[w.length>>1]*1.35+fmx*.04}
+ const cand=[];for(let i=3;i<n-3;i++){const v=flux[i];if(v>thr[i]&&v>=flux[i-1]&&v>=flux[i+1]&&v>=flux[i-2]&&v>=flux[i+2]&&v>=flux[i-3]&&v>=flux[i+3])cand.push([i,v-thr[i]])}cand.sort((x,y)=>y[1]-x[1]);
+ const minGap=Math.max(3,Math.floor((L/nCh)*.33*sr/hop)),pick=[0];for(const[i]of cand){if(pick.length>=nCh)break;if(pick.every(p=>Math.abs(p-i)>=minGap))pick.push(i)}
+ for(const[i]of cand){if(pick.length>=nCh)break;if(pick.every(p=>Math.abs(p-i)>=Math.max(2,minGap>>1)))pick.push(i)}
+ pick.sort((x,y)=>x-y);
+ /* backtrack each onset: to the energy valley before the flux peak, then to the first sample that rises, then to a zero crossing */
+ const attack=fi=>{if(fi<=0)return 0;const w=Math.max(16,Math.round(.001*sr)),s0=Math.max(a0,a0+(fi-6)*hop),s1=a0+(fi+2)*hop+N,m=Math.floor((s1-s0)/w);if(m<4)return Math.max(0,(a0+fi*hop-a0)/sr);
+  const env=new Float32Array(m);const hp=i=>mono(i)-.97*mono(i-1);for(let q=0;q<m;q++){let e=0;for(let i=s0+q*w,z=i+w;i<z;i++){const x=hp(i);e+=x*x}env[q]=Math.sqrt(e/w)}
+  let jq=1,jv=-1;for(let q=1;q<m;q++){const dv=env[q]-env[q-1];if(dv>jv){jv=dv;jq=q}}let base=1e9;for(let q=Math.max(0,jq-30);q<jq;q++)base=Math.min(base,env[q]);if(base===1e9)base=env[0];
+  const tgt=base+(env[jq]-base)*.1;let q=jq;while(q>0&&env[q-1]>tgt)q--;let i=s0+q*w;for(let z=i+w;i<z;i++){if(Math.abs(hp(i))>tgt*1.2)break}
+  for(let k=0;k<Math.round(.0015*sr);k++){const j=i-k;if(j>a0&&((ch0[j-1]<=0&&ch0[j]>0)||(ch0[j-1]>=0&&ch0[j]<0))){i=j;break}}return Math.max(0,(i-a0)/sr)};
+ const cuts=pick.map(attack);cuts[0]=0;
+ const sl=cuts.map((c,i)=>[c,i<cuts.length-1?cuts[i+1]:L]).filter(s=>s[1]-s[0]>.04);
  const ORD={8:[0,2,1,0,4,7,5,3],12:[0,3,1,0,6,9,4,11,2,7,5,10],16:[0,2,1,0,4,7,5,3,8,10,9,8,12,15,13,11]};let ord=(ORD[sl.length]||sl.map((_,i)=>i).reverse()).filter(i=>i<sl.length);
  const P=900,pk=new Float32Array(P);for(let i=0;i<P;i++){let m=0;for(let j=a0+Math.floor(i*L*sr/P),e=a0+Math.floor((i+1)*L*sr/P);j<e;j+=4)m=Math.max(m,Math.abs(ch0[j]||0));pk[i]=m}let mx=0;for(const v of pk)mx=Math.max(mx,v);for(let i=0;i<P;i++)pk[i]/=mx||1;
  const rev=new AudioBuffer({numberOfChannels:2,length:Math.floor(L*sr),sampleRate:sr});for(let c=0;c<2;c++){const s=c?ch1:ch0,d=rev.getChannelData(c);for(let i=0;i<d.length;i++)d[i]=s[a0+d.length-1-i]||0}
  const loopLen=ord.reduce((s,i)=>s+(sl[i][1]-sl[i][0]),0);
  INS[sid]={src,st0,L,sl,ord,pk,rev,loopLen,dur:{intro:3.2,a:LEAD+L/2,b:LEAD+L/2,full:LEAD+L,chop:LEAD+sl.reduce((s,x)=>s+(x[1]-x[0])+.14,0),loop:.9+loopLen*2,slow:LEAD+L/.8+.8,rev:LEAD+L,fast:LEAD+L/1.25,flip:.4+loopLen+L/1.25*.5+L*.5,outro:6.5}};return INS[sid]}
+/* editing sound effects: your ElevenLabs sounds (sfx/inside), trimmed + levelled on load; synthesised ones only as a fallback */
+const SFXF={whoosh:'whoosh',impact:'impact',cut:'scratch',tapestop:'tapestop',rewind:'rewind',riser:'riser'},SFXB={};let SFXP=null;
+const SFXLV={whoosh:.55,impact:.8,cut:.32,tapestop:.6,rewind:.6,riser:.5};
+function sfxLoad(){return SFXP=SFXP||Promise.all(Object.entries(SFXF).map(async([k,f])=>{try{const r=await fetch(new URL('sfx/inside/'+f+'.mp3?v=1',document.baseURI).href);const b=await ctxA().decodeAudioData(await r.arrayBuffer());
+ let pk=0,st=b.length;for(let c=0;c<b.numberOfChannels;c++){const d=b.getChannelData(c);for(let i=0;i<d.length;i++)pk=Math.max(pk,Math.abs(d[i]))}for(let c=0;c<b.numberOfChannels;c++){const d=b.getChannelData(c);for(let i=0;i<d.length;i++)if(Math.abs(d[i])>pk*.02){st=Math.min(st,i);break}}
+ let en=0;for(let c=0;c<b.numberOfChannels;c++){const d=b.getChannelData(c);for(let i=d.length-1;i>0;i--)if(Math.abs(d[i])>pk*.01){en=Math.max(en,i);break}}const len=Math.max(1,en-st+1),out=new AudioBuffer({numberOfChannels:2,length:len,sampleRate:b.sampleRate}),fd=Math.min(len,Math.round(b.sampleRate*.01));
+ for(let c=0;c<2;c++){const s=b.getChannelData(Math.min(c,b.numberOfChannels-1)),d=out.getChannelData(c);for(let i=0;i<len;i++){let v=s[st+i]/(pk||1);if(i>len-fd)v*=(len-i)/fd;d[i]=v}}SFXB[k]=out}catch(e){}}))}
 /* synthesised editing sound effects */
 let NZ=null;function nz(oc){if(NZ&&NZ.sampleRate===oc.sampleRate)return NZ;const b=oc.createBuffer(1,oc.sampleRate*2,oc.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;NZ=b;return b}
-function sfx(oc,type,t,vol){const g=oc.createGain();g.connect(oc.destination);vol=vol||1;const env=(a,dur,pk)=>{g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(pk*vol,t+a);g.gain.exponentialRampToValueAtTime(.0005,t+dur)};
+function sfx(oc,type,t,vol){vol=vol||1;if(SFXB[type]){const n=oc.createBufferSource(),g2=oc.createGain();n.buffer=SFXB[type];g2.gain.value=vol*(SFXLV[type]||.6);n.connect(g2);g2.connect(oc.destination);n.start(t);return}const g=oc.createGain();g.connect(oc.destination);const env=(a,dur,pk)=>{g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(pk*vol,t+a);g.gain.exponentialRampToValueAtTime(.0005,t+dur)};
  if(type==='whoosh'||type==='rewind'||type==='riser'){const s=oc.createBufferSource();s.buffer=nz(oc);const f=oc.createBiquadFilter();f.type='bandpass';f.Q.value=1.4;const d=type==='riser'?1.1:.5;if(type==='rewind'){f.frequency.setValueAtTime(5000,t);f.frequency.exponentialRampToValueAtTime(300,t+d)}else{f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(type==='riser'?8000:4500,t+d)}s.connect(f);f.connect(g);env(d*.7,d,type==='riser'?.35:.5);s.start(t,Math.random(),d)}
  else if(type==='tick'){const o=oc.createOscillator();o.type='square';o.frequency.value=2600;o.connect(g);env(.001,.05,.22);o.start(t);o.stop(t+.06)}
  else if(type==='cut'){const s=oc.createBufferSource();s.buffer=nz(oc);const f=oc.createBiquadFilter();f.type='highpass';f.frequency.value=3000;s.connect(f);f.connect(g);env(.001,.08,.5);s.start(t,0,.09)}
- else if(type==='impact'){const o=oc.createOscillator();o.type='sine';o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(38,t+.5);o.connect(g);env(.005,.7,.9);o.start(t);o.stop(t+.75);sfx(oc,'cut',t,.6*vol)}
+ else if(type==='impact'){const o=oc.createOscillator();o.type='sine';o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(38,t+.5);o.connect(g);env(.005,.7,.9);o.start(t);o.stop(t+.75)}
  else if(type==='tapestop'){const o=oc.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(40,t+.45);const f=oc.createBiquadFilter();f.type='lowpass';f.frequency.value=900;o.connect(f);f.connect(g);env(.01,.5,.25);o.start(t);o.stop(t+.5)}}
 /* the audio for one step, rendered offline at the video rate */
-const SB={};async function stepBuffer(b){const A=INS[b._sid];if(!A)throw new Error('not analysed');const key=b._sid+'|'+b._step+'|'+(M.insN||8);if(SB[key])return SB[key];
+const SB={};async function stepBuffer(b){await sfxLoad();const A=INS[b._sid];if(!A)throw new Error('not analysed');const key=b._sid+'|'+b._step+'|'+(M.insN||8);if(SB[key])return SB[key];
  const s=b._step,D=A.dur[s],oc=new OfflineAudioContext(2,Math.ceil(D*SR),SR),src=A.src,mus=oc.createGain();mus.connect(oc.destination);
  const play=(buf,when,off,dur,rate,gain,rv)=>{const n=oc.createBufferSource();n.buffer=buf;n.playbackRate.value=rate||1;const g=oc.createGain();g.gain.value=gain==null?1:gain;n.connect(g);g.connect(mus);if(rv){/* reverb send */const cv=oc.createConvolver();cv.buffer=impulse(oc);const w=oc.createGain();w.gain.value=.45;g.connect(cv);cv.connect(w);w.connect(mus)}n.start(when,off,dur)};
  const S=A.st0,L=A.L;
@@ -317,8 +335,7 @@ function clipBox(c,T,x,y,w,h,name,col,pk,a0,a1,rev,lit,u){c.save();c.fillStyle=c
  if(pk){c.fillStyle=col[0];const N=Math.max(2,Math.floor(w/(2.4*u))),mid=y+h*.62,amp=h*.33;for(let i=0;i<N;i++){let f=a0+(a1-a0)*(i/N);if(rev)f=a1-(f-a0);const v=pk[Math.min(pk.length-1,Math.floor(f*pk.length))]||0,hh=Math.max(1,v*amp);c.fillRect(x+i*w/N,mid-hh,Math.max(1,w/N*.7),hh*2)}}
  c.strokeStyle=lit?'#fff':col[0];c.lineWidth=(lit?2.5:1.2)*u;c.strokeRect(x,y,w,h);c.restore()}
 function insideFrame(c,st,L,k,tl,tg,tot,d){const T=thOf('inside'),th=thKey('inside'),u=H/720,f=st.font,cur=L[k],b=cur.b,s=b._step,sid=b._sid,A=INS[sid],im=M.cov[sid],name=String(b.title||'Sample').replace(/[^A-Za-z0-9]+/g,'_');
- c.fillStyle=T.bg;c.fillRect(0,0,W,H);
- if(th==='mpc'&&SCI.mpc){const bd=blurBd(sid);if(bd){c.globalAlpha=.25;c.drawImage(bd,0,0,W,H);c.globalAlpha=1}}
+ c.fillStyle=T.bg;c.fillRect(0,0,W,H);{const BG=SCI[th==='ableton'?'bg_vinyl_mono':'bg_vinyl_red'];if(BG){const z=1.04+.02*Math.sin(tg*.15),bw=W*z,bh=H*z;c.drawImage(BG,(W-bw)/2,(H-bh)/2,bw,bh);c.fillStyle=T.bg;c.globalAlpha=.55;c.fillRect(0,0,W,H);c.globalAlpha=1;const g=c.createLinearGradient(0,H*.18,0,H*.9);g.addColorStop(0,'rgba(0,0,0,.15)');g.addColorStop(.5,'rgba(0,0,0,.45)');g.addColorStop(1,'rgba(0,0,0,.2)');c.fillStyle=g;c.fillRect(0,0,W,H)}}
  /* header */
  cov(c,im,W*.035,H*.04,H*.12,st,false);txt(c,String(b.title||'').toUpperCase(),W*.035+H*.14,H*.095,fitPx(c,String(b.title||'').toUpperCase(),f,W*.45,40*u),f,'#fff');
  const meta=[b.bpm&&b.bpm+' BPM',b.musical_key,'MZPRD'].filter(Boolean).join('  •  ');txt(c,meta,W*.035+H*.14,H*.135,15*u,'Oswald',T.acc,'left',4);
