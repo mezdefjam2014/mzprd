@@ -147,11 +147,10 @@ async function loadCover(b){
  if(M.cov[b.id])return;
  await new Promise(r=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{M.cov[b.id]=im;r()};im.onerror=r;im.src=artOf(b,1024)});
 }
-async function probe(b){
- if(M.dur[b.id]!=null)return;M.dur[b.id]=0;
- try{const s=await fetchBuf(b);M.dur[b.id]=s.duration}catch(e){M.dur[b.id]=0}
+const PRB={};function probe(b){if(M.dur[b.id])return Promise.resolve();return PRB[b.id]||(PRB[b.id]=(async()=>{M.dur[b.id]=M.dur[b.id]||0;
+ try{const s=await fetchBuf(b);M.dur[b.id]=s.duration}catch(e){M.dur[b.id]=0;delete PRB[b.id]}
  await loadCover(b);ui();
-}
+})())}
 
 /* ---------- ui ---------- */
 function css(){
@@ -241,7 +240,7 @@ function ui(){
  const tl=$m('#mxTot');tl.textContent=n?n+' track'+(n>1?'s':'')+' / '+fmt(t)+(t<600?'  (under 10 min: add '+K().many+' or tick REPEAT)':t>900?'  (over 15 min)':'  (good length)'):'';
  tl.style.color=n&&t>=600&&t<=900?'#6fd08c':'#a9a9ae';
 }
-const PV={on:false,k:0,src:null,an:null,raf:0,t0:0,buf:null};
+const pvMsg=t=>{const m=box&&box.querySelector('#mxMsg');if(m)m.textContent=t};const PV={on:false,k:0,src:null,an:null,raf:0,t0:0,buf:null};
 function preview(){
  if(!box)return;if(PV.on)return;const L=layout(),cv=$m('#mxPv'),c=cv.getContext('2d');
  if(!L.length){c.fillStyle='#000';c.fillRect(0,0,cv.width,cv.height);c.fillStyle='#8e8e94';c.font='14px Montserrat';c.textAlign='center';c.fillText('Pick '+K().many+' to preview the style',cv.width/2,cv.height/2);return}
@@ -250,8 +249,8 @@ function preview(){
 }
 let PVB=null;function pvBig(){if(!PVB){PVB=document.createElement('canvas');PVB.width=W;PVB.height=H}return PVB}
 /* PLAY: real audio through an analyser, the frame redrawn live; when a track ends the next one starts */
-async function pvPlay(){const L=layout();if(!L.length){msg('Pick '+K().many+' first.');return}pvStop(true);PV.on=true;$m('#mxPlay').classList.add('on');$m('#mxPlay').innerHTML='&#9632; STOP';
- const a=ctxA();try{await a.resume()}catch(e){}const go=async k=>{if(!PV.on)return;if(k>=L.length)k=0;PV.k=k;msg('Loading '+L[k].b.title+'...');let buf;try{buf=await fetchBuf(L[k].b)}catch(e){msg('Could not load the preview audio for '+L[k].b.title+'.');pvStop();return}if(!PV.on)return;msg('');
+async function pvPlay(){const L=layout();if(!L.length){pvMsg('Pick '+K().many+' first.');return}pvStop(true);PV.on=true;$m('#mxPlay').classList.add('on');$m('#mxPlay').innerHTML='&#9632; STOP';
+ const a=ctxA();try{await a.resume()}catch(e){}const go=async k=>{if(!PV.on)return;if(k>=L.length)k=0;PV.k=k;pvMsg('Loading '+L[k].b.title+'...');let buf;try{buf=await fetchBuf(L[k].b)}catch(e){pvMsg('Could not load the preview audio for '+L[k].b.title+'.');pvStop();return}if(!PV.on)return;pvMsg('');
   const s=a.createBufferSource(),an=a.createAnalyser();an.fftSize=1024;an.smoothingTimeConstant=.7;s.buffer=buf;s.connect(an);an.connect(a.destination);s.onended=()=>{if(PV.on&&PV.src===s)go(k+1)};PV.src=s;PV.an=an;PV.buf=buf;PV.t0=a.currentTime;s.start()};
  await go(0);
  const td=new Uint8Array(1024),fd=new Uint8Array(512),cv=$m('#mxPv'),c=cv.getContext('2d');let last=0;
@@ -334,6 +333,7 @@ async function render(){
   venc=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>{err=e}});venc.configure(vc.cfg);
   aenc=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>{err=e}});aenc.configure({codec:acf.codec,sampleRate:SR,numberOfChannels:2,bitrate:160000});
   /* real durations first (cheap: already probed), then render track by track */
+  msg('Measuring track lengths...');await Promise.all([...new Set(list)].map(b=>probe(b).catch(()=>{})));
   const tot=list.reduce((s,b)=>s+(M.dur[b.id]||180),0);let gUs=0,done=0;const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');
   const Lyt=[];let acc=0;for(const b of list){const d=M.dur[b.id]||180;Lyt.push({b,start:acc,dur:d});acc+=d}
   const t0=performance.now();
