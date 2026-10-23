@@ -44,7 +44,7 @@ async function setKind(k){if(M.busy||k===M.kind&&M.lists[k])return;M.lists[M.kin
  if(!M.lists[k]){try{const q=sb.from(k).select('*').order('created_at',{ascending:false});const r=k==='beats'?await q:await q.eq('published',true);M.lists[k]=r.data||[]}catch(e){M.lists[k]=[]}}
  M.beats=M.lists[k];M.sel=[];M.title=K().title;M.yt=0;M.gen=null;if($m('#mxTitle'))$m('#mxTitle').value=M.title;
  box.querySelectorAll('#mxKind button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));$m('#mxPick').textContent='1. PICK YOUR '+K().MANY;
- M.beats.forEach(b=>loadCover(b));ui();preview();genAll()}
+ M.beats.forEach(b=>loadCover(b));{const ib=$m('#mxFmt [data-f="inside"]');if(ib)ib.style.display=k==='samples'?'':'none'}if(k!=='samples'&&M.fmt==='inside'){setFmt('mix');return}ui();preview();genAll()}
 const SLEEVE=()=>new URL('crate-sleeve.jpg',document.baseURI).href;
 const artOf=(b,px)=>b.cover_path?((window.thumbUrl&&thumbUrl(b.cover_path))||pub(b.cover_path)):M.kind==='samples'?SLEEVE():M.kind==='beats'?stockCover(b.title,px):SLEEVE();
 const $m=s=>box.querySelector(s);
@@ -55,11 +55,11 @@ const ctxA=()=>ac||(ac=new (window.AudioContext||window.webkitAudioContext)());
 
 /* ---------- playlist ---------- */
 function playlist(){
- let L=M.sel.map(id=>M.beats.find(b=>String(b.id)===String(id))).filter(Boolean);if(M.fmt==='speed')return speedList(L);
+ let L=M.sel.map(id=>M.beats.find(b=>String(b.id)===String(id))).filter(Boolean);if(M.fmt==='speed')return speedList(L);if(M.fmt==='inside')return insList(L);
  if(M.repeat&&L.length){const base=L.slice(),dur=b=>M.dur[b.id]||180;let t=L.reduce((s,b)=>s+dur(b),0),i=0;while(t<600&&L.length<60){const b=base[i++%base.length];L.push(b);t+=dur(b)}}
  return L;
 }
-function layout(){let t=0;const cl=FM().clip;return playlist().map(b=>{const d0=M.dur[b._sid||b.id]||0,d=b._mode?(d0?Math.min(SPM[b._mode].sec,d0/SPM[b._mode].rate):0):cl&&d0?Math.min(d0,cl):d0,o={b,start:t,dur:d};t+=d;return o})}
+function layout(){let t=0;const cl=FM().clip;return playlist().map(b=>{const d0=M.dur[b._sid||b.id]||0,d=b._step?((INS[b._sid]&&INS[b._sid].dur[b._step])||0):b._mode?(d0?Math.min(SPM[b._mode].sec,d0/SPM[b._mode].rate):0):cl&&d0?Math.min(d0,cl):d0,o={b,start:t,dur:d};t+=d;return o})}
 const total=()=>layout().reduce((s,o)=>s+o.dur,0);
 
 /* ---------- drawing ---------- */
@@ -138,13 +138,13 @@ function mixFrame(c,st,L,k,tl,tg,tot,d,opts){
 }
 
 /* ---------- video formats: MIX (playlist), COUNTDOWN (top N), VERSUS (A vs B), GIVEAWAY (free loop Short, 9:16) ---------- */
-const FMTS={mix:{n:'MIX'},count:{n:'COUNTDOWN',clip:15,max:10},vs:{n:'PACK vs PACK',clip:20,max:2},give:{n:'FREE LOOP SHORT',clip:30,max:1,vert:1},rate:{n:'RATE IT 1-10',clip:12,max:10},speed:{n:'SPEED VERSIONS',max:3}};
+const FMTS={mix:{n:'MIX'},count:{n:'COUNTDOWN',clip:15,max:10},vs:{n:'PACK vs PACK',clip:20,max:2},give:{n:'FREE LOOP SHORT',clip:30,max:1,vert:1},rate:{n:'RATE IT 1-10',clip:12,max:10},speed:{n:'SPEED VERSIONS',max:3},inside:{n:'INSIDE THE SAMPLE',max:1}};
 const FM=()=>FMTS[M.fmt||'mix'];
 const KP=()=>({beats:'Beats',packs:'Sample Packs',samples:'Samples'})[M.kind],K1=()=>({beats:'Beat',packs:'Pack',samples:'Sample'})[M.kind];
-function setFmt(f){if(M.busy)return;pvStop(true);M.fmt=f;const v=!!FM().vert;W=v?720:1280;H=v?1280:720;bdc={};PVB=null;const cv=$m('#mxPv');cv.width=W;cv.height=H;cv.style.width=v?'auto':'100%';cv.style.maxHeight=v?'70vh':'';cv.style.margin=v?'0 auto':'';
- const mx=FM().max;if(mx&&M.sel.length>mx)M.sel=M.sel.slice(0,mx);box.querySelectorAll('#mxFmt button').forEach(b=>b.classList.toggle('on',b.dataset.f===f));{const T=THM[f]&&THM[f]();$m('#mxVsW').style.display=T?'block':'none';$m('#mxDealW').style.display=f==='rate'||f==='speed'?'block':'none';$m('#mxThH').textContent=f==='vs'?'BATTLE THEME':'THEME';if(T){M.th=M.th||{};const cur=M.th[f]||Object.keys(T)[0];$m('#mxVsT').innerHTML=Object.keys(T).map(k=>`<button class="btn${k===cur?' on':''}" data-v="${k}">${T[k].n}</button>`).join('')}}
- const hint=$m('#mxFmtHint');if(hint)hint.textContent={mix:'Pick tracks in order. Aim for 10 to 15 minutes.',count:'Pick up to 10 in order: your #1 last. Each plays its best 15 seconds.',vs:'Pick 2. Each plays its best 20 seconds, then a "comment A or B" vote card.',give:'Pick 1 loop. Makes a 9:16 Short (about 30 seconds) for a free download post.',rate:'Pick up to 10. Tap the score next to each one in YOUR MIX to set it (1 to 10). Ends on a sales card.',speed:'Pick 1 to 3. Each plays normal, slowed + reverb, then sped up. Ends on a sales card.'}[f];
- M.title=f==='rate'?'Rating '+KP()+' 1-10':f==='speed'?'Normal vs Slowed vs Sped Up':f==='mix'?K().title:f==='count'?'Top '+Math.max(3,M.sel.length||10)+' '+KP():f==='vs'?K1()+' Battle':'Free Loop';if($m('#mxTitle'))$m('#mxTitle').value=M.title;M.gen=null;ui();preview();genAll()}
+function setFmt(f){if(M.busy)return;if(f==='inside'&&M.kind!=='samples')return;pvStop(true);M.fmt=f;const v=!!FM().vert;W=v?720:1280;H=v?1280:720;bdc={};PVB=null;const cv=$m('#mxPv');cv.width=W;cv.height=H;cv.style.width=v?'auto':'100%';cv.style.maxHeight=v?'70vh':'';cv.style.margin=v?'0 auto':'';
+ const mx=FM().max;if(mx&&M.sel.length>mx)M.sel=M.sel.slice(0,mx);box.querySelectorAll('#mxFmt button').forEach(b=>b.classList.toggle('on',b.dataset.f===f));{const T=THM[f]&&THM[f]();$m('#mxVsW').style.display=T?'block':'none';$m('#mxDealW').style.display=f==='rate'||f==='speed'||f==='inside'?'block':'none';$m('#mxInsW').style.display=f==='inside'?'block':'none';$m('#mxThH').textContent=f==='vs'?'BATTLE THEME':'THEME';if(T){M.th=M.th||{};const cur=M.th[f]||Object.keys(T)[0];$m('#mxVsT').innerHTML=Object.keys(T).map(k=>`<button class="btn${k===cur?' on':''}" data-v="${k}">${T[k].n}</button>`).join('')}}
+ const hint=$m('#mxFmtHint');if(hint)hint.textContent={mix:'Pick tracks in order. Aim for 10 to 15 minutes.',count:'Pick up to 10 in order: your #1 last. Each plays its best 15 seconds.',vs:'Pick 2. Each plays its best 20 seconds, then a "comment A or B" vote card.',give:'Pick 1 loop. Makes a 9:16 Short (about 30 seconds) for a free download post.',rate:'Pick up to 10. Tap the score next to each one in YOUR MIX to set it (1 to 10). Ends on a sales card.',speed:'Pick 1 to 3. Each plays normal, slowed + reverb, then sped up. Ends on a sales card.',inside:'Pick 1 sample. It is split, rebuilt, chopped on its real hits, re-ordered into a new loop, slowed, reversed and sped up, with editing sounds. Ends on a sales card.'}[f];
+ M.title=f==='inside'?'Inside the Sample':f==='rate'?'Rating '+KP()+' 1-10':f==='speed'?'Normal vs Slowed vs Sped Up':f==='mix'?K().title:f==='count'?'Top '+Math.max(3,M.sel.length||10)+' '+KP():f==='vs'?K1()+' Battle':'Free Loop';if($m('#mxTitle'))$m('#mxTitle').value=M.title;M.gen=null;ui();preview();genAll()}
 /* the strongest stretch of a track (by loudness), so clips start on the good part */
 function bestStart(buf,len){if(!len||buf.duration<=len+.5)return 0;const d=buf.getChannelData(0),sr=buf.sampleRate,hop=Math.floor(sr/4),n=Math.floor(d.length/hop),e=new Float32Array(n);for(let i=0;i<n;i++){let s=0;for(let j=i*hop,z=j+hop;j<z;j+=8)s+=d[j]*d[j];e[i]=s}
  const w=Math.floor(len*4);let best=0,bi=0,cur=0;for(let i=0;i<n;i++){cur+=e[i];if(i>=w)cur-=e[i-w];if(i>=w-1&&cur>best){best=cur;bi=i-w+1}}return Math.min(bi*hop/sr,buf.duration-len)}
@@ -260,14 +260,114 @@ function speedFrame(c,st,L,k,tl,tg,tot,d){const T=thOf('speed'),th=thKey('speed'
  c.fillStyle='rgba(255,255,255,.15)';c.fillRect(lx,H*.8,W*.35,6*u);c.fillStyle=T.b;c.fillRect(lx,H*.8,W*.35*Math.min(1,tl/Math.max(1,cur.dur)),6*u);
  const last=k===L.length-1,ce=last?ease((tl-(cur.dur-4.5))/.6):0;if(last&&ce>0)salesCard(c,st,ce,Object.assign({},b,{id:sid}),b.title,'WAV + ALL VERSIONS');
  finish(c,st)}
+/* ---------- INSIDE THE SAMPLE: one sample taken apart and rebuilt on a DAW timeline ----------
+   Steps: intro, part A, part B, full, chop (real transients, zero-cross snapped), new loop from the chops, slowed + reverb,
+   reversed, sped up, the flip (medley), sales card. Every step's audio is rendered for real; editing sound effects are synthesised. */
+const INS_STEPS=['intro','a','b','full','chop','loop','slow','rev','fast','flip','outro'];
+const INS_LAB={intro:'INSIDE THE SAMPLE',a:'PART A',b:'PART B',full:'THE FULL SAMPLE',chop:'CHOP IT',loop:'NEW LOOP FROM THE CHOPS',slow:'SLOWED + REVERB',rev:'REVERSED',fast:'SPED UP',flip:'THE FLIP',outro:'GET THE SAMPLE'};
+const INT={fl:{n:'FL PLAYLIST',bg:'#1c2026',grid:'#262b33',lane:'#20252c',ca:['#ffb0b8','#a8323f'],cb:['#8ff0ff','#2f8fa8'],cc:['#c9a6ff','#5b3fa8'],ph:'#ffffff',acc:'#ff5a7a'},
+ ableton:{n:'ABLETON GRID',bg:'#2b2b2b',grid:'#333333',lane:'#262626',ca:['#ffd23f','#9a7a12'],cb:['#3ee08f','#1d7a4a'],cc:['#ff7d3e','#99431c'],ph:'#ffffff',acc:'#ffd23f'},
+ mpc:{n:'MPC SCREEN',bg:'#0a0a0c',grid:'#16161a',lane:'#121216',ca:['#ff4d5d','#7a1420'],cb:['#ffd34a','#7a5a10'],cc:['#ffffff','#555'],ph:'#ffd34a',acc:'#ff3040'}};
+THM.inside=()=>INT;
+const LEAD=.4,INS={};
+function insList(L){const b=L[0];if(!b)return[];return INS_STEPS.map(s=>Object.assign({},b,{id:b.id+'#'+s,_sid:b.id,_step:s}))}
+/* analysis: best loop window, real transients for the chops, a new order, waveform peaks */
+function insAnalyze(sid,src){const nCh=M.insN||8,sr=src.sampleRate,ch0=src.getChannelData(0),ch1=src.numberOfChannels>1?src.getChannelData(1):ch0,b=M.beats.find(x=>String(x.id)===String(sid))||{},bpm=+b.bpm||0;
+ let L=bpm?Math.min(10,Math.max(4,(bpm>=110?8:4)*4*60/bpm)):Math.min(8,src.duration);L=Math.min(L,src.duration);const st0=bestStart(src,L);
+ const hop=256,a0=Math.floor(st0*sr),n=Math.floor(L*sr/hop),env=new Float32Array(n);for(let i=0;i<n;i++){let s=0;for(let j=a0+i*hop,e=j+hop;j<e;j++){const v=(ch0[j]||0)+(ch1[j]||0);s+=v*v}env[i]=Math.sqrt(s/hop)}
+ const fl=new Float32Array(n);for(let i=1;i<n;i++)fl[i]=Math.max(0,env[i]-env[i-1]*1.05);const minGap=Math.floor((L/nCh)*.45*sr/hop);
+ const cand=[];for(let i=2;i<n-2;i++)if(fl[i]>0&&fl[i]>=fl[i-1]&&fl[i]>=fl[i+1])cand.push([i,fl[i]]);cand.sort((x,y)=>y[1]-x[1]);
+ const pick=[0];for(const[i]of cand){if(pick.length>=nCh)break;if(pick.every(p=>Math.abs(p-i)>=minGap))pick.push(i)}
+ if(pick.length<nCh){for(let q=1;q<nCh&&pick.length<nCh;q++){const i=Math.round(q*n/nCh);if(pick.every(p=>Math.abs(p-i)>=minGap*.5))pick.push(i)}}
+ pick.sort((x,y)=>x-y);const zc=t=>{let i=Math.round(t*sr)+a0;for(let k=0;k<200;k++){const j=i-k;if(j>0&&((ch0[j-1]<=0&&ch0[j]>0)||(ch0[j-1]>=0&&ch0[j]<0)))return(j-a0)/sr}return(i-a0)/sr};
+ const cuts=pick.map(i=>Math.max(0,zc(i*hop/sr-.008)));cuts[0]=0;const sl=cuts.map((c,i)=>[c,i<cuts.length-1?cuts[i+1]:L]).filter(s=>s[1]-s[0]>.04);
+ const ORD={8:[0,2,1,0,4,7,5,3],12:[0,3,1,0,6,9,4,11,2,7,5,10],16:[0,2,1,0,4,7,5,3,8,10,9,8,12,15,13,11]};let ord=(ORD[sl.length]||sl.map((_,i)=>i).reverse()).filter(i=>i<sl.length);
+ const P=900,pk=new Float32Array(P);for(let i=0;i<P;i++){let m=0;for(let j=a0+Math.floor(i*L*sr/P),e=a0+Math.floor((i+1)*L*sr/P);j<e;j+=4)m=Math.max(m,Math.abs(ch0[j]||0));pk[i]=m}let mx=0;for(const v of pk)mx=Math.max(mx,v);for(let i=0;i<P;i++)pk[i]/=mx||1;
+ const rev=new AudioBuffer({numberOfChannels:2,length:Math.floor(L*sr),sampleRate:sr});for(let c=0;c<2;c++){const s=c?ch1:ch0,d=rev.getChannelData(c);for(let i=0;i<d.length;i++)d[i]=s[a0+d.length-1-i]||0}
+ const loopLen=ord.reduce((s,i)=>s+(sl[i][1]-sl[i][0]),0);
+ INS[sid]={src,st0,L,sl,ord,pk,rev,loopLen,dur:{intro:3.2,a:LEAD+L/2,b:LEAD+L/2,full:LEAD+L,chop:LEAD+sl.reduce((s,x)=>s+(x[1]-x[0])+.14,0),loop:.9+loopLen*2,slow:LEAD+L/.8+.8,rev:LEAD+L,fast:LEAD+L/1.25,flip:.4+loopLen+L/1.25*.5+L*.5,outro:6.5}};return INS[sid]}
+/* synthesised editing sound effects */
+let NZ=null;function nz(oc){if(NZ&&NZ.sampleRate===oc.sampleRate)return NZ;const b=oc.createBuffer(1,oc.sampleRate*2,oc.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;NZ=b;return b}
+function sfx(oc,type,t,vol){const g=oc.createGain();g.connect(oc.destination);vol=vol||1;const env=(a,dur,pk)=>{g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(pk*vol,t+a);g.gain.exponentialRampToValueAtTime(.0005,t+dur)};
+ if(type==='whoosh'||type==='rewind'||type==='riser'){const s=oc.createBufferSource();s.buffer=nz(oc);const f=oc.createBiquadFilter();f.type='bandpass';f.Q.value=1.4;const d=type==='riser'?1.1:.5;if(type==='rewind'){f.frequency.setValueAtTime(5000,t);f.frequency.exponentialRampToValueAtTime(300,t+d)}else{f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(type==='riser'?8000:4500,t+d)}s.connect(f);f.connect(g);env(d*.7,d,type==='riser'?.35:.5);s.start(t,Math.random(),d)}
+ else if(type==='tick'){const o=oc.createOscillator();o.type='square';o.frequency.value=2600;o.connect(g);env(.001,.05,.22);o.start(t);o.stop(t+.06)}
+ else if(type==='cut'){const s=oc.createBufferSource();s.buffer=nz(oc);const f=oc.createBiquadFilter();f.type='highpass';f.frequency.value=3000;s.connect(f);f.connect(g);env(.001,.08,.5);s.start(t,0,.09)}
+ else if(type==='impact'){const o=oc.createOscillator();o.type='sine';o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(38,t+.5);o.connect(g);env(.005,.7,.9);o.start(t);o.stop(t+.75);sfx(oc,'cut',t,.6*vol)}
+ else if(type==='tapestop'){const o=oc.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(40,t+.45);const f=oc.createBiquadFilter();f.type='lowpass';f.frequency.value=900;o.connect(f);f.connect(g);env(.01,.5,.25);o.start(t);o.stop(t+.5)}}
+/* the audio for one step, rendered offline at the video rate */
+const SB={};async function stepBuffer(b){const A=INS[b._sid];if(!A)throw new Error('not analysed');const key=b._sid+'|'+b._step+'|'+(M.insN||8);if(SB[key])return SB[key];
+ const s=b._step,D=A.dur[s],oc=new OfflineAudioContext(2,Math.ceil(D*SR),SR),src=A.src,mus=oc.createGain();mus.connect(oc.destination);
+ const play=(buf,when,off,dur,rate,gain,rv)=>{const n=oc.createBufferSource();n.buffer=buf;n.playbackRate.value=rate||1;const g=oc.createGain();g.gain.value=gain==null?1:gain;n.connect(g);g.connect(mus);if(rv){/* reverb send */const cv=oc.createConvolver();cv.buffer=impulse(oc);const w=oc.createGain();w.gain.value=.45;g.connect(cv);cv.connect(w);w.connect(mus)}n.start(when,off,dur)};
+ const S=A.st0,L=A.L;
+ if(s==='intro'){sfx(oc,'riser',.2,1);sfx(oc,'impact',1.4,1);play(src,1.4,S,1.6,1,.5)}
+ else if(s==='a'){sfx(oc,'whoosh',0,1);play(src,LEAD,S,L/2)}
+ else if(s==='b'){sfx(oc,'whoosh',0,1);play(src,LEAD,S+L/2,L/2)}
+ else if(s==='full'){sfx(oc,'impact',0,.9);play(src,LEAD,S,L)}
+ else if(s==='chop'){let t=LEAD;A.sl.forEach(x=>{sfx(oc,'cut',t,.55);play(src,t,S+x[0],x[1]-x[0]);t+=x[1]-x[0]+.14})}
+ else if(s==='loop'){sfx(oc,'whoosh',0,.8);let t=.9;for(let r=0;r<2;r++)A.ord.forEach((i,j)=>{const x=A.sl[i],d=x[1]-x[0];if(r===0)sfx(oc,'tick',t,.5);play(src,t,S+x[0],d);t+=d})}
+ else if(s==='slow'){sfx(oc,'tapestop',0,1);play(src,LEAD,S,L,.8,1,1)}
+ else if(s==='rev'){sfx(oc,'rewind',0,1);play(A.rev,LEAD,0,L)}
+ else if(s==='fast'){sfx(oc,'riser',0,.6);play(src,LEAD,S,L,1.25)}
+ else if(s==='flip'){sfx(oc,'impact',0,.8);let t=.4;A.ord.forEach(i=>{const x=A.sl[i],d=x[1]-x[0];play(src,t,S+x[0],d);t+=d});play(src,t,S,L/2,1.25);t+=L/1.25*.5;play(A.rev,t,L/2,L/2)}
+ else if(s==='outro'){sfx(oc,'whoosh',0,.8);play(src,.2,S,Math.min(L,6),1,.35)}
+ const rb=await oc.startRendering();SB[key]=rb;return rb}
+/* ---- visuals ---- */
+function clipBox(c,T,x,y,w,h,name,col,pk,a0,a1,rev,lit,u){c.save();c.fillStyle=col[1];c.globalAlpha=lit?1:.55;c.fillRect(x,y,w,h);c.fillStyle=col[0];c.globalAlpha=lit?.28:.14;c.fillRect(x,y+h*.24,w,h*.76);c.globalAlpha=lit?1:.6;c.fillStyle=col[1];c.fillRect(x,y,w,h*.24);
+ c.save();c.beginPath();c.rect(x,y,w,h*.24);c.clip();c.font='700 '+Math.max(9,h*.15)+'px Inter, Arial, sans-serif';c.fillStyle='#fff';c.textBaseline='middle';c.fillText('↠ '+name,x+6*u,y+h*.125);c.restore();
+ if(pk){c.fillStyle=col[0];const N=Math.max(2,Math.floor(w/(2.4*u))),mid=y+h*.62,amp=h*.33;for(let i=0;i<N;i++){let f=a0+(a1-a0)*(i/N);if(rev)f=a1-(f-a0);const v=pk[Math.min(pk.length-1,Math.floor(f*pk.length))]||0,hh=Math.max(1,v*amp);c.fillRect(x+i*w/N,mid-hh,Math.max(1,w/N*.7),hh*2)}}
+ c.strokeStyle=lit?'#fff':col[0];c.lineWidth=(lit?2.5:1.2)*u;c.strokeRect(x,y,w,h);c.restore()}
+function insideFrame(c,st,L,k,tl,tg,tot,d){const T=thOf('inside'),th=thKey('inside'),u=H/720,f=st.font,cur=L[k],b=cur.b,s=b._step,sid=b._sid,A=INS[sid],im=M.cov[sid],name=String(b.title||'Sample').replace(/[^A-Za-z0-9]+/g,'_');
+ c.fillStyle=T.bg;c.fillRect(0,0,W,H);
+ if(th==='mpc'&&SCI.mpc){const bd=blurBd(sid);if(bd){c.globalAlpha=.25;c.drawImage(bd,0,0,W,H);c.globalAlpha=1}}
+ /* header */
+ cov(c,im,W*.035,H*.04,H*.12,st,false);txt(c,String(b.title||'').toUpperCase(),W*.035+H*.14,H*.095,fitPx(c,String(b.title||'').toUpperCase(),f,W*.45,40*u),f,'#fff');
+ const meta=[b.bpm&&b.bpm+' BPM',b.musical_key,'MZPRD'].filter(Boolean).join('  •  ');txt(c,meta,W*.035+H*.14,H*.135,15*u,'Oswald',T.acc,'left',4);
+ const si=INS_STEPS.indexOf(s),lab=INS_LAB[s];txt(c,'STEP '+String(si).padStart(2,'0')+' / '+String(INS_STEPS.length-2).padStart(2,'0'),W*.965,H*.08,15*u,'Oswald','rgba(255,255,255,.55)','right',5);
+ const lp=ease((tl-.05)/.45);c.save();c.globalAlpha=lp;txt(c,lab,W*.965,H*.135,fitPx(c,lab,f,W*.42,42*u)*(1.15-.15*lp),f,T.acc,'right');c.restore();
+ /* the arrangement area */
+ const ax=W*.05,aw=W*.9,ay=H*.24,lh=H*.15,gap=H*.025;
+ let area=[ax,ay,aw,lh*3+gap*2];
+ if(th==='mpc'&&SCI.mpc){const I=SCI.mpc,h=H*.72,w=I.width*h/I.height,x=W*.5-w/2,y=H*.19;shotImg(c,I,x,y,w,u);const sc=w/649;area=[x+20*sc+6*u,y+70*sc+6*u,406*sc-12*u,222*sc-12*u];c.fillStyle=T.bg;c.fillRect(area[0]-6*u,area[1]-6*u,area[2]+12*u,area[3]+12*u)}
+ const [X0,Y0,AW,AH]=area,LH=(AH-gap*2)/3;
+ c.fillStyle=T.grid;for(let i=0;i<=16;i++){c.globalAlpha=i%4?.5:1;c.fillRect(X0+AW*i/16,Y0,1,AH)}c.globalAlpha=1;for(let r=0;r<3;r++){c.fillStyle=T.lane;c.fillRect(X0,Y0+r*(LH+gap),AW,LH)}
+ if(!A){txt(c,'LOADING THE SAMPLE...',W/2,Y0+AH/2,30*u,f,'#fff','center');finish(c,st);return}
+ const pk=A.pk,Lsec=A.L,laneY=r=>Y0+r*(LH+gap),dur=cur.dur,pt=Math.max(0,tl-LEAD),scale=AW/Lsec;
+ const ph=x=>{c.save();c.fillStyle=T.ph;c.shadowColor=T.ph;c.shadowBlur=10*u;c.fillRect(x-1.5*u,Y0-8*u,3*u,AH+16*u);c.restore()};
+ const sIn=ease(tl/.4);
+ if(s==='intro'){const p=ease(tl/1.3);c.save();c.globalAlpha=p;clipBox(c,T,X0,laneY(1),AW,LH,name,T.ca,pk,0,1,false,true,u);c.restore();const ip=ease((tl-1.4)/.3);if(ip>0){c.save();c.fillStyle='rgba(0,0,0,'+(.55*ip)+')';c.fillRect(0,0,W,H);const t1='INSIDE THE SAMPLE';txt(c,t1,W/2,H*.5,fitPx(c,t1,f,W*.85,120*u)*(1.3-.3*ip),f,'#fff','center');txt(c,String(b.title||'').toUpperCase(),W/2,H*.62,40*u,f,T.acc,'center',4);c.restore()}}
+ else if(s==='a'){clipBox(c,T,X0+(1-sIn)*-AW*.3,laneY(0),AW/2,LH,name+'_A',T.ca,pk,0,.5,false,true,u);ph(X0+pt*scale)}
+ else if(s==='b'){clipBox(c,T,X0,laneY(0),AW/2,LH,name+'_A',T.ca,pk,0,.5,false,false,u);clipBox(c,T,X0+AW/2+(1-sIn)*AW*.3,laneY(1),AW/2,LH,name+'_B',T.cb,pk,.5,1,false,true,u);ph(X0+AW/2+pt*scale)}
+ else if(s==='full'){const m=ease(tl/.35);if(m<1){clipBox(c,T,X0,laneY(0)+(laneY(1)-laneY(0))*m,AW/2,LH,name+'_A',T.ca,pk,0,.5,false,true,u);clipBox(c,T,X0+AW/2,laneY(1),AW/2,LH,name+'_B',T.cb,pk,.5,1,false,true,u)}else clipBox(c,T,X0,laneY(1),AW,LH,name+'_FULL',T.ca,pk,0,1,false,true,u);
+  if(tl<.5){c.fillStyle='rgba(255,255,255,'+(.5*(1-tl/.5))+')';c.fillRect(0,0,W,H)}ph(X0+pt*scale)}
+ else if(s==='chop'){let t=0,ci=-1;A.sl.forEach((x,i)=>{const dd=x[1]-x[0]+.14;if(pt>=t&&pt<t+dd)ci=i;t+=dd});clipBox(c,T,X0,laneY(1),AW,LH,name+'_CHOPS',T.ca,pk,0,1,false,true,u);
+  A.sl.forEach((x,i)=>{const sx=X0+x[0]*scale,sw=(x[1]-x[0])*scale,shown=i<=ci||pt>=t;if(i===ci){c.fillStyle='rgba(255,255,255,.22)';c.fillRect(sx,laneY(1),sw,LH);c.strokeStyle='#fff';c.lineWidth=3*u;c.strokeRect(sx,laneY(1),sw,LH)}
+   if(i>0&&(i<=ci||ci<0&&pt>0)){c.save();c.strokeStyle=T.acc;c.shadowColor=T.acc;c.shadowBlur=12*u;c.lineWidth=3*u;c.beginPath();c.moveTo(sx,laneY(1)-14*u);c.lineTo(sx,laneY(1)+LH+14*u);c.stroke();c.restore()}
+   if(shown){const bx=sx+sw/2,br=Math.min(16*u,LH*.3,sw*.45);c.fillStyle=i===ci?T.acc:'rgba(0,0,0,.6)';c.beginPath();c.arc(bx,laneY(2)+LH*.35,br,0,6.283);c.fill();txt(c,String(i+1),bx,laneY(2)+LH*.35+br*.38,br*1.05,'Oswald',i===ci?ink(T.acc):'#fff','center')}});
+  if(th!=='mpc')txt(c,(ci+1>0?ci+1:A.sl.length)+' / '+A.sl.length+' CHOPS',X0,laneY(2)+LH*.8,18*u,'Oswald','rgba(255,255,255,.7)','left',4);else txt(c,(ci+1>0?ci+1:A.sl.length)+' / '+A.sl.length+' CHOPS',W*.5,H*.165,16*u,'Oswald','rgba(255,255,255,.75)','center',4)}
+ else if(s==='loop'||s==='flip'){clipBox(c,T,X0,laneY(0),AW,LH*.8,name,T.ca,pk,0,1,false,false,u);const tot2=A.loopLen,sc2=AW/tot2,lead=s==='loop'?.9:.4;let x=X0;A.ord.forEach((i,j)=>{const sl=A.sl[i],w=(sl[1]-sl[0])*sc2,fx=X0+sl[0]*scale,p=s==='loop'?ease((tl-j*.08)/.6):1,cx=fx+(x-fx)*p,cy=laneY(0)+(laneY(1)-laneY(0))*p,col=[T.ca,T.cb,T.cc][i%3];
+   const pos=((tl-lead)%tot2+tot2)%tot2,on=tl>lead&&pos*sc2>=x-X0&&pos*sc2<x-X0+w;clipBox(c,T,cx,cy,Math.max(4,w*(.35+.65*p)),LH,String(i+1),col,pk,sl[0]/Lsec,sl[1]/Lsec,false,on,u);x+=w});
+  if(tl>lead)ph(X0+(((tl-lead)%tot2)*sc2));
+  if(s==='flip'){const tt='WHICH VERSION WOULD YOU USE?',p=ease((tl-dur+3)/.5);if(p>0){c.save();c.globalAlpha=p;txt(c,tt,W/2,laneY(2)+LH*.7,fitPx(c,tt,f,W*.8,48*u),f,'#fff','center');txt(c,'COMMENT 1 TO 5',W/2,laneY(2)+LH*.7+34*u,20*u,'Oswald',T.acc,'center',6);c.restore()}}}
+ else if(s==='slow'||s==='fast'){const r=s==='slow'?.8:1.25,wd=AW*Math.min(1,(1/r)/(1/.8))*(s==='slow'?1:1),ww=AW*(s==='slow'?1:.8),p=ease(tl/.5),w2=AW*(1+(ww/AW-1)*p)*(s==='slow'?1:1);const W2=s==='slow'?AW*(.8+.2*p):AW*(.8-.16*p);
+  clipBox(c,T,X0,laneY(1),W2,LH,name+(s==='slow'?'_SLOWED':'_SPED_UP'),s==='slow'?T.cb:T.cc,pk,0,1,false,true,u);{const bx=X0+W2,by=laneY(1)-14*u,lb=r+'x';c.font=44*u+'px '+f;const bw=c.measureText(lb).width+28*u;c.fillStyle=T.acc;c.fillRect(bx-bw,by-44*u,bw,46*u);txt(c,lb,bx-bw/2,by-8*u,40*u,f,ink(T.acc),'center')}ph(X0+Math.min(W2,pt/(cur.dur-LEAD-(s==='slow'?.8:0))*W2))}
+ else if(s==='rev'){const p=ease(tl/.4),sy=Math.cos(p*Math.PI);c.save();c.translate(X0+AW/2,laneY(1)+LH/2);c.scale(sy<0?-1:1,1);c.scale(Math.max(.05,Math.abs(sy)),1);c.translate(-(X0+AW/2),-(laneY(1)+LH/2));clipBox(c,T,X0,laneY(1),AW,LH,name+'_REVERSED',T.cc,pk,0,1,false,true,u);c.restore();ph(X0+AW-pt*scale)}
+ else if(s==='outro'){clipBox(c,T,X0,laneY(1),AW,LH,name,T.ca,pk,0,1,false,false,u);salesCard(c,st,ease(tl/.6),Object.assign({},b,{id:sid}),b.title,'EVERY SOUND CAME FROM ONE SAMPLE')}
+ if(th==='mpc'&&SCI.mpc&&s!=='outro'){const I=SCI.mpc,h=H*.72,w=I.width*h/I.height,x=W*.5-w/2,y=H*.19,sc=w/649,pw=277*sc/4,ph2=282*sc/4;c.save();c.globalCompositeOperation='screen';for(let r=0;r<4;r++)for(let q=0;q<4;q++){const n=r*4+q,on=d.fd[4+n*6]/255>.62;if(!on)continue;c.globalAlpha=.85;c.fillStyle=T.acc;c.shadowColor=T.acc;c.shadowBlur=pw*.5;c.fillRect(x+83*sc+q*pw+pw*.1,y+348*sc+r*ph2+ph2*.08,pw*.8,ph2*.72)}c.restore()}
+ /* step chips */
+ const chips=INS_STEPS.slice(1,-1),cw=W*.9/chips.length;chips.forEach((x,i)=>{const on=x===s,done=INS_STEPS.indexOf(x)<si;c.fillStyle=on?T.acc:done?'rgba(255,255,255,.25)':'rgba(255,255,255,.07)';c.fillRect(W*.05+i*cw+2*u,H*.93,cw-4*u,6*u)});
+ if(s!=='outro'&&s!=='intro'&&th!=='mpc')drawVis(c,Object.assign({},st,{acc:T.acc}),d,W*.05,W*.95,H*.89,H*.02);
+ finish(c,st)}
+
+async function insEnsure(sid){if(INS[sid]&&INS[sid].n===(M.insN||8))return INS[sid];const b=M.beats.find(x=>String(x.id)===String(sid));if(!b)return null;const src=await fetchBuf(b);const A=insAnalyze(sid,src);A.n=M.insN||8;return A}
+
 /* speed versions: each picked item becomes 3 entries (normal, slowed + reverb, sped up) */
 function speedList(L){const out=[];L.forEach(b=>['n','s','f'].forEach(m=>out.push(Object.assign({},b,{id:b.id+'#'+m,_sid:b.id,_mode:m}))));return out}
 let IR=null;function impulse(ctx){if(IR&&IR.sampleRate===ctx.sampleRate)return IR;const n=Math.floor(ctx.sampleRate*2.4),b=ctx.createBuffer(2,n,ctx.sampleRate);for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.6)}IR=b;return b}
 function speedChain(ctx,src,m,dest){src.playbackRate.value=m.rate;if(!m.rv){src.connect(dest);return}const dry=ctx.createGain(),wet=ctx.createGain(),cv=ctx.createConvolver();cv.buffer=impulse(ctx);dry.gain.value=.78;wet.gain.value=.42;src.connect(dry);dry.connect(dest);src.connect(cv);cv.connect(wet);wet.connect(dest)}
 
-function frameAny(c,st,L,k,tl,tg,tot,d,opts){if(M.fmt==='rate')return rateFrame(c,st,L,k,tl,tg,tot,d);if(M.fmt==='speed')return speedFrame(c,st,L,k,tl,tg,tot,d);const f=M.fmt||'mix';if(f==='count')return countFrame(c,st,L,k,tl,tg,tot,d);if(f==='vs')return vsFrame(c,st,L,k,tl,tg,tot,d);if(f==='give')return giveFrame(c,st,L,k,tl,tg,tot,d);return mixFrame(c,st,L,k,tl,tg,tot,d,opts)}
+function frameAny(c,st,L,k,tl,tg,tot,d,opts){if(M.fmt==='inside')return insideFrame(c,st,L,k,tl,tg,tot,d);if(M.fmt==='rate')return rateFrame(c,st,L,k,tl,tg,tot,d);if(M.fmt==='speed')return speedFrame(c,st,L,k,tl,tg,tot,d);const f=M.fmt||'mix';if(f==='count')return countFrame(c,st,L,k,tl,tg,tot,d);if(f==='vs')return vsFrame(c,st,L,k,tl,tg,tot,d);if(f==='give')return giveFrame(c,st,L,k,tl,tg,tot,d);return mixFrame(c,st,L,k,tl,tg,tot,d,opts)}
 /* titles for the new formats */
-const MXF={rate:['Rating My {st} {Kp} 1-10 ({y})','I Rated {n} {st} {Kp} (Brutally Honest)','Rate These {st} Loops 1-10 | {T}','{n} {Kp} Rated 1-10: Which Is a 10?','Producer Rates {st} {Kp} 1-10 ({pr} Type)','Is This a 10/10 {K1}? Rating {n} {Kp}','Rating {st} {Kp} Until I Find a 10'],
+const MXF={inside:['Inside the Sample: How I Flipped "{A}" 5 Ways','I Chopped This {st} Sample Into a New Loop ("{A}")','One {st} Sample, 5 Flips: "{A}"','Chopping "{A}" on Its Real Hits ({st} Sample {y})','"{A}" Slowed, Reversed and Chopped | Sample Breakdown','What You Can Make From One Sample: "{A}"','Sample Breakdown {y}: "{A}" ({pr} Type)'],rate:['Rating My {st} {Kp} 1-10 ({y})','I Rated {n} {st} {Kp} (Brutally Honest)','Rate These {st} Loops 1-10 | {T}','{n} {Kp} Rated 1-10: Which Is a 10?','Producer Rates {st} {Kp} 1-10 ({pr} Type)','Is This a 10/10 {K1}? Rating {n} {Kp}','Rating {st} {Kp} Until I Find a 10'],
  speed:['{A} - Normal vs Slowed vs Sped Up','{A} (Slowed + Reverb) vs Sped Up #shorts','{st} Loop: Normal, Slowed + Reverb, Sped Up','Which Version Hits Harder? "{A}" (3 Speeds)','"{A}" Slowed + Reverb ({st} {K1})','{A} Sped Up vs Slowed | {st} Sample {y}'],count:['Top {n} {Kp} {y} (Ranked)','Top {n} {st} {Kp} of {y}','{n} Best {st} {Kp} {y} | #{n} to #1','Ranking My {st} {Kp}: Top {n} ({y})','Top {n} {st} {Kp} for {pr} Type Beats','#1 Will Surprise You: Top {n} {st} {Kp}','Top {n} {Kp} You Need in {y} (Ranked)','The {n} Hardest {st} {Kp} of {y}'],
  vs:['"{A}" vs "{B}" | Which {K1} Wins?','{st} {K1} Battle: {A} vs {B} ({y})','Which Is Harder? {A} vs {B}','{A} or {B}? Comment Your Pick','{K1} vs {K1}: {A} vs {B} | Vote Below','{A} vs {B} ({pr} Type {K1} Battle)','Battle of the {st} {Kp}: {A} vs {B}'],
  give:['FREE {st} Loop {y} - "{A}" (Download Below)','[FREE] {pr} Type Loop - "{A}" #shorts','Free {st} Sample Download {y} | "{A}"','FREE {st} Sample for Your Next Beat #shorts','Free Loop Friday: "{A}" (Royalty Free)','[FREE] {st} Loop / Sample - "{A}" #shorts']};
@@ -278,6 +378,7 @@ function fmtTitles(r,st){const L=layout(),n=new Set(L.map(o=>o.b.id)).size||M.se
 /* ---------- audio ---------- */
 async function fetchBuf(b){if(window.MZPrime)try{await MZPrime([b.preview_path])}catch(e){}const r=await fetch(pub(b.preview_path));if(!r.ok)throw new Error('audio');return await ctxA().decodeAudioData(await r.arrayBuffer())}
 async function track48(b){
+ if(b._step){await insEnsure(b._sid);const rb=await stepBuffer(b);return{L:rb.getChannelData(0).slice(),R:rb.getChannelData(1).slice(),dur:rb.duration}}
  if(b._mode){const m=SPM[b._mode],src=await fetchBuf(b),need=m.sec*m.rate,st0=bestStart(src,Math.min(need,src.duration)),len=Math.min(m.sec,(src.duration-st0)/m.rate),oc=new OfflineAudioContext(2,Math.ceil(len*SR),SR),s=oc.createBufferSource();s.buffer=src;speedChain(oc,s,m,oc.destination);s.start(0,st0,len*m.rate);const rb=await oc.startRendering();return{L:rb.getChannelData(0),R:rb.getChannelData(1),dur:len}}
  const src=await fetchBuf(b),n=Math.ceil(src.duration*SR),oc=new OfflineAudioContext(2,n,SR),s=oc.createBufferSource();s.buffer=src;s.connect(oc.destination);s.start(0);
  const rb=await oc.startRendering();return{L:rb.getChannelData(0),R:rb.getChannelData(1),dur:src.duration};
@@ -296,7 +397,7 @@ function css(){
  if(document.getElementById('mxCss'))return;const s=document.createElement('style');s.id='mxCss';
  s.textContent=`#mixModal{display:none;position:fixed;inset:0;z-index:85;background:rgba(0,0,0,.84);align-items:center;justify-content:center;padding:16px}
 #mixModal.on{display:flex}
-#mxKind,#mxFmt{display:flex;flex-wrap:wrap;gap:0;margin:0 0 10px;border:1px solid #3a3a40}#mxKind button,#mxFmt button{flex:1;background:transparent;border:0;color:#a9a9ae;font:700 10px Montserrat;letter-spacing:.14em;padding:10px 6px;cursor:pointer}#mxKind button.on,#mxFmt button.on{background:#e0242f;color:#fff}.mxTl{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;max-height:260px;overflow:auto}.mxTl button{display:flex;gap:8px;align-items:center;text-align:left;background:#0c0c0f;border:1px solid #26262b;color:#e9e9ec;font:500 12px Montserrat;padding:7px 9px;cursor:pointer}.mxTl button:hover,.mxTl button.on{border-color:#e0242f}.mxTl b{flex:0 0 30px;font:700 12px Montserrat;color:#0b0b0d;background:#e8b94a;text-align:center;padding:2px 0}.mxTl b.hi{background:#3ad07a}
+#mxKind,#mxFmt,#mxInsN{display:flex;flex-wrap:wrap;gap:0;margin:0 0 10px;border:1px solid #3a3a40}#mxKind button,#mxFmt button,#mxInsN button{flex:1;background:transparent;border:0;color:#a9a9ae;font:700 10px Montserrat;letter-spacing:.14em;padding:10px 6px;cursor:pointer}#mxKind button.on,#mxFmt button.on,#mxInsN button.on{background:#e0242f;color:#fff}.mxTl{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;max-height:260px;overflow:auto}.mxTl button{display:flex;gap:8px;align-items:center;text-align:left;background:#0c0c0f;border:1px solid #26262b;color:#e9e9ec;font:500 12px Montserrat;padding:7px 9px;cursor:pointer}.mxTl button:hover,.mxTl button.on{border-color:#e0242f}.mxTl b{flex:0 0 30px;font:700 12px Montserrat;color:#0b0b0d;background:#e8b94a;text-align:center;padding:2px 0}.mxTl b.hi{background:#3ad07a}
 #mixModal{padding:0!important}.mxSeek{display:flex;align-items:center;gap:12px;margin-top:8px}.mxSk{position:relative;flex:1;height:12px;background:#1d1d22;border:1px solid #2c2c32;border-radius:6px;cursor:pointer}.mxSk b{position:absolute;left:0;top:0;bottom:0;width:0;background:#e0242f;border-radius:6px;box-shadow:0 0 10px rgba(224,36,47,.5)}.mxSk i{position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;opacity:0;pointer-events:none}.mxSk:hover i{opacity:.8}.mxSk i::after{content:attr(data-t);position:absolute;bottom:20px;left:-20px;font:700 10px Montserrat;color:#fff;background:#000;padding:2px 5px}#mxSkT{font:700 12px Montserrat;color:#fff;min-width:100px;text-align:right}.mxTicks{position:relative;height:22px;margin:4px 112px 0 0}.mxTicks button{position:absolute;transform:translateX(-1px);height:20px;min-width:20px;border:0;border-left:2px solid #e0242f;background:#141418;color:#a9a9ae;font:700 10px Montserrat;cursor:pointer;padding:0 5px}.mxTicks button:hover{color:#fff;background:#2a0b0e}
 #mixModal .mb{position:relative;width:100vw;height:100vh;max-height:100vh;overflow:auto;background:#0c0c0f;border:1.5px solid var(--red);box-shadow:0 0 50px rgba(224,36,47,.3);padding:20px}
 #mixModal .mx{position:absolute;top:8px;right:10px;width:40px;height:40px;background:transparent;border:1.5px solid #4a4a50;color:#fff;font:400 26px/1 Montserrat;padding:0}
@@ -338,8 +439,8 @@ function build(){
  <h3>MIX VIDEO (10 TO 15 MINUTES)</h3>
  <div class="mg">
   <div><div class="pn"><div class="mxK" id="mxKind"><button data-k="beats" class="on">BEATS</button><button data-k="packs">SAMPLE PACKS</button><button data-k="samples">SINGLE SAMPLES</button></div><h4 id="mxPick">1. PICK YOUR BEATS</h4><div class="lst" id="mxAll"></div>
-   <h4>YOUR MIX (IN ORDER)</h4><div class="lst" id="mxSel"></div><div class="msg" id="mxTot"></div><h4 style="margin-top:14px">STYLE</h4><div class="st" id="mxSt"></div><div id="mxVsW" style="display:none"><h4 style="margin-top:14px" id="mxThH">THEME</h4><div class="st" id="mxVsT"></div></div><div id="mxDealW" style="display:none"><h4 style="margin-top:14px">SALES CARD (OPTIONAL)</h4><div class="two"><input type="text" id="mxCode" placeholder="Coupon code"><input type="number" id="mxOff" min="1" max="90" placeholder="% off"></div><input type="text" id="mxEnds" placeholder="Ends in, e.g. 48 hours" style="margin-top:6px"><div class="msg" style="margin-top:6px">Shown on the last card with the price and LINK IN DESCRIPTION.</div></div></div></div>
-  <div><div class="pn"><h4>2. FORMAT</h4><div class="mxK" id="mxFmt"><button data-f="mix" class="on">MIX</button><button data-f="count">COUNTDOWN</button><button data-f="vs">PACK vs PACK</button><button data-f="give">FREE LOOP SHORT</button><button data-f="rate">RATE IT 1-10</button><button data-f="speed">SPEED VERSIONS</button></div><div class="msg" id="mxFmtHint" style="margin:-4px 0 10px">Pick tracks in order. Aim for 10 to 15 minutes.</div>
+   <h4>YOUR MIX (IN ORDER)</h4><div class="lst" id="mxSel"></div><div class="msg" id="mxTot"></div><h4 style="margin-top:14px">STYLE</h4><div class="st" id="mxSt"></div><div id="mxVsW" style="display:none"><h4 style="margin-top:14px" id="mxThH">THEME</h4><div class="st" id="mxVsT"></div></div><div id="mxInsW" style="display:none"><h4 style="margin-top:14px">CHOPS</h4><div class="mxK" id="mxInsN"><button data-n="8" class="on">8 CHOPS</button><button data-n="12">12 CHOPS</button><button data-n="16">16 CHOPS</button></div></div><div id="mxDealW" style="display:none"><h4 style="margin-top:14px">SALES CARD (OPTIONAL)</h4><div class="two"><input type="text" id="mxCode" placeholder="Coupon code"><input type="number" id="mxOff" min="1" max="90" placeholder="% off"></div><input type="text" id="mxEnds" placeholder="Ends in, e.g. 48 hours" style="margin-top:6px"><div class="msg" style="margin-top:6px">Shown on the last card with the price and LINK IN DESCRIPTION.</div></div></div></div>
+  <div><div class="pn"><h4>2. FORMAT</h4><div class="mxK" id="mxFmt"><button data-f="mix" class="on">MIX</button><button data-f="count">COUNTDOWN</button><button data-f="vs">PACK vs PACK</button><button data-f="give">FREE LOOP SHORT</button><button data-f="rate">RATE IT 1-10</button><button data-f="speed">SPEED VERSIONS</button><button data-f="inside" style="display:none">INSIDE THE SAMPLE</button></div><div class="msg" id="mxFmtHint" style="margin:-4px 0 10px">Pick tracks in order. Aim for 10 to 15 minutes.</div>
    <canvas id="mxPv" width="1280" height="720"></canvas><div class="mxSeek" id="mxSeek"><div class="mxSk"><b id="mxSkF"></b><i id="mxSkH"></i></div><span id="mxSkT">0:00 / 0:00</span></div><div class="mxTicks" id="mxTicks"></div><div class="two" style="margin-top:6px"><button class="go" id="mxPlay" style="margin:0">&#9654; PLAY PREVIEW</button><button class="btn" id="mxStopB">&#9632; STOP</button></div>
    <label>MIX TITLE</label><input type="text" id="mxTitle">
    <div class="two"><div><label>FADE BETWEEN TRACKS (SEC)</label><input type="number" id="mxFade" min="0" max="4" step="0.5"></div><div><label>&nbsp;</label><button class="btn" id="mxPrev">REFRESH PREVIEW</button></div></div>
@@ -365,6 +466,7 @@ function build(){
  $m('#mxThGo').onclick=()=>thumbs(false);$m('#mxThNew').onclick=()=>thumbs(true);
  $m('#mxYn').onclick=()=>{M.yt++;pickTitle()};$m('#mxGen').onclick=()=>{M.seed2=(M.seed2||0)+1;genAll()};$m('#mxYdn').onclick=()=>{M.dv=(M.dv||0)+1;yt()};
  $m('#mxVsT').onclick=e=>{const b=e.target.closest('button');if(!b)return;M.th=M.th||{};M.th[M.fmt]=b.dataset.v;$m('#mxVsT').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(!PV.on)preview()};
+ $m('#mxInsN').onclick=e=>{const b=e.target.closest('button');if(!b||M.busy)return;pvStop(true);M.insN=+b.dataset.n;$m('#mxInsN').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));Object.keys(SB).forEach(k=>delete SB[k]);ui()};
  M.deal={};['#mxCode','#mxOff','#mxEnds'].forEach(id=>$m(id).oninput=()=>{M.deal={code:$m('#mxCode').value.trim(),off:+$m('#mxOff').value||0,ends:$m('#mxEnds').value.trim()};if(!PV.on)preview()});
  $m('#mxFmt').onclick=e=>{const b=e.target.closest('button');if(b)setFmt(b.dataset.f)};
  $m('#mxKind').onclick=e=>{const b=e.target.closest('button');if(b)setKind(b.dataset.k)};
@@ -373,7 +475,7 @@ function build(){
 }
 function shut(){pvStop(true);box.classList.remove('on');box.setAttribute('aria-hidden','true');document.removeEventListener('keydown',key)}
 function key(e){if(e.key!=='Escape')return;const lb=document.getElementById('thLb');if(lb){lb.remove();return}shut()}
-function ui(){setTimeout(skTicks,0);if(M.fmt==='count'&&M.sel.length&&/^Top \d+ /.test(M.title)){M.title=M.title.replace(/^Top \d+ /,'Top '+M.sel.length+' ');const ti=box&&box.querySelector('#mxTitle');if(ti)ti.value=M.title}
+function ui(){setTimeout(skTicks,0);if(M.fmt==='inside'&&M.sel[0]&&!(INS[M.sel[0]]&&INS[M.sel[0]].n===(M.insN||8))&&!M.insBusy){M.insBusy=1;insEnsure(M.sel[0]).then(()=>{M.insBusy=0;ui();if(!PV.on)preview();M.gen=null;yt()}).catch(()=>{M.insBusy=0})}if(M.fmt==='count'&&M.sel.length&&/^Top \d+ /.test(M.title)){M.title=M.title.replace(/^Top \d+ /,'Top '+M.sel.length+' ');const ti=box&&box.querySelector('#mxTitle');if(ti)ti.value=M.title}
  const all=$m('#mxAll'),sel=$m('#mxSel');
  all.innerHTML=M.beats.length?M.beats.map(b=>{const on=M.sel.includes(String(b.id));return`<div class="row" data-id="${esc(b.id)}"><img src="${esc(artOf(b,96))}" alt="" loading="lazy" decoding="async"><b>${esc(b.title)}${b.preview_path?'':' (no preview)'}</b><button data-a="${on?'rm':'add'}"${b.preview_path?'':' disabled'}>${on?'✓':'+'}</button></div>`}).join(''):'<div class="msg" style="padding:10px">No '+K().many+' yet.</div>';
  all.querySelectorAll('button').forEach(bt=>bt.onclick=()=>{const id=bt.parentNode.dataset.id;if(bt.dataset.a==='add'){M.sel.push(id);if(FM().max&&M.sel.length>FM().max)M.sel=M.sel.slice(-FM().max);const b=M.beats.find(x=>String(x.id)===id);probe(b)}else M.sel=M.sel.filter(x=>x!==id);ui();preview();thumbsAuto();yt()});
@@ -387,13 +489,13 @@ const pvMsg=t=>{const m=box&&box.querySelector('#mxMsg');if(m)m.textContent=t};c
 function preview(){
  if(!box)return;if(PV.on)return;const L=layout(),cv=$m('#mxPv'),c=cv.getContext('2d');
  if(!L.length){c.fillStyle='#000';c.fillRect(0,0,cv.width,cv.height);c.fillStyle='#8e8e94';c.font='14px Montserrat';c.textAlign='center';c.fillText('Pick '+K().many+' to preview the style',cv.width/2,cv.height/2);return}
- const k=M.fmt==='speed'?Math.max(0,L.length-2):Math.min(1,L.length-1),big=pvBig();const Ld=L.map(o=>({...o,dur:o.dur||(FM().clip||180)}));frameAny(big.getContext('2d'),ST[M.style],Ld,k,M.fmt==='mix'?12:M.fmt==='rate'?Ld[k].dur-.6:4,Ld[0].dur+4,Math.max(60,total()),fakeData(1.2),{outro:false});
+ const k=M.fmt==='inside'?Math.min(4,L.length-1):M.fmt==='speed'?Math.max(0,L.length-2):Math.min(1,L.length-1),big=pvBig();const Ld=L.map(o=>({...o,dur:o.dur||(FM().clip||180)}));frameAny(big.getContext('2d'),ST[M.style],Ld,k,M.fmt==='mix'?12:M.fmt==='rate'?Ld[k].dur-.6:M.fmt==='inside'?LEAD+2.2:4,Ld[0].dur+4,Math.max(60,total()),fakeData(1.2),{outro:false});
  c.drawImage(big,0,0,cv.width,cv.height);
 }
 let PVB=null;function pvBig(){if(!PVB){PVB=document.createElement('canvas');PVB.width=W;PVB.height=H}return PVB}
 /* PLAY: real audio through an analyser, the frame redrawn live; when a track ends the next one starts */
 async function pvPlay(k0,off0){k0=k0||0;off0=off0||0;const L=layout();if(!L.length){pvMsg('Pick '+K().many+' first.');return}pvStop(true);const GEN=PV.gen=(PV.gen||0)+1;PV.on=true;$m('#mxPlay').classList.add('on');$m('#mxPlay').innerHTML='&#9632; STOP';
- const a=ctxA();try{await a.resume()}catch(e){}const go=async k=>{if(!PV.on||PV.gen!==GEN)return;if(k>=L.length)k=0;PV.k=k;pvMsg('Loading '+L[k].b.title+'...');let buf;try{buf=await fetchBuf(L[k].b)}catch(e){pvMsg('Could not load the preview audio for '+L[k].b.title+'.');pvStop();return}if(!PV.on||PV.gen!==GEN)return;pvMsg('');if(PV.src){try{PV.src.onended=null;PV.src.stop()}catch(e){}}
+ const a=ctxA();try{await a.resume()}catch(e){}const go=async k=>{if(!PV.on||PV.gen!==GEN)return;if(k>=L.length)k=0;PV.k=k;pvMsg('Loading '+L[k].b.title+'...');let buf;try{buf=L[k].b._step?(await insEnsure(L[k].b._sid),await stepBuffer(L[k].b)):await fetchBuf(L[k].b)}catch(e){pvMsg('Could not load the preview audio for '+L[k].b.title+'.');pvStop();return}if(!PV.on||PV.gen!==GEN)return;pvMsg('');if(PV.src){try{PV.src.onended=null;PV.src.stop()}catch(e){}}
   const s=a.createBufferSource(),an=a.createAnalyser();an.fftSize=1024;an.smoothingTimeConstant=.7;s.buffer=buf;const MD=L[k].b._mode&&SPM[L[k].b._mode];if(MD)speedChain(a,s,MD,an);else s.connect(an);an.connect(a.destination);s.onended=()=>{if(PV.on&&PV.src===s&&PV.gen===GEN)go(k+1)};PV.src=s;PV.an=an;PV.buf=buf;PV.t0=a.currentTime-(k===k0?off0:0);if(MD){const st0=bestStart(buf,Math.min(MD.sec*MD.rate,buf.duration)),o=k===k0?off0*MD.rate:0;s.start(0,st0+o,Math.max(.05,MD.sec*MD.rate-o))}else{const CL=FM().clip,cs=CL&&buf.duration>CL?((M.cs[L[k].b.id]||{})[CL]||0):0,o=k===k0?Math.min(off0,Math.max(0,(CL||buf.duration)-.05)):0;if(CL)s.start(0,cs+o,Math.max(.05,Math.min(CL,buf.duration)-o));else s.start(0,o)}if(k===k0)off0=0};
  await go(k0);
  const td=new Uint8Array(1024),fd=new Uint8Array(512),cv=$m('#mxPv'),c=cv.getContext('2d');let last=0;
@@ -409,7 +511,7 @@ async function pvSeek(t){const L=layout();if(!L.length)return;await Promise.all(
 function pvStop(quiet){PV.on=false;PV.gen=(PV.gen||0)+1;cancelAnimationFrame(PV.raf);if(PV.src){try{PV.src.onended=null;PV.src.stop()}catch(e){}PV.src=null}const b=box&&$m('#mxPlay');if(b){b.classList.remove('on');b.innerHTML='&#9654; PLAY PREVIEW'}if(!quiet)preview()}
 /* ---------- thumbnails + text ---------- */
 async function thLoad(){if(!window.MZThumbs){await new Promise((ok,no)=>{const s=document.createElement('script');s.src=new URL('thumbs.js?v=6',document.baseURI).href;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}await window.MZThumbs.load();hero=hero||(await new Promise(r=>{const i=new Image();i.src=new URL('hero.jpg',document.baseURI).href;i.onload=()=>r(i);i.onerror=()=>r(null)}))}
-function thCtx(){const L=playlist(),first=L[0]||M.beats[0],t=total();return{title:M.title,w:MZThumbs.words(M.title),cover:first&&M.cov[first._sid||first.id],kind:M.kind==='beats'?'beats':'packs',label:K().mix,tagText:M.fmt==='rate'?'RATED 1-10':M.fmt==='speed'?'SLOWED + SPED UP':M.fmt==='count'?'TOP '+M.sel.length:M.fmt==='vs'?'A VS B':M.fmt==='give'?'FREE LOOP':K().mix,infoText:L.length+' '+(L.length>1?K().MANY:K().ONE)+'   •   '+Math.max(1,Math.round(t/60))+' MIN',seed:M.seed}}
+function thCtx(){const L=playlist(),first=L[0]||M.beats[0],t=total();return{title:M.title,w:MZThumbs.words(M.title),cover:first&&M.cov[first._sid||first.id],kind:M.kind==='beats'?'beats':'packs',label:K().mix,tagText:M.fmt==='inside'?'INSIDE THE SAMPLE':M.fmt==='rate'?'RATED 1-10':M.fmt==='speed'?'SLOWED + SPED UP':M.fmt==='count'?'TOP '+M.sel.length:M.fmt==='vs'?'A VS B':M.fmt==='give'?'FREE LOOP':K().mix,infoText:L.length+' '+(L.length>1?K().MANY:K().ONE)+'   •   '+Math.max(1,Math.round(t/60))+' MIN',seed:M.seed}}
 let thT=0;function thumbsAuto(){if($m('#mxTh').children.length){clearTimeout(thT);thT=setTimeout(()=>thumbs(false),500)}}
 async function thumbs(bump){
  await thLoad();if(bump)M.seed+=7;const g=$m('#mxTh'),X=thCtx();g.innerHTML='';
@@ -448,10 +550,10 @@ function yt(){
  const HOOK={beats:[M.title+' | '+u+' beats by MZPRD (Meztheprod), '+mins+(mins>1?' minutes':' minute')+', no ads between tracks.',mins+(mins>1?' minutes':' minute')+' of '+M.title.toLowerCase()+': '+u+' beats back to back by MZPRD.'],
   packs:[M.title+': '+u+' sample packs by MZPRD in one video, '+mins+(mins>1?' minutes':' minute')+' of loops you can hear before you buy.',u+' royalty free sample packs, back to back. Every pack is linked below, jump with the chapters.'],
   samples:[M.title+': '+u+' royalty free samples by MZPRD, '+mins+(mins>1?' minutes':' minute')+', every one ready for your next beat.',mins+(mins>1?' minutes':' minute')+' of samples, '+u+' loops back to back. Every one is linked below.']}[k];
- if(M.fmt&&M.fmt!=='mix'){const A=L[0]&&L[0].b,B=L[1]&&L[1].b,F=M.fmt,intro=F==='rate'?'I rated '+u+' '+KP().toLowerCase()+' from 1 to 10. Agree? Comment your own scores.':F==='speed'?'"'+(A?A.title:'')+'" three ways: normal, slowed + reverb and sped up. Which version hits hardest? Every version comes with it.':F==='count'?'Ranking '+u+' '+KP().toLowerCase()+' from #'+u+' down to #1. Which one should be #1? Comment below.':F==='vs'?(A&&B?'"'+A.title+'" vs "'+B.title+'". Which one wins? Comment A or B.':''):'FREE LOOP: "'+(A?A.title:'')+'" by MZPRD. Royalty free for your beats.';
-  const lines=F==='rate'?L.map((o,i)=>fmt(o.start)+' '+o.b.title+' - '+rateOf(o.b.id,i,L.length)+'/10').join('\n'):F==='speed'?L.map(o=>fmt(o.start)+' '+o.b.title+' ('+SPM[o.b._mode].lab.toLowerCase()+')').join('\n'):F==='count'?L.map((o,i)=>fmt(o.start)+' #'+(L.length-i)+' '+o.b.title).join('\n'):F==='vs'?L.map((o,i)=>fmt(o.start)+' '+(i?'B':'A')+': '+o.b.title).join('\n'):'';
-  $m('#mxYd').value=intro+(lines?'\n\n'+lines:'')+'\n\n'+(F==='give'?'GET IT (FREE): ':'LINKS\n')+[...new Map(L.map(o=>[o.b._sid||o.b.id,o.b])).values()].map(b=>(F==='give'?'':b.title+': ')+W.url(b)).join('\n')+'\n\nAll beats and sample packs: '+SITE+'\n\n'+(F==='rate'?'#samplepack #producer #mzprd':F==='speed'?'#slowedandreverb #spedup #mzprd':F==='give'?'#shorts #freeloop #samples #mzprd':F==='vs'?'#beatbattle #samplepack #mzprd':'#top10 #samplepack #mzprd');
-  const ft={rate:['rating samples','rate my samples','sample pack review','rated 1-10','producer reacts'],speed:['slowed + reverb','sped up','slowed and reverb','sped up version','slowed reverb loop'],count:['top 10 '+KP().toLowerCase(),'best '+KP().toLowerCase()+' '+YEAR,'ranked','top '+KP().toLowerCase()+' '+YEAR],vs:[KP().toLowerCase()+' battle','which is better','beat battle','vs'],give:['free loop','free sample','free loop download','free samples '+YEAR,'royalty free loop','free soul sample','shorts']}[F];const all=[...ft,...L.map(o=>o.b.title),'mzprd','meztheprod'];let out=[],len=0;for(const t of [...new Set(all.map(x=>String(x).toLowerCase()))]){if(len+t.length+2>500)break;out.push(t);len+=t.length+2}$m('#mxYg').value=out.join(', ');return}
+ if(M.fmt&&M.fmt!=='mix'){const A=L[0]&&L[0].b,B=L[1]&&L[1].b,F=M.fmt,intro=F==='inside'?'One sample, taken apart: "'+(A?A.title:'')+'" split, chopped on its real hits, rebuilt into a new loop, slowed, reversed and sped up. Which version would you use? Comment 1 to 5.':F==='rate'?'I rated '+u+' '+KP().toLowerCase()+' from 1 to 10. Agree? Comment your own scores.':F==='speed'?'"'+(A?A.title:'')+'" three ways: normal, slowed + reverb and sped up. Which version hits hardest? Every version comes with it.':F==='count'?'Ranking '+u+' '+KP().toLowerCase()+' from #'+u+' down to #1. Which one should be #1? Comment below.':F==='vs'?(A&&B?'"'+A.title+'" vs "'+B.title+'". Which one wins? Comment A or B.':''):'FREE LOOP: "'+(A?A.title:'')+'" by MZPRD. Royalty free for your beats.';
+  const lines=F==='inside'?L.filter(o=>o.b._step!=='outro').map(o=>fmt(o.start)+' '+INS_LAB[o.b._step].charAt(0)+INS_LAB[o.b._step].slice(1).toLowerCase()).join('\n'):F==='rate'?L.map((o,i)=>fmt(o.start)+' '+o.b.title+' - '+rateOf(o.b.id,i,L.length)+'/10').join('\n'):F==='speed'?L.map(o=>fmt(o.start)+' '+o.b.title+' ('+SPM[o.b._mode].lab.toLowerCase()+')').join('\n'):F==='count'?L.map((o,i)=>fmt(o.start)+' #'+(L.length-i)+' '+o.b.title).join('\n'):F==='vs'?L.map((o,i)=>fmt(o.start)+' '+(i?'B':'A')+': '+o.b.title).join('\n'):'';
+  $m('#mxYd').value=intro+(lines?'\n\n'+lines:'')+'\n\n'+(F==='give'?'GET IT (FREE): ':'LINKS\n')+[...new Map(L.map(o=>[o.b._sid||o.b.id,o.b])).values()].map(b=>(F==='give'?'':b.title+': ')+W.url(b)).join('\n')+'\n\nAll beats and sample packs: '+SITE+'\n\n'+(F==='inside'?'#samplebreakdown #chopping #mzprd':F==='rate'?'#samplepack #producer #mzprd':F==='speed'?'#slowedandreverb #spedup #mzprd':F==='give'?'#shorts #freeloop #samples #mzprd':F==='vs'?'#beatbattle #samplepack #mzprd':'#top10 #samplepack #mzprd');
+  const ft={inside:['sample breakdown','chopping samples','how to chop samples','flipping samples','sample flip','slowed + reverb','reversed sample','new loop from sample','mpc chopping'],rate:['rating samples','rate my samples','sample pack review','rated 1-10','producer reacts'],speed:['slowed + reverb','sped up','slowed and reverb','sped up version','slowed reverb loop'],count:['top 10 '+KP().toLowerCase(),'best '+KP().toLowerCase()+' '+YEAR,'ranked','top '+KP().toLowerCase()+' '+YEAR],vs:[KP().toLowerCase()+' battle','which is better','beat battle','vs'],give:['free loop','free sample','free loop download','free samples '+YEAR,'royalty free loop','free soul sample','shorts']}[F];const all=[...ft,...L.map(o=>o.b.title),'mzprd','meztheprod'];let out=[],len=0;for(const t of [...new Set(all.map(x=>String(x).toLowerCase()))]){if(len+t.length+2>500)break;out.push(t);len+=t.length+2}$m('#mxYg').value=out.join(', ');return}
  const BUY={beats:'BUY OR DOWNLOAD ANY BEAT',packs:'GET ANY SAMPLE PACK',samples:'GET ANY SAMPLE (CRATE DIG)'}[k],LIC=k==='beats'?'':'\n\nLICENSE\n100% royalty free for your beats and releases. No reselling the sounds as-is.';
  const HT={beats:'#typebeat #rapbeats #beatmix #mzprd',packs:'#samplepack #loopkit #boombap',samples:'#samples #soulsamples #loopkit'}[k];
  $m('#mxYd').value=HOOK[d%HOOK.length]+'\n\n'+(k==='beats'?'TRACKLIST':'CHAPTERS')+'\n'+ch+'\n\n'+BUY+'\n'+links+LIC+'\n\nAll beats and sample packs: '+SITE+'\n\n'+(k==='beats'?'Subscribe for new beats every week.':'Subscribe for new sample packs every week.')+'\n\n'+HT;
@@ -474,7 +576,7 @@ async function render(){
  M.busy=true;btn.disabled=true;dl.style.display='none';badge(0);addEventListener('beforeunload',beforeUnload);
  let err=null,venc,aenc;
  try{
-  await loadMuxer();await thLoad();await Promise.all(M.sel.map(id=>{const b=M.beats.find(x=>String(x.id)===id);return loadCover(b)}));await Promise.all(playlist().map(b=>probe(b).catch(()=>{})));
+  await loadMuxer();await thLoad();await Promise.all(M.sel.map(id=>{const b=M.beats.find(x=>String(x.id)===id);return loadCover(b)}));await Promise.all(playlist().map(b=>probe(b).catch(()=>{})));if(M.fmt==='inside'&&M.sel[0])await insEnsure(M.sel[0]);
   await document.fonts.load("40px "+ST[M.style].font).catch(()=>{});
   const st=ST[M.style],list=playlist();
   if(M.outro&&window.MZEndCard){try{const tc=document.createElement('canvas');tc.width=W;tc.height=H;window.MZEndCard(tc.getContext('2d'),W,H,0,6)}catch(e){}await new Promise(r=>setTimeout(r,700))}
@@ -486,7 +588,7 @@ async function render(){
   aenc=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>{err=e}});aenc.configure({codec:acf.codec,sampleRate:SR,numberOfChannels:2,bitrate:160000});
   /* real durations first (cheap: already probed), then render track by track */
   msg('Measuring track lengths...');await Promise.all([...new Set(list)].map(b=>probe(b).catch(()=>{})));
-  const CL=FM().clip,dOf=b=>{if(b._mode)return Math.min(SPM[b._mode].sec,(M.dur[b._sid]||1e9)/SPM[b._mode].rate);const d=M.dur[b.id]||180;return CL?Math.min(d,CL):d};const tot=list.reduce((s,b)=>s+dOf(b),0);let gUs=0,done=0;const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');
+  const CL=FM().clip,dOf=b=>{if(b._step)return(INS[b._sid]&&INS[b._sid].dur[b._step])||3;if(b._mode)return Math.min(SPM[b._mode].sec,(M.dur[b._sid]||1e9)/SPM[b._mode].rate);const d=M.dur[b.id]||180;return CL?Math.min(d,CL):d};const tot=list.reduce((s,b)=>s+dOf(b),0);let gUs=0,done=0;const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');
   const Lyt=[];let acc=0;for(const b of list){const d=dOf(b);Lyt.push({b,start:acc,dur:d});acc+=d}
   const t0=performance.now();
   for(let k=0;k<list.length;k++){
@@ -506,7 +608,7 @@ async function render(){
    gUs+=Math.round(nf*1e6/FPS);done+=nf;
   }
   await venc.flush();await aenc.flush();if(err)throw err;muxer.finalize();
-  const blob=new Blob([target.buffer],{type:'video/mp4'});dl.href=URL.createObjectURL(blob);dl.download='mzprd-'+M.kind+'-'+(M.fmt==='mix'?'mix':M.fmt==='count'?'countdown':M.fmt==='vs'?'versus':M.fmt==='rate'?'rate-it':M.fmt==='speed'?'speed-versions':'free-loop-short')+'.mp4';dl.style.display='block';$m('#mxProg').style.width='100%';
+  const blob=new Blob([target.buffer],{type:'video/mp4'});dl.href=URL.createObjectURL(blob);dl.download='mzprd-'+M.kind+'-'+(M.fmt==='mix'?'mix':M.fmt==='count'?'countdown':M.fmt==='vs'?'versus':M.fmt==='inside'?'inside-the-sample':M.fmt==='rate'?'rate-it':M.fmt==='speed'?'speed-versions':'free-loop-short')+'.mp4';dl.style.display='block';$m('#mxProg').style.width='100%';
   msg('Done in '+Math.round((performance.now()-t0)/1000)+'s. '+(blob.size/1048576).toFixed(0)+' MB MP4, '+fmt(done/FPS)+' long. Click DOWNLOAD MIX VIDEO.');try{toast('MIX VIDEO READY')}catch(e){}
  }catch(e){console.warn(e);msg('Render failed: '+((e&&e.message)||e))}
  finally{try{venc&&venc.close()}catch(e){}try{aenc&&aenc.close()}catch(e){}M.busy=false;btn.disabled=false;badge();removeEventListener('beforeunload',beforeUnload)}
