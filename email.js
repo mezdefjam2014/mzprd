@@ -43,7 +43,7 @@ function ctx(){
  const pr=(typeof promo!=='undefined'&&promo)||{};
  const packs=E.multi.map(id=>E.items.find(i=>i._k==='packs'&&String(i.id)===id)).filter(Boolean).map(p=>{const ps=p.slug||String(p.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||p.id;return{T:p.title||'Untitled',url:SITE+'/pack/'+ps+'/',cover:p.cover_path?pub(p.cover_path):'',price:p.price!=null?'$'+Number(p.price).toFixed(2).replace(/\.00$/,''):''}});
  return{packs,it,isB,noun:isB?'beat':'pack',T:it.title||'Untitled',mood:tags[1]||'hard',genre:(tags[0]||'hip hop').toLowerCase(),info,when,
-  url:SITE+'/'+(isB?'beat':'pack')+'/'+sl+'/',cover:it.cover_path?pub(it.cover_path):(isB&&E.stk[it.id]||''),
+  url:SITE+'/'+(isB?'beat':'pack')+'/'+sl+'/',cover:it.cover_path?((window.thumbUrl&&thumbUrl(it.cover_path))?SITE+'/'+thumbUrl(it.cover_path).replace(/^.*?th\//,'th/'):pub(it.cover_path)):(isB&&E.stk[it.id]||''),
   promoPrice:pr.promo_price!=null?'$'+Number(pr.promo_price).toFixed(0):'$10',promoLine:((pr.promo_text||'ALL BEATS')+' '+(pr.promo_price!=null?'$'+Number(pr.promo_price).toFixed(0):'$10')).trim()};
 }
 function content(){

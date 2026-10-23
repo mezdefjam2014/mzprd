@@ -543,7 +543,7 @@ html.ready #mzLoad{opacity:0;visibility:hidden;pointer-events:none}
 <div id="enter"><svg class="crown" viewBox="0 0 120 84" aria-hidden="true"><path class="cp" d="M10 66 L17 20 L42 46 L60 10 L78 46 L103 20 L110 66 Z M14 76 H106"/></svg><h1 id="enterT">MZPRD</h1><button id="go">ENTER</button><p>SOUND ON</p></div>
 
 <!--PAGEDATA-->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script>
 const SB_URL='https://qapmtiuptmgcajoaontj.supabase.co',SB_KEY='sb_publishable_jyfu7YHp2wK_WEv3nWeEzg_ogP00kD3';
 const sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -638,7 +638,7 @@ function stockCover(title,size){
  return _stk[key]=c.toDataURL('image/jpeg',.9);
 }
 const isBeatRow=x=>x&&('audio_path' in x||x._k==='beats'||x.bpm!==undefined&&!('file_path' in x));
-const thumbUrl=p=>window.MZTH&&MZTH.has(p)?BASEPATH+'th/'+String(p).replace(/[^\w.-]+/g,'_').replace(/\.\w+$/,'')+'.webp':'',coverUrl=(x,px)=>x&&x.cover_path?(thumbUrl(x.cover_path)||pub(x.cover_path)):(isBeatRow(x)?stockCover(x.title,px||512):'');
+const thumbUrl=window.thumbUrl=p=>window.MZTH&&MZTH.has(p)?BASEPATH+'th/'+String(p).replace(/[^\w.-]+/g,'_').replace(/\.\w+$/,'')+'.webp':'',coverUrl=(x,px)=>x&&x.cover_path?(thumbUrl(x.cover_path)||pub(x.cover_path)):(isBeatRow(x)?stockCover(x.title,px||512):'');
 /* one small hosted copy of the generated cover per beat (emails and link previews cannot use a drawn image).
    The file name carries a hash of the title, so a rename makes a fresh file and nothing shows a stale copy. */
 const stockH=t=>{const s=String(t||'BEAT').toUpperCase().replace(/\s+/g,' ').trim()||'BEAT';let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36)};
@@ -1478,13 +1478,13 @@ const FIELDS={
  packs:{table:'packs',title:'SAMPLE PACK',files:[['cover_path','PACK IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (optional, public)','audio/*','private-files','previews'],['file_path','PACK FILE (.zip, private, any size)','.zip,application/zip,audio/*','private-files','packs']]}
 };
 function loadScript(f){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+f;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
-function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=72';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=75';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
 async function boRender(){
  {const pb=document.getElementById('pbkBar');if(pb)pb.style.display=tab==='packs'?'block':'none'}
  const vid=tab==='video';document.querySelector('#bo .bo2').style.display=vid?'none':'';
  document.getElementById('bo2b').style.display='none';document.getElementById('bo2c').style.display='none';
  if(window.emailClose)emailClose();if(window.showMakerClose)showMakerClose();if(window.mpcClose)mpcClose();
- if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=6');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
+ if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=7');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
  if(tab==='mpc'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.mpcOpen)await loadScript('mpc.js?v=171');await mpcOpen();try{if(!window.mpcSkin)await loadScript('mpc-skin.js?v=1');mpcSkin()}catch(e){}}catch(e){toast('MPC FAILED TO LOAD')}return}
  if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=15');if(!window.MZShowFX)await loadScript('showfx.js?v=3');if(!window.showMakerOpen)await loadScript('showmaker.js?v=16');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
  if(vid){try{await loadStudio();await studioOpen();try{if(!window.studioSkin)await loadScript('studio-skin.js?v=1');studioSkin()}catch(e){}}catch(e){toast('VIDEO STUDIO FAILED TO LOAD')}return}
