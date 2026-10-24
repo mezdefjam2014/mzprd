@@ -23,7 +23,7 @@ const R={busy:false};
 const $s=s=>document.querySelector('#studio '+s);
 const e2=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dims=()=>S.fmt==='16:9'?[1920,1080]:[1080,1920];
-const SHORT_DEF=60,SHORT_MAX=120;
+const SHORT_DEF=90,SHORT_MAX=90;
 const len=()=>{const d=S.buf?S.buf.duration:30,m=parseFloat(S.maxLen),p=S.fmt==='9:16';return Math.max(1,Math.min(d,m>0?m:(p?SHORT_DEF:Infinity),p?SHORT_MAX:Infinity))};
 
 function css(){
@@ -232,7 +232,16 @@ function drawVis(c,d,W,H,base,cx,cy,r){
  }
  c.restore();
 }
-function frame(cv,t,dur){
+/* 9:16 Shorts are cut at 1:30: when the audio is longer, the last 3.5 s say to watch the full video */
+function frame(cv,t,dur){frame0(cv,t,dur);if(S.fmt==='9:16'&&S.buf&&S.buf.duration>dur+.5&&t>dur-3.5)endCard(cv,Math.min(1,(t-(dur-3.5))/.5),t)}
+function endCard(cv,a,t){const c=cv.getContext('2d'),W=cv.width,H=cv.height,u=W/720,f=FONTS[S.font]||'Impact',acc='#e0242f',e=1-Math.pow(1-Math.max(0,a),3);
+ const fit=(s,mw,px)=>{c.font=px+'px '+f;const w=c.measureText(s).width;return w>mw?px*mw/w:px},tx=(s,x,y,px,col)=>{c.font=px+'px '+f;c.fillStyle=col;c.textAlign='center';c.fillText(s,x,y)};
+ c.save();c.globalAlpha=e*.85;c.fillStyle='#000';c.fillRect(0,0,W,H);c.globalAlpha=e;
+ tx('WANT THE REST?',W/2,H*.36,fit('WANT THE REST?',W*.8,54*u),'rgba(255,255,255,.75)');
+ c.save();c.translate(W/2,H*.46);c.scale(1.25-.25*e,1.25-.25*e);c.shadowColor=acc;c.shadowBlur=40*u;tx('WATCH THE',0,0,fit('WATCH THE',W*.86,110*u),'#fff');tx('FULL VIDEO',0,110*u,fit('FULL VIDEO',W*.9,130*u),acc);c.restore();
+ const bw=W*.78,bh=78*u,bx=(W-bw)/2,by=H*.62,lb='ON MY CHANNEL  •  LINK IN BIO';c.fillStyle='#fff';c.fillRect(bx,by,bw,bh);tx(lb,W/2,by+bh*.64,fit(lb,bw*.88,32*u),'#0b0b0d');
+ const bob=Math.sin(t*6)*10*u;c.fillStyle=acc;c.beginPath();c.moveTo(W/2-34*u,H*.76+bob);c.lineTo(W/2+34*u,H*.76+bob);c.lineTo(W/2,H*.8+bob);c.closePath();c.fill();c.restore()}
+function frame0(cv,t,dur){
  const W=cv.width,H=cv.height,c=cv.getContext('2d'),land=W>H,p=dur?Math.min(1,t/dur):0,d=audioData(t);
  c.fillStyle='#050506';c.fillRect(0,0,W,H);
  const pulse=S.sync?1+d.bass*.035:1,zoom=S.anim==='zoom'?1+.1*p:1,pan=S.anim==='pan'?(p-.5)*W*.05:0;
@@ -600,7 +609,7 @@ async function renderFast(o){
  $s('#sProg').style.width='0';msg('Preparing...');
  await document.fonts.load('40px '+(FONTS[S.font]||'Impact')).catch(()=>{});await document.fonts.load("12px 'Press Start 2P'").catch(()=>{});
  if(!heroImg){heroImg=new Image();heroImg.src=new URL('hero.jpg',document.baseURI).href}try{await heroImg.decode()}catch(e){}
- const oc=new OfflineAudioContext(2,Math.ceil(dur*48000),48000),src=oc.createBufferSource();src.buffer=S.buf;src.connect(oc.destination);src.start(0);const rb=await oc.startRendering();
+ const oc=new OfflineAudioContext(2,Math.ceil(dur*48000),48000),src=oc.createBufferSource(),og=oc.createGain();src.buffer=S.buf;src.connect(og);og.connect(oc.destination);if(S.fmt==='9:16'&&S.buf.duration>dur+.5){og.gain.setValueAtTime(1,Math.max(0,dur-1.5));og.gain.linearRampToValueAtTime(0,dur)}src.start(0);const rb=await oc.startRendering();
  const target=new Mp4Muxer.ArrayBufferTarget(),muxer=new Mp4Muxer.Muxer({target,video:{codec:vc.mux,width:w,height:h},audio:{codec:ac.mux,numberOfChannels:2,sampleRate:48000},fastStart:'in-memory'});
  let err=null;
  const venc=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>{err=e}});venc.configure(vc.cfg);
@@ -895,7 +904,7 @@ function wire(){
  wv.onpointerdown=e=>{if(run&&run.rec)return;drag=true;was=!!(A&&A.playing);if(was)stopPlay();wv.setPointerCapture(e.pointerId);seek(e)};
  wv.onpointermove=e=>{if(drag)seek(e)};
  wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
- q('#thOpen').onclick=thOpen;q("#mixBtn").onclick=async()=>{try{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=49',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
+ q('#thOpen').onclick=thOpen;q("#mixBtn").onclick=async()=>{try{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=50',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
  q('#thGo').onclick=()=>thMake(true);q('#thMore').onclick=()=>thMake(true);q('#thAll').onclick=thAll;
  document.querySelectorAll('#studio [data-th]').forEach(b=>b.onclick=()=>{TH.pf=b.dataset.th;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(window.MZThumbs&&q('#thGrid').children.length)thMake(false)});
  q('#yAll').onclick=()=>{yi.t++;yi.d++;yi.g++;ytText()};
