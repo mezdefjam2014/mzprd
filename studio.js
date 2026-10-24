@@ -526,10 +526,12 @@ function audioCtx(){
  A={ctx,an,out,rec,playing:false,src:null,t0:0};return A;
 }
 async function decode(arr){const a=audioCtx();return await a.ctx.decodeAudioData(arr)}
+/* preview links expire (signed, 6 h): on any failure get a fresh link and try once more */
+async function fetchPrev(path){const go=()=>fetch(pub(path)).then(r=>{if(!r.ok)throw new Error('audio '+r.status);return r.arrayBuffer()});try{return await go()}catch(e){if(!window.MZPrime||String(path).indexOf('r2:')!==0)throw e;await MZPrime([path],true);return await go()}}
 async function loadPreview(){if(S.item&&window.MZPrime)try{await MZPrime([S.item.preview_path])}catch(e){}
  const it=S.item;S.buf=null;msg('');setAudM('');
  if(!it||!it.preview_path){setAudM('This item has no preview audio. Pick "my full beat file" and choose a file.');redraw();return}
- try{setAudM('Loading preview...');const r=await fetch(pub(it.preview_path));if(!r.ok)throw 0;S.buf=await decode(await r.arrayBuffer());S.srcLabel='preview';setAudM('Preview loaded ('+fmt(S.buf.duration)+').')}
+ try{setAudM('Loading preview...');S.buf=await decode(await fetchPrev(it.preview_path));S.srcLabel='preview';setAudM('Preview loaded ('+fmt(S.buf.duration)+').')}
  catch(e){setAudM('Could not load the preview audio.')}
  syncUi();redraw();
 }
@@ -907,7 +909,7 @@ function wire(){
  wv.onpointerdown=e=>{if(run&&run.rec)return;drag=true;was=!!(A&&A.playing);if(was)stopPlay();wv.setPointerCapture(e.pointerId);seek(e)};
  wv.onpointermove=e=>{if(drag)seek(e)};
  wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
- q('#thOpen').onclick=thOpen;q("#mixBtn").onclick=async()=>{try{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=56',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
+ q('#thOpen').onclick=thOpen;q("#mixBtn").onclick=async()=>{try{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=57',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
  q('#thGo').onclick=()=>thMake(true);q('#thMore').onclick=()=>thMake(true);q('#thAll').onclick=thAll;
  document.querySelectorAll('#studio [data-th]').forEach(b=>b.onclick=()=>{TH.pf=b.dataset.th;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(window.MZThumbs&&q('#thGrid').children.length)thMake(false)});
  q('#yAll').onclick=()=>{yi.t++;yi.d++;yi.g++;ytText()};

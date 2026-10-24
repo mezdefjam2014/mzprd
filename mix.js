@@ -563,7 +563,9 @@ function fmtTitles(r,st){const L=layout(),n=M.fmt==='inside'||M.fmt==='speed'?M.
  return[...out.values()].sort((a,b)=>b.s-a.s)}
 
 /* ---------- audio ---------- */
-async function fetchBuf(b){if(window.MZPrime)try{await MZPrime([b.preview_path])}catch(e){}const r=await fetch(pub(b.preview_path));if(!r.ok)throw new Error('audio');return await ctxA().decodeAudioData(await r.arrayBuffer())}
+/* preview links expire (signed, 6 h): on any failure get a fresh link and try once more */
+async function fetchPrev(path){const go=()=>fetch(pub(path)).then(r=>{if(!r.ok)throw new Error('audio '+r.status);return r.arrayBuffer()});try{return await go()}catch(e){if(!window.MZPrime||String(path).indexOf('r2:')!==0)throw e;await MZPrime([path],true);return await go()}}
+async function fetchBuf(b){if(window.MZPrime)try{await MZPrime([b.preview_path])}catch(e){}return await ctxA().decodeAudioData(await fetchPrev(b.preview_path))}
 async function track48(b){
  if(b._step){await insEnsure(b._sid);const rb=await stepBuffer(b);return{L:rb.getChannelData(0).slice(),R:rb.getChannelData(1).slice(),dur:rb.duration}}
  if(b._mode){const m=SPM[b._mode],src=await fetchBuf(b),need=m.sec*m.rate,st0=bestStart(src,Math.min(need,src.duration)),len=Math.min(m.sec,(src.duration-st0)/m.rate),oc=new OfflineAudioContext(2,Math.ceil(len*SR),SR),s=oc.createBufferSource();s.buffer=src;speedChain(oc,s,m,oc.destination);s.start(0,st0,len*m.rate);const rb=await oc.startRendering();return{L:rb.getChannelData(0),R:rb.getChannelData(1),dur:len}}
