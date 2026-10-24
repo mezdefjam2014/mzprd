@@ -325,11 +325,11 @@ const SB={};async function stepBuffer(b){await sfxLoad();const A=INS[b._sid];if(
  const s=b._step,D=A.dur[s],oc=new OfflineAudioContext(2,Math.ceil(D*SR),SR),src=A.src,mus=oc.createGain();mus.connect(oc.destination);
  const play=(buf,when,off,dur,rate,gain,rv)=>{const n=oc.createBufferSource();n.buffer=buf;n.playbackRate.value=rate||1;const g=oc.createGain();g.gain.value=gain==null?1:gain;n.connect(g);g.connect(mus);if(rv){/* reverb send */const cv=oc.createConvolver();cv.buffer=impulse(oc);const w=oc.createGain();w.gain.value=.45;g.connect(cv);cv.connect(w);w.connect(mus)}n.start(when,off,dur)};
  const S=A.st0,L=A.L;
- if(s==='intro'){sfx(oc,'riser',.2,1);sfx(oc,'impact',1.4,1);play(src,1.4,S,1.6,1,.5)}
+ if(s==='intro'){sfx(oc,'riser',.2,1);sfx(oc,'impact',1.4,1);play(src,1.4,S,1.8,1,.5)}
  else if(s==='a'){sfx(oc,'whoosh',0,1);play(src,LEAD,S,L/2)}
  else if(s==='b'){sfx(oc,'whoosh',0,1);play(src,LEAD,S+L/2,L/2)}
  else if(s==='full'){sfx(oc,'impact',0,.9);play(src,LEAD,S,L)}
- else if(s==='chop'){let t=LEAD;A.sl.forEach(x=>{sfx(oc,'click',t,.9);play(src,t,S+x[0],x[1]-x[0]);t+=x[1]-x[0]+.14})}
+ else if(s==='chop'){sfx(oc,'whoosh',0,.8);let t=LEAD;A.sl.forEach(x=>{sfx(oc,'click',t,.9);play(src,t,S+x[0],x[1]-x[0]);t+=x[1]-x[0]+.14})}
  else if(s==='loop'){sfx(oc,'whoosh',0,.8);let t=.9;for(let r=0;r<2;r++)A.ord.forEach((i,j)=>{const x=A.sl[i],d=x[1]-x[0];if(r===0)sfx(oc,'tick',t,.5);play(src,t,S+x[0],d);t+=d})}
  else if(s==='slow'){sfx(oc,'tapestop',0,1);play(src,LEAD,S,L,.8,1,1)}
  else if(s==='rev'){sfx(oc,'rewind',0,1);play(A.rev,LEAD,0,L)}
@@ -698,7 +698,7 @@ function skTicks(){if(!box)return;const L=layout(),tot=skTot(),el=$m('#mxTicks')
 async function pvSeek(t){const L=layout();if(!L.length)return;await Promise.all(L.map(o=>probe(o.b).catch(()=>{})));const L2=layout();let k=L2.findIndex(o=>t>=o.start&&t<o.start+(o.dur||0));if(k<0)k=L2.length-1;const off=Math.max(0,t-L2[k].start);skDraw(t,skTot());pvPlay(k,off)}
 function pvStop(quiet){PV.on=false;PV.gen=(PV.gen||0)+1;cancelAnimationFrame(PV.raf);if(PV.src){try{PV.src.onended=null;PV.src.stop()}catch(e){}PV.src=null}const b=box&&$m('#mxPlay');if(b){b.classList.remove('on');b.innerHTML='&#9654; PLAY PREVIEW'}if(!quiet)preview()}
 /* ---------- thumbnails + text ---------- */
-async function thLoad(){if(!window.MZThumbs){await new Promise((ok,no)=>{const s=document.createElement('script');s.src=new URL('thumbs.js?v=6',document.baseURI).href;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}await window.MZThumbs.load();hero=hero||(await new Promise(r=>{const i=new Image();i.src=new URL('hero.jpg',document.baseURI).href;i.onload=()=>r(i);i.onerror=()=>r(null)}))}
+async function thLoad(){if(!window.MZThumbs){await new Promise((ok,no)=>{const s=document.createElement('script');s.src=new URL('thumbs.js?v=27',document.baseURI).href;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}await window.MZThumbs.load();hero=hero||(await new Promise(r=>{const i=new Image();i.src=new URL('hero.jpg',document.baseURI).href;i.onload=()=>r(i);i.onerror=()=>r(null)}))}
 function thCtx(){const L=playlist(),first=L[0]||M.beats[0],t=total();return{title:M.title,w:MZThumbs.words(M.title),cover:first&&M.cov[first._sid||first.id],kind:M.kind==='beats'?'beats':'packs',label:K().mix,tagText:M.fmt==='inside'?'INSIDE THE SAMPLE':M.fmt==='rate'?'RATED 1-10':M.fmt==='speed'?'SLOWED + SPED UP':M.fmt==='count'?'TOP '+M.sel.length:M.fmt==='vs'?'A VS B':M.fmt==='give'?'FREE LOOP':K().mix,infoText:L.length+' '+(L.length>1?K().MANY:K().ONE)+'   •   '+Math.max(1,Math.round(t/60))+' MIN',seed:M.seed}}
 let thT=0;function thumbsAuto(){if($m('#mxTh').children.length){clearTimeout(thT);thT=setTimeout(()=>thumbs(false),500)}}
 async function thumbs(bump){
@@ -756,12 +756,14 @@ function yt(){
 const mcx=new MessageChannel(),ysq=[];mcx.port1.onmessage=()=>{const f=ysq.shift();if(f)f()};const yieldNow=()=>new Promise(r=>{ysq.push(r);mcx.port2.postMessage(0)});
 function loadMuxer(){return window.Mp4Muxer?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=new URL('mp4-muxer.js',document.baseURI).href;s.onload=ok;s.onerror=()=>no(new Error('muxer'));document.head.appendChild(s)})}
 function badge(p){const b=document.querySelector('.bh [data-t=video]');if(b)b.textContent=p==null?'VIDEO STUDIO':'VIDEO STUDIO '+p+'%'}
+/* while a render runs, links open in a new tab so leaving the page never stops it */
+if(!window.__mzNav){window.__mzNav=1;window.__mzR=0;document.addEventListener('click',e=>{if(!(window.__mzR>0))return;const a=e.target.closest&&e.target.closest('a[href]');if(!a||a.hasAttribute('download')||a.target==='_blank'||a.href.startsWith('blob:')||a.getAttribute('href').startsWith('#'))return;e.preventDefault();e.stopPropagation();window.open(a.href,'_blank');try{toast('RENDER STILL RUNNING HERE, OPENED IN A NEW TAB')}catch(x){}},true)}
 const beforeUnload=e=>{if(M.busy){e.preventDefault();e.returnValue=''}};
 async function render(){
  if(M.busy)return;const msg=t=>$m('#mxMsg').textContent=t,btn=$m('#mxRender'),dl=$m('#mxDl');
  if(!playlist().length){msg('Pick at least one '+K().one+' first.');return}
  if(!(window.VideoEncoder&&window.AudioEncoder&&window.VideoFrame&&window.AudioData&&window.OfflineAudioContext)){msg('This browser cannot render long videos. Use Chrome or Edge.');return}
- M.busy=true;btn.disabled=true;dl.style.display='none';badge(0);addEventListener('beforeunload',beforeUnload);
+ M.busy=true;btn.disabled=true;dl.style.display='none';badge(0);addEventListener('beforeunload',beforeUnload);window.__mzR=(window.__mzR||0)+1;
  let err=null,venc,aenc;
  try{
   await loadMuxer();await thLoad();await Promise.all(M.sel.map(id=>{const b=M.beats.find(x=>String(x.id)===id);return loadCover(b)}));await Promise.all(playlist().map(b=>probe(b).catch(()=>{})));if(M.fmt==='inside')for(const id of M.sel)await insEnsure(id);
@@ -781,7 +783,7 @@ async function render(){
   const t0=performance.now();
   for(let k=0;k<list.length;k++){
    msg('Preparing track '+(k+1)+' of '+list.length+'...');
-   const tr=await track48(list[k]);if(CL&&tr.dur>CL){const st0=((M.cs[list[k].id]||{})[CL])||0,a0=Math.floor(st0*SR),n0=Math.floor(CL*SR);tr.L=tr.L.slice(a0,a0+n0);tr.R=tr.R.slice(a0,a0+n0);tr.dur=CL}const pre=Lyt.slice(0,k).reduce((s,o)=>s+o.dur,0);if(CAP&&pre>=CAP-.05)break;const cut=CAP&&pre+tr.dur>CAP,nf=cut?Math.floor((CAP-pre)*FPS):Math.floor(tr.dur*FPS),n=Math.floor(nf/FPS*SR),fade=Math.floor(M.fade*SR);if(!cut)Lyt[k].dur=nf/FPS;
+   const tr=await track48(list[k]);if(CL&&tr.dur>CL){const st0=((M.cs[list[k].id]||{})[CL])||0,a0=Math.floor(st0*SR),n0=Math.floor(CL*SR);tr.L=tr.L.slice(a0,a0+n0);tr.R=tr.R.slice(a0,a0+n0);tr.dur=CL}const pre=Lyt.slice(0,k).reduce((s,o)=>s+o.dur,0);if(CAP&&pre>=CAP-.05)break;const cut=CAP&&pre+tr.dur>CAP,nf=cut?Math.floor((CAP-pre)*FPS):Math.floor(tr.dur*FPS),n=Math.floor(nf/FPS*SR),fade=Math.floor((list[k]._step?.012:M.fade)*SR);if(!cut)Lyt[k].dur=nf/FPS;
    for(let i=0;i<n;i++){let g=1;if(fade){if(i<fade)g=i/fade;else if(n-i<fade)g=(n-i)/fade}if(cut){const e=Math.floor(1.5*SR);if(n-i<e)g*=(n-i)/e}tr.L[i]*=g;tr.R[i]*=g}
    const CH=4800;for(let o=0;o<n;o+=CH){const m=Math.min(CH,n-o),b=new Float32Array(m*2);b.set(tr.L.subarray(o,o+m),0);b.set(tr.R.subarray(o,o+m),m);const ad=new AudioData({format:'f32-planar',sampleRate:SR,numberOfFrames:m,numberOfChannels:2,timestamp:gUs+Math.round(o/SR*1e6),data:b});aenc.encode(ad);ad.close();if((o/CH)%30===0)await yieldNow()}
    const mono=new Float32Array(n);for(let i=0;i<n;i++)mono[i]=(tr.L[i]+tr.R[i])*.5;
@@ -790,7 +792,7 @@ async function render(){
     if(err)throw err;const tl=f/FPS,tg=lastStart+tl;
     frameAny(c,st,Lyt.map((o,i)=>i<=k?o:{...o}),k,tl,tg,tot,dataAt(mono,tl),{outro:M.outro&&M.fmt==='mix'});if(CAP&&tg>CAP-3.5)fullCard(c,st,ease((tg-(CAP-3.5))/.5),tg);
     const vf=new VideoFrame(cv,{timestamp:gUs+Math.round(f*1e6/FPS),duration:Math.round(1e6/FPS)});venc.encode(vf,{keyFrame:(done+f)%120===0});vf.close();
-    while(venc.encodeQueueSize>8){await Promise.race([new Promise(r=>venc.addEventListener('dequeue',r,{once:true})),new Promise(r=>setTimeout(r,40))]);if(err)throw err}
+    while(venc.encodeQueueSize>8){await Promise.race([new Promise(r=>venc.addEventListener('dequeue',r,{once:true})),yieldNow()]);if(err)throw err}
     if(f%6===0){const p=Math.min(99,Math.round((done+f)/Math.max(1,tot*FPS)*100));$m('#mxProg').style.width=p+'%';badge(p);msg('Rendering track '+(k+1)+' of '+list.length+' ('+p+'%). You can close this window or switch tabs, it keeps going.');await yieldNow()}
    }
    gUs+=Math.round(nf*1e6/FPS);done+=nf;
@@ -799,7 +801,7 @@ async function render(){
   const blob=new Blob([target.buffer],{type:'video/mp4'});dl.href=URL.createObjectURL(blob);dl.download='mzprd-'+M.kind+'-'+(M.fmt==='mix'?'mix':M.fmt==='count'?'countdown':M.fmt==='vs'?'versus':M.fmt==='inside'?'inside-the-sample':M.fmt==='rate'?'rate-it':M.fmt==='speed'?'speed-versions':'free-loop-short')+'.mp4';dl.style.display='block';$m('#mxProg').style.width='100%';
   msg('Done in '+Math.round((performance.now()-t0)/1000)+'s. '+(blob.size/1048576).toFixed(0)+' MB MP4, '+fmt(done/FPS)+' long. Click DOWNLOAD MIX VIDEO.');try{toast('MIX VIDEO READY')}catch(e){}
  }catch(e){console.warn(e);msg('Render failed: '+((e&&e.message)||e))}
- finally{try{venc&&venc.close()}catch(e){}try{aenc&&aenc.close()}catch(e){}M.busy=false;btn.disabled=false;badge();removeEventListener('beforeunload',beforeUnload)}
+ finally{try{venc&&venc.close()}catch(e){}try{aenc&&aenc.close()}catch(e){}M.busy=false;btn.disabled=false;badge();removeEventListener('beforeunload',beforeUnload);window.__mzR=Math.max(0,(window.__mzR||1)-1)}
 }
 window.mixOpen=async function(){
  if(!box){if(!M.beats.length){try{const r=await sb.from('beats').select('*').order('created_at',{ascending:false});M.beats=r.data||[]}catch(e){}}

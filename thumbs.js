@@ -8,11 +8,12 @@ let ready=null,hero=null,grain=null;
 const SRC={x:520,y:0,w:620,h:468};
 function load(){
  if(ready)return ready;
+ const to=(x,ms)=>Promise.race([Promise.resolve(x).catch(()=>{}),new Promise(r=>setTimeout(r,ms))]);/* nothing slow can block the makers */
  ready=(async()=>{
-  if(!window.MZPackPhoto)await new Promise(res=>{const sc=document.createElement('script');sc.src=new URL('packphoto.js?v=14',document.baseURI).href;sc.onload=()=>window.MZPackPhoto.load().then(res,res);sc.onerror=res;document.head.appendChild(sc)});
+  if(!window.MZPackPhoto)await to(new Promise(res=>{const sc=document.createElement('script');sc.src=new URL('packphoto.js?v=14',document.baseURI).href;sc.onload=()=>window.MZPackPhoto.load().then(res,res);sc.onerror=res;document.head.appendChild(sc)}),9000);
   if(!document.querySelector('link[data-th]')){await new Promise(res=>{const l=document.createElement('link');l.rel='stylesheet';l.href=FONT_LINK;l.dataset.th='1';l.onload=res;l.onerror=res;document.head.appendChild(l);setTimeout(res,5000)})}
-  await Promise.all(["40px Anton","40px 'Bebas Neue'","600 40px Oswald","12px 'Press Start 2P'","40px 'Permanent Marker'","40px Bangers"].map(f=>document.fonts.load(f).catch(()=>{})));
-  hero=new Image();hero.src=new URL('hero.jpg',document.baseURI).href;try{await hero.decode()}catch(e){}
+  await to(Promise.all(["40px Anton","40px 'Bebas Neue'","600 40px Oswald","12px 'Press Start 2P'","40px 'Permanent Marker'","40px Bangers"].map(f=>document.fonts.load(f).catch(()=>{}))),6000);
+  hero=new Image();hero.src=new URL('hero.jpg',document.baseURI).href;await to(hero.decode(),5000);
  })();
  return ready;
 }

@@ -233,8 +233,9 @@ function drawVis(c,d,W,H,base,cx,cy,r){
  c.restore();
 }
 /* 9:16 Shorts are cut at 1:30: when the audio is longer, the last 3.5 s say to watch the full video */
-function frame(cv,t,dur){frame0(cv,t,dur);if(S.fmt==='9:16'&&S.buf&&S.buf.duration>dur+.5&&t>dur-3.5)endCard(cv,Math.min(1,(t-(dur-3.5))/.5),t)}
-function endCard(cv,a,t){const c=cv.getContext('2d'),W=cv.width,H=cv.height,u=W/720,f=FONTS[S.font]||'Impact',acc='#e0242f',e=1-Math.pow(1-Math.max(0,a),3);
+const cutV=dur=>S.fmt==='9:16'&&S.buf&&S.buf.duration>dur+.5;
+function frame(cv,t,dur){frame0(cv,t,dur);if(cutV(dur)&&t>dur-3.5)watchCard(cv,Math.min(1,(t-(dur-3.5))/.5),t)}
+function watchCard(cv,a,t){const c=cv.getContext('2d'),W=cv.width,H=cv.height,u=W/720,f=FONTS[S.font]||'Impact',acc='#e0242f',e=1-Math.pow(1-Math.max(0,a),3);
  const fit=(s,mw,px)=>{c.font=px+'px '+f;const w=c.measureText(s).width;return w>mw?px*mw/w:px},tx=(s,x,y,px,col)=>{c.font=px+'px '+f;c.fillStyle=col;c.textAlign='center';c.fillText(s,x,y)};
  c.save();c.globalAlpha=e*.85;c.fillStyle='#000';c.fillRect(0,0,W,H);c.globalAlpha=e;
  tx('WANT THE REST?',W/2,H*.36,fit('WANT THE REST?',W*.8,54*u),'rgba(255,255,255,.75)');
@@ -278,7 +279,7 @@ function frame0(cv,t,dur){
  }
  if(SCN[S.preset]&&S.cover){scText(c,W,H,t);scBar(c,W,H,t,dur)}
  if(S.preset==='film'){c.fillStyle='#000';const b=H*(land?.085:.05);c.fillRect(0,0,W,b);c.fillRect(0,H-b,W,b)}
- const ecd=Math.min(6,dur*.5);if(S.end&&dur&&t>dur-ecd)endCard(c,W,H,t-(dur-ecd),ecd);
+ const ecd=Math.min(6,dur*.5),eo=cutV(dur)?3.5:0;if(S.end&&dur&&t>dur-eo-ecd)endCard(c,W,H,Math.min(ecd,t-(dur-eo-ecd)),ecd);
 }
 let ec=null,heroImg=null;
 function sellCard(c,W,H,tt,ecd){
@@ -581,6 +582,8 @@ function setAudM(m){const el=$s('#sAudM');if(el)el.textContent=m}
 const mcx=new MessageChannel(),ysq=[];mcx.port1.onmessage=()=>{const f=ysq.shift();if(f)f()};
 const yieldNow=()=>new Promise(r=>{ysq.push(r);mcx.port2.postMessage(0)});
 function badge(p){const b=document.querySelector('.bh [data-t=video]');if(b)b.textContent=p==null?'VIDEO STUDIO':'VIDEO STUDIO '+p+'%'}
+/* while a render runs, links open in a new tab so leaving the page never stops it */
+if(!window.__mzNav){window.__mzNav=1;window.__mzR=0;document.addEventListener('click',e=>{if(!(window.__mzR>0))return;const a=e.target.closest&&e.target.closest('a[href]');if(!a||a.hasAttribute('download')||a.target==='_blank'||a.href.startsWith('blob:')||a.getAttribute('href').startsWith('#'))return;e.preventDefault();e.stopPropagation();window.open(a.href,'_blank');try{toast('RENDER STILL RUNNING HERE, OPENED IN A NEW TAB')}catch(x){}},true)}
 const beforeUnload=e=>{if(R.busy){e.preventDefault();e.returnValue=''}};
 function loadMuxer(){return window.Mp4Muxer?Promise.resolve():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mp4-muxer.js',document.baseURI).href;sc.onload=ok;sc.onerror=()=>no(new Error('muxer'));document.head.appendChild(sc)})}
 async function render(){
@@ -605,7 +608,7 @@ async function renderFast(o){
  const pickV=async()=>{for(const c of [{codec:'avc1.640028',mux:'avc'},{codec:'avc1.4d0028',mux:'avc'},{codec:'avc1.42E028',mux:'avc'},{codec:'vp09.00.40.08',mux:'vp9'}]){const cfg={codec:c.codec,width:w,height:h,bitrate:8e6,framerate:fps};try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return{...c,cfg}}catch(e){}}return null};
  const pickA=async()=>{for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){try{const r=await AudioEncoder.isConfigSupported({codec:c.codec,sampleRate:48000,numberOfChannels:2,bitrate:192000});if(r&&r.supported)return c}catch(e){}}return null};
  const vc=await pickV(),ac=await pickA();if(!vc||!ac)throw new Error('no codec');
- R.busy=true;root.classList.add('busy');btn.disabled=true;dl.style.display='none';badge(0);addEventListener('beforeunload',beforeUnload);
+ R.busy=true;root.classList.add('busy');btn.disabled=true;dl.style.display='none';badge(0);addEventListener('beforeunload',beforeUnload);window.__mzR=(window.__mzR||0)+1;
  $s('#sProg').style.width='0';msg('Preparing...');
  await document.fonts.load('40px '+(FONTS[S.font]||'Impact')).catch(()=>{});await document.fonts.load("12px 'Press Start 2P'").catch(()=>{});
  if(!heroImg){heroImg=new Image();heroImg.src=new URL('hero.jpg',document.baseURI).href}try{await heroImg.decode()}catch(e){}
@@ -624,11 +627,11 @@ async function renderFast(o){
    if(err)throw err;
    frame(cv,Math.min(i/fps,dur),dur);
    const vf=new VideoFrame(cv,{timestamp:Math.round(i*1e6/fps),duration:Math.round(1e6/fps)});venc.encode(vf,{keyFrame:i%90===0});vf.close();
-   while(venc.encodeQueueSize>8){await Promise.race([new Promise(r=>venc.addEventListener('dequeue',r,{once:true})),new Promise(r=>setTimeout(r,40))]);if(err)throw err}
+   while(venc.encodeQueueSize>8){await Promise.race([new Promise(r=>venc.addEventListener('dequeue',r,{once:true})),yieldNow()]);if(err)throw err}
    if(i%4===0){const p=Math.round(i/N*100);$s('#sProg').style.width=p+'%';badge(p);msg(tag+'Rendering '+p+'% ... you can switch tabs, it keeps going.');await yieldNow()}
   }
   OFF=null;await venc.flush();await aenc.flush();if(err)throw err;muxer.finalize();
- }finally{OFF=null;try{venc.close()}catch(e){}try{aenc.close()}catch(e){}removeEventListener('beforeunload',beforeUnload)}
+ }finally{OFF=null;try{venc.close()}catch(e){}try{aenc.close()}catch(e){}removeEventListener('beforeunload',beforeUnload);window.__mzR=Math.max(0,(window.__mzR||1)-1)}
  const blob=new Blob([target.buffer],{type:'video/mp4'}),url=URL.createObjectURL(blob);
  dl.href=url;dl.download=((S.item&&(S.item.slug||String(S.item.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')))||'video')+'-'+(S.fmt==='16:9'?'16x9':'9x16')+'.mp4';dl.textContent='DOWNLOAD '+S.fmt+' VIDEO';dl.style.display='block';
  R.busy=false;root.classList.remove('busy');btn.disabled=false;badge();$s('#sProg').style.width='100%';
@@ -830,7 +833,7 @@ const TH={seed:0,pf:'16:9',ord:null,page:0,sel:[],rr:{}},TH_N=6,THMODAL=`<div id
  <div id="thGrid"></div><div class="msg" id="thMsg">14 looks (16:9) and 8 (9:16), 6 at a time. The type line follows SOUNDS LIKE (artist). Every card downloads in 16:9 (1280x720) and 9:16 (1080x1920).</div>
  <button class="btn" id="thAll" style="display:none;margin-top:8px">DOWNLOAD THIS SET (12 FILES)</button>
 </div></div>`;
-function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=26',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
+function thLoad(){return window.MZThumbs?window.MZThumbs.load():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('thumbs.js?v=27',document.baseURI).href;sc.onload=()=>window.MZThumbs.load().then(ok,no);sc.onerror=()=>no(new Error('thumbs.js'));document.head.appendChild(sc)})}
 /* the type line (ARTIST TYPE BEAT) comes from the same SOUNDS LIKE / MOOD boxes the YouTube text uses */
 function thCtx(i){const it=S.item||{},Y=S.item?ytCtx():{};return{title:it.title||'',w:window.MZThumbs.words(S.tx.title.text||it.title),cover:S.cover,bpm:it.bpm,key:it.musical_key,kind:S.kind==='samples'?'packs':S.kind,label:S.kind==='samples'?'SINGLE SAMPLE':'',seed:TH.seed+(TH.rr[i]||0)*13,art:Y.art||'',mood:Y.mood||'',genre:Y.genre||''}}
 const thSize=f=>f==='16:9'?[1280,720]:[1080,1920];
@@ -904,7 +907,7 @@ function wire(){
  wv.onpointerdown=e=>{if(run&&run.rec)return;drag=true;was=!!(A&&A.playing);if(was)stopPlay();wv.setPointerCapture(e.pointerId);seek(e)};
  wv.onpointermove=e=>{if(drag)seek(e)};
  wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
- q('#thOpen').onclick=thOpen;q("#mixBtn").onclick=async()=>{try{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=50',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
+ q('#thOpen').onclick=thOpen;q("#mixBtn").onclick=async()=>{try{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=56',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
  q('#thGo').onclick=()=>thMake(true);q('#thMore').onclick=()=>thMake(true);q('#thAll').onclick=thAll;
  document.querySelectorAll('#studio [data-th]').forEach(b=>b.onclick=()=>{TH.pf=b.dataset.th;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(window.MZThumbs&&q('#thGrid').children.length)thMake(false)});
  q('#yAll').onclick=()=>{yi.t++;yi.d++;yi.g++;ytText()};
