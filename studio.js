@@ -94,6 +94,8 @@ function css(){
 #mixBtn,#thOpen{display:block;width:100%;margin-top:14px;background:#14141a;border:1.5px solid rgba(224,36,47,.7);color:#fff;font:700 12px Montserrat;letter-spacing:.3em;padding:14px;animation:thGlow 3.2s ease-in-out infinite}
 @keyframes thGlow{0%,100%{box-shadow:0 0 0 rgba(224,36,47,0)}50%{box-shadow:0 0 14px rgba(224,36,47,.28)}}
 #mixBtn:hover,#thOpen:hover{border-color:#e0242f;background:#1b1b22}
+#insBtn{display:block;width:100%;margin-top:14px;background:#fff;color:#0b0b0d;font:900 12px Montserrat;letter-spacing:.3em;padding:14px;border:1.5px solid #fff;cursor:pointer}#insBtn:hover{background:#e9e9ee;border-color:#e9e9ee}
+#mixBtn{background:#fff;color:#0b0b0d;font-weight:900;border-color:#fff;animation:none}#mixBtn:hover{background:#e9e9ee;border-color:#e9e9ee;color:#0b0b0d}
 #thModal{display:none;position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.82);align-items:center;justify-content:center;padding:18px}
 #thModal.on{display:flex}
 #thModal .thbox{position:relative;width:min(980px,100%);max-height:92vh;overflow:auto;background:#0c0c0f;border:1.5px solid var(--red);box-shadow:0 0 50px rgba(224,36,47,.35);padding:20px}
@@ -166,6 +168,7 @@ function html(){
   <div class="bar"><b id="sProg"></b></div><div class="msg" id="sMsg">Keep this tab open and visible while it renders. A 3 minute beat takes about 3 minutes.</div>
   <a id="sDl" class="btn" style="display:none;text-align:center;margin-top:8px;text-decoration:none">DOWNLOAD VIDEO</a>
   <a id="sDl2" class="btn" style="display:none;text-align:center;margin-top:8px;text-decoration:none">DOWNLOAD 9:16 VIDEO</a>
+  <button id="insBtn" type="button">&#9986; INSIDE THE SAMPLE</button>
   <button id="mixBtn" type="button">&#9835; MIX VIDEO (10-15 MIN)</button>
   <button id="thOpen" type="button">&#9733; THUMBNAILS</button>
  </div></div>`;
@@ -909,7 +912,10 @@ function wire(){
  wv.onpointerdown=e=>{if(run&&run.rec)return;drag=true;was=!!(A&&A.playing);if(was)stopPlay();wv.setPointerCapture(e.pointerId);seek(e)};
  wv.onpointermove=e=>{if(drag)seek(e)};
  wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
- q('#thOpen').onclick=thOpen;q("#mixBtn").onclick=async()=>{try{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=57',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
+ q('#thOpen').onclick=thOpen;const mixGo=async()=>{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=57',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()};
+ q("#mixBtn").onclick=async()=>{try{await mixGo()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};
+ /* straight to Inside the Sample: single samples + that format */
+ q('#insBtn').onclick=async()=>{try{await mixGo();for(let i=0;i<40&&!document.querySelector('#mxKind');i++)await new Promise(r=>setTimeout(r,100));const k=[...document.querySelectorAll('#mxKind button')].find(b=>/SINGLE/.test(b.textContent));if(k&&!k.classList.contains('on'))k.click();for(let i=0;i<30;i++){const f=document.querySelector('#mxFmt button[data-f=inside]');if(f&&f.offsetParent){f.click();break}await new Promise(r=>setTimeout(r,100))}}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
  q('#thGo').onclick=()=>thMake(true);q('#thMore').onclick=()=>thMake(true);q('#thAll').onclick=thAll;
  document.querySelectorAll('#studio [data-th]').forEach(b=>b.onclick=()=>{TH.pf=b.dataset.th;b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));if(window.MZThumbs&&q('#thGrid').children.length)thMake(false)});
  q('#yAll').onclick=()=>{yi.t++;yi.d++;yi.g++;ytText()};
