@@ -299,7 +299,7 @@ function insAnalyze(sid,src){const nCh=M.insN||8,sr=src.sampleRate,ch0=src.getCh
  const loopLen=ord.reduce((s,i)=>s+(sl[i][1]-sl[i][0]),0);
  INS[sid]={src,st0,L,sl,ord,pk,rev,loopLen,dur:{intro:3.2,a:LEAD+L/2,b:LEAD+L/2,full:LEAD+L,chop:LEAD+sl.reduce((s,x)=>s+(x[1]-x[0])+.14,0),loop:.9+loopLen*2,slow:LEAD+L/.8+.8,rev:LEAD+L,fast:LEAD+L/1.25,flip:.4+loopLen+L/1.25*.5+L*.5,outro:6.5}};return INS[sid]}
 /* editing sound effects: your ElevenLabs sounds (sfx/inside), trimmed + levelled on load; synthesised ones only as a fallback */
-const SFXF={whoosh:'whoosh',impact:'impact',cut:'scratch',tapestop:'tapestop',rewind:'rewind',riser:'riser'},SFXB={};let SFXP=null;
+const SFXF={whoosh:'whoosh',impact:'impact',cut:'scratch',tapestop:'tapestop',rewind:'rewind',riser:'riser',click:'click'},SFXB={};let SFXP=null;
 const SFXLV={whoosh:.55,impact:.8,cut:.32,tapestop:.6,rewind:.6,riser:.5};
 function sfxLoad(){return SFXP=SFXP||Promise.all(Object.entries(SFXF).map(async([k,f])=>{try{const r=await fetch(new URL('sfx/inside/'+f+'.mp3?v=1',document.baseURI).href);const b=await ctxA().decodeAudioData(await r.arrayBuffer());
  let pk=0,st=b.length;for(let c=0;c<b.numberOfChannels;c++){const d=b.getChannelData(c);for(let i=0;i<d.length;i++)pk=Math.max(pk,Math.abs(d[i]))}for(let c=0;c<b.numberOfChannels;c++){const d=b.getChannelData(c);for(let i=0;i<d.length;i++)if(Math.abs(d[i])>pk*.02){st=Math.min(st,i);break}}
@@ -322,7 +322,7 @@ const SB={};async function stepBuffer(b){await sfxLoad();const A=INS[b._sid];if(
  else if(s==='a'){sfx(oc,'whoosh',0,1);play(src,LEAD,S,L/2)}
  else if(s==='b'){sfx(oc,'whoosh',0,1);play(src,LEAD,S+L/2,L/2)}
  else if(s==='full'){sfx(oc,'impact',0,.9);play(src,LEAD,S,L)}
- else if(s==='chop'){let t=LEAD;A.sl.forEach(x=>{sfx(oc,'cut',t,.55);play(src,t,S+x[0],x[1]-x[0]);t+=x[1]-x[0]+.14})}
+ else if(s==='chop'){let t=LEAD;A.sl.forEach(x=>{sfx(oc,'click',t,.9);play(src,t,S+x[0],x[1]-x[0]);t+=x[1]-x[0]+.14})}
  else if(s==='loop'){sfx(oc,'whoosh',0,.8);let t=.9;for(let r=0;r<2;r++)A.ord.forEach((i,j)=>{const x=A.sl[i],d=x[1]-x[0];if(r===0)sfx(oc,'tick',t,.5);play(src,t,S+x[0],d);t+=d})}
  else if(s==='slow'){sfx(oc,'tapestop',0,1);play(src,LEAD,S,L,.8,1,1)}
  else if(s==='rev'){sfx(oc,'rewind',0,1);play(A.rev,LEAD,0,L)}
