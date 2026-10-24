@@ -162,7 +162,7 @@ function html(){
    <label class="chk"><input type="checkbox" id="sSync" checked> COVER PULSES TO THE BEAT</label>
    <label class="chk"><input type="checkbox" id="sGlow"> GLOW EFFECT</label>
    <h4>END CARD</h4>
-   <label class="chk"><input type="checkbox" id="sEnd" checked> END CARD</label><select id="sEndT"><option value="sell">Sell the beat (price, link, instant download)</option><option value="sub">8-bit subscribe card</option></select>
+   <label class="chk"><input type="checkbox" id="sEnd" checked> END CARD</label><label class="chk"><input type="checkbox" id="sTag" checked> VOICE TAG EVERY 13 SEC (PACKS + SAMPLES)</label><select id="sEndT"><option value="sell">Sell the beat (price, link, instant download)</option><option value="sub">8-bit subscribe card</option></select>
   </div>
   <button class="go" id="sRender">RENDER VIDEO</button>
   <div class="bar"><b id="sProg"></b></div><div class="msg" id="sMsg">Keep this tab open and visible while it renders. A 3 minute beat takes about 3 minutes.</div>
@@ -617,7 +617,9 @@ async function renderFast(o){
  $s('#sProg').style.width='0';msg('Preparing...');
  await document.fonts.load('40px '+(FONTS[S.font]||'Impact')).catch(()=>{});await document.fonts.load("12px 'Press Start 2P'").catch(()=>{});
  if(!heroImg){heroImg=new Image();heroImg.src=new URL('hero.jpg',document.baseURI).href}try{await heroImg.decode()}catch(e){}
- const oc=new OfflineAudioContext(2,Math.ceil(dur*48000),48000),src=oc.createBufferSource(),og=oc.createGain();src.buffer=S.buf;src.connect(og);og.connect(oc.destination);if(S.fmt==='9:16'&&S.buf.duration>dur+.5){og.gain.setValueAtTime(1,Math.max(0,dur-1.5));og.gain.linearRampToValueAtTime(0,dur)}src.start(0);const rb=await oc.startRendering();
+ const oc=new OfflineAudioContext(2,Math.ceil(dur*48000),48000),src=oc.createBufferSource(),og=oc.createGain();src.buffer=S.buf;src.connect(og);og.connect(oc.destination);
+ /* anti-rip voice tag: packs + samples only, low, every 13 s */
+ if(!($s('#sTag')&&!$s('#sTag').checked)&&S.kind!=='beats'){try{const tb=await oc.decodeAudioData(await (await fetch(new URL('sfx/inside/tag.mp3?v=1',document.baseURI).href)).arrayBuffer());let pk=0;for(let c=0;c<tb.numberOfChannels;c++){const d=tb.getChannelData(c);for(let i=0;i<d.length;i+=2)pk=Math.max(pk,Math.abs(d[i]))}for(let t=1.2;t<dur-1.5;t+=13){const n=oc.createBufferSource(),g=oc.createGain();n.buffer=tb;g.gain.value=.16/(pk||1);n.connect(g);g.connect(oc.destination);n.start(t)}}catch(e){console.warn('tag',e)}}if(S.fmt==='9:16'&&S.buf.duration>dur+.5){og.gain.setValueAtTime(1,Math.max(0,dur-1.5));og.gain.linearRampToValueAtTime(0,dur)}src.start(0);const rb=await oc.startRendering();
  const target=new Mp4Muxer.ArrayBufferTarget(),muxer=new Mp4Muxer.Muxer({target,video:{codec:vc.mux,width:w,height:h},audio:{codec:ac.mux,numberOfChannels:2,sampleRate:48000},fastStart:'in-memory'});
  let err=null;
  const venc=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>{err=e}});venc.configure(vc.cfg);
@@ -912,7 +914,7 @@ function wire(){
  wv.onpointerdown=e=>{if(run&&run.rec)return;drag=true;was=!!(A&&A.playing);if(was)stopPlay();wv.setPointerCapture(e.pointerId);seek(e)};
  wv.onpointermove=e=>{if(drag)seek(e)};
  wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
- q('#thOpen').onclick=thOpen;const mixGo=async()=>{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=57',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()};
+ q('#thOpen').onclick=thOpen;const mixGo=async()=>{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=59',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()};
  q("#mixBtn").onclick=async()=>{try{await mixGo()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};
  /* straight to Inside the Sample: single samples + that format */
  q('#insBtn').onclick=async()=>{try{await mixGo();for(let i=0;i<40&&!document.querySelector('#mxKind');i++)await new Promise(r=>setTimeout(r,100));const k=[...document.querySelectorAll('#mxKind button')].find(b=>/SINGLE/.test(b.textContent));if(k&&!k.classList.contains('on'))k.click();for(let i=0;i<30;i++){const f=document.querySelector('#mxFmt button[data-f=inside]');if(f&&f.offsetParent){f.click();break}await new Promise(r=>setTimeout(r,100))}}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};

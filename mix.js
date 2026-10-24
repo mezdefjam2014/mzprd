@@ -306,8 +306,10 @@ function insAnalyze(sid,src){const nCh=M.insN||8,sr=src.sampleRate,ch0=src.getCh
  const loopLen=ord.reduce((s,i)=>s+(sl[i][1]-sl[i][0]),0);
  INS[sid]={src,st0,L,reg,bpm:tb,sl,ord,pk,rev,loopLen,dur:{intro:3.2,a:LEAD+L/2,b:LEAD+L/2,full:LEAD+L,chop:LEAD+sl.reduce((s,x)=>s+(x[1]-x[0])+.14,0),loop:.9+loopLen*2,slow:LEAD+L/.8+.8,rev:LEAD+L,fast:LEAD+L/1.25,flip:.4+loopLen+L/1.25*.5+L*.5,outro:6.5}};return INS[sid]}
 /* editing sound effects: your ElevenLabs sounds (sfx/inside), trimmed + levelled on load; synthesised ones only as a fallback */
-const SFXF={whoosh:'whoosh',impact:'impact',cut:'scratch',tapestop:'tapestop',rewind:'rewind',riser:'riser',click:'click'},SFXB={};let SFXP=null;
-const SFXLV={whoosh:.55,impact:.8,cut:.32,tapestop:.6,rewind:.6,riser:.5};
+const SFXF={whoosh:'whoosh',impact:'impact',cut:'scratch',tapestop:'tapestop',rewind:'rewind',riser:'riser',click:'click',tag:'tag'},SFXB={};let SFXP=null;
+const SFXLV={whoosh:.55,impact:.8,cut:.32,tapestop:.6,rewind:.6,riser:.5,tag:.16};
+/* anti-rip voice tag (packs + samples only): low under the music, every 13 s of the whole video */
+const TAGQ=13;function tagMix(L,R,pre,n){const tb=SFXB.tag;if(!tb)return;const a=tb.getChannelData(0),b=tb.getChannelData(1),k=tb.sampleRate/SR,g=SFXLV.tag,end=pre+n/SR;for(let tt=1.2;tt<end;tt+=TAGQ){if(tt+tb.duration<pre)continue;const i0=Math.round((tt-pre)*SR);for(let j=0;j<a.length/k;j++){const i=i0+j;if(i<0)continue;if(i>=n)break;const p=j*k,q=Math.floor(p),f=p-q;L[i]+=((a[q]||0)*(1-f)+(a[q+1]||0)*f)*g;R[i]+=((b[q]||0)*(1-f)+(b[q+1]||0)*f)*g}}}
 function sfxLoad(){return SFXP=SFXP||Promise.all(Object.entries(SFXF).map(async([k,f])=>{try{const r=await fetch(new URL('sfx/inside/'+f+'.mp3?v=1',document.baseURI).href);const b=await ctxA().decodeAudioData(await r.arrayBuffer());
  let pk=0,st=b.length;for(let c=0;c<b.numberOfChannels;c++){const d=b.getChannelData(c);for(let i=0;i<d.length;i++)pk=Math.max(pk,Math.abs(d[i]))}for(let c=0;c<b.numberOfChannels;c++){const d=b.getChannelData(c);for(let i=0;i<d.length;i++)if(Math.abs(d[i])>pk*.02){st=Math.min(st,i);break}}
  let en=0;for(let c=0;c<b.numberOfChannels;c++){const d=b.getChannelData(c);for(let i=d.length-1;i>0;i--)if(Math.abs(d[i])>pk*.01){en=Math.max(en,i);break}}const len=Math.max(1,en-st+1),out=new AudioBuffer({numberOfChannels:2,length:len,sampleRate:b.sampleRate}),fd=Math.min(len,Math.round(b.sampleRate*.01));
@@ -635,7 +637,7 @@ function build(){
    <div class="two"><div><label>FADE BETWEEN TRACKS (SEC)</label><input type="number" id="mxFade" min="0" max="4" step="0.5"></div><div><label>&nbsp;</label><button class="btn" id="mxPrev">REFRESH PREVIEW</button></div></div>
    <label class="chk"><input type="checkbox" id="mxRep"> REPEAT THE LIST TO REACH 10 MINUTES</label>
    <input type="checkbox" id="mxChar" style="display:none">
-   <label class="chk"><input type="checkbox" id="mxOut" checked> 8-BIT SUBSCRIBE CARD AT THE END</label>
+   <label class="chk"><input type="checkbox" id="mxOut" checked> 8-BIT SUBSCRIBE CARD AT THE END</label><label class="chk"><input type="checkbox" id="mxTag" checked> VOICE TAG EVERY 13 SEC (PACKS + SAMPLES, STOPS RIPS)</label>
    <button class="go" id="mxRender">RENDER MIX VIDEO</button><div class="bar"><b id="mxProg"></b></div><div class="msg" id="mxMsg">Renders offline (faster than real time). A 15 minute mix is a large file, close other heavy tabs first.</div>
    <a id="mxDl" class="btn" style="display:none;text-align:center;margin-top:8px;text-decoration:none">DOWNLOAD MIX VIDEO</a></div></div>
   <div><div class="pn"><h4>3. PREMADE THUMBNAILS</h4><div class="two"><button class="btn" id="mxThGo">MAKE 5</button><button class="btn" id="mxThNew">NEW SET</button></div><div id="mxTh" style="margin-top:6px"></div>
@@ -650,7 +652,7 @@ function build(){
  $m('#mxTitle').value=M.title;$m('#mxFade').value=M.fade;
  $m('#mxTitle').oninput=e=>{M.title=e.target.value||K().title;preview();genAll()};
  $m('#mxFade').oninput=e=>{M.fade=Math.max(0,Math.min(4,parseFloat(e.target.value)||0))};
- $m('#mxRep').onchange=e=>{M.repeat=e.target.checked;ui()};$m('#mxChar').onchange=e=>{M.char=e.target.checked;preview()};$m('#mxOut').onchange=e=>{M.outro=e.target.checked};
+ $m('#mxRep').onchange=e=>{M.repeat=e.target.checked;ui()};$m('#mxChar').onchange=e=>{M.char=e.target.checked;preview()};$m('#mxOut').onchange=e=>{M.outro=e.target.checked};$m('#mxTag').onchange=e=>{M.vtag=e.target.checked};
  $m('#mxPrev').onclick=preview;$m('#mxPlay').onclick=()=>{PV.on?pvStop():pvPlay()};{const sk=$m('#mxSeek .mxSk');let drag=false;const at=e=>{const r=sk.getBoundingClientRect();return Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*skTot()};sk.onmousemove=e=>{const h=$m('#mxSkH'),t=at(e);h.style.left=(t/Math.max(1,skTot())*100)+'%';h.dataset.t=fmt(t)};sk.onclick=e=>pvSeek(at(e))}$m('#mxStopB').onclick=()=>pvStop();$m('#mxRender').onclick=render;
  $m('#mxThGo').onclick=()=>thumbs(false);$m('#mxThNew').onclick=()=>thumbs(true);
  $m('#mxYn').onclick=()=>{M.yt++;pickTitle()};$m('#mxGen').onclick=()=>{M.seed2=(M.seed2||0)+1;genAll()};$m('#mxYdn').onclick=()=>{M.dv=(M.dv||0)+1;yt()};
@@ -781,11 +783,13 @@ async function render(){
   /* real durations first (cheap: already probed), then render track by track */
   msg('Measuring track lengths...');await Promise.all([...new Set(list)].map(b=>probe(b).catch(()=>{})));
   const CL=FM().clip,dOf=b=>{if(b._step)return(INS[b._sid]&&INS[b._sid].dur[b._step])||3;if(b._mode)return Math.min(SPM[b._mode].sec,(M.dur[b._sid]||1e9)/SPM[b._mode].rate);const d=M.dur[b.id]||180;return CL?Math.min(d,CL):d};const CAP=isV()?90:0,tot=CAP?Math.min(CAP,list.reduce((s,b)=>s+dOf(b),0)):list.reduce((s,b)=>s+dOf(b),0);let gUs=0,done=0;const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');
+  if(M.vtag!==false&&M.kind!=='beats')await sfxLoad();
   const Lyt=[];let acc=0;for(const b of list){const d=dOf(b);Lyt.push({b,start:acc,dur:d});acc+=d}
   const t0=performance.now();
   for(let k=0;k<list.length;k++){
    msg('Preparing track '+(k+1)+' of '+list.length+'...');
    const tr=await track48(list[k]);if(CL&&tr.dur>CL){const st0=((M.cs[list[k].id]||{})[CL])||0,a0=Math.floor(st0*SR),n0=Math.floor(CL*SR);tr.L=tr.L.slice(a0,a0+n0);tr.R=tr.R.slice(a0,a0+n0);tr.dur=CL}const pre=Lyt.slice(0,k).reduce((s,o)=>s+o.dur,0);if(CAP&&pre>=CAP-.05)break;const cut=CAP&&pre+tr.dur>CAP,nf=cut?Math.floor((CAP-pre)*FPS):Math.floor(tr.dur*FPS),n=Math.floor(nf/FPS*SR),fade=Math.floor((list[k]._step?.012:M.fade)*SR);if(!cut)Lyt[k].dur=nf/FPS;
+   if(M.vtag!==false&&M.kind!=='beats')tagMix(tr.L,tr.R,pre,n);
    for(let i=0;i<n;i++){let g=1;if(fade){if(i<fade)g=i/fade;else if(n-i<fade)g=(n-i)/fade}if(cut){const e=Math.floor(1.5*SR);if(n-i<e)g*=(n-i)/e}tr.L[i]*=g;tr.R[i]*=g}
    const CH=4800;for(let o=0;o<n;o+=CH){const m=Math.min(CH,n-o),b=new Float32Array(m*2);b.set(tr.L.subarray(o,o+m),0);b.set(tr.R.subarray(o,o+m),m);const ad=new AudioData({format:'f32-planar',sampleRate:SR,numberOfFrames:m,numberOfChannels:2,timestamp:gUs+Math.round(o/SR*1e6),data:b});aenc.encode(ad);ad.close();if((o/CH)%30===0)await yieldNow()}
    const mono=new Float32Array(n);for(let i=0;i<n;i++)mono[i]=(tr.L[i]+tr.R[i])*.5;
