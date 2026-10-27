@@ -419,3 +419,6 @@ body.store #packs .card .cart:hover{background:#2a2a2a!important;color:#fff!impo
 body.store #packs .card .cart.in{background:#e0242f!important;color:#fff!important}
 .st-card[data-k="p"] .st-pr{display:block;font:800 22px Inter,sans-serif;margin-top:2px}
 body.store .cv .pl.on i{border:0!important;width:14px;height:16px;margin:0;border-left:5px solid #111!important;border-right:5px solid #111!important;display:block}body.store .cv .pl.on i:before,body.store .cv .pl.on i:after{display:none}
+/* pause icon on white play buttons must be dark (sample pack cards) */
+body.store .card.play .pl i,body.store .cv .pl.on i,body.store .view .pl.on i{background:linear-gradient(90deg,#111 0 4px,transparent 4px 8px,#111 8px 12px)!important;border:0!important;width:12px;height:14px;margin:0}
+body.store .card.play .cv .pl,body.store .card.play .pl{opacity:1!important;transform:none!important}
