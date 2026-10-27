@@ -167,7 +167,7 @@ img.th{image-rendering:auto}
 .row.play .pl i,.card.play .pl i,.bp.play .pl i{width:12px;height:14px;border:0;margin:0;background:linear-gradient(90deg,#fff 0 4px,transparent 4px 8px,#fff 8px 12px)}
 .wv{width:100%;height:42px;display:block;cursor:pointer}
 .st{text-align:center;font:600 14px Montserrat;color:#e8e8ea;letter-spacing:.06em}
-.st.pc{color:var(--gold);font-weight:700}
+.st.pc{color:var(--gold);font-weight:700}.st.pc small s{display:inline-block;font:700 14px Montserrat;letter-spacing:.02em;color:#ff5a6a;text-decoration:line-through 2px;text-decoration-color:#ff5a6a;margin-top:3px}
 .st small{display:block;font:500 9px Montserrat;letter-spacing:.3em;color:#6c6c73;margin-top:5px}
 .ic{display:flex;gap:14px;justify-content:center}
 .ic button{background:none;border:0;padding:2px;color:#c8c8cc}
@@ -674,10 +674,10 @@ function renderBeats(){
   const d=document.createElement('div');d.className='row';
   const tags=esc(B.tags||'').replace(/ ?\/ ?/g,'&nbsp;&nbsp;&nbsp;');
   d.innerHTML=`${thumb(B,i,'th')}<span class="no">${String(i+1).padStart(2,'0')}</span>
-  <div><div class="ti"><a class="tl" href="beat/${esc(bslug(B))}/">${esc(B.title)}</a></div><div class="tg">${tags}</div><div class="ms">${money(eff(B))}</div></div>
+  <div><div class="ti"><a class="tl" href="beat/${esc(bslug(B))}/">${esc(B.title)}</a></div><div class="tg">${tags}</div><div class="ms">${money(eff(B))} ${(()=>{const e=eff(B),w=Math.max(Number(B.price)>e?Number(B.price):0,window.MZSlash?MZSlash(e,'b'):0);return w>e?'<s>'+money(w)+'</s>':''})()}</div></div>
   <button class="pl" aria-label="Play ${esc(B.title)}"><i></i></button>
   <canvas class="wv" height="42"></canvas>
-  <div class="st tm">--:--<small>TIME</small></div><div class="st pc">${money(eff(B))}<small>${promo.promo_enabled&&eff(B)!==Number(B.price)?'<s>'+money(B.price)+'</s>':'PRICE'}</small></div>
+  <div class="st tm">--:--<small>TIME</small></div><div class="st pc">${money(eff(B))}<small>${(()=>{const e=eff(B),w=Math.max(Number(B.price)>e?Number(B.price):0,window.MZSlash?MZSlash(e,'b'):0);return w>e?'<s>'+money(w)+'</s>':''})()||'PRICE'}</small></div>
   <div class="ic"><button class="lk" aria-label="Like">${I.heart}</button><button class="sh" aria-label="Share">${I.share}</button></div>
   <button class="cart">ADD TO CART</button>${B.free_download&&B.preview_path?`<button class="dl" aria-label="Free download">${I.dl}</button>`:'<span></span>'}`;
   list.appendChild(d);
@@ -936,7 +936,7 @@ function showBeatPage(i){
  if(i<0||!beats[i]){box.innerHTML='<button class="back" id="bBack">&larr; ALL BEATS</button><div class="empty"><b>NOT FOUND</b>THIS BEAT IS NOT AVAILABLE</div>';$('#bBack').onclick=()=>{history.pushState(null,'',BASEPATH);route()};showView('beat');return}
  const B=beats[i],tg=(B.tags||'').split('/').map(x=>x.trim()).filter(Boolean),old=promo.promo_enabled&&eff(B)!==Number(B.price);
  const others=beats.map((b,k)=>[b,k]).filter(x=>x[1]!==i).slice(0,4);
- box.innerHTML='<button class="x" id="bX" aria-label="Close beat page">&times;</button><button class="back" id="bBack">&larr; ALL BEATS</button><div class="bp'+(cur===i&&playing?' play':'')+'"><div class="cov">'+thumb(B,i,'')+'</div><div><h1>'+esc(B.title)+'</h1><div class="tgs">'+tg.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div><div class="prc">'+money(eff(B))+(old?'<s>'+money(B.price)+'</s>':'')+'</div><canvas class="bwv" id="bwv"></canvas>'+(B.description?'<div class="d">'+esc(B.description)+'</div>':'')+'<div class="acts2"><button class="pl" id="bPlay" aria-label="Play"><i></i></button><button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bLike" style="border-color:#4a4a50;color:#fff">SAVE</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(B.preview_path?'<button class="cart" id="bRec" style="border-color:#4a4a50;color:#fff">RECORD OVER IT</button>':'')+(B.free_download&&B.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE BEATS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1],'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
+ box.innerHTML='<button class="x" id="bX" aria-label="Close beat page">&times;</button><button class="back" id="bBack">&larr; ALL BEATS</button><div class="bp'+(cur===i&&playing?' play':'')+'"><div class="cov">'+thumb(B,i,'')+'</div><div><h1>'+esc(B.title)+'</h1><div class="tgs">'+tg.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div><div class="prc">'+(window.MZPrice?MZPrice('b',B):money(eff(B))+(old?'<s>'+money(B.price)+'</s>':''))+'</div><canvas class="bwv" id="bwv"></canvas>'+(B.description?'<div class="d">'+esc(B.description)+'</div>':'')+'<div class="acts2"><button class="pl" id="bPlay" aria-label="Play"><i></i></button><button class="cart" id="bCart">ADD TO CART</button><button class="cart" id="bLike" style="border-color:#4a4a50;color:#fff">SAVE</button><button class="cart" id="bShare" style="border-color:#4a4a50;color:#fff">SHARE</button>'+(B.preview_path?'<button class="cart" id="bRec" style="border-color:#4a4a50;color:#fff">RECORD OVER IT</button>':'')+(B.free_download&&B.preview_path?'<button class="cart" id="bFree" style="border-color:#4a4a50;color:#fff">FREE DOWNLOAD</button>':'')+'</div></div></div>'+(others.length?'<div class="more"><h4>MORE BEATS</h4><div class="mr">'+others.map(x=>'<a data-s="'+esc(bslug(x[0]))+'">'+thumb(x[0],x[1],'')+'<span>'+esc(x[0].title)+'</span></a>').join('')+'</div></div>':'');
  paintArt(box);
  $('#bBack').onclick=$('#bX').onclick=closeBeatPage;
  $('#bPlay').onclick=()=>play(i);
@@ -1953,8 +1953,8 @@ window.slotsBoot=async function(){slotsLive=false;return;
 if($('#slotBtn'))$('#slotBtn').onclick=async()=>{try{if(!window.slotsOpen)await loadScript('slots.js?v=4');await window.slotsOpen()}catch(e){toast('SLOTS FAILED TO LOAD')}};
 checkAdmin();loadAll();frame();
 </script>
-<script src="store.js?v=34"></script>
-<script src="store2.js?v=9"></script>
+<script src="store.js?v=35"></script>
+<script src="store2.js?v=11"></script>
 <script src="store3.js?v=3"></script>
 <script>try{history.scrollRestoration='manual'}catch(e){}</script>
 <script src="store4.js?v=21"></script>

@@ -6,8 +6,8 @@ const $=s=>document.querySelector(s),esc=s=>String(s==null?'':s).replace(/[&<>"]
 const G=n=>{try{return (0,eval)(n)}catch(e){return undefined}};
 const S=()=>G('promo')||{},BS=()=>G('beats')||[],PS=()=>G('packs')||[],m=v=>{try{return money(v)}catch(e){return'$'+Number(v).toFixed(2)}};
 const NEWDAYS=14,isNew=x=>!!(x&&x.created_at&&(Date.now()-new Date(x.created_at))<NEWDAYS*864e5);
-/* sample packs show a made-up higher "was" price crossed out: about 25% above the real price (or the % set in PROMO), ending in .99 */
-window.MZSlash=(p,k)=>{if(k!=='p'||!(p>0))return 0;const pc=Number(S().slash_pct)||25;return Math.ceil(p*(1+Math.min(pc,60)/100))-.01};
+/* beats and sample packs show a made-up higher "was" price crossed out, ending in .99: packs about 25% above the real price (or the % set in PROMO), beats about 65% above */
+window.MZSlash=(p,k)=>{if((k!=='p'&&k!=='b')||!(p>0))return 0;const pc=k==='b'?65:(Number(S().slash_pct)||25);return Math.ceil(p*(1+Math.min(pc,k==='b'?100:60)/100))-.01};
 function price(k,x){let p=Number(x.price);try{if(k==='b')p=eff(x)}catch(e){}const was=Math.max(Number(x.price)>p?Number(x.price):0,window.MZSlash(p,k));return m(p)+(was>p?' <s class="was">'+m(was)+'</s>':'')}
 window.MZPrice=price;window.MZIsNew=isNew;
 
