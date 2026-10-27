@@ -4,19 +4,27 @@
 (function(){
 const au=document.getElementById('au'),pg=document.getElementById('pg');if(!au||!pg)return;
 const cache=new Map();
-async function load(u){if(cache.has(u))return cache.get(u);const p=(async()=>{const buf=await fetch(u).then(r=>r.arrayBuffer());const C=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+/* the signed link changes every few hours, so waveforms are remembered by the file path */
+const keyOf=u=>{try{const S=window.MZSign||{};for(const k in S)if(S[k]===u)return k}catch(e){}return String(u).split('?')[0]};
+const saved=k=>{try{const s=localStorage.getItem('mzpk:'+k);if(!s)return null;const a=new Float32Array(s.length);for(let i=0;i<s.length;i++)a[i]=(s.charCodeAt(i)-48)/74;return a}catch(e){return null}};
+const save=(k,pk)=>{try{let s='';for(const v of pk)s+=String.fromCharCode(48+Math.round(Math.max(0,Math.min(1,v))*74));localStorage.setItem('mzpk:'+k,s)}catch(e){}};
+/* a dim stand-in shape (same every time for a track) shown until the real waveform is ready */
+function fake(k){let h=2166136261;for(let i=0;i<k.length;i++){h^=k.charCodeAt(i);h=Math.imul(h,16777619)}const r=()=>((h=Math.imul(h^(h>>>15),2246822507)>>>0)/4294967296),a=new Float32Array(600);let v=.5;for(let i=0;i<600;i++){v+=(r()-.5)*.35;v=Math.max(.18,Math.min(.95,v));a[i]=v*(.55+.45*Math.abs(Math.sin(i*.21)))}return a}
+async function load(u){const k=keyOf(u),sv=saved(k);if(sv)return sv;if(cache.has(k))return cache.get(k);const p=(async()=>{const buf=await fetch(u).then(r=>r.arrayBuffer());const C=window.OfflineAudioContext||window.webkitOfflineAudioContext;
  const a=await new C(1,2,44100).decodeAudioData(buf),N=600,L=a.length,ch=[...Array(a.numberOfChannels)].map((_,c)=>a.getChannelData(c)),pk=new Float32Array(N),step=Math.floor(L/N)||1;
  for(let i=0;i<N;i++){let m=0;const s=i*step,e=Math.min(L,s+step);for(let j=s;j<e;j+=4)for(const d of ch){const v=Math.abs(d[j]);if(v>m)m=v}pk[i]=m}
- let mx=0;for(const v of pk)mx=Math.max(mx,v);if(mx>0)for(let i=0;i<N;i++)pk[i]/=mx;return pk})();cache.set(u,p);p.catch(()=>cache.delete(u));return p}
+ let mx=0;for(const v of pk)mx=Math.max(mx,v);if(mx>0)for(let i=0;i<N;i++)pk[i]/=mx;save(k,pk);return pk})();cache.set(k,p);p.catch(()=>cache.delete(k));return p}
 
 /* one clip: el gets the markup; o = {url(), name(), current(), start()} */
 function clip(el,o){el.innerHTML='<div class="wc-h"><span></span></div><div class="wc-b"><canvas></canvas><i class="wc-ph"></i></div>';el.classList.add('wclip');
- const cv=el.querySelector('canvas'),ph=el.querySelector('.wc-ph'),nm=el.querySelector('.wc-h span');let peaks=null,url='',drag=false,pend=null;
+ const cv=el.querySelector('canvas'),ph=el.querySelector('.wc-ph'),nm=el.querySelector('.wc-h span');let peaks=null,url='',drag=false,pend=null,ghost=null,from=null,t0=0;
  function draw(){const r=cv.getBoundingClientRect(),dpr=devicePixelRatio||1,W=Math.max(1,Math.round(r.width*dpr)),H=Math.max(1,Math.round(r.height*dpr));if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
-  const g=cv.getContext('2d');g.clearRect(0,0,W,H);const mid=H/2;g.fillStyle='#ffffff';if(!peaks){g.fillRect(0,mid-dpr/2,W,dpr);return}
-  const n=peaks.length;for(let x=0;x<W;x++){const v=peaks[Math.min(n-1,Math.floor(x/W*n))],h=Math.max(dpr,v*(H*.46));g.fillRect(x,mid-h,1,h*2)}}
+  const g=cv.getContext('2d');g.clearRect(0,0,W,H);const mid=H/2;g.fillStyle='#ffffff';const src=peaks||ghost;if(!src){g.fillRect(0,mid-dpr/2,W,dpr);return}
+  const e=peaks&&from?Math.min(1,(performance.now()-t0)/350):1,ease=1-Math.pow(1-e,3);g.globalAlpha=peaks?(from?.35+.65*ease:1):.3+.08*Math.sin(performance.now()/260);
+  const n=src.length;for(let x=0;x<W;x++){const ix=Math.min(n-1,Math.floor(x/W*n));let v=src[ix];if(peaks&&from&&e<1)v=from[ix]+(v-from[ix])*ease;const h=Math.max(dpr,v*(H*.46));g.fillRect(x,mid-h,1,h*2)}g.globalAlpha=1;
+  if((peaks&&from&&e<1)||(!peaks&&ghost&&el.isConnected))requestAnimationFrame(draw);else from=null}
  function pos(){const d=au.duration,on=o.current();ph.style.left=(on&&d?Math.min(1,au.currentTime/d)*100:0)+'%';el.classList.toggle('live',on)}
- async function refresh(){nm.textContent=o.name();const u=o.url();if(!u||u===url){draw();pos();return}url=u;peaks=null;draw();try{const p=await load(u);if(url===u){peaks=p;draw()}}catch(e){}pos()}
+ async function refresh(){nm.textContent=o.name();const u=o.url();if(!u||u===url){draw();pos();return}url=u;peaks=null;ghost=fake(keyOf(u));draw();try{const p=await load(u);if(url===u){from=ghost;t0=performance.now();peaks=p;ghost=null;draw()}}catch(e){if(url===u){ghost=null;draw()}}pos()}
  const frac=e=>{const r=el.getBoundingClientRect();return Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))};
  const seek=f=>{if(o.current()&&au.duration){au.currentTime=f*au.duration;pos()}else{pend=f;o.start()}};
  el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();drag=true;try{el.setPointerCapture(e.pointerId)}catch(_){}seek(frac(e))},true);
