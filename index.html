@@ -556,6 +556,8 @@ const pub=p=>!p?'':String(p).indexOf('r2:')===0?((window.MZSign||{})[p]||''):/^(
 /* play links for previews kept in Cloudflare: asked for in one go, good for 6 hours, refreshed every 3 */
 window.MZSign=window.MZSign||{};window.MZPrime=async function(paths,force){const keys=[...new Set((paths||[]).filter(p=>p&&String(p).indexOf('r2:previews/')===0&&(force||!MZSign[p])))];if(!keys.length)return;
  for(let i=0;i<keys.length;i+=300){try{const r=await fetch(SB_URL+'/functions/v1/checkout',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify({action:'preview-urls',keys:keys.slice(i,i+300)})}).then(r=>r.json());Object.assign(MZSign,r.urls||{})}catch(e){}}};
+/* if a preview fails to load (expired or blocked link), get a fresh link and retry once */
+(f=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',f):f())(()=>{const au=document.getElementById('au');if(!au)return;let last='';au.addEventListener('error',async()=>{const u=au.src;if(!u||u===last)return;const k=Object.keys(MZSign).find(x=>MZSign[x]===u);if(!k)return;last=u;try{await MZPrime([k],true);if(MZSign[k]&&MZSign[k]!==u){au.src=MZSign[k];au.play().catch(()=>{})}}catch(e){}})});
 const primeAll=force=>MZPrime([...(beats||[]),...(packs||[]),...(window.MZSamplesAll||[])].map(x=>x.preview_path),force);
 setInterval(()=>{primeAll(true)},3*3600e3);
 const eff=B=>promo.promo_enabled?Number(promo.promo_price):Number(B.price);
@@ -690,7 +692,7 @@ function renderBeats(){
   d.querySelector('.sh').onclick=()=>{try{navigator.clipboard.writeText(location.href.split('#')[0]+'#'+encodeURIComponent(B.title))}catch(e){}toast('LINK COPIED')};
   const dlb=d.querySelector('.dl');if(dlb)dlb.onclick=()=>freeDownload(B);
   d.querySelector('.cart').onclick=e=>toggleCart('b:'+B.id,e.currentTarget);
-  if(B.preview_path){const a=new Audio();a.preload='metadata';a.src=pub(B.preview_path);a.onloadedmetadata=()=>{d.querySelector('.tm').firstChild.textContent=fmt(a.duration)}}
+  if(B.preview_path){const a=new Audio();a.crossOrigin='anonymous';a.preload='metadata';a.src=pub(B.preview_path);a.onloadedmetadata=()=>{d.querySelector('.tm').firstChild.textContent=fmt(a.duration)}}
  });
  paintArt(list);syncCart();ui();
 }
@@ -1549,7 +1551,7 @@ async function boRender(){
 let demoA=null,demoB=null;
 function demoStop(){if(demoA){try{demoA.pause()}catch(e){}}if(demoB){demoB.classList.remove('on');demoB.innerHTML='&#9654; DEMO'}demoA=null;demoB=null}
 function demoToggle(r,btn){const same=demoB===btn;demoStop();if(same)return;
- const a=new Audio(pub(r.preview_path));demoA=a;demoB=btn;btn.classList.add('on');btn.innerHTML='&#9632; STOP';
+ const a=new Audio();a.crossOrigin='anonymous';a.src=pub(r.preview_path);demoA=a;demoB=btn;btn.classList.add('on');btn.innerHTML='&#9632; STOP';
  a.play().catch(()=>{toast('Could not play this preview');demoStop()});
  a.ontimeupdate=()=>{if(demoA===a){if(a.currentTime>=20)demoStop();else if(a.currentTime>17)a.volume=Math.max(0,(20-a.currentTime)/3)}};a.onended=()=>{if(demoA===a)demoStop()}}
 function dragSort(list,onDone){list.querySelectorAll('.bi[data-id] .dh').forEach(h=>{h.onpointerdown=e=>{e.preventDefault();const row=h.closest('.bi');row.classList.add('drag');try{h.setPointerCapture(e.pointerId)}catch(x){}let done=false;
