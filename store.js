@@ -19,7 +19,7 @@ document.body.classList.add('store');
 /* top: promo bar, centred logo, tools (the site's own buttons, moved), nav, ticker */
 const top=document.createElement('div');top.id='stTop';
 top.innerHTML=`<div class="st-bar">${esc(PROMO)}</div><div class="st-head"><a class="st-logo" id="stLogo">MZ<span>PRD</span></a><div class="st-tools" id="stTools"></div></div>
-<nav class="st-nav"><a data-h="home" class="on">Home</a><a data-v="kits">Sample Packs</a><a data-v="beats">Beats</a><a data-v="crate">Crate Dig</a><a data-v="about">About</a></nav>
+<nav class="st-nav"><a data-h="home" class="on">Home</a><a data-v="kits">Sample Packs</a><a data-v="beats">Beats</a><a data-f="1">Feed</a><a data-v="crate">Crate Dig</a><a data-v="about">About</a></nav>
 <div class="st-tick"><div>${Array(8).fill(TICK.map(t=>'<span>⋆ '+esc(t)+'</span>').join('')).join('')}</div></div>`;
 document.body.insertBefore(top,document.body.firstChild);
 const tools=document.querySelector('header .tools');if(tools)$('#stTools').appendChild(tools);
@@ -32,6 +32,10 @@ const navA=[...top.querySelectorAll('.st-nav a')];
 function mark(v){navA.forEach(a=>a.classList.toggle('on',(a.dataset.v||a.dataset.h)===v))}
 function showHome(push){document.title='MZPRD | Beats & Sample Packs';document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-home'));mark('home');if(push&&location.pathname!==(window.BASEPATH||'/'))history.pushState(null,'',window.BASEPATH||'/');render();scrollTo(0,0)}
 navA.forEach(a=>a.onclick=()=>{if(a.dataset.v){const b=document.querySelector('header nav button[data-v="'+a.dataset.v+'"]');if(b)b.click();mark(a.dataset.v)}else if(a.dataset.h==='home')showHome(true);else{const b=document.querySelector('header nav button[data-v="about"]');if(b)b.click();mark('about');setTimeout(()=>{const f=$('#stFaq');if(f)f.scrollIntoView({behavior:'smooth'})},120)}});
+/* the feed: nothing of it loads until someone opens it */
+const feedGo=()=>{const css=document.createElement('link');if(!window.MZFeed&&!document.getElementById('fdCss')){css.id='fdCss';css.rel='stylesheet';css.href=(window.BASEPATH||'/')+'feed.css?v=1';document.head.appendChild(css)}
+ if(window.MZFeed)return MZFeed.open();const s=document.createElement('script');s.src=(window.BASEPATH||'/')+'feed.js?v=1';s.onload=()=>MZFeed.open();document.head.appendChild(s)};
+top.querySelector('[data-f]').onclick=feedGo;if(/^#feed/.test(location.hash))setTimeout(feedGo,0);
 window.showHome=showHome;$('#stLogo').onclick=()=>showHome(true);
 /* keep the nav underline in step with the site's own view changes */
 new MutationObserver(()=>{const on=document.querySelector('.view.on');if(!on)return;const v=on.id.slice(2);mark(v==='beat'?((()=>{try{return pageKind==='p'}catch(e){return false}})()?'kits':'beats'):v)}).observe(caseEl,{subtree:true,attributes:true,attributeFilter:['class']});

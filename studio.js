@@ -165,6 +165,7 @@ function html(){
    <label class="chk"><input type="checkbox" id="sEnd" checked> END CARD</label><label class="chk"><input type="checkbox" id="sTag" checked> VOICE TAG EVERY 13 SEC (PACKS + SAMPLES)</label><select id="sEndT"><option value="sell">Sell the beat (price, link, instant download)</option><option value="sub">8-bit subscribe card</option></select>
   </div>
   <button class="go" id="sRender">RENDER VIDEO</button>
+  <button class="go" id="sFeed" style="margin-top:8px">SEND TO FEED (20 SEC, 720P)</button>
   <div class="bar"><b id="sProg"></b></div><div class="msg" id="sMsg">Keep this tab open and visible while it renders. A 3 minute beat takes about 3 minutes.</div>
   <a id="sDl" class="btn" style="display:none;text-align:center;margin-top:8px;text-decoration:none">DOWNLOAD VIDEO</a>
   <a id="sDl2" class="btn" style="display:none;text-align:center;margin-top:8px;text-decoration:none">DOWNLOAD 9:16 VIDEO</a>
@@ -591,6 +592,20 @@ function badge(p){const b=document.querySelector('.bh [data-t=video]');if(b)b.te
 if(!window.__mzNav){window.__mzNav=1;window.__mzR=0;document.addEventListener('click',e=>{if(!(window.__mzR>0))return;const a=e.target.closest&&e.target.closest('a[href]');if(!a||a.hasAttribute('download')||a.target==='_blank'||a.href.startsWith('blob:')||a.getAttribute('href').startsWith('#'))return;e.preventDefault();e.stopPropagation();window.open(a.href,'_blank');try{toast('RENDER STILL RUNNING HERE, OPENED IN A NEW TAB')}catch(x){}},true)}
 const beforeUnload=e=>{if(R.busy){e.preventDefault();e.returnValue=''}};
 function loadMuxer(){return window.Mp4Muxer?Promise.resolve():new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mp4-muxer.js',document.baseURI).href;sc.onload=ok;sc.onerror=()=>no(new Error('muxer'));document.head.appendChild(sc)})}
+/* the chosen template as a small 20 second 9:16 video, straight to Cloudflare and into the feed */
+async function sendFeed(){
+ if(R.busy)return;if(!S.buf||!S.item||!S.item.id){msg('Pick a beat, pack or sample first.');return}
+ const t=S.kind==='beats'?'b':S.kind==='packs'?'p':S.kind==='samples'?'s':'';if(!t){msg('Pick a beat, pack or sample first.');return}
+ if(!window.VideoEncoder||!window.AudioEncoder){msg('Send to Feed needs Chrome or Edge.');return}
+ stopPlay();const f0=S.fmt,k=t+':'+S.item.id;
+ try{S.fmt='9:16';const blob=await renderFast({feed:1,tag:'FEED '});S.fmt=f0;msg('Uploading to Cloudflare...');
+  const path=await upload(new File([blob],'feed.mp4',{type:'video/mp4'}),'private-files','previews',()=>{});
+  const old=await sb.from('feed_items').select('video_path').eq('item_key',k).maybeSingle(),{error}=await sb.from('feed_items').upsert({item_key:k,shown:true,video_path:path});
+  if(error){await adminCall({action:'r2-delete',key:path.slice(3)}).catch(()=>{});throw error}
+  if(old.data&&old.data.video_path)await adminCall({action:'r2-delete',key:String(old.data.video_path).slice(3)}).catch(()=>{});
+  msg('In the feed. '+(blob.size/1048576).toFixed(1)+' MB.');try{toast('SENT TO FEED')}catch(e){}}
+ catch(e){console.warn('feed send failed',e);OFF=null;R.busy=false;badge();$s('#sRender').disabled=false;document.getElementById('studio').classList.remove('busy');msg('Send to Feed failed ('+((e&&e.message)||e)+').')}
+ finally{S.fmt=f0;redraw()}}
 async function render(){
  if(R.busy)return;if(!S.buf){msg('Add audio first (preview or your own file).');return}
  stopPlay();
@@ -609,8 +624,8 @@ async function render(){
 }
 async function renderFast(o){
  o=o||{};await loadMuxer();
- const[w,h]=dims(),fps=30,dur=len(),N=Math.ceil(dur*fps),btn=$s('#sRender'),dl=o.dl||$s('#sDl'),root=document.getElementById('studio'),tag=o.tag||'';
- const pickV=async()=>{for(const c of [{codec:'avc1.640028',mux:'avc'},{codec:'avc1.4d0028',mux:'avc'},{codec:'avc1.42E028',mux:'avc'},{codec:'vp09.00.40.08',mux:'vp9'}]){const cfg={codec:c.codec,width:w,height:h,bitrate:8e6,framerate:fps};try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return{...c,cfg}}catch(e){}}return null};
+ const[w,h]=o.feed?[720,1280]:dims(),fps=o.feed?24:30,dur=o.feed?Math.min(20,len()):len(),N=Math.ceil(dur*fps),btn=$s('#sRender'),dl=o.dl||$s('#sDl'),root=document.getElementById('studio'),tag=o.tag||'';
+ const pickV=async()=>{for(const c of [{codec:'avc1.640028',mux:'avc'},{codec:'avc1.4d0028',mux:'avc'},{codec:'avc1.42E028',mux:'avc'},{codec:'vp09.00.40.08',mux:'vp9'}]){const cfg={codec:c.codec,width:w,height:h,bitrate:o.feed?15e5:8e6,framerate:fps};try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return{...c,cfg}}catch(e){}}return null};
  const pickA=async()=>{for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){try{const r=await AudioEncoder.isConfigSupported({codec:c.codec,sampleRate:48000,numberOfChannels:2,bitrate:192000});if(r&&r.supported)return c}catch(e){}}return null};
  const vc=await pickV(),ac=await pickA();if(!vc||!ac)throw new Error('no codec');
  R.busy=true;root.classList.add('busy');btn.disabled=true;dl.style.display='none';badge(0);addEventListener('beforeunload',beforeUnload);window.__mzR=(window.__mzR||0)+1;
@@ -623,17 +638,17 @@ async function renderFast(o){
  const target=new Mp4Muxer.ArrayBufferTarget(),muxer=new Mp4Muxer.Muxer({target,video:{codec:vc.mux,width:w,height:h},audio:{codec:ac.mux,numberOfChannels:2,sampleRate:48000},fastStart:'in-memory'});
  let err=null;
  const venc=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>{err=e}});venc.configure(vc.cfg);
- const aenc=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>{err=e}});aenc.configure({codec:ac.codec,sampleRate:48000,numberOfChannels:2,bitrate:192000});
+ const aenc=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>{err=e}});aenc.configure({codec:ac.codec,sampleRate:48000,numberOfChannels:2,bitrate:o.feed?128e3:192000});
  const t0=performance.now();
  try{
   const L=rb.getChannelData(0),Rr=rb.getChannelData(1),CH=4800;
   for(let o=0,k=0;o<L.length;o+=CH,k++){const n=Math.min(CH,L.length-o),buf=new Float32Array(n*2);buf.set(L.subarray(o,o+n),0);buf.set(Rr.subarray(o,o+n),n);
    const ad=new AudioData({format:'f32-planar',sampleRate:48000,numberOfFrames:n,numberOfChannels:2,timestamp:Math.round(o/48000*1e6),data:buf});aenc.encode(ad);ad.close();if(k%25===0)await yieldNow()}
-  const cv=document.createElement('canvas');cv.width=w;cv.height=h;S.bd=null;OFF={prev:new Float32Array(512)};
+  const cv=document.createElement('canvas'),[sw,sh]=o.feed?dims():[w,h],small=document.createElement('canvas');cv.width=sw;cv.height=sh;small.width=w;small.height=h;const sx=small.getContext('2d');sx.imageSmoothingQuality='high';S.bd=null;OFF={prev:new Float32Array(512)};
   for(let i=0;i<N;i++){
    if(err)throw err;
    frame(cv,Math.min(i/fps,dur),dur);
-   const vf=new VideoFrame(cv,{timestamp:Math.round(i*1e6/fps),duration:Math.round(1e6/fps)});venc.encode(vf,{keyFrame:i%90===0});vf.close();
+   if(o.feed)sx.drawImage(cv,0,0,w,h);const vf=new VideoFrame(o.feed?small:cv,{timestamp:Math.round(i*1e6/fps),duration:Math.round(1e6/fps)});venc.encode(vf,{keyFrame:i%90===0});vf.close();
    while(venc.encodeQueueSize>8){await Promise.race([new Promise(r=>venc.addEventListener('dequeue',r,{once:true})),yieldNow()]);if(err)throw err}
    if(i%4===0){const p=Math.round(i/N*100);$s('#sProg').style.width=p+'%';badge(p);msg(tag+'Rendering '+p+'% ... you can switch tabs, it keeps going.');await yieldNow()}
   }
@@ -644,7 +659,7 @@ async function renderFast(o){
  R.busy=false;root.classList.remove('busy');btn.disabled=false;badge();$s('#sProg').style.width='100%';
  msg(tag+'Done in '+Math.round((performance.now()-t0)/1000)+'s. '+(blob.size/1048576).toFixed(1)+' MB MP4. Click DOWNLOAD VIDEO.');
  try{toast('VIDEO READY: '+dl.download)}catch(e){}
- redraw();
+ redraw();if(o.feed)return blob;
 }
 async function renderRT(){
  if(!S.buf){msg('Add audio first (preview or your own file).');return}
@@ -929,7 +944,7 @@ function wire(){
   if(A&&A.playing){stopPlay();redraw();return}
   if(!S.buf){msg('Add audio first.');return}
   playFrom(scrub)};
- q('#sRender').onclick=render;
+ q('#sRender').onclick=render;q('#sFeed').onclick=sendFeed;
  document.querySelectorAll('#studio [data-c]').forEach(b=>b.onclick=async()=>{const el=q('#'+b.dataset.c);el.select();try{await navigator.clipboard.writeText(el.value);toast('COPIED')}catch(e){document.execCommand('copy');toast('COPIED')}});
 }
 window.studioOpen=async function(){

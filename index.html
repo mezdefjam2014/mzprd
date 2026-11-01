@@ -508,11 +508,12 @@ html.ready #mzLoad{opacity:0;visibility:hidden;pointer-events:none}
 </div></div>
 
 <div id="bo">
- <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="samples">SINGLE SAMPLES</button><button data-t="promo">PROMO</button><button data-t="sales">SALES</button><button data-t="accounts">ACCOUNTS</button><button data-t="video">VIDEO STUDIO</button><button data-t="email">EMAIL</button><button data-t="show">SHOW MAKER</button><button data-t="mpc">MPC</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
+ <div class="bh"><h2>BACK OFFICE</h2><button data-t="beats" class="on">BEATS</button><button data-t="packs">SAMPLE PACKS</button><button data-t="samples">SINGLE SAMPLES</button><button data-t="promo">PROMO</button><button data-t="sales">SALES</button><button data-t="accounts">ACCOUNTS</button><button data-t="video">VIDEO STUDIO</button><button data-t="feed">FEED</button><button data-t="email">EMAIL</button><button data-t="show">SHOW MAKER</button><button data-t="mpc">MPC</button><button id="boSite">VIEW SITE</button><button id="boOut">LOG OUT</button></div>
  <div id="pbk"></div>
  <div id="pbkBar" style="display:none;margin:0 0 16px"><button class="bo-btn" id="pbkOpen" type="button" style="border-color:var(--gold);color:var(--gold)">&#9733; PACK BUILDER: BUILD A PACK FASTER (DRAFTS USE NO CLOUD SPACE UNTIL YOU PUBLISH)</button></div>
  <div id="studio"></div>
  <div id="emailst"></div>
+ <div id="feedmk" style="display:none"></div>
  <div id="showmk"></div>
  <div id="mpcmk"></div>
  <div class="bo2">
@@ -1460,7 +1461,7 @@ async function checkAdmin(){
  LINK.textContent=isAdmin?'BACK OFFICE':'LOGIN';
  if(window.slotsBoot)window.slotsBoot();
 }
-const ADM=['beats','packs','samples','promo','sales','accounts','video','email','show','mpc'],adminRel=()=>location.pathname.slice(BASEPATH.length).match(/^admin\/(?:([a-z]+)\/)?$/);
+const ADM=['beats','packs','samples','promo','sales','accounts','video','email','show','mpc','feed'],adminRel=()=>location.pathname.slice(BASEPATH.length).match(/^admin\/(?:([a-z]+)\/)?$/);
 function syncBoTabs(){document.querySelectorAll('.bh [data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t===tab))}
 function goAdmin(t){if(!ADM.includes(t))t='beats';tab=t;editing=null;if(!adminRel()||adminRel()[1]!==t)history.pushState(null,'',BASEPATH+'admin/'+t+'/');syncBoTabs();openBO()}
 function leaveAdmin(){if(!document.getElementById('v-home')){location.href=BASEPATH;return}$('#bo').classList.remove('on');if(window.studioClose)studioClose();if(adminRel())history.pushState(null,'',BASEPATH);route()}
@@ -1492,12 +1493,13 @@ const FIELDS={
  packs:{table:'packs',title:'SAMPLE PACK',files:[['cover_path','PACK IMAGE','image/*','public-media','covers'],['preview_path','PREVIEW AUDIO (optional, public)','audio/*','private-files','previews'],['file_path','PACK FILE (.zip, private, any size)','.zip,application/zip,audio/*','private-files','packs']]}
 };
 function loadScript(f){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+f;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
-function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=123';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function loadStudio(){return window.studioOpen?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=BASEPATH+'studio.js?v=124';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
 async function boRender(){
  {const pb=document.getElementById('pbkBar');if(pb)pb.style.display=tab==='packs'?'block':'none'}
  const vid=tab==='video';document.querySelector('#bo .bo2').style.display=vid?'none':'';
  document.getElementById('bo2b').style.display='none';document.getElementById('bo2c').style.display='none';
  if(window.emailClose)emailClose();if(window.showMakerClose)showMakerClose();if(window.mpcClose)mpcClose();
+ {const fm=document.getElementById('feedmk');fm.style.display=tab==='feed'?'':'none';if(tab==='feed'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.feedBoOpen)await loadScript('feedbo.js?v=1');await feedBoOpen(fm)}catch(e){toast('FEED FAILED TO LOAD')}return}}
  if(tab==='email'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.emailOpen)await loadScript('email.js?v=7');await emailOpen()}catch(e){toast('EMAIL STUDIO FAILED TO LOAD')}return}
  if(tab==='mpc'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.mpcOpen)await loadScript('mpc.js?v=171');await mpcOpen();try{if(!window.mpcSkin)await loadScript('mpc-skin.js?v=1');mpcSkin()}catch(e){}}catch(e){toast('MPC FAILED TO LOAD')}return}
  if(tab==='show'){document.querySelector('#bo .bo2').style.display='none';if(window.studioClose)studioClose();try{if(!window.MZShow)await loadScript('show.js?v=15');if(!window.MZShowFX)await loadScript('showfx.js?v=3');if(!window.showMakerOpen)await loadScript('showmaker.js?v=16');await showMakerOpen()}catch(e){toast('SHOW MAKER FAILED TO LOAD')}return}
@@ -1967,7 +1969,7 @@ window.slotsBoot=async function(){slotsLive=false;return;
 if($('#slotBtn'))$('#slotBtn').onclick=async()=>{try{if(!window.slotsOpen)await loadScript('slots.js?v=4');await window.slotsOpen()}catch(e){toast('SLOTS FAILED TO LOAD')}};
 checkAdmin();loadAll();frame();
 </script>
-<script src="store.js?v=35"></script>
+<script src="store.js?v=36"></script>
 <script src="store2.js?v=11"></script>
 <script src="store3.js?v=3"></script>
 <script>try{history.scrollRestoration='manual'}catch(e){}</script>
