@@ -253,7 +253,11 @@ function shortDesc(d) {
 
 /* ----- crate dig (single samples) ----- */
 {
-  write('crate-dig', render({
+  for (const [rel, name] of [['feed', 'Feed'], ['feed/beats', 'Beats Feed'], ['feed/packs', 'Sample Packs Feed'], ['feed/samples', 'Samples Feed']]) {
+  write(rel, render({ path: rel + '/', title: `${name} | MZPRD`, desc: `Swipe through MZPRD ${name.toLowerCase()} and hear every demo.`, h1: name, page: { kind: 'view', v: 'beats', title: `${name} | MZPRD` }, content: '', ld: [] }))
+  addUrl(rel + '/')
+}
+write('crate-dig', render({
     path: 'crate-dig/', title: 'Crate Dig: Single Samples | MZPRD',
     desc: 'Dig through the MZPRD crate: single samples, soul chops, drum breaks and loops. Flip through the records, drop one on the turntable and preview it.',
     h1: 'Crate Dig', page: { kind: 'view', v: 'crate', title: 'Crate Dig: Single Samples | MZPRD' }, content: '',
