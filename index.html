@@ -848,7 +848,9 @@ function showDone(o,fresh){
  d.innerHTML='<h3>'+(fresh?'THANK YOU!':'YOUR DOWNLOADS')+'</h3>'+(fresh?'<div style="font:500 13px/1.6 Montserrat;color:#b8b8be;margin-bottom:6px">Payment received. PayPal has emailed you a receipt.</div>':'')+
   '<div class="dlt">AVAILABLE FOR <b id="dlTime">'+mmss(o.exp-Date.now())+' LEFT</b> IN THIS BROWSER ONLY</div>'+
   o.downloads.map(x=>'<div class="dlr"><span>'+esc(x.title).toUpperCase()+'</span>'+(x.available?'<button class="dbtn" data-i="'+x.i+'">DOWNLOAD</button>':'<em>FILE COMING SOON</em>')+'</div>').join('')+
-  '<div class="nt" style="color:#b8b8be">Save your files to your device now. After 15 minutes the downloads stop working and cannot be reopened.</div><button class="go" id="dClose">CLOSE</button>';
+  '<div class="nt" style="color:#b8b8be">Save your files to your device now. After 15 minutes the downloads stop working and cannot be reopened.</div>'+(fresh?(acUser?'<div class="nt" style="color:#b8b8be">Saved to your account. You can download it again anytime from My Account.</div>':'<div class="nt" style="color:#fff">Keep your downloads forever: create a free account.</div><button class="go" id="dAcct">CREATE FREE ACCOUNT</button><button class="acl" id="dIn">I ALREADY HAVE AN ACCOUNT</button>'):'')+'<button class="go" id="dClose">CLOSE</button>';
+if(fresh&&acUser)acctClaim();
+{const ga=m=>{acMode=m;$('#acctBtn').click()},u=$('#dAcct'),i=$('#dIn');if(u)u.onclick=()=>ga('up');if(i)i.onclick=()=>ga('in')}
  d.querySelectorAll('.dbtn').forEach(b=>b.onclick=()=>dlGet(b));
  $('#dClose').onclick=()=>closeCartModal();
  tickDl();
