@@ -823,7 +823,7 @@ async function render(){
 }
 window.mixOpen=async function(){
  if(!box){if(!M.beats.length){try{const r=await sb.from('beats').select('*').order('created_at',{ascending:false});M.beats=r.data||[]}catch(e){}}
-  try{await thLoad()}catch(e){}build();M.beats.forEach(b=>loadCover(b))}
+  try{await thLoad()}catch(e){}build();M.beats.forEach(b=>loadCover(b))}else{try{const r=await sb.from('beats').select('*').order('created_at',{ascending:false});if(r.data){const old=new Map(M.beats.map(x=>[String(x.id),x]));M.beats=r.data;M.beats.forEach(x=>{const o=old.get(String(x.id));if(!o||o.cover_path!==x.cover_path){delete M.cov[x.id];loadCover(x)}})}}catch(e){}}
  box.classList.add('on');box.setAttribute('aria-hidden','false');document.addEventListener('keydown',key);ui();setTimeout(()=>{preview();genAll()},300);
 };
 window.mixClose=function(){if(box)shut()};

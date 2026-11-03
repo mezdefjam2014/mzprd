@@ -626,24 +626,24 @@ async function renderFast(o){
  o=o||{};await loadMuxer();
  const[w,h]=o.feed?[720,1280]:dims(),fps=o.feed?24:30,dur=o.feed?Math.min(20,len()):len(),N=Math.ceil(dur*fps),btn=$s('#sRender'),dl=o.dl||$s('#sDl'),root=document.getElementById('studio'),tag=o.tag||'';
  const pickV=async()=>{for(const c of [{codec:'avc1.640028',mux:'avc'},{codec:'avc1.4d0028',mux:'avc'},{codec:'avc1.42E028',mux:'avc'},{codec:'vp09.00.40.08',mux:'vp9'}]){const cfg={codec:c.codec,width:w,height:h,bitrate:o.feed?15e5:8e6,framerate:fps};try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return{...c,cfg}}catch(e){}}return null};
- const pickA=async()=>{for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){try{const r=await AudioEncoder.isConfigSupported({codec:c.codec,sampleRate:48000,numberOfChannels:2,bitrate:192000});if(r&&r.supported)return c}catch(e){}}return null};
+ const pickA=async()=>{for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){if(o.noAac&&c.mux==='aac')continue;for(const sr of [48000,44100]){try{const r=await AudioEncoder.isConfigSupported({codec:c.codec,sampleRate:sr,numberOfChannels:2,bitrate:128000});if(r&&r.supported)return{...c,sr}}catch(e){}}}return null};
  const vc=await pickV(),ac=await pickA();if(!vc||!ac)throw new Error('no codec');
  R.busy=true;root.classList.add('busy');btn.disabled=true;dl.style.display='none';badge(0);addEventListener('beforeunload',beforeUnload);window.__mzR=(window.__mzR||0)+1;
  $s('#sProg').style.width='0';msg('Preparing...');
  await document.fonts.load('40px '+(FONTS[S.font]||'Impact')).catch(()=>{});await document.fonts.load("12px 'Press Start 2P'").catch(()=>{});
  if(!heroImg){heroImg=new Image();heroImg.src=new URL('hero.jpg',document.baseURI).href}try{await heroImg.decode()}catch(e){}
- const oc=new OfflineAudioContext(2,Math.ceil(dur*48000),48000),src=oc.createBufferSource(),og=oc.createGain();src.buffer=S.buf;src.connect(og);og.connect(oc.destination);
+ const oc=new OfflineAudioContext(2,Math.ceil(dur*ac.sr),ac.sr),src=oc.createBufferSource(),og=oc.createGain();src.buffer=S.buf;src.connect(og);og.connect(oc.destination);
  /* anti-rip voice tag: packs + samples only, low, every 13 s */
  if(!($s('#sTag')&&!$s('#sTag').checked)&&S.kind!=='beats'){try{const tb=await oc.decodeAudioData(await (await fetch(new URL('sfx/inside/tag.mp3?v=1',document.baseURI).href)).arrayBuffer());let pk=0;for(let c=0;c<tb.numberOfChannels;c++){const d=tb.getChannelData(c);for(let i=0;i<d.length;i+=2)pk=Math.max(pk,Math.abs(d[i]))}for(let t=1.2;t<dur-1.5;t+=13){const n=oc.createBufferSource(),g=oc.createGain();n.buffer=tb;g.gain.value=.16/(pk||1);n.connect(g);g.connect(oc.destination);n.start(t)}}catch(e){console.warn('tag',e)}}if(S.fmt==='9:16'&&S.buf.duration>dur+.5){og.gain.setValueAtTime(1,Math.max(0,dur-1.5));og.gain.linearRampToValueAtTime(0,dur)}src.start(0);const rb=await oc.startRendering();
- const target=new Mp4Muxer.ArrayBufferTarget(),muxer=new Mp4Muxer.Muxer({target,video:{codec:vc.mux,width:w,height:h},audio:{codec:ac.mux,numberOfChannels:2,sampleRate:48000},fastStart:'in-memory'});
+ const target=new Mp4Muxer.ArrayBufferTarget(),muxer=new Mp4Muxer.Muxer({target,video:{codec:vc.mux,width:w,height:h},audio:{codec:ac.mux,numberOfChannels:2,sampleRate:ac.sr},fastStart:'in-memory'});
  let err=null;
  const venc=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>{err=e}});venc.configure(vc.cfg);
- const aenc=new AudioEncoder({output:(c,m)=>muxer.addAudioChunk(c,m),error:e=>{err=e}});aenc.configure({codec:ac.codec,sampleRate:48000,numberOfChannels:2,bitrate:o.feed?128e3:192000});
+ const aenc=new AudioEncoder({output:(c,m)=>{aN++;muxer.addAudioChunk(c,m)},error:e=>{err=e}});aenc.configure({codec:ac.codec,sampleRate:ac.sr,numberOfChannels:2,bitrate:o.feed?128e3:(ac.mux==='aac'?192000:160000)});let aN=0;
  const t0=performance.now();
  try{
   const L=rb.getChannelData(0),Rr=rb.getChannelData(1),CH=4800;
   for(let o=0,k=0;o<L.length;o+=CH,k++){const n=Math.min(CH,L.length-o),buf=new Float32Array(n*2);buf.set(L.subarray(o,o+n),0);buf.set(Rr.subarray(o,o+n),n);
-   const ad=new AudioData({format:'f32-planar',sampleRate:48000,numberOfFrames:n,numberOfChannels:2,timestamp:Math.round(o/48000*1e6),data:buf});aenc.encode(ad);ad.close();if(k%25===0)await yieldNow()}
+   const ad=new AudioData({format:'f32-planar',sampleRate:ac.sr,numberOfFrames:n,numberOfChannels:2,timestamp:Math.round(o/ac.sr*1e6),data:buf});aenc.encode(ad);ad.close();if(k%25===0)await yieldNow()}
   const cv=document.createElement('canvas'),[sw,sh]=o.feed?dims():[w,h],small=document.createElement('canvas');cv.width=sw;cv.height=sh;small.width=w;small.height=h;const sx=small.getContext('2d');sx.imageSmoothingQuality='high';S.bd=null;OFF={prev:new Float32Array(512)};
   for(let i=0;i<N;i++){
    if(err)throw err;
@@ -654,10 +654,14 @@ async function renderFast(o){
   }
   OFF=null;await venc.flush();await aenc.flush();if(err)throw err;muxer.finalize();
  }finally{OFF=null;try{venc.close()}catch(e){}try{aenc.close()}catch(e){}removeEventListener('beforeunload',beforeUnload);window.__mzR=Math.max(0,(window.__mzR||1)-1)}
- const blob=new Blob([target.buffer],{type:'video/mp4'}),url=URL.createObjectURL(blob);
+ const blob=new Blob([target.buffer],{type:'video/mp4'});
+ /* make sure the sound really made it into the file (some 9:16 renders came out silent); re-render once if it did not */
+ let aud=aN>0;if(aud){try{const x=await new OfflineAudioContext(1,1,ac.sr).decodeAudioData(await blob.slice(0).arrayBuffer());const c=x.getChannelData(0),sc=rb.getChannelData(0);let m=0,ms=0;for(let i=0;i<c.length;i+=11)m=Math.max(m,Math.abs(c[i]));for(let i=0;i<sc.length;i+=11)ms=Math.max(ms,Math.abs(sc[i]));aud=x.duration>dur*.8&&(ms<.001||m>ms*.05)}catch(e){aud=false}}
+ if(!aud&&!o.retry){console.warn('render had no audio, retrying',ac.mux);msg(tag+'Audio check failed. Rendering again...');R.busy=false;return renderFast({...o,retry:1,noAac:ac.mux!=='aac'?false:o.noAac})}
+ const url=URL.createObjectURL(blob);
  dl.href=url;dl.download=((S.item&&(S.item.slug||String(S.item.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')))||'video')+'-'+(S.fmt==='16:9'?'16x9':'9x16')+'.mp4';dl.textContent='DOWNLOAD '+S.fmt+' VIDEO';dl.style.display='block';
  R.busy=false;root.classList.remove('busy');btn.disabled=false;badge();$s('#sProg').style.width='100%';
- msg(tag+'Done in '+Math.round((performance.now()-t0)/1000)+'s. '+(blob.size/1048576).toFixed(1)+' MB MP4. Click DOWNLOAD VIDEO.');
+ msg(tag+'Done in '+Math.round((performance.now()-t0)/1000)+'s. '+(blob.size/1048576).toFixed(1)+' MB MP4. Click DOWNLOAD VIDEO.'+(!aud?' WARNING: the sound did not make it into this video. Try Chrome.':ac.mux!=='aac'?' NOTE: this browser made Opus audio, which some phones and apps do not play. Render in Chrome for phone-safe sound.':''));
  try{toast('VIDEO READY: '+dl.download)}catch(e){}
  redraw();if(o.feed)return blob;
 }
@@ -929,7 +933,7 @@ function wire(){
  wv.onpointerdown=e=>{if(run&&run.rec)return;drag=true;was=!!(A&&A.playing);if(was)stopPlay();wv.setPointerCapture(e.pointerId);seek(e)};
  wv.onpointermove=e=>{if(drag)seek(e)};
  wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
- q('#thOpen').onclick=thOpen;const mixGo=async()=>{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=63',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()};
+ q('#thOpen').onclick=thOpen;const mixGo=async()=>{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=64',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()};
  q("#mixBtn").onclick=async()=>{try{await mixGo()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};
  /* straight to Inside the Sample: single samples + that format */
  q('#insBtn').onclick=async()=>{try{await mixGo();for(let i=0;i<40&&!document.querySelector('#mxKind');i++)await new Promise(r=>setTimeout(r,100));const k=[...document.querySelectorAll('#mxKind button')].find(b=>/SINGLE/.test(b.textContent));if(k&&!k.classList.contains('on'))k.click();for(let i=0;i<30;i++){const f=document.querySelector('#mxFmt button[data-f=inside]');if(f&&f.offsetParent){f.click();break}await new Promise(r=>setTimeout(r,100))}}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
@@ -951,8 +955,15 @@ window.studioOpen=async function(){
  css();const root=document.getElementById('studio');root.classList.add('on');
  if(!mounted){root.innerHTML=html()+THMODAL;mounted=true;wire();buildTx();redraw();root.querySelector('#sl').innerHTML='<div class="msg" style="padding:12px">Loading...</div>';
   try{await loadItems()}catch(e){root.querySelector('#sl').innerHTML='<div class="msg" style="padding:12px">Could not load items.</div>';return}
-  renderList();const first=S.items.find(i=>i._k===S.kind);if(first)setItem(first)}
+  renderList();const first=S.items.find(i=>i._k===S.kind);if(first)setItem(first);return}
+ refreshItems()
 };
+/* back-office edits show up without reloading: re-read items on every open and when the tab gets focus again */
+let refBusy=false;async function refreshItems(){if(refBusy||R.busy||!mounted)return;refBusy=true;try{const old=S.item;await loadItems();renderList();if(!old)return;
+ const nw=S.items.find(i=>i._k===old._k&&String(i.id)===String(old.id));if(!nw)return;
+ const ch=['title','cover_path','preview_path','bpm','musical_key','kind','slug'].some(k=>String(nw[k]??'')!==String(old[k]??''));
+ if(ch&&!(A&&A.playing))setItem(nw);else{S.item=nw;document.querySelectorAll('#studio .it').forEach(e=>e.classList.toggle('on',e.dataset.id===String(nw.id)))}}catch(e){console.warn('refresh',e)}finally{refBusy=false}}
+addEventListener('focus',()=>{const r=document.getElementById('studio');if(r&&r.classList.contains('on'))refreshItems()});
 window.MZEndCard=function(c,W,H,tt,ecd){return endCard(c,W,H,tt,ecd)};
 window.studioClose=function(){thShut();if(window.mixClose)mixClose();if(!(run&&run.rec))stopPlay();const r=document.getElementById('studio');if(r)r.classList.remove('on')};
 })();
