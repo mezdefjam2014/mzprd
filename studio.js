@@ -929,7 +929,7 @@ function wire(){
  wv.onpointerdown=e=>{if(run&&run.rec)return;drag=true;was=!!(A&&A.playing);if(was)stopPlay();wv.setPointerCapture(e.pointerId);seek(e)};
  wv.onpointermove=e=>{if(drag)seek(e)};
  wv.onpointerup=wv.onpointercancel=()=>{if(!drag)return;drag=false;if(was)playFrom(scrub)};
- q('#thOpen').onclick=thOpen;const mixGo=async()=>{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=59',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()};
+ q('#thOpen').onclick=thOpen;const mixGo=async()=>{if(!window.mixOpen)await new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=new URL('mix.js?v=63',document.baseURI).href;sc.onload=ok;sc.onerror=no;document.head.appendChild(sc)});await window.mixOpen()};
  q("#mixBtn").onclick=async()=>{try{await mixGo()}catch(e){toast('MIX MAKER FAILED TO LOAD')}};
  /* straight to Inside the Sample: single samples + that format */
  q('#insBtn').onclick=async()=>{try{await mixGo();for(let i=0;i<40&&!document.querySelector('#mxKind');i++)await new Promise(r=>setTimeout(r,100));const k=[...document.querySelectorAll('#mxKind button')].find(b=>/SINGLE/.test(b.textContent));if(k&&!k.classList.contains('on'))k.click();for(let i=0;i<30;i++){const f=document.querySelector('#mxFmt button[data-f=inside]');if(f&&f.offsetParent){f.click();break}await new Promise(r=>setTimeout(r,100))}}catch(e){toast('MIX MAKER FAILED TO LOAD')}};q('#thClose').onclick=thShut;q('#thModal').onclick=e=>{if(e.target.id==='thModal')thShut()};
