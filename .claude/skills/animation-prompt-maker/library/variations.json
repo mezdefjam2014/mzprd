@@ -437,7 +437,7 @@
   "how": "cross (rear straight), real boxer take 5 (CMU 14_03)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "box_cross_6": {
   "cat": "boxing",
@@ -570,7 +570,7 @@
   "how": "combination 2-1 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
   "loop": true,
   "frames": 48,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_1_2_2_1": {
   "cat": "boxing",
@@ -724,7 +724,7 @@
   "how": "combination 2-2-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 144_20)",
   "loop": true,
   "frames": 67,
-  "status": "active"
+  "status": "approved"
  },
  "knife_combo_thrusts_1": {
   "cat": "knife",
@@ -759,7 +759,7 @@
   "how": "knife combination (thrusts), from real punches 2-1 (CMU 14_02)",
   "loop": true,
   "frames": 48,
-  "status": "active"
+  "status": "approved"
  },
  "knife_combo_thrusts_6": {
   "cat": "knife",
@@ -794,7 +794,7 @@
   "how": "southpaw jab (lead straight) (mirrored real take)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "box_southpaw_cross": {
   "cat": "boxing",
@@ -1018,7 +1018,7 @@
   "how": "left-handed rising stab under the ribs, from a real strike (CMU 14_01)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "knife_body_slash_left_hand": {
   "cat": "knife",
@@ -1053,7 +1053,7 @@
   "how": "left-handed bat swing: horizontal swing, real take (CMU 124_07)",
   "loop": true,
   "frames": 48,
-  "status": "active"
+  "status": "approved"
  },
  "bat_swing_down_1_lefty": {
   "cat": "weapon swings",
@@ -1108,7 +1108,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 34,
-  "status": "active"
+  "status": "approved"
  },
  "duck_4": {
   "cat": "duck",
@@ -1116,7 +1116,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 38,
-  "status": "active"
+  "status": "approved"
  },
  "duck_4_mirrored": {
   "cat": "duck",
@@ -1124,7 +1124,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 38,
-  "status": "active"
+  "status": "approved"
  },
  "duck_5": {
   "cat": "duck",
@@ -1148,7 +1148,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "approved"
  },
  "duck_6_mirrored": {
   "cat": "duck",
@@ -1156,7 +1156,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "approved"
  },
  "duck_7": {
   "cat": "duck",
@@ -1308,7 +1308,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 66,
-  "status": "active"
+  "status": "approved"
  },
  "roll_4_mirrored": {
   "cat": "roll",
@@ -1316,7 +1316,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 66,
-  "status": "active"
+  "status": "approved"
  },
  "roll_5": {
   "cat": "roll",
@@ -1324,7 +1324,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 79,
-  "status": "active"
+  "status": "approved"
  },
  "roll_5_mirrored": {
   "cat": "roll",
@@ -1332,7 +1332,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 79,
-  "status": "active"
+  "status": "approved"
  },
  "roll_6": {
   "cat": "roll",
@@ -1340,7 +1340,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 78,
-  "status": "active"
+  "status": "approved"
  },
  "roll_6_mirrored": {
   "cat": "roll",
@@ -1356,7 +1356,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 59,
-  "status": "active"
+  "status": "approved"
  },
  "roll_7_mirrored": {
   "cat": "roll",
@@ -1380,7 +1380,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "crawl_4": {
   "cat": "crawl",
@@ -1396,7 +1396,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 46,
-  "status": "active"
+  "status": "approved"
  },
  "stairs_9": {
   "cat": "stairs",
@@ -1476,7 +1476,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 97,
-  "status": "active"
+  "status": "approved"
  },
  "get_up_1": {
   "cat": "get up",
@@ -1484,7 +1484,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 92,
-  "status": "active"
+  "status": "approved"
  },
  "get_up_1_mirrored": {
   "cat": "get up",
@@ -1492,7 +1492,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 92,
-  "status": "active"
+  "status": "approved"
  },
  "get_up_2": {
   "cat": "get up",
@@ -1500,7 +1500,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 82,
-  "status": "active"
+  "status": "approved"
  },
  "get_up_2_mirrored": {
   "cat": "get up",
@@ -1508,7 +1508,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 82,
-  "status": "active"
+  "status": "approved"
  },
  "get_up_3": {
   "cat": "get up",
@@ -1564,7 +1564,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 89,
-  "status": "active"
+  "status": "approved"
  },
  "get_up_6_mirrored": {
   "cat": "get up",
@@ -1580,7 +1580,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 76,
-  "status": "active"
+  "status": "approved"
  },
  "get_up_7_mirrored": {
   "cat": "get up",
@@ -1588,7 +1588,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 76,
-  "status": "active"
+  "status": "approved"
  },
  "sit_down_1": {
   "cat": "sit down",
@@ -1604,7 +1604,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 91,
-  "status": "active"
+  "status": "approved"
  },
  "sit_down_3": {
   "cat": "sit down",
@@ -1724,7 +1724,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 58,
-  "status": "active"
+  "status": "approved"
  },
  "flip_10": {
   "cat": "flip",
@@ -1732,7 +1732,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 62,
-  "status": "active"
+  "status": "approved"
  },
  "flip_11": {
   "cat": "flip",
@@ -1740,7 +1740,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 79,
-  "status": "active"
+  "status": "approved"
  },
  "flip_12": {
   "cat": "flip",
@@ -1748,7 +1748,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 69,
-  "status": "active"
+  "status": "approved"
  },
  "flip_13": {
   "cat": "flip",
@@ -1764,7 +1764,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 49,
-  "status": "active"
+  "status": "approved"
  },
  "cartwheel_1": {
   "cat": "cartwheel",
@@ -1812,7 +1812,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 98,
-  "status": "active"
+  "status": "approved"
  },
  "cartwheel_4": {
   "cat": "cartwheel",
@@ -1820,7 +1820,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 61,
-  "status": "active"
+  "status": "approved"
  },
  "cartwheel_4_mirrored": {
   "cat": "cartwheel",
@@ -1844,7 +1844,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 78,
-  "status": "active"
+  "status": "approved"
  },
  "cartwheel_6": {
   "cat": "cartwheel",
@@ -1860,7 +1860,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 60,
-  "status": "active"
+  "status": "approved"
  },
  "cartwheel_7": {
   "cat": "cartwheel",
@@ -1884,7 +1884,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 58,
-  "status": "active"
+  "status": "approved"
  },
  "cartwheel_8_mirrored": {
   "cat": "cartwheel",
@@ -2100,7 +2100,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 70,
-  "status": "active"
+  "status": "approved"
  },
  "jump_17": {
   "cat": "jump",
@@ -2108,7 +2108,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "approved"
  },
  "hop_1": {
   "cat": "hop",
@@ -2124,7 +2124,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 48,
-  "status": "active"
+  "status": "approved"
  },
  "hop_2": {
   "cat": "hop",
@@ -2140,7 +2140,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 64,
-  "status": "active"
+  "status": "approved"
  },
  "hop_3": {
   "cat": "hop",
@@ -2156,7 +2156,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 38,
-  "status": "active"
+  "status": "approved"
  },
  "hop_4": {
   "cat": "hop",
@@ -2164,7 +2164,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 42,
-  "status": "active"
+  "status": "approved"
  },
  "hop_4_mirrored": {
   "cat": "hop",
@@ -2172,7 +2172,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 42,
-  "status": "active"
+  "status": "approved"
  },
  "hop_5": {
   "cat": "hop",
@@ -2252,7 +2252,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 79,
-  "status": "active"
+  "status": "approved"
  },
  "kick_1": {
   "cat": "kick",
@@ -2380,7 +2380,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 79,
-  "status": "active"
+  "status": "approved"
  },
  "kick_9": {
   "cat": "kick",
@@ -2412,7 +2412,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 61,
-  "status": "active"
+  "status": "approved"
  },
  "kick_11": {
   "cat": "kick",
@@ -2428,7 +2428,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "kick_12": {
   "cat": "kick",
@@ -2476,7 +2476,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 70,
-  "status": "active"
+  "status": "approved"
  },
  "throw_3": {
   "cat": "throw",
@@ -2644,7 +2644,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 49,
-  "status": "active"
+  "status": "approved"
  },
  "stumble_3_mirrored": {
   "cat": "stumble",
@@ -2668,7 +2668,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 67,
-  "status": "active"
+  "status": "approved"
  },
  "push_pull_3": {
   "cat": "push pull",
@@ -2700,7 +2700,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "push_pull_5": {
   "cat": "push pull",
@@ -2748,7 +2748,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 49,
-  "status": "active"
+  "status": "approved"
  },
  "carry_3": {
   "cat": "carry",
@@ -2780,7 +2780,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "approved"
  },
  "carry_7": {
   "cat": "carry",
@@ -2788,7 +2788,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_1": {
   "cat": "sidestep",
@@ -2796,7 +2796,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_1_mirrored": {
   "cat": "sidestep",
@@ -2804,7 +2804,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_3": {
   "cat": "sidestep",
@@ -2812,7 +2812,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_3_mirrored": {
   "cat": "sidestep",
@@ -2868,7 +2868,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_7": {
   "cat": "sidestep",
@@ -2876,7 +2876,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_7_mirrored": {
   "cat": "sidestep",
@@ -2884,7 +2884,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_8": {
   "cat": "sidestep",
@@ -2892,7 +2892,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 32,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_8_mirrored": {
   "cat": "sidestep",
@@ -2900,7 +2900,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 32,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_9": {
   "cat": "sidestep",
@@ -2908,7 +2908,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 28,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_9_mirrored": {
   "cat": "sidestep",
@@ -2916,7 +2916,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 28,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_10": {
   "cat": "sidestep",
@@ -2924,7 +2924,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_10_mirrored": {
   "cat": "sidestep",
@@ -2932,7 +2932,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_11": {
   "cat": "sidestep",
@@ -2964,7 +2964,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_13": {
   "cat": "sidestep",
@@ -2972,7 +2972,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 29,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_13_mirrored": {
   "cat": "sidestep",
@@ -2980,7 +2980,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 29,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_14": {
   "cat": "sidestep",
@@ -2988,7 +2988,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_14_mirrored": {
   "cat": "sidestep",
@@ -2996,7 +2996,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_15": {
   "cat": "sidestep",
@@ -3004,7 +3004,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_15_mirrored": {
   "cat": "sidestep",
@@ -3012,7 +3012,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_16": {
   "cat": "sidestep",
@@ -3020,7 +3020,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_16_mirrored": {
   "cat": "sidestep",
@@ -3028,7 +3028,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "approved"
  },
  "sidestep_17": {
   "cat": "sidestep",
@@ -3052,7 +3052,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 34,
-  "status": "active"
+  "status": "approved"
  },
  "backward_2": {
   "cat": "backward",
@@ -3060,7 +3060,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "backward_3": {
   "cat": "backward",
@@ -3068,7 +3068,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 40,
-  "status": "active"
+  "status": "approved"
  },
  "backward_4": {
   "cat": "backward",
@@ -3076,7 +3076,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "approved"
  },
  "backward_5": {
   "cat": "backward",
@@ -3084,7 +3084,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "approved"
  },
  "backward_6": {
   "cat": "backward",
@@ -3092,7 +3092,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "approved"
  },
  "backward_7": {
   "cat": "backward",
@@ -3100,7 +3100,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "approved"
  },
  "balance_1": {
   "cat": "balance",
@@ -3108,7 +3108,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 64,
-  "status": "active"
+  "status": "approved"
  },
  "balance_2": {
   "cat": "balance",
@@ -3196,14 +3196,14 @@
   "loop": true,
   "oneshot": false,
   "frames": 72,
-  "status": "active"
+  "status": "approved"
  },
  "bat_horizontal_1": {
   "cat": "bat swings",
   "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 124_07)",
   "loop": true,
   "frames": 61,
-  "status": "active"
+  "status": "approved"
  },
  "bat_horizontal_1_lefty": {
   "cat": "bat swings",
