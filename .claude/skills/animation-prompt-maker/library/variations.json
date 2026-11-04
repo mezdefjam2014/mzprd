@@ -402,7 +402,7 @@
   "how": "jab (lead straight), real boxer take 1 (CMU 15_13)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "older"
  },
  "box_cross_1": {
   "cat": "boxing",
@@ -451,7 +451,7 @@
   "how": "rear hook, real boxer take 1 (CMU 144_20)",
   "loop": true,
   "frames": 18,
-  "status": "active"
+  "status": "older"
  },
  "box_rear_hook_2": {
   "cat": "boxing",
@@ -591,7 +591,7 @@
   "how": "combination 4b-2b (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 15_13)",
   "loop": true,
   "frames": 39,
-  "status": "active"
+  "status": "older"
  },
  "box_combo_3b_4b_1": {
   "cat": "boxing",
@@ -619,7 +619,7 @@
   "how": "combination 2-3 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_03)",
   "loop": true,
   "frames": 51,
-  "status": "active"
+  "status": "older"
  },
  "box_combo_4_1_1": {
   "cat": "boxing",
@@ -703,14 +703,14 @@
   "how": "combination 2-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 144_21)",
   "loop": true,
   "frames": 28,
-  "status": "active"
+  "status": "older"
  },
  "box_combo_2_2_2_1": {
   "cat": "boxing",
   "how": "combination 2-2-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 144_20)",
   "loop": true,
   "frames": 60,
-  "status": "active"
+  "status": "older"
  },
  "box_combo_6_5_1": {
   "cat": "boxing",
@@ -808,7 +808,7 @@
   "how": "southpaw rear hook (mirrored real take)",
   "loop": true,
   "frames": 18,
-  "status": "active"
+  "status": "older"
  },
  "box_southpaw_lead_uppercut": {
   "cat": "boxing",
@@ -864,7 +864,7 @@
   "how": "rising stab under the ribs, from a real strike (CMU 14_03)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "older"
  },
  "knife_body_slash_1": {
   "cat": "knife",
@@ -878,119 +878,119 @@
   "how": "sword: downward chop, real take (CMU 02_09)",
   "loop": true,
   "frames": 21,
-  "status": "active"
+  "status": "older"
  },
  "sword_down_2": {
   "cat": "weapon swings",
   "how": "sword: downward chop, real take (CMU 02_07)",
   "loop": true,
   "frames": 45,
-  "status": "active"
+  "status": "older"
  },
  "sword_down_3": {
   "cat": "weapon swings",
   "how": "sword: downward chop, real take (CMU 02_07)",
   "loop": true,
   "frames": 48,
-  "status": "active"
+  "status": "older"
  },
  "sword_side_1": {
   "cat": "weapon swings",
   "how": "sword: horizontal swing, real take (CMU 02_07)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "older"
  },
  "sword_side_2": {
   "cat": "weapon swings",
   "how": "sword: horizontal swing, real take (CMU 02_08)",
   "loop": true,
   "frames": 35,
-  "status": "active"
+  "status": "older"
  },
  "sword_side_3": {
   "cat": "weapon swings",
   "how": "sword: horizontal swing, real take (CMU 02_08)",
   "loop": true,
   "frames": 40,
-  "status": "active"
+  "status": "older"
  },
  "sword_up_2": {
   "cat": "weapon swings",
   "how": "sword: rising swing, real take (CMU 02_07)",
   "loop": true,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "machete_down_1": {
   "cat": "weapon swings",
   "how": "machete: downward chop, real take (CMU 02_09)",
   "loop": true,
   "frames": 47,
-  "status": "active"
+  "status": "older"
  },
  "machete_side_1": {
   "cat": "weapon swings",
   "how": "machete: horizontal swing, real take (CMU 02_09)",
   "loop": true,
   "frames": 44,
-  "status": "active"
+  "status": "older"
  },
  "machete_side_2": {
   "cat": "weapon swings",
   "how": "machete: horizontal swing, real take (CMU 02_07)",
   "loop": true,
   "frames": 47,
-  "status": "active"
+  "status": "older"
  },
  "machete_side_3": {
   "cat": "weapon swings",
   "how": "machete: horizontal swing, real take (CMU 02_07)",
   "loop": true,
   "frames": 48,
-  "status": "active"
+  "status": "older"
  },
  "axe_down_1": {
   "cat": "weapon swings",
   "how": "axe: downward chop, real take (CMU 80_71)",
   "loop": true,
   "frames": 29,
-  "status": "active"
+  "status": "older"
  },
  "axe_down_2": {
   "cat": "weapon swings",
   "how": "axe: downward chop, real take (CMU 79_01)",
   "loop": true,
   "frames": 48,
-  "status": "active"
+  "status": "older"
  },
  "axe_down_3": {
   "cat": "weapon swings",
   "how": "axe: downward chop, real take (CMU 80_71)",
   "loop": true,
   "frames": 27,
-  "status": "active"
+  "status": "older"
  },
  "axe_side_1": {
   "cat": "weapon swings",
   "how": "axe: horizontal swing, real take (CMU 80_71)",
   "loop": true,
   "frames": 48,
-  "status": "active"
+  "status": "older"
  },
  "bat_swing_side_2": {
   "cat": "weapon swings",
   "how": "bat swing: horizontal swing, real take (CMU 124_07)",
   "loop": true,
   "frames": 48,
-  "status": "active"
+  "status": "older"
  },
  "bat_swing_down_1": {
   "cat": "weapon swings",
   "how": "bat swing: downward chop, real take (CMU 124_07)",
   "loop": true,
   "frames": 48,
-  "status": "active"
+  "status": "older"
  },
  "knife_combo_thrusts_left_hand": {
   "cat": "knife",
@@ -1025,28 +1025,28 @@
   "how": "left-handed low slash to the body, from a real strike (CMU 13_17)",
   "loop": true,
   "frames": 23,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_smash_1": {
   "cat": "weapon swings",
   "how": "bat: two-handed overhead smash, real take (CMU 80_71)",
   "loop": true,
   "frames": 29,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_smash_2": {
   "cat": "weapon swings",
   "how": "bat: two-handed overhead smash, real take (CMU 79_01)",
   "loop": true,
   "frames": 48,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_smash_3": {
   "cat": "weapon swings",
   "how": "bat: two-handed overhead smash, real take (CMU 80_71)",
   "loop": true,
   "frames": 27,
-  "status": "active"
+  "status": "older"
  },
  "bat_swing_side_2_lefty": {
   "cat": "weapon swings",
@@ -1060,7 +1060,7 @@
   "how": "left-handed bat swing: downward chop, real take (CMU 124_07)",
   "loop": true,
   "frames": 48,
-  "status": "active"
+  "status": "older"
  },
  "duck_1": {
   "cat": "duck",
@@ -1068,7 +1068,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "older"
  },
  "duck_1_mirrored": {
   "cat": "duck",
@@ -1076,7 +1076,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "older"
  },
  "duck_2": {
   "cat": "duck",
@@ -1084,7 +1084,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "older"
  },
  "duck_2_mirrored": {
   "cat": "duck",
@@ -1092,7 +1092,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "older"
  },
  "duck_3": {
   "cat": "duck",
@@ -1100,7 +1100,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 34,
-  "status": "active"
+  "status": "older"
  },
  "duck_3_mirrored": {
   "cat": "duck",
@@ -1132,7 +1132,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 27,
-  "status": "active"
+  "status": "older"
  },
  "duck_5_mirrored": {
   "cat": "duck",
@@ -1140,7 +1140,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 27,
-  "status": "active"
+  "status": "older"
  },
  "duck_6": {
   "cat": "duck",
@@ -1164,7 +1164,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "older"
  },
  "duck_7_mirrored": {
   "cat": "duck",
@@ -1172,7 +1172,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "older"
  },
  "duck_8": {
   "cat": "duck",
@@ -1180,7 +1180,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "older"
  },
  "duck_8_mirrored": {
   "cat": "duck",
@@ -1188,7 +1188,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "older"
  },
  "dodge_1": {
   "cat": "dodge",
@@ -1196,7 +1196,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "older"
  },
  "dodge_1_mirrored": {
   "cat": "dodge",
@@ -1204,7 +1204,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "older"
  },
  "dodge_2": {
   "cat": "dodge",
@@ -1212,7 +1212,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "older"
  },
  "dodge_2_mirrored": {
   "cat": "dodge",
@@ -1220,7 +1220,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "older"
  },
  "dodge_3": {
   "cat": "dodge",
@@ -1228,7 +1228,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "older"
  },
  "dodge_3_mirrored": {
   "cat": "dodge",
@@ -1236,7 +1236,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "older"
  },
  "dodge_4": {
   "cat": "dodge",
@@ -1244,7 +1244,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "older"
  },
  "dodge_4_mirrored": {
   "cat": "dodge",
@@ -1252,7 +1252,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "older"
  },
  "roll_1": {
   "cat": "roll",
@@ -1260,7 +1260,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "roll_1_mirrored": {
   "cat": "roll",
@@ -1268,7 +1268,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "roll_2": {
   "cat": "roll",
@@ -1276,7 +1276,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 87,
-  "status": "active"
+  "status": "older"
  },
  "roll_2_mirrored": {
   "cat": "roll",
@@ -1284,7 +1284,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 87,
-  "status": "active"
+  "status": "older"
  },
  "roll_3": {
   "cat": "roll",
@@ -1292,7 +1292,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 97,
-  "status": "active"
+  "status": "older"
  },
  "roll_3_mirrored": {
   "cat": "roll",
@@ -1300,7 +1300,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 97,
-  "status": "active"
+  "status": "older"
  },
  "roll_4": {
   "cat": "roll",
@@ -1348,7 +1348,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 78,
-  "status": "active"
+  "status": "older"
  },
  "roll_7": {
   "cat": "roll",
@@ -1364,7 +1364,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 59,
-  "status": "active"
+  "status": "older"
  },
  "crawl_3": {
   "cat": "crawl",
@@ -1372,7 +1372,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "older"
  },
  "crawl_3_mirrored": {
   "cat": "crawl",
@@ -1388,7 +1388,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 46,
-  "status": "active"
+  "status": "older"
  },
  "crawl_4_mirrored": {
   "cat": "crawl",
@@ -1404,7 +1404,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 42,
-  "status": "active"
+  "status": "older"
  },
  "stairs_15": {
   "cat": "stairs",
@@ -1412,7 +1412,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "older"
  },
  "stairs_16": {
   "cat": "stairs",
@@ -1420,7 +1420,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 32,
-  "status": "active"
+  "status": "older"
  },
  "stairs_18": {
   "cat": "stairs",
@@ -1428,7 +1428,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "older"
  },
  "stairs_19": {
   "cat": "stairs",
@@ -1436,7 +1436,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "older"
  },
  "stairs_20": {
   "cat": "stairs",
@@ -1444,7 +1444,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 34,
-  "status": "active"
+  "status": "older"
  },
  "fall_1": {
   "cat": "fall",
@@ -1452,7 +1452,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 69,
-  "status": "active"
+  "status": "older"
  },
  "fall_1_mirrored": {
   "cat": "fall",
@@ -1460,7 +1460,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 69,
-  "status": "active"
+  "status": "older"
  },
  "fall_2": {
   "cat": "fall",
@@ -1468,7 +1468,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 97,
-  "status": "active"
+  "status": "older"
  },
  "fall_2_mirrored": {
   "cat": "fall",
@@ -1516,7 +1516,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 105,
-  "status": "active"
+  "status": "older"
  },
  "get_up_3_mirrored": {
   "cat": "get up",
@@ -1524,7 +1524,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 105,
-  "status": "active"
+  "status": "older"
  },
  "get_up_4": {
   "cat": "get up",
@@ -1532,7 +1532,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 79,
-  "status": "active"
+  "status": "older"
  },
  "get_up_4_mirrored": {
   "cat": "get up",
@@ -1540,7 +1540,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 79,
-  "status": "active"
+  "status": "older"
  },
  "get_up_5": {
   "cat": "get up",
@@ -1548,7 +1548,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 89,
-  "status": "active"
+  "status": "older"
  },
  "get_up_5_mirrored": {
   "cat": "get up",
@@ -1556,7 +1556,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 89,
-  "status": "active"
+  "status": "older"
  },
  "get_up_6": {
   "cat": "get up",
@@ -1572,7 +1572,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 89,
-  "status": "active"
+  "status": "older"
  },
  "get_up_7": {
   "cat": "get up",
@@ -1596,7 +1596,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 77,
-  "status": "active"
+  "status": "older"
  },
  "sit_down_2": {
   "cat": "sit down",
@@ -1612,7 +1612,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 83,
-  "status": "active"
+  "status": "older"
  },
  "stand_up_1": {
   "cat": "stand up",
@@ -1620,7 +1620,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 58,
-  "status": "active"
+  "status": "older"
  },
  "stand_up_2": {
   "cat": "stand up",
@@ -1628,7 +1628,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 95,
-  "status": "active"
+  "status": "older"
  },
  "stand_up_3": {
   "cat": "stand up",
@@ -1636,7 +1636,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 76,
-  "status": "active"
+  "status": "older"
  },
  "stand_up_4": {
   "cat": "stand up",
@@ -1644,7 +1644,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 82,
-  "status": "active"
+  "status": "older"
  },
  "stand_up_5": {
   "cat": "stand up",
@@ -1652,7 +1652,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 76,
-  "status": "active"
+  "status": "older"
  },
  "flip_1": {
   "cat": "flip",
@@ -1660,7 +1660,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 83,
-  "status": "active"
+  "status": "older"
  },
  "flip_2": {
   "cat": "flip",
@@ -1668,7 +1668,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 113,
-  "status": "active"
+  "status": "older"
  },
  "flip_3": {
   "cat": "flip",
@@ -1676,7 +1676,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 105,
-  "status": "active"
+  "status": "older"
  },
  "flip_4": {
   "cat": "flip",
@@ -1684,7 +1684,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "flip_5": {
   "cat": "flip",
@@ -1692,7 +1692,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 50,
-  "status": "active"
+  "status": "older"
  },
  "flip_6": {
   "cat": "flip",
@@ -1700,7 +1700,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 46,
-  "status": "active"
+  "status": "older"
  },
  "flip_7": {
   "cat": "flip",
@@ -1708,7 +1708,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 52,
-  "status": "active"
+  "status": "older"
  },
  "flip_8": {
   "cat": "flip",
@@ -1716,7 +1716,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "flip_9": {
   "cat": "flip",
@@ -1756,7 +1756,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 54,
-  "status": "active"
+  "status": "older"
  },
  "flip_14": {
   "cat": "flip",
@@ -1772,7 +1772,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 60,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_1_mirrored": {
   "cat": "cartwheel",
@@ -1780,7 +1780,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 60,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_2": {
   "cat": "cartwheel",
@@ -1788,7 +1788,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 100,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_2_mirrored": {
   "cat": "cartwheel",
@@ -1796,7 +1796,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 100,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_3": {
   "cat": "cartwheel",
@@ -1804,7 +1804,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 98,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_3_mirrored": {
   "cat": "cartwheel",
@@ -1828,7 +1828,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_5": {
   "cat": "cartwheel",
@@ -1836,7 +1836,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 78,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_5_mirrored": {
   "cat": "cartwheel",
@@ -1852,7 +1852,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 60,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_6_mirrored": {
   "cat": "cartwheel",
@@ -1868,7 +1868,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_7_mirrored": {
   "cat": "cartwheel",
@@ -1876,7 +1876,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_8": {
   "cat": "cartwheel",
@@ -1892,7 +1892,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 58,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_9": {
   "cat": "cartwheel",
@@ -1900,7 +1900,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 88,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_9_mirrored": {
   "cat": "cartwheel",
@@ -1908,7 +1908,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 88,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_10": {
   "cat": "cartwheel",
@@ -1916,7 +1916,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 87,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_10_mirrored": {
   "cat": "cartwheel",
@@ -1924,7 +1924,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 87,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_11": {
   "cat": "cartwheel",
@@ -1932,7 +1932,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 80,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_11_mirrored": {
   "cat": "cartwheel",
@@ -1940,7 +1940,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 80,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_12": {
   "cat": "cartwheel",
@@ -1948,7 +1948,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 84,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_12_mirrored": {
   "cat": "cartwheel",
@@ -1956,7 +1956,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 84,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_13": {
   "cat": "cartwheel",
@@ -1964,7 +1964,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 97,
-  "status": "active"
+  "status": "older"
  },
  "cartwheel_13_mirrored": {
   "cat": "cartwheel",
@@ -1972,7 +1972,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 97,
-  "status": "active"
+  "status": "older"
  },
  "jump_1": {
   "cat": "jump",
@@ -1980,7 +1980,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "jump_2": {
   "cat": "jump",
@@ -1988,7 +1988,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "older"
  },
  "jump_3": {
   "cat": "jump",
@@ -1996,7 +1996,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "jump_4": {
   "cat": "jump",
@@ -2004,7 +2004,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 34,
-  "status": "active"
+  "status": "older"
  },
  "jump_5": {
   "cat": "jump",
@@ -2012,7 +2012,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 36,
-  "status": "active"
+  "status": "older"
  },
  "jump_6": {
   "cat": "jump",
@@ -2020,7 +2020,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "older"
  },
  "jump_7": {
   "cat": "jump",
@@ -2028,7 +2028,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 25,
-  "status": "active"
+  "status": "older"
  },
  "jump_8": {
   "cat": "jump",
@@ -2036,7 +2036,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 56,
-  "status": "active"
+  "status": "older"
  },
  "jump_9": {
   "cat": "jump",
@@ -2044,7 +2044,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 64,
-  "status": "active"
+  "status": "older"
  },
  "jump_10": {
   "cat": "jump",
@@ -2052,7 +2052,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "older"
  },
  "jump_11": {
   "cat": "jump",
@@ -2060,7 +2060,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 69,
-  "status": "active"
+  "status": "older"
  },
  "jump_12": {
   "cat": "jump",
@@ -2068,7 +2068,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 49,
-  "status": "active"
+  "status": "older"
  },
  "jump_13": {
   "cat": "jump",
@@ -2076,7 +2076,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "jump_14": {
   "cat": "jump",
@@ -2084,7 +2084,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 80,
-  "status": "active"
+  "status": "older"
  },
  "jump_15": {
   "cat": "jump",
@@ -2092,7 +2092,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "jump_16": {
   "cat": "jump",
@@ -2116,7 +2116,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 48,
-  "status": "active"
+  "status": "older"
  },
  "hop_1_mirrored": {
   "cat": "hop",
@@ -2132,7 +2132,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 64,
-  "status": "active"
+  "status": "older"
  },
  "hop_2_mirrored": {
   "cat": "hop",
@@ -2148,7 +2148,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 38,
-  "status": "active"
+  "status": "older"
  },
  "hop_3_mirrored": {
   "cat": "hop",
@@ -2180,7 +2180,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 62,
-  "status": "active"
+  "status": "older"
  },
  "hop_5_mirrored": {
   "cat": "hop",
@@ -2188,7 +2188,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 62,
-  "status": "active"
+  "status": "older"
  },
  "hop_6": {
   "cat": "hop",
@@ -2196,7 +2196,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 45,
-  "status": "active"
+  "status": "older"
  },
  "hop_6_mirrored": {
   "cat": "hop",
@@ -2204,7 +2204,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 45,
-  "status": "active"
+  "status": "older"
  },
  "hop_7": {
   "cat": "hop",
@@ -2212,7 +2212,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "hop_7_mirrored": {
   "cat": "hop",
@@ -2220,7 +2220,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "hop_8": {
   "cat": "hop",
@@ -2228,7 +2228,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "older"
  },
  "hop_8_mirrored": {
   "cat": "hop",
@@ -2236,7 +2236,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "older"
  },
  "hop_9": {
   "cat": "hop",
@@ -2244,7 +2244,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 79,
-  "status": "active"
+  "status": "older"
  },
  "hop_9_mirrored": {
   "cat": "hop",
@@ -2260,7 +2260,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 71,
-  "status": "active"
+  "status": "older"
  },
  "kick_1_mirrored": {
   "cat": "kick",
@@ -2268,7 +2268,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 71,
-  "status": "active"
+  "status": "older"
  },
  "kick_2": {
   "cat": "kick",
@@ -2276,7 +2276,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "kick_2_mirrored": {
   "cat": "kick",
@@ -2284,7 +2284,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "kick_3": {
   "cat": "kick",
@@ -2292,7 +2292,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 69,
-  "status": "active"
+  "status": "older"
  },
  "kick_3_mirrored": {
   "cat": "kick",
@@ -2300,7 +2300,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 69,
-  "status": "active"
+  "status": "older"
  },
  "kick_4": {
   "cat": "kick",
@@ -2308,7 +2308,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "kick_4_mirrored": {
   "cat": "kick",
@@ -2316,7 +2316,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "kick_5": {
   "cat": "kick",
@@ -2324,7 +2324,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 54,
-  "status": "active"
+  "status": "older"
  },
  "kick_5_mirrored": {
   "cat": "kick",
@@ -2332,7 +2332,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 54,
-  "status": "active"
+  "status": "older"
  },
  "kick_6": {
   "cat": "kick",
@@ -2340,7 +2340,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 45,
-  "status": "active"
+  "status": "older"
  },
  "kick_6_mirrored": {
   "cat": "kick",
@@ -2348,7 +2348,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 45,
-  "status": "active"
+  "status": "older"
  },
  "kick_7": {
   "cat": "kick",
@@ -2356,7 +2356,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "kick_7_mirrored": {
   "cat": "kick",
@@ -2364,7 +2364,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "kick_8": {
   "cat": "kick",
@@ -2372,7 +2372,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 79,
-  "status": "active"
+  "status": "older"
  },
  "kick_8_mirrored": {
   "cat": "kick",
@@ -2388,7 +2388,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 64,
-  "status": "active"
+  "status": "older"
  },
  "kick_9_mirrored": {
   "cat": "kick",
@@ -2396,7 +2396,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 64,
-  "status": "active"
+  "status": "older"
  },
  "kick_10": {
   "cat": "kick",
@@ -2404,7 +2404,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "kick_10_mirrored": {
   "cat": "kick",
@@ -2420,7 +2420,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "older"
  },
  "kick_11_mirrored": {
   "cat": "kick",
@@ -2436,7 +2436,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "older"
  },
  "kick_12_mirrored": {
   "cat": "kick",
@@ -2444,7 +2444,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "older"
  },
  "throw_1": {
   "cat": "throw",
@@ -2452,7 +2452,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 78,
-  "status": "active"
+  "status": "older"
  },
  "throw_1_mirrored": {
   "cat": "throw",
@@ -2460,7 +2460,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 78,
-  "status": "active"
+  "status": "older"
  },
  "throw_2": {
   "cat": "throw",
@@ -2468,7 +2468,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 70,
-  "status": "active"
+  "status": "older"
  },
  "throw_2_mirrored": {
   "cat": "throw",
@@ -2484,7 +2484,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 67,
-  "status": "active"
+  "status": "older"
  },
  "throw_3_mirrored": {
   "cat": "throw",
@@ -2492,7 +2492,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 67,
-  "status": "active"
+  "status": "older"
  },
  "throw_4": {
   "cat": "throw",
@@ -2500,7 +2500,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "throw_4_mirrored": {
   "cat": "throw",
@@ -2508,7 +2508,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "throw_5": {
   "cat": "throw",
@@ -2516,7 +2516,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "throw_5_mirrored": {
   "cat": "throw",
@@ -2524,7 +2524,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "throw_6": {
   "cat": "throw",
@@ -2532,7 +2532,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "throw_6_mirrored": {
   "cat": "throw",
@@ -2540,7 +2540,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "throw_7": {
   "cat": "throw",
@@ -2548,7 +2548,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 60,
-  "status": "active"
+  "status": "older"
  },
  "throw_7_mirrored": {
   "cat": "throw",
@@ -2556,7 +2556,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 60,
-  "status": "active"
+  "status": "older"
  },
  "throw_8": {
   "cat": "throw",
@@ -2564,7 +2564,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "throw_8_mirrored": {
   "cat": "throw",
@@ -2572,7 +2572,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "throw_9": {
   "cat": "throw",
@@ -2580,7 +2580,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 80,
-  "status": "active"
+  "status": "older"
  },
  "throw_9_mirrored": {
   "cat": "throw",
@@ -2588,7 +2588,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 80,
-  "status": "active"
+  "status": "older"
  },
  "throw_10": {
   "cat": "throw",
@@ -2596,7 +2596,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 29,
-  "status": "active"
+  "status": "older"
  },
  "throw_10_mirrored": {
   "cat": "throw",
@@ -2604,7 +2604,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 29,
-  "status": "active"
+  "status": "older"
  },
  "stumble_1": {
   "cat": "stumble",
@@ -2612,7 +2612,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 113,
-  "status": "active"
+  "status": "older"
  },
  "stumble_1_mirrored": {
   "cat": "stumble",
@@ -2620,7 +2620,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 113,
-  "status": "active"
+  "status": "older"
  },
  "stumble_2": {
   "cat": "stumble",
@@ -2628,7 +2628,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 60,
-  "status": "active"
+  "status": "older"
  },
  "stumble_2_mirrored": {
   "cat": "stumble",
@@ -2636,7 +2636,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 60,
-  "status": "active"
+  "status": "older"
  },
  "stumble_3": {
   "cat": "stumble",
@@ -2652,7 +2652,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 49,
-  "status": "active"
+  "status": "older"
  },
  "push_pull_2": {
   "cat": "push pull",
@@ -2660,7 +2660,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 67,
-  "status": "active"
+  "status": "older"
  },
  "push_pull_2_mirrored": {
   "cat": "push pull",
@@ -2676,7 +2676,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "push_pull_3_mirrored": {
   "cat": "push pull",
@@ -2684,7 +2684,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "push_pull_4": {
   "cat": "push pull",
@@ -2692,7 +2692,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "older"
  },
  "push_pull_4_mirrored": {
   "cat": "push pull",
@@ -2708,7 +2708,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "push_pull_5_mirrored": {
   "cat": "push pull",
@@ -2716,7 +2716,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "push_pull_6": {
   "cat": "push pull",
@@ -2724,7 +2724,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "push_pull_6_mirrored": {
   "cat": "push pull",
@@ -2732,7 +2732,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "carry_1": {
   "cat": "carry",
@@ -2740,7 +2740,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 53,
-  "status": "active"
+  "status": "older"
  },
  "carry_2": {
   "cat": "carry",
@@ -2756,7 +2756,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 54,
-  "status": "active"
+  "status": "older"
  },
  "carry_4": {
   "cat": "carry",
@@ -2764,7 +2764,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 48,
-  "status": "active"
+  "status": "older"
  },
  "carry_5": {
   "cat": "carry",
@@ -2772,7 +2772,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 53,
-  "status": "active"
+  "status": "older"
  },
  "carry_6": {
   "cat": "carry",
@@ -2820,7 +2820,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "older"
  },
  "sidestep_4": {
   "cat": "sidestep",
@@ -2828,7 +2828,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 29,
-  "status": "active"
+  "status": "older"
  },
  "sidestep_4_mirrored": {
   "cat": "sidestep",
@@ -2836,7 +2836,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 29,
-  "status": "active"
+  "status": "older"
  },
  "sidestep_5": {
   "cat": "sidestep",
@@ -2844,7 +2844,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "older"
  },
  "sidestep_5_mirrored": {
   "cat": "sidestep",
@@ -2852,7 +2852,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "older"
  },
  "sidestep_6": {
   "cat": "sidestep",
@@ -2860,7 +2860,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "older"
  },
  "sidestep_6_mirrored": {
   "cat": "sidestep",
@@ -2940,7 +2940,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "older"
  },
  "sidestep_11_mirrored": {
   "cat": "sidestep",
@@ -2948,7 +2948,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "older"
  },
  "sidestep_12": {
   "cat": "sidestep",
@@ -2956,7 +2956,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "older"
  },
  "sidestep_12_mirrored": {
   "cat": "sidestep",
@@ -3036,7 +3036,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 46,
-  "status": "active"
+  "status": "older"
  },
  "sidestep_17_mirrored": {
   "cat": "sidestep",
@@ -3044,7 +3044,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 46,
-  "status": "active"
+  "status": "older"
  },
  "backward_1": {
   "cat": "backward",
@@ -3116,7 +3116,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 44,
-  "status": "active"
+  "status": "older"
  },
  "balance_3": {
   "cat": "balance",
@@ -3124,7 +3124,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "balance_4": {
   "cat": "balance",
@@ -3132,7 +3132,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "balance_5": {
   "cat": "balance",
@@ -3140,7 +3140,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 29,
-  "status": "active"
+  "status": "older"
  },
  "balance_6": {
   "cat": "balance",
@@ -3148,7 +3148,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 34,
-  "status": "active"
+  "status": "older"
  },
  "balance_7": {
   "cat": "balance",
@@ -3156,7 +3156,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "balance_8": {
   "cat": "balance",
@@ -3164,7 +3164,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "balance_9": {
   "cat": "balance",
@@ -3172,7 +3172,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "balance_10": {
   "cat": "balance",
@@ -3180,7 +3180,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 25,
-  "status": "active"
+  "status": "older"
  },
  "balance_11": {
   "cat": "balance",
@@ -3188,7 +3188,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 49,
-  "status": "active"
+  "status": "older"
  },
  "balance_12": {
   "cat": "balance",
@@ -3210,594 +3210,1554 @@
   "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 124_07)",
   "loop": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_2": {
   "cat": "bat swings",
   "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 124_07)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_2_lefty": {
   "cat": "bat swings",
   "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 124_07)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_1": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 124_07)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_1_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 124_07)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_2": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 124_08)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_2_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 124_08)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_3": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 79_01)",
   "loop": true,
   "frames": 62,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_3_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 79_01)",
   "loop": true,
   "frames": 62,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_4": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 79_01)",
   "loop": true,
   "frames": 42,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_4_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 79_01)",
   "loop": true,
   "frames": 42,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_5": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 80_71)",
   "loop": true,
   "frames": 27,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_5_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 80_71)",
   "loop": true,
   "frames": 27,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_6": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 80_71)",
   "loop": true,
   "frames": 27,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_6_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 80_71)",
   "loop": true,
   "frames": 27,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_7": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 80_71)",
   "loop": true,
   "frames": 28,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_7_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 80_71)",
   "loop": true,
   "frames": 28,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_8": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 80_71)",
   "loop": true,
   "frames": 35,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_8_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 80_71)",
   "loop": true,
   "frames": 35,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_9": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 80_71)",
   "loop": true,
   "frames": 55,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_9_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 80_71)",
   "loop": true,
   "frames": 55,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_10": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_10_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_11": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 64,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_11_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 64,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_12": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_12_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_13": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_13_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_14": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 59,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_14_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 59,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_15": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_15_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_16": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_16_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_17": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 55,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_17_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 55,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_18": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_18_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_19": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 39,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_19_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 39,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_20": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_20_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_21": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 62,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_21_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 62,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_22": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 42,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_22_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
   "loop": true,
   "frames": 42,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_23": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 64,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_23_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 64,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_24": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_24_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_25": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_25_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_diagonal_1": {
   "cat": "bat swings",
   "how": "diagonal downward bat swing, real motion (CMU 86_05)",
   "loop": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "bat_diagonal_1_lefty": {
   "cat": "bat swings",
   "how": "left-handed diagonal downward bat swing, real motion (CMU 86_05)",
   "loop": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_26": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_26_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_27": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_27_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_3": {
   "cat": "bat swings",
   "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
   "loop": true,
   "frames": 52,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_3_lefty": {
   "cat": "bat swings",
   "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
   "loop": true,
   "frames": 52,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_4": {
   "cat": "bat swings",
   "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_4_lefty": {
   "cat": "bat swings",
   "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_5": {
   "cat": "bat swings",
   "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
   "loop": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_5_lefty": {
   "cat": "bat swings",
   "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
   "loop": true,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_28": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_28_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_29": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_29_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_30": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_30_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_6": {
   "cat": "bat swings",
   "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_6_lefty": {
   "cat": "bat swings",
   "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_31": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 40,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_31_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 40,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_32": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 39,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_32_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 39,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_33": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_33_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_7": {
   "cat": "bat swings",
   "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
   "loop": true,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_7_lefty": {
   "cat": "bat swings",
   "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
   "loop": true,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_34": {
   "cat": "bat swings",
   "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "bat_overhead_34_lefty": {
   "cat": "bat swings",
   "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
   "loop": true,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_8": {
   "cat": "bat swings",
   "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 62_10)",
   "loop": true,
   "frames": 64,
-  "status": "active"
+  "status": "older"
  },
  "bat_horizontal_8_lefty": {
   "cat": "bat swings",
   "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 62_10)",
   "loop": true,
   "frames": 64,
+  "status": "older"
+ },
+ "horror_28x09_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 0.8s. Recording: 'prairie dog (human subject)' (CMU 28_09). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "horror_31x11_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 0.8s. Recording: 'prairie dog (human subject)' (CMU 31_11). Measured: drops low (head down 30cm), fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "climbing_13x34_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.1s. Recording: 'climb ladder' (CMU 13_34). Measured: drops low (head down 29cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": false,
+  "oneshot": true,
+  "frames": 64,
+  "status": "active"
+ },
+ "climbing_13x34_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 1.4s. Recording: 'climb ladder' (CMU 13_34). Measured: steps forward/back, turns 64\u00b0",
+  "loop": false,
+  "oneshot": true,
+  "frames": 41,
+  "status": "active"
+ },
+ "climbing_13x35_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.7s. Recording: 'climb 3 steps' (CMU 13_35). Measured: leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 82,
+  "status": "active"
+ },
+ "climbing_13x35_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 1.5s. Recording: 'climb 3 steps' (CMU 13_35). Measured: drops low (head down 23cm), leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 44,
+  "status": "active"
+ },
+ "climbing_13x37_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.7s. Recording: 'climb 3 steps' (CMU 13_37). Measured: leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 81,
+  "status": "active"
+ },
+ "climbing_13x37_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 1.8s. Recording: 'climb 3 steps' (CMU 13_37). Measured: leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 55,
+  "status": "active"
+ },
+ "climbing_14x22_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 4.2s. Recording: 'climb 3 steps' (CMU 14_22). Measured: drops low (head down 70cm), leaves the ground, steps forward/back, turns 98\u00b0",
+  "loop": false,
+  "oneshot": true,
+  "frames": 125,
+  "status": "active"
+ },
+ "climbing_14x22_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 1.7s. Recording: 'climb 3 steps' (CMU 14_22). Measured: leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 51,
+  "status": "active"
+ },
+ "climbing_14x30_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 1.5s. Recording: 'sit on stepstool, ankle on other knee, hand on chin' (CMU 14_30). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 46,
+  "status": "active"
+ },
+ "climbing_14x30_2": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 1.4s. Recording: 'sit on stepstool, ankle on other knee, hand on chin' (CMU 14_30). Measured: drops low (head down 53cm), steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "climbing_14x33_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.2s. Recording: 'climb ladder' (CMU 14_33). Measured: drops low (head down 66cm), leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 67,
+  "status": "active"
+ },
+ "climbing_14x33_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 3.1s. Recording: 'climb ladder' (CMU 14_33). Measured: leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 92,
+  "status": "active"
+ },
+ "climbing_14x34_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.4s. Recording: 'climb ladder' (CMU 14_34). Measured: steps forward/back, fast arm strike/swing",
+  "loop": false,
+  "oneshot": true,
+  "frames": 73,
+  "status": "active"
+ },
+ "climbing_14x34_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.5s. Recording: 'climb ladder' (CMU 14_34). Measured: leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 76,
+  "status": "active"
+ },
+ "climbing_14x35_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 3.4s. Recording: 'climb ladder' (CMU 14_35). Measured: drops low (head down 25cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": false,
+  "oneshot": true,
+  "frames": 102,
+  "status": "active"
+ },
+ "climbing_14x35_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.1s. Recording: 'climb ladder' (CMU 14_35). Measured: drops low (head down 39cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": false,
+  "oneshot": true,
+  "frames": 62,
+  "status": "active"
+ },
+ "climbing_15x02_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.3s. Recording: 'climb, step over, sit on, stand on stepstool' (CMU 15_02). Measured: drops low (head down 32cm), leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 69,
+  "status": "active"
+ },
+ "climbing_15x02_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 4.3s. Recording: 'climb, step over, sit on, stand on stepstool' (CMU 15_02). Measured: leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 129,
+  "status": "active"
+ },
+ "climbing_16x04_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 2.5s. Recording: 'high jump' (CMU 16_04). Measured: drops low (head down 33cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 75,
+  "status": "active"
+ },
+ "climbing_16x05_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 2.1s. Recording: 'forward jump' (CMU 16_05). Measured: drops low (head down 23cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 62,
+  "status": "active"
+ },
+ "climbing_16x07_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 2.2s. Recording: 'forward jump' (CMU 16_07). Measured: drops low (head down 24cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 65,
+  "status": "active"
+ },
+ "climbing_16x09_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 1.9s. Recording: 'forward jump' (CMU 16_09). Measured: drops low (head down 49cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "climbing_40x06_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.8s. Recording: 'climb, step over, sit on, jump over stepstool' (CMU 40_06). Measured: leaves the ground, steps forward/back, fast arm strike/swing, turns 130\u00b0",
+  "loop": false,
+  "oneshot": true,
+  "frames": 84,
+  "status": "active"
+ },
+ "climbing_40x06_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 1.7s. Recording: 'climb, step over, sit on, jump over stepstool' (CMU 40_06). Measured: drops low (head down 42cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": false,
+  "oneshot": true,
+  "frames": 50,
+  "status": "active"
+ },
+ "climbing_40x07_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.9s. Recording: 'climb, step over, jump over stepstool' (CMU 40_07). Measured: leaves the ground, steps forward/back, fast arm strike/swing, turns 166\u00b0",
+  "loop": false,
+  "oneshot": true,
+  "frames": 88,
+  "status": "active"
+ },
+ "climbing_40x07_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 3.5s. Recording: 'climb, step over, jump over stepstool' (CMU 40_07). Measured: leaves the ground, steps forward/back, fast arm strike/swing, turns 175\u00b0",
+  "loop": false,
+  "oneshot": true,
+  "frames": 106,
+  "status": "active"
+ },
+ "climbing_40x08_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 1.6s. Recording: 'climb, step over, jump over stepstool' (CMU 40_08). Measured: drops low (head down 40cm), leaves the ground, steps sideways, fast arm strike/swing",
+  "loop": false,
+  "oneshot": true,
+  "frames": 49,
+  "status": "active"
+ },
+ "climbing_40x08_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 1.6s. Recording: 'climb, step over, jump over stepstool' (CMU 40_08). Measured: drops low (head down 41cm), leaves the ground, steps sideways",
+  "loop": false,
+  "oneshot": true,
+  "frames": 47,
+  "status": "active"
+ },
+ "climbing_41x08_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 3.2s. Recording: 'climb, step over, jump over, navigate around stepstool' (CMU 41_08). Measured: leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 96,
+  "status": "active"
+ },
+ "climbing_41x09_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 3.5s. Recording: 'climb, step over, jump over, navigate around stepstool' (CMU 41_09). Measured: leaves the ground, steps forward/back, fast arm strike/swing, turns 137\u00b0",
+  "loop": false,
+  "oneshot": true,
+  "frames": 106,
+  "status": "active"
+ },
+ "climbing_41x09_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.5s. Recording: 'climb, step over, jump over, navigate around stepstool' (CMU 41_09). Measured: leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 75,
+  "status": "active"
+ },
+ "climbing_49x04_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 0.9s. Recording: 'run, leap' (CMU 49_04). Measured: drops low (head down 41cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 26,
+  "status": "active"
+ },
+ "climbing_76x11_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 1.2s. Recording: 'quick large steps backwards' (CMU 76_11). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 36,
+  "status": "active"
+ },
+ "climbing_81x14_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 3.2s. Recording: 'climb backwards off ledge' (CMU 81_14). Measured: goes down onto the ground, leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 97,
+  "status": "active"
+ },
+ "climbing_81x14_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 3.5s. Recording: 'climb backwards off ledge' (CMU 81_14). Measured: drops low (head down 82cm), leaves the ground, steps forward/back, turns 121\u00b0",
+  "loop": false,
+  "oneshot": true,
+  "frames": 106,
+  "status": "active"
+ },
+ "climbing_81x15_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.9s. Recording: 'climb backwards off ledge' (CMU 81_15). Measured: leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 88,
+  "status": "active"
+ },
+ "climbing_81x15_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.4s. Recording: 'climb backwards off ledge' (CMU 81_15). Measured: goes down onto the ground, leaves the ground, steps forward/back, turns 108\u00b0",
+  "loop": false,
+  "oneshot": true,
+  "frames": 72,
+  "status": "active"
+ },
+ "climbing_86x13_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 3.3s. Recording: 'walking around, walk up ladder, step down ladder' (CMU 86_13). Measured: drops low (head down 26cm), leaves the ground, steps forward/back",
+  "loop": false,
+  "oneshot": true,
+  "frames": 99,
+  "status": "active"
+ },
+ "climbing_86x13_2": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 1.2s. Recording: 'walking around, walk up ladder, step down ladder' (CMU 86_13). Measured: steps forward/back, fast arm strike/swing",
+  "loop": false,
+  "oneshot": true,
+  "frames": 35,
+  "status": "active"
+ },
+ "climbing_113x22_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 1.5s. Recording: 'Step over' (CMU 113_22). Measured: lifts a leg high, steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 45,
+  "status": "active"
+ },
+ "climbing_113x22_2": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 1.6s. Recording: 'Step over' (CMU 113_22). Measured: lifts a leg high, steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 47,
+  "status": "active"
+ },
+ "climbing_127x25_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 0.9s. Recording: 'Run Jump Over' (CMU 127_25). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 26,
+  "status": "active"
+ },
+ "climbing_127x26_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 0.9s. Recording: 'Run Jump Over' (CMU 127_26). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 27,
+  "status": "active"
+ },
+ "climbing_127x27_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 1.2s. Recording: 'Run Jump Over' (CMU 127_27). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "climbing_127x28_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 0.8s. Recording: 'Run Jump Over' (CMU 127_28). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "climbing_141x09_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 0.8s. Recording: 'Step Over' (CMU 141_09). Measured: lifts a leg high, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 25,
+  "status": "active"
+ },
+ "climbing_143x14_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 0.8s. Recording: 'Walk And Step Over' (CMU 143_14). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "climbing_143x15_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 0.8s. Recording: 'Walk And Step Over' (CMU 143_15). Measured: lifts a leg high, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 25,
+  "status": "active"
+ },
+ "climbing_143x16_1": {
+  "cat": "climbing & parkour",
+  "how": "seamless loop, 1.1s. Recording: 'Walk And Step Over' (CMU 143_16). Measured: lifts a leg high, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "climbing_143x37_1": {
+  "cat": "climbing & parkour",
+  "how": "one-shot, 2.2s. Recording: 'Climb Up And Down Ladder' (CMU 143_37). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": false,
+  "oneshot": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "fights_17x01_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.9s. Recording: 'walk with anger, frustration' (CMU 17_01). Measured: leaves the ground, steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 56,
+  "status": "active"
+ },
+ "fights_17x01_2": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.7s. Recording: 'walk with anger, frustration' (CMU 17_01). Measured: steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 50,
+  "status": "active"
+ },
+ "fights_17x02_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 0.9s. Recording: 'walk with anger, frustration' (CMU 17_02). Measured: leaves the ground, steps sideways, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 27,
+  "status": "active"
+ },
+ "fights_17x02_2": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.8s. Recording: 'walk with anger, frustration' (CMU 17_02). Measured: steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 54,
+  "status": "active"
+ },
+ "fights_18x11_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.9s. Recording: 'quarrel - angry hand gestures (2 subjects - subject A)' (CMU 18_11). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 58,
+  "status": "active"
+ },
+ "fights_18x13_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.6s. Recording: 'run, scramble for last seat (2 subjects - subject A)' (CMU 18_13). Measured: drops low (head down 50cm), steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 47,
+  "status": "active"
+ },
+ "fights_18x14_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.1s. Recording: 'run, scramble for last seat (2 subjects - subject A)' (CMU 18_14). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "fights_19x11_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 0.9s. Recording: 'quarrel - angry hand gestures (2 subjects - subject B)' (CMU 19_11). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 26,
+  "status": "active"
+ },
+ "fights_19x13_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.7s. Recording: 'run, scramble for last seat (2 subjects - subject B)' (CMU 19_13). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 51,
+  "status": "active"
+ },
+ "fights_19x13_2": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.4s. Recording: 'run, scramble for last seat (2 subjects - subject B)' (CMU 19_13). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 42,
+  "status": "active"
+ },
+ "fights_19x14_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 0.8s. Recording: 'run, scramble for last seat (2 subjects - subject B)' (CMU 19_14). Measured: steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "fights_56x07_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.9s. Recording: 'vignettes - yawn, stretch, walk, run/jog, angrily grab, jump, skip, halt' (CMU 56_07). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "fights_56x07_2": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 0.8s. Recording: 'vignettes - yawn, stretch, walk, run/jog, angrily grab, jump, skip, halt' (CMU 56_07). Measured: lifts a leg high, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "fights_81x07_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.4s. Recording: 'pull heavy object' (CMU 81_07). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "fights_81x10_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 2.2s. Recording: 'push object that is high in air' (CMU 81_10). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 65,
+  "status": "active"
+ },
+ "fights_82x06_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.2s. Recording: 'Pushing on heavy object' (CMU 82_06). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "fights_82x06_2": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 0.8s. Recording: 'Pushing on heavy object' (CMU 82_06). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 25,
+  "status": "active"
+ },
+ "fights_82x07_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.4s. Recording: 'Pushing on heavy object' (CMU 82_07). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "fights_82x07_2": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 0.8s. Recording: 'Pushing on heavy object' (CMU 82_07). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "fights_134x06_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 0.8s. Recording: 'Push Turn Left' (CMU 134_06). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "fights_134x08_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 0.8s. Recording: 'Push Turn Right' (CMU 134_08). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "fights_141x28_1": {
+  "cat": "fights & interactions",
+  "how": "seamless loop, 1.4s. Recording: 'Slap Hands, Throw it Back' (CMU 141_28). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "horror_77x05_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.9s. Recording: 'look around with flashlight' (CMU 77_05). Measured: fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "horror_77x06_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 2.3s. Recording: 'searching ground' (CMU 77_06). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 68,
+  "status": "active"
+ },
+ "horror_77x06_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.3s. Recording: 'searching ground' (CMU 77_06). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "horror_77x25_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.9s. Recording: 'careful walk and search' (CMU 77_25). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 58,
+  "status": "active"
+ },
+ "horror_77x25_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.9s. Recording: 'careful walk and search' (CMU 77_25). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "horror_77x26_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.7s. Recording: 'careful walk and search' (CMU 77_26). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 51,
+  "status": "active"
+ },
+ "horror_77x27_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 0.7s. Recording: 'careful walk and search' (CMU 77_27). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 22,
+  "status": "active"
+ },
+ "horror_77x27_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 0.9s. Recording: 'careful walk and search' (CMU 77_27). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 28,
+  "status": "active"
+ },
+ "horror_20x13_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.2s. Recording: 'blind man's bluff (blindfold tag) (2 subjects - subject A)' (CMU 20_13). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 36,
+  "status": "active"
+ },
+ "horror_20x13_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 2.1s. Recording: 'blind man's bluff (blindfold tag) (2 subjects - subject A)' (CMU 20_13). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 62,
+  "status": "active"
+ },
+ "horror_21x13_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.1s. Recording: 'blind man's bluff (blindfold tag) (2 subjects - subject B)' (CMU 21_13). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "horror_21x13_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.9s. Recording: 'blind man's bluff (blindfold tag) (2 subjects - subject B)' (CMU 21_13). Measured: goes down onto the ground, leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "horror_136x12_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.5s. Recording: 'Walk Backwards Crouched' (CMU 136_12). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 44,
+  "status": "active"
+ },
+ "horror_136x12_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.4s. Recording: 'Walk Backwards Crouched' (CMU 136_12). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "horror_136x13_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.3s. Recording: 'Walk on Toes Crouched' (CMU 136_13). Measured: leaves the ground, steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "horror_136x13_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.3s. Recording: 'Walk on Toes Crouched' (CMU 136_13). Measured: leaves the ground, steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "horror_136x14_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.2s. Recording: 'Walk on Toes Crouched' (CMU 136_14). Measured: leaves the ground, steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "horror_136x14_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.1s. Recording: 'Walk on Toes Crouched' (CMU 136_14). Measured: leaves the ground, steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "horror_136x15_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.2s. Recording: 'Walk Backwards on Toes Crouched' (CMU 136_15). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 36,
+  "status": "active"
+ },
+ "horror_136x15_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.2s. Recording: 'Walk Backwards on Toes Crouched' (CMU 136_15). Measured: leaves the ground, steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "horror_136x16_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.2s. Recording: 'Walk Backwards on Toes Crouched' (CMU 136_16). Measured: leaves the ground, steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 36,
+  "status": "active"
+ },
+ "horror_136x16_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.1s. Recording: 'Walk Backwards on Toes Crouched' (CMU 136_16). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "horror_139x11_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 0.8s. Recording: 'Run To Sneak' (CMU 139_11). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "horror_139x11_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.3s. Recording: 'Run To Sneak' (CMU 139_11). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "horror_139x14_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 0.6s. Recording: 'Sneak Sideways' (CMU 139_14). Measured: steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 19,
+  "status": "active"
+ },
+ "horror_139x14_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.4s. Recording: 'Sneak Sideways' (CMU 139_14). Measured: steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "horror_139x15_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.5s. Recording: 'Sneak Sideways' (CMU 139_15). Measured: steps sideways",
+  "loop": true,
+  "oneshot": false,
+  "frames": 45,
+  "status": "active"
+ },
+ "horror_139x15_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 0.8s. Recording: 'Sneak Sideways' (CMU 139_15). Measured: steps sideways",
+  "loop": true,
+  "oneshot": false,
+  "frames": 25,
+  "status": "active"
+ },
+ "horror_139x29_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.8s. Recording: 'Sneaking' (CMU 139_29). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 54,
+  "status": "active"
+ },
+ "horror_139x29_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.5s. Recording: 'Sneaking' (CMU 139_29). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 44,
+  "status": "active"
+ },
+ "horror_139x31_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.2s. Recording: 'Sneaking' (CMU 139_31). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "horror_139x31_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.0s. Recording: 'Sneaking' (CMU 139_31). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "horror_139x32_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.3s. Recording: 'Sneaking' (CMU 139_32). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 40,
+  "status": "active"
+ },
+ "horror_139x32_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.1s. Recording: 'Sneaking' (CMU 139_32). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "horror_120x12_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.3s. Recording: 'Mickey sneaking walk' (CMU 120_12). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "horror_120x12_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.4s. Recording: 'Mickey sneaking walk' (CMU 120_12). Measured: drops low (head down 26cm), steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "horror_120x13_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.3s. Recording: 'Mickey sneaking walk' (CMU 120_13). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "horror_120x13_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.1s. Recording: 'Mickey sneaking walk' (CMU 120_13). Measured: drops low (head down 30cm), steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "horror_120x14_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.6s. Recording: 'Mickey sneaking walk' (CMU 120_14). Measured: leaves the ground, steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 48,
+  "status": "active"
+ },
+ "horror_120x14_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.4s. Recording: 'Mickey sneaking walk' (CMU 120_14). Measured: drops low (head down 36cm), steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "horror_132x15_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.4s. Recording: 'Walk With Knees Bent' (CMU 132_15). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 42,
+  "status": "active"
+ },
+ "horror_132x15_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.3s. Recording: 'Walk With Knees Bent' (CMU 132_15). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "horror_81x12_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.7s. Recording: 'jump backwards off ledge' (CMU 81_12). Measured: drops low (head down 41cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 52,
+  "status": "active"
+ },
+ "horror_81x12_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.1s. Recording: 'jump backwards off ledge' (CMU 81_12). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "horror_81x13_1": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.4s. Recording: 'jump backwards off ledge' (CMU 81_13). Measured: drops low (head down 38cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 42,
+  "status": "active"
+ },
+ "horror_81x13_2": {
+  "cat": "horror & creatures",
+  "how": "seamless loop, 1.5s. Recording: 'jump backwards off ledge' (CMU 81_13). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 45,
   "status": "active"
  }
 }
