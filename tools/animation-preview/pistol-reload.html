@@ -1,0 +1,219 @@
+<title>Pistol Reload Storyboard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono&display=swap">
+<style>
+/* Layout: animator's light-table — big playback stage, then 8 numbered key panels, then the prompt */
+:root{
+  --bg:#eef1f4; --panel:#ffffff; --ink:#1b2430; --muted:#5b6878; --line:#cfd6de;
+  --accent:#e0661b; --figure:#1b2430; --gun:#3b4654; --mag-old:#9aa5b1; --mag-new:#e0661b;
+  --display:"Chakra Petch",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12161c; --panel:#1b2129; --ink:#e6ebf1; --muted:#97a3b2; --line:#2e3742;
+  --accent:#ff8a3d; --figure:#e6ebf1; --gun:#b7c2ce; --mag-old:#5f6b78; --mag-new:#ff8a3d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161c; --panel:#1b2129; --ink:#e6ebf1; --muted:#97a3b2; --line:#2e3742;
+  --accent:#ff8a3d; --figure:#e6ebf1; --gun:#b7c2ce; --mag-old:#5f6b78; --mag-new:#ff8a3d; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+main{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--display);font-size:clamp(26px,5vw,38px);margin:0;letter-spacing:.01em;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-top:6px}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+#main{width:100%;aspect-ratio:16/9;max-width:100%;display:block}
+.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+button{font-family:var(--display);font-weight:700;font-size:14px;background:var(--accent);color:#fff;border:0;border-radius:6px;padding:8px 16px;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=range]{flex:1;min-width:140px;accent-color:var(--accent)}
+.readout{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);min-width:170px}
+.readout b{color:var(--ink)}
+h2{font-family:var(--display);font-size:20px;margin:0}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.card.on{border-color:var(--accent)}
+.card canvas{width:100%;aspect-ratio:4/3;display:block}
+.card .n{font-family:var(--display);font-weight:700;color:var(--accent)}
+.card p{margin:0;font-size:13px;line-height:1.35}
+.card .f{font-family:var(--mono);font-size:11px;color:var(--muted)}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;white-space:pre-wrap;font-family:var(--mono);font-size:13px;line-height:1.5;margin:0;overflow-x:auto}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.note{font-size:13px;color:var(--muted);margin:0;max-width:65ch}
+</style>
+
+<main>
+  <header>
+    <h1>Pistol Reload Storyboard</h1>
+    <div class="meta">3D third-person · side view · 24 fps · frames 1–48 · one-shot</div>
+  </header>
+
+  <section class="stage">
+    <canvas id="main" width="1280" height="720" aria-label="Animated reload preview"></canvas>
+    <div class="controls">
+      <button id="play">Pause</button>
+      <button class="ghost" id="onion">Onion skin: off</button>
+      <input type="range" id="scrub" min="1" max="48" step="0.1" value="1" aria-label="Frame">
+      <div class="readout" id="readout"></div>
+    </div>
+    <p class="note">Shown from the side so every pose reads clearly. The orange magazine is the new one and the grey one is the empty one being dropped.</p>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <h2>Key frames</h2>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <div class="row"><h2>Prompt</h2><button class="ghost" id="copy">Copy prompt</button></div>
+    <pre id="prompt"></pre>
+  </section>
+</main>
+
+<script>
+const D=Math.PI/180;
+// angles in degrees, 0 = facing right, positive = clockwise (down) on screen
+const KEYS=[
+ {f:1, n:"Standing ready, pistol held forward in both hands at chest height.",
+  lean:4,head:0,rU:15,rF:-5,lU:25,lF:-2,gun:0,slide:0,drop:0,nm:0},
+ {f:8, n:"Pistol pulled close to the chest and tilted, head looking down at it.",
+  lean:8,head:22,rU:65,rF:-55,lU:75,lF:-25,gun:-20,slide:0,drop:0,nm:0},
+ {f:13,n:"Thumb presses the release, the empty magazine drops out of the grip.",
+  lean:8,head:25,rU:65,rF:-55,lU:95,lF:70,gun:-15,slide:0,drop:.45,nm:0},
+ {f:19,n:"Left hand reaches down and grabs a fresh magazine from the hip pouch.",
+  lean:12,head:20,rU:65,rF:-55,lU:110,lF:95,gun:-15,slide:0,drop:1,nm:1},
+ {f:25,n:"Left hand brings the new magazine up just below the grip.",
+  lean:9,head:24,rU:65,rF:-55,lU:72,lF:-8,gun:-15,slide:0,drop:1,nm:1},
+ {f:29,n:"Palm slaps the magazine into the grip, pistol bumps up slightly.",
+  lean:7,head:20,rU:60,rF:-62,lU:66,lF:-30,gun:-22,slide:0,drop:1,nm:2},
+ {f:35,n:"Left hand pulls the slide back.",
+  lean:7,head:18,rU:60,rF:-58,lU:55,lF:-75,gun:-12,slide:1,drop:1,nm:2},
+ {f:48,n:"Slide released, both hands back on the pistol, extended forward and ready.",
+  lean:4,head:0,rU:15,rF:-5,lU:25,lF:-2,gun:0,slide:0,drop:1,nm:2},
+];
+const PROMPT=`Create an 8-panel 3D animation storyboard of a character reloading a pistol, viewed from a third-person over-the-shoulder camera, realistic style. Lay the panels out left to right, numbered 1 to 8, same character, camera and scale in every panel. Each panel shows a different moment:
+
+${KEYS.map((k,i)=>`${i+1}. ${k.n}`).join("\n")}
+
+Keep each step clearly different and readable, and don't let the magazine clip through the hand or gun.
+Then animate it in Blender at 24 fps, spacing these poses over 48 frames.`;
+
+const L={torso:58,neck:8,head:12,upper:31,fore:29,thigh:44,shin:44};
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+function poseAt(fr){
+  if(fr<=KEYS[0].f)return KEYS[0];
+  for(let i=0;i<KEYS.length-1;i++){const a=KEYS[i],b=KEYS[i+1];
+    if(fr<=b.f){
+      let t=(fr-a.f)/(b.f-a.f);
+      // hard snaps on the seat and slide-release, smooth ease elsewhere
+      t=(i===4||i===6)?Math.min(1,t*1.8):ease(t);
+      const o={};for(const k in a)o[k]=typeof a[k]==="number"?a[k]+(b[k]-a[k])*t:a[k];return o;}}
+  return KEYS[KEYS.length-1];
+}
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const P=(x,y,a,l)=>[x+Math.cos(a*D)*l,y+Math.sin(a*D)*l];
+const lerp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+
+function solve(p){
+  const hip=[0,0];
+  const sh=P(0,0,-90+p.lean,L.torso);
+  const nk=P(sh[0],sh[1],-90+p.lean*.5,L.neck);
+  const hd=P(nk[0],nk[1],-90+p.lean+p.head*.6,L.head);
+  const rE=P(sh[0],sh[1],p.rU,L.upper), rH=P(rE[0],rE[1],p.rF,L.fore);
+  const lE=P(sh[0]-3,sh[1]+1,p.lU,L.upper), lH=P(lE[0],lE[1],p.lF,L.fore);
+  const g=p.gun*D, gp=(x,y)=>[rH[0]+x*Math.cos(g)-y*Math.sin(g), rH[1]+x*Math.sin(g)+y*Math.cos(g)];
+  const magIn=gp(2,13);                      // magazine seat point inside the grip
+  const pouch=[-8,6];
+  const floor=[34,2*L.thigh*.97+2];
+  return {hip,sh,nk,hd,rE,rH,lE,lH,gp,magIn,pouch,floor,headTilt:p.head};
+}
+
+function draw(ctx,w,h,p,opt={}){
+  const s=solve(p), sc=h/215, ox=w*.42, oy=h*.43;
+  ctx.save();ctx.translate(ox,oy);ctx.scale(sc,sc);
+  ctx.lineCap="round";ctx.lineJoin="round";
+  const fig=opt.ghost?css("--line"):css("--figure");
+  const line=(pts,c,wd)=>{ctx.strokeStyle=c;ctx.lineWidth=wd;ctx.beginPath();ctx.moveTo(...pts[0]);for(const q of pts.slice(1))ctx.lineTo(...q);ctx.stroke();};
+  // floor
+  if(!opt.ghost){ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-90,s.floor[1]+3);ctx.lineTo(120,s.floor[1]+3);ctx.stroke();}
+  // legs: back leg, front leg (fixed stance, slight knee bend)
+  const kneeB=P(0,0,104,L.thigh), footB=P(kneeB[0],kneeB[1],95,L.shin);
+  const kneeF=P(0,0,74,L.thigh), footF=P(kneeF[0],kneeF[1],92,L.shin);
+  // far arm (left) behind the body
+  line([s.sh,s.lE,s.lH],fig,6);
+  line([s.hip,kneeB,footB],fig,7);line([s.hip,kneeF,footF],fig,7);
+  line([s.hip,s.sh],fig,9);line([s.sh,s.nk],fig,6);
+  ctx.fillStyle=opt.ghost?"transparent":css("--panel");ctx.strokeStyle=fig;ctx.lineWidth=4;
+  ctx.beginPath();ctx.arc(s.hd[0],s.hd[1],L.head,0,7);ctx.fill();ctx.stroke();
+  // eye direction
+  const ed=P(s.hd[0],s.hd[1],s.headTilt*1.4,L.head*.6);ctx.fillStyle=fig;ctx.beginPath();ctx.arc(ed[0],ed[1],2,0,7);ctx.fill();
+  if(!opt.ghost){
+    // belt pouch
+    ctx.fillStyle=css("--line");ctx.fillRect(s.pouch[0]-5,s.pouch[1]-4,10,10);
+    // gun
+    const g=p.gun*D, sl=-p.slide*7;
+    ctx.save();ctx.translate(...s.rH);ctx.rotate(g);
+    ctx.fillStyle=css("--gun");
+    ctx.beginPath();ctx.moveTo(-3,-1);ctx.lineTo(7,-1);ctx.lineTo(9,16);ctx.lineTo(0,16);ctx.closePath();ctx.fill(); // grip
+    ctx.fillRect(-6+sl,-10,34,8); // slide
+    ctx.fillStyle=css("--bg");ctx.fillRect(22+sl,-8,4,2);
+    ctx.restore();
+    const drawMag=(pt,ang,col)=>{ctx.save();ctx.translate(...pt);ctx.rotate(ang);ctx.fillStyle=col;ctx.fillRect(-3,-7,7,15);ctx.restore();};
+    // old (empty) magazine
+    if(p.drop<1.01){const a=s.magIn, b=s.floor, t=p.drop;
+      const pt=[a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t*t*(t<1?1:1)];
+      drawMag(t>=.999?[b[0],b[1]-3]:pt, t>=.999?Math.PI/2:g+t*1.2, css("--mag-old"));}
+    // new magazine: 0 pouch -> 1 left hand -> 2 seated in gun
+    let np,na;
+    if(p.nm<=1){np=lerp(s.pouch,s.lH,p.nm);na=p.nm*g;} else {np=lerp(s.lH,s.magIn,p.nm-1);na=g;}
+    drawMag(np,na,css("--mag-new"));
+  }
+  // near arm (right) on top
+  line([s.sh,s.rE,s.rH],fig,7);
+  ctx.restore();
+}
+
+// main stage
+const mc=document.getElementById("main"),mx=mc.getContext("2d");
+let frame=1,playing=!matchMedia("(prefers-reduced-motion: reduce)").matches,onion=false,last=0,hold=0;
+const scrub=document.getElementById("scrub"),readout=document.getElementById("readout"),playBtn=document.getElementById("play");
+playBtn.textContent=playing?"Pause":"Play";
+function keyIndex(fr){let k=0;KEYS.forEach((x,i)=>{if(fr>=x.f-.01)k=i});return k;}
+function render(){
+  mx.fillStyle=css("--panel");mx.fillRect(0,0,mc.width,mc.height);
+  if(onion)KEYS.forEach(k=>draw(mx,mc.width,mc.height,k,{ghost:true}));
+  draw(mx,mc.width,mc.height,poseAt(frame));
+  const k=keyIndex(frame);
+  readout.innerHTML=`Frame <b>${String(Math.floor(frame)).padStart(2,"0")}</b> / 48 · key <b>${k+1}</b>`;
+  scrub.value=frame;
+  document.querySelectorAll(".card").forEach((c,i)=>c.classList.toggle("on",i===k));
+}
+function tick(t){
+  if(playing&&last){const dt=(t-last)/1000;
+    if(frame>=48){hold+=dt;if(hold>0.8){frame=1;hold=0}}else frame=Math.min(48,frame+dt*24);}
+  last=t;render();requestAnimationFrame(tick);
+}
+playBtn.onclick=()=>{playing=!playing;playBtn.textContent=playing?"Pause":"Play"};
+document.getElementById("onion").onclick=e=>{onion=!onion;e.target.textContent="Onion skin: "+(onion?"on":"off")};
+scrub.oninput=()=>{frame=+scrub.value;playing=false;playBtn.textContent="Play"};
+
+// panels
+const grid=document.getElementById("grid");
+KEYS.forEach((k,i)=>{
+  const c=document.createElement("div");c.className="card";c.tabIndex=0;
+  c.innerHTML=`<canvas width="400" height="300"></canvas><div class="n">${i+1}</div><p>${k.n}</p><div class="f">frame ${k.f}</div>`;
+  const go=()=>{frame=k.f;playing=false;playBtn.textContent="Play"};
+  c.onclick=go;c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}};
+  grid.appendChild(c);
+});
+function drawPanels(){document.querySelectorAll(".card canvas").forEach((cv,i)=>{const x=cv.getContext("2d");x.fillStyle=css("--panel");x.fillRect(0,0,cv.width,cv.height);draw(x,cv.width,cv.height,KEYS[i])})}
+drawPanels();matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawPanels);
+new MutationObserver(drawPanels).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+document.getElementById("prompt").textContent=PROMPT;
+document.getElementById("copy").onclick=async e=>{
+  try{await navigator.clipboard.writeText(PROMPT);e.target.textContent="Copied"}
+  catch{const r=document.createRange();r.selectNodeContents(document.getElementById("prompt"));const s=getSelection();s.removeAllRanges();s.addRange(r);e.target.textContent="Selected, press Ctrl+C"}
+  setTimeout(()=>e.target.textContent="Copy prompt",1800);
+};
+requestAnimationFrame(tick);
+</script>
