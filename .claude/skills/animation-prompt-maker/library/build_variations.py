@@ -111,8 +111,7 @@ def fetch_extra():
 def main():
     import gzip, shutil
     fetch_extra()
-    if mocap.VARS.exists(): shutil.rmtree(mocap.VARS)
-    mocap.VARS.mkdir()
+    mocap.VARS.mkdir(exist_ok=True)
     old = json.loads(mocap.VARS_INDEX.read_text()) if mocap.VARS_INDEX.exists() else {}
     idx, bad, rep = {}, [], []
     def one(r):
@@ -126,11 +125,13 @@ def main():
         except Exception as e:
             return name, cat, how, 0, 0, 0, repr(e)
     with ThreadPoolExecutor(8) as ex:
-        for name, cat, how, q, st, n, err in ex.map(one, R):
+        blocked = set(json.loads((mocap.HERE / "rejected.json").read_text())) if (mocap.HERE / "rejected.json").exists() else set()
+        for name, cat, how, q, st, n, err in ex.map(one, [r for r in R if r[0] not in blocked]):
             if err: bad.append((name, err)); continue
             idx[name] = dict(cat=cat, how=how, loop=True, frames=n, seam=round(q, 2), status=old.get(name, {}).get("status", "active"))
             rep.append((name, n, q, st))
-    mocap.VARS_INDEX.write_text(json.dumps(idx, indent=1))
+    keep = {n: x for n, x in old.items() if n not in idx and x.get("cat") == "weapons"}
+    mocap.VARS_INDEX.write_text(json.dumps({**keep, **idx}, indent=1))
     for name, n, q, st in sorted(rep, key=lambda x: -x[2]): print(f"{name:18s} {n/30:4.1f}s  seam {q:4.2f}  power {st:5.1f}")
     print(len(idx), "loops built | failed:", bad)
 
