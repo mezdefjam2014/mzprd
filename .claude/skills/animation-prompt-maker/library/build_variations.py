@@ -11,106 +11,138 @@ EXTRA = {  # extra real source moves (become normal originals)
  "gorilla_1": "80_49", "gorilla_2": "120_02", "bear_1": "28_11", "bear_2": "29_16", "dinosaur_1": "28_19", "dinosaur_2": "29_23", "robot_1": "120_21",
  "shake_hands_1": "18_01", "phone_1": "79_36", "strike_1": "02_05", "threaten_1": "22_20",
 }
-def W(spec, maxs=5.0):
-    m = mocap.load_spec(spec)
-    return m if "@" in spec else mocap.auto_window(m, maxs)
-def cut(m, n): return {k: v[:n] for k, v in m.items()}
-E = mocap.exaggerate; S = mocap.speed; M = mocap.mirror; U = mocap.upper_from; C = mocap.chain; B = mocap.mix; LN = mocap.lean
-R = [  # (name, category, how it was made, builder)
- # ---------- attacks ----------
- ("snap_jab", "attacks", "punch_1, 1.4x speed, exaggerated", lambda: E(S(W("punch_1"), 1.4), .5)),
- ("heavy_haymaker", "attacks", "punch_1, slowed, big exaggeration", lambda: E(S(W("punch_1"), .75), .8)),
- ("lefty_punch", "attacks", "punch_1 mirrored", lambda: M(W("punch_1"))),
- ("walking_punch", "attacks", "walk_1 legs + punch_1 arms", lambda: U(W("walk_1"), W("punch_1"))),
- ("charging_punch", "attacks", "run_1 legs + strike_1 arms", lambda: U(W("run_1", 3), W("strike_1"))),
- ("snap_kick", "attacks", "kick_8, faster and snappier", lambda: E(S(W("kick_8"), 1.3), .5)),
- ("left_kick", "attacks", "kick_8 mirrored", lambda: M(W("kick_8"))),
- ("slowmo_jump_kick", "attacks", "jump_kick_2 at half speed", lambda: S(W("jump_kick_2@1.2-3.8"), .5)),
- ("mirrored_jump_kick", "attacks", "jump_kick_2 mirrored", lambda: M(W("jump_kick_2@1.2-3.8"))),
- ("sword_heavy", "attacks", "swordplay_1 slowed, exaggerated", lambda: E(S(W("swordplay_1"), .8), .6)),
- ("sword_lefty", "attacks", "swordplay_1 mirrored", lambda: M(W("swordplay_1"))),
- ("feint_and_strike", "attacks", "attack_2, snappier", lambda: E(W("attack_2"), .4)),
- ("punch_then_kick", "attacks", "punch_1 then kick_8", lambda: C(W("punch_1", 2), W("kick_8"))),
- ("overhead_threat", "attacks", "threaten_1, exaggerated", lambda: E(W("threaten_1"), .5)),
- # ---------- blocking ----------
- ("block_left_fast", "blocking", "block_1, 1.3x speed", lambda: S(W("block_1"), 1.3)),
- ("block_right_heavy", "blocking", "block_3, slowed and braced", lambda: E(S(W("block_3"), .8), .4)),
- ("block_mirrored", "blocking", "block_1 mirrored", lambda: M(W("block_1"))),
- ("retreating_block", "blocking", "walk_backward_1 legs + block_2 arms", lambda: U(W("walk_backward_1"), W("block_2"))),
- ("crouched_guard", "blocking", "walk_crouched_1 legs + boxing_1 arms", lambda: U(W("walk_crouched_1"), W("boxing_1@4.8-8.8"))),
- ("dodge_and_counter", "blocking", "dodge_1 then punch_1", lambda: C(W("dodge_1", 3), W("punch_1", 2))),
- # ---------- waves ----------
- ("big_wave", "waves", "wave_1, big exaggeration", lambda: E(W("wave_1"), .8)),
- ("left_hand_wave", "waves", "wave_1 mirrored", lambda: M(W("wave_1"))),
- ("tired_wave", "waves", "wave_1 slowed, damped, slumped", lambda: LN(E(S(W("wave_1"), .7), -.4), 12)),
- ("excited_wave", "waves", "wave_1 1.5x speed, exaggerated", lambda: E(S(W("wave_1"), 1.5), .6)),
- ("walking_wave", "waves", "walk_2 legs + wave_1 arms", lambda: U(W("walk_2"), W("wave_1"))),
- ("wave_then_hop", "waves", "wave_1 then hop_1", lambda: C(W("wave_1", 3), W("hop_1", 2.5))),
- # ---------- zombies ----------
- ("hunched_zombie", "zombies", "zombie_3 hunched forward 25 degrees", lambda: LN(W("zombie_3"), 25)),
- ("slow_heavy_zombie", "zombies", "zombie_3 at 0.6x speed, exaggerated", lambda: E(S(W("zombie_3"), .6), .5)),
- ("limping_zombie", "zombies", "limp_1 legs + zombie_3 arms", lambda: U(W("limp_1"), W("zombie_3"))),
- ("running_zombie", "zombies", "run_2 legs + zombie_4 arms, hunched", lambda: LN(U(W("run_2", 3), W("zombie_4")), 15)),
- ("drunk_zombie", "zombies", "zombie_3 blended 40% with drunk_1", lambda: B(W("zombie_3"), W("drunk_1"), .4)),
- ("zombie_lunge", "zombies", "zombie_3 then attack_1, hunched", lambda: LN(C(W("zombie_3", 3), W("attack_1", 2.5)), 15)),
- ("zombie_mirrored", "zombies", "zombie_4 mirrored", lambda: M(W("zombie_4"))),
- ("creeping_zombie", "zombies", "creep_1 legs + zombie_3 arms", lambda: U(W("creep_1"), W("zombie_3"))),
- # ---------- monsters ----------
- ("ape_monster", "monsters", "gorilla_1, hunched and exaggerated", lambda: LN(E(W("gorilla_1"), .5), 15)),
- ("charging_ape", "monsters", "run_1 legs + gorilla_2 arms, hunched", lambda: LN(U(W("run_1", 3), W("gorilla_2")), 20)),
- ("heavy_beast", "monsters", "bear_1 slowed and exaggerated", lambda: E(S(W("bear_1"), .7), .6)),
- ("dino_stomp", "monsters", "dinosaur_1, exaggerated, leaning", lambda: LN(E(W("dinosaur_1"), .7), 18)),
- ("robot_glitch", "monsters", "robot_1 1.4x speed, snappy", lambda: E(S(W("robot_1"), 1.4), .7)),
- ("monster_rage", "monsters", "quarrel_1 hunched, exaggerated", lambda: LN(E(W("quarrel_1"), .9), 20)),
- ("stalking_beast", "monsters", "creep_2 legs + gorilla_1 arms, hunched", lambda: LN(U(W("creep_2"), W("gorilla_1")), 22)),
- ("giant_walk", "monsters", "elephant_1 slowed, exaggerated", lambda: E(S(W("elephant_1"), .7), .5)),
- # ---------- boxing ----------
- ("boxing_fast", "boxing", "boxing_1 at 1.4x speed", lambda: S(W("boxing_1@4.8-8.8"), 1.4)),
- ("southpaw_boxing", "boxing", "boxing_1 mirrored", lambda: M(W("boxing_1@4.8-8.8"))),
- ("heavyweight", "boxing", "boxing_2 slowed, exaggerated", lambda: E(S(W("boxing_2"), .8), .6)),
- ("advancing_boxer", "boxing", "walk_3 legs + boxing_1 arms", lambda: U(W("walk_3"), W("boxing_1@4.8-8.8"))),
- ("retreating_boxer", "boxing", "walk_backward_2 legs + boxing_3 arms", lambda: U(W("walk_backward_2"), W("boxing_3"))),
- ("tired_boxer", "boxing", "boxing_4 slowed, damped, slumped", lambda: LN(E(S(W("boxing_4"), .7), -.4), 10)),
- # ---------- social ----------
- ("animated_talker", "social", "conversation_1, exaggerated gestures", lambda: E(W("conversation_1"), .7)),
- ("calm_talker", "social", "conversation_1 slowed and damped", lambda: E(S(W("conversation_1"), .8), -.5)),
- ("walk_and_talk", "social", "walk_1 legs + conversation_1 arms", lambda: U(W("walk_1"), W("conversation_1"))),
- ("heated_argument", "social", "quarrel_2, faster and exaggerated", lambda: E(S(W("quarrel_2"), 1.2), .6)),
- ("big_shrug", "social", "shrug_1, exaggerated", lambda: E(W("shrug_1"), .8)),
- ("big_laugh", "social", "laugh_1, exaggerated", lambda: E(W("laugh_1"), .7)),
- ("nervous_talker", "social", "conversation_3 blended 30% with scared_1", lambda: B(W("conversation_3"), W("scared_1"), .3)),
- ("phone_pacing", "social", "walk_2 legs + phone_1 arms", lambda: U(W("walk_2"), W("phone_1"))),
- ("handshake_mirrored", "social", "shake_hands_1 mirrored", lambda: M(W("shake_hands_1"))),
- # ---------- emotions / movement ----------
- ("terrified_walk", "emotions", "scared_walk_1, exaggerated, hunched", lambda: LN(E(W("scared_walk_1"), .6), 12)),
- ("sad_slow_walk", "emotions", "sad_walk_1 slowed, slumped", lambda: LN(S(W("sad_walk_1"), .75), 14)),
- ("proud_walk", "emotions", "walk_4 leaning back slightly", lambda: LN(W("walk_4"), -8)),
- ("sneak_attack", "emotions", "sneak_1 then punch_1", lambda: C(W("sneak_1", 3), W("punch_1", 2))),
- ("jog", "emotions", "walk_1 blended 40% with run_1", lambda: B(W("walk_1"), W("run_1", 3), .4)),
+import loops
+def base(name):
+    return mocap.load_move(name)[0]
+def loop_speed(m, k):
+    n = max(8, int(round(mocap.nframes(m) / k))); a = loops.arr(m); a = np.concatenate([a, a[:1]])
+    src = np.linspace(0, 1, len(a)); dst = np.linspace(0, 1, n + 1)
+    out = np.stack([[np.interp(dst, src, a[:, j, c]) for c in range(3)] for j in range(a.shape[1])], 0).transpose(2, 0, 1)
+    return loops.unarr(out[:-1])
+def loop_exag(m, k):
+    w = 7; ker = np.ones(w) / w; out = {}
+    for j, v in m.items():
+        sm = np.stack([np.convolve(np.pad(v[:, c], w // 2, mode="wrap"), ker, "valid") for c in range(3)], 1)
+        out[j] = v + (v - sm) * k
+    return mocap.ground(mocap.fix_lengths(out, m))
+def V(src, kind="action", focus=None, speed=None, exag=None, mirror=False, lean=None, **kw):
+    def f():
+        m, _ = loops.make_loop(base(src), kind, focus, **kw)
+        if mirror: m = mocap.mirror(m)
+        if lean: m = mocap.lean(m, lean)
+        if speed: m = loop_speed(m, speed)
+        if exag: m = loop_exag(m, exag)
+        return m
+    return f
+A, C, H, K = "action", "cycle", "hands", "kick"
+R = [  # (name, category, description, builder) - every one is a single move, cut to a seamless in-place loop
+ # attacks
+ ("punch", "attacks", "clean single punch", V("punch_1", A, H, exag=.3)),
+ ("snap_jab", "attacks", "fast snappy jab", V("punch_1", A, H, speed=1.35, exag=.5)),
+ ("heavy_haymaker", "attacks", "slow, heavy wind-up punch", V("strike_1", A, H, speed=.8, exag=.7)),
+ ("lefty_punch", "attacks", "punch with the left hand", V("punch_1", A, H, exag=.3, mirror=True)),
+ ("lunge_punch", "attacks", "stepping attack punch", V("attack_1", A, H, exag=.4)),
+ ("feint_strike", "attacks", "fake then strike", V("attack_2", A, H, exag=.4)),
+ ("front_kick", "attacks", "single front kick", V("kick_8", A, K, exag=.4)),
+ ("snap_kick", "attacks", "fast snap kick", V("kick_8", A, K, speed=1.3, exag=.5)),
+ ("left_kick", "attacks", "kick with the left leg", V("kick_8", A, K, exag=.4, mirror=True)),
+ ("jump_kick", "attacks", "jump kick, in place", V("jump_kick_2", A, K, max_s=2.2)),
+ ("jump_kick_left", "attacks", "jump kick, mirrored", V("jump_kick_2", A, K, max_s=2.2, mirror=True)),
+ ("spin_kick", "attacks", "jumping spin kick", V("spin_kick_2", A, K, max_s=2.2)),
+ ("sword_slash", "attacks", "single sword slash", V("swordplay_1", A, H, exag=.4)),
+ ("sword_heavy", "attacks", "slow heavy sword swing", V("swordplay_2", A, H, speed=.8, exag=.6)),
+ ("overhead_smash", "attacks", "raise and smash overhead", V("threaten_1", A, H, exag=.5)),
+ # blocking
+ ("block_left", "blocking", "block on the left side", V("block_1", A, H, exag=.3)),
+ ("block_right", "blocking", "block on the right side", V("block_3", A, H, exag=.3)),
+ ("block_fast", "blocking", "quick reflex block", V("block_2", A, H, speed=1.3, exag=.4)),
+ ("block_heavy", "blocking", "braced heavy block", V("block_4", A, H, speed=.85, exag=.4)),
+ ("dodge", "blocking", "dodge out of the way", V("dodge_1", A, None, exag=.3)),
+ ("duck", "blocking", "duck under an attack", V("duck_1", A, None, exag=.3)),
+ # waves
+ ("wave", "waves", "friendly wave", V("wave_1", A, H)),
+ ("big_wave", "waves", "big, exaggerated wave", V("wave_1", A, H, exag=.8)),
+ ("excited_wave", "waves", "fast excited wave", V("wave_2", A, H, speed=1.4, exag=.5)),
+ ("tired_wave", "waves", "slow, slumped wave", V("wave_1", A, H, speed=.75, exag=-.3, lean=10)),
+ ("left_hand_wave", "waves", "wave with the left hand", V("wave_1", A, H, mirror=True)),
+ ("signal_wave", "waves", "directing-traffic wave", V("wave_3", A, H, exag=.3)),
+ # zombies (gait cycles)
+ ("zombie_walk", "zombies", "zombie walk cycle", V("zombie_3", C)),
+ ("zombie_hunched", "zombies", "hunched zombie walk", V("zombie_3", C, lean=22)),
+ ("zombie_heavy", "zombies", "slow, heavy zombie walk", V("zombie_4", C, speed=.7, exag=.4)),
+ ("zombie_march", "zombies", "zombie march cycle", V("zombie_1", C)),
+ ("zombie_mirrored", "zombies", "zombie walk, mirrored", V("zombie_4", C, mirror=True)),
+ ("zombie_lurch", "zombies", "lurching zombie", V("zombie_6", C, exag=.6, lean=12)),
+ ("drunk_shamble", "zombies", "drunken shamble cycle", V("drunk_1", C, exag=.3)),
+ ("limp_walk", "zombies", "limping walk cycle", V("limp_1", C)),
+ # monsters
+ ("ape_walk", "monsters", "ape knuckle walk", V("gorilla_1", C, lean=12, exag=.3)),
+ ("ape_rage", "monsters", "ape chest-beat / rage", V("gorilla_2", A, H, exag=.6)),
+ ("monster_stalk", "monsters", "slow hunched monster stalk", V("zombie_3", C, speed=.75, exag=.5, lean=25)),
+ ("beast_charge", "monsters", "hunched charging run", V("run_1", C, min_s=.45, max_s=1.0, lean=25, exag=.3)),
+ ("dino_walk", "monsters", "dinosaur stalk", V("dinosaur_1", C, lean=15, exag=.4)),
+ ("dino_snap", "monsters", "dinosaur lunge", V("dinosaur_2", A, None, exag=.6)),
+ ("robot_move", "monsters", "robotic motion", V("robot_1", A, H, speed=1.2, exag=.5)),
+ ("giant_stomp", "monsters", "slow, heavy giant stomp", V("walk_1", C, speed=.65, exag=.7, lean=8)),
+ ("monster_rage", "monsters", "hunched rage", V("quarrel_1", A, H, exag=.9, lean=20)),
+ # boxing
+ ("boxing_combo", "boxing", "boxing combo", V("boxing_1", A, H, exag=.3)),
+ ("boxing_fast", "boxing", "fast combo", V("boxing_2", A, H, speed=1.35, exag=.4)),
+ ("southpaw", "boxing", "left-handed boxing", V("boxing_1", A, H, exag=.3, mirror=True)),
+ ("heavyweight", "boxing", "slow heavy punches", V("boxing_3", A, H, speed=.8, exag=.6)),
+ ("boxing_bounce", "boxing", "boxer bounce and jab", V("boxing_4", A, H, exag=.3)),
+ ("boxing_hook", "boxing", "hooks", V("boxing_5", A, H, exag=.4)),
+ # social
+ ("talking", "social", "explaining with gestures", V("conversation_1", A, H, max_s=3)),
+ ("animated_talker", "social", "big expressive gestures", V("conversation_1", A, H, max_s=3, exag=.7)),
+ ("calm_talker", "social", "calm, small gestures", V("conversation_3", A, H, max_s=3, speed=.85, exag=-.4)),
+ ("arguing", "social", "angry argument", V("quarrel_2", A, H, max_s=3, exag=.5)),
+ ("heated_argument", "social", "fast, heated argument", V("argue_1", A, H, max_s=3, speed=1.2, exag=.6)),
+ ("shrug", "social", "shrug", V("shrug_1", A, H)),
+ ("big_shrug", "social", "big exaggerated shrug", V("shrug_2", A, H, exag=.8)),
+ ("laugh", "social", "laughing", V("laugh_1", A, None, max_s=3)),
+ ("big_laugh", "social", "doubled-over laugh", V("laugh_2", A, None, max_s=3, exag=.6)),
+ ("phone_call", "social", "answering the phone", V("phone_1", A, H, max_s=3)),
+ # emotions / movement
+ ("scared", "emotions", "scared flinch", V("scared_1", A, None, exag=.4)),
+ ("scared_walk", "emotions", "scared, hunched walk", V("walk_2", C, speed=.85, lean=18, exag=-.2)),
+ ("sad_walk", "emotions", "sad walk cycle", V("sad_walk_1", C, lean=12)),
+ ("proud_walk", "emotions", "proud walk cycle", V("walk_4", C, lean=-8)),
+ ("sneak", "emotions", "sneaking cycle", V("sneak_1", C)),
+ ("creep", "emotions", "creeping cycle", V("creep_1", C)),
+ ("run_cycle", "emotions", "run cycle", V("run_1", C, min_s=.45, max_s=1.0)),
+ ("walk_cycle", "emotions", "walk cycle", V("walk_1", C)),
 ]
 
 def fetch_extra():
     have = mocap._saved()
     todo = [(n, c) for n, c in EXTRA.items() if n not in have]
     with ThreadPoolExecutor(8) as ex: list(ex.map(lambda j: mocap.fetch(j[1], j[0]), todo))
-    print(len(todo), "new source moves fetched")
 
 def main():
+    import gzip, shutil
     fetch_extra()
-    mocap.VARS.mkdir(exist_ok=True)
+    if mocap.VARS.exists(): shutil.rmtree(mocap.VARS)
+    mocap.VARS.mkdir()
     old = json.loads(mocap.VARS_INDEX.read_text()) if mocap.VARS_INDEX.exists() else {}
-    idx, bad = {}, []
-    for name, cat, how, fn in R:
+    idx, bad, rep = {}, [], []
+    def one(r):
+        name, cat, how, fn = r
         try:
-            m = mocap.ground(fn())
-            arr = np.stack([m[k] for k in mocap.PTS], 1)
-            doc = dict(name=name, source="variation", desc=how, cat=cat, fps=mocap.FPS, joints=mocap.PTS, frames=np.round(arr).astype(int).tolist())
-            import gzip
+            m = fn(); q = loops.seam_quality(m); st = loops.strength(loops.arr(m))
+            a = loops.arr(m)
+            doc = dict(name=name, source="variation", desc=how, cat=cat, loop=True, fps=mocap.FPS, joints=mocap.PTS, frames=np.round(a).astype(int).tolist())
             with gzip.open(mocap.VARS / f"{name}.json.gz", "wt") as fh: json.dump(doc, fh, separators=(",", ":"))
-            idx[name] = dict(cat=cat, how=how, status=old.get(name, {}).get("status", "active"))
+            return name, cat, how, q, st, len(a), None
         except Exception as e:
-            bad.append((name, repr(e)))
+            return name, cat, how, 0, 0, 0, repr(e)
+    with ThreadPoolExecutor(8) as ex:
+        for name, cat, how, q, st, n, err in ex.map(one, R):
+            if err: bad.append((name, err)); continue
+            idx[name] = dict(cat=cat, how=how, loop=True, frames=n, seam=round(q, 2), status=old.get(name, {}).get("status", "active"))
+            rep.append((name, n, q, st))
     mocap.VARS_INDEX.write_text(json.dumps(idx, indent=1))
-    print(len(idx), "variations built", "| failed:", bad)
+    for name, n, q, st in sorted(rep, key=lambda x: -x[2]): print(f"{name:18s} {n/30:4.1f}s  seam {q:4.2f}  power {st:5.1f}")
+    print(len(idx), "loops built | failed:", bad)
 
 if __name__ == "__main__": main()

@@ -49,7 +49,7 @@ button.x{font-family:var(--display);font-weight:700;border:1px solid var(--line)
 <main>
   <header>
     <h1>Move Library</h1>
-    <p class="sub">__COUNT__ original moves (real motion capture, CMU, free for commercial use) and __VCOUNT__ new variations made from them. Each tile loops the main action. Click one for a big player and the command that turns it into a storyboard, preview and Blender file.</p>
+    <p class="sub">__COUNT__ original moves (real motion capture, CMU, free for commercial use) and __VCOUNT__ new seamless in-place loop variations made from them (one clean move each, like Mixamo). Each tile loops the main action. Click one for a big player and the command that turns it into a storyboard, preview and Blender file.</p>
   </header>
   <div class="bar"><input type="search" id="q" placeholder="Search moves, e.g. kick, zombie, jump" aria-label="Search moves"><span class="count" id="count"></span></div>
   <div class="review" id="review"><span>Tap the check on the variations you want to keep. <b id="okc">0</b> approved so far.</span><span class="count" id="dbmsg"></span></div>
@@ -111,7 +111,7 @@ const VIEWS={"3/4":[40,14],Side:[0,8],Front:[90,8],Back:[-90,10],Top:[0,70]};
 const vb=document.getElementById("views");
 Object.entries(VIEWS).forEach(([k,v])=>{const b=document.createElement("button");b.className="chip"+(k==="3/4"?" on":"");b.textContent=k;b.onclick=()=>{view=v;vb.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));};vb.appendChild(b);});
 function open(i){cur=DATA.moves[i];document.getElementById("dn").textContent=cur.n;
-  document.getElementById("dd").textContent=`${cur.d} | ${cur.src} | full clip ${cur.t}s (tile shows from ${cur.start}s)`;
+  document.getElementById("dd").textContent=`${cur.v?cur.d+" | seamless in-place loop, "+(cur.f.length/30).toFixed(1)+"s":cur.d+" | "+cur.src+" | full clip "+cur.t+"s (tile shows from "+cur.start+"s)"}`;
   document.getElementById("cmd").textContent=cur.v?`python3 .claude/skills/animation-prompt-maker/library/mocap.py make ${cur.n} -o out     (don't like it? mocap.py suspend ${cur.n})`:`python3 .claude/skills/animation-prompt-maker/library/mocap.py make ${cur.n} --start ${cur.start} --end ${(cur.start+cur.f.length/DATA.fps).toFixed(1)} -o out`;
   paintDlg();dlg.showModal();}
 function paintDlg(){const b=document.getElementById("dok");if(!cur)return;b.hidden=!(cur.v&&db);b.textContent=approved.has(cur.n)?"✓ Approved":"Approve";b.style.borderColor=approved.has(cur.n)?"var(--ok)":"";b.style.color=approved.has(cur.n)?"var(--ok)":"";}
@@ -137,9 +137,9 @@ async function toggle(n){if(!db||pending.has(n))return;pending.add(n);const on=a
 })();
 // animation loop (only visible tiles)
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-function tick(t){const fi=Math.floor(t/1000*DATA.fps);
-  if(!reduce)for(const x of tiles)if(x.vis&&!x.el.hidden)draw(x.cv.getContext("2d"),300,300,x.m.f[fi%x.m.f.length]);
-  if(dlg.open&&cur)draw(big.getContext("2d"),960,720,cur.f[fi%cur.f.length],view[0],view[1],true);
+function tick(t){const sec=t/1000;const at=m=>m.f[Math.floor(sec*(m.fps||DATA.fps))%m.f.length];
+  if(!reduce)for(const x of tiles)if(x.vis&&!x.el.hidden)draw(x.cv.getContext("2d"),300,300,at(x.m));
+  if(dlg.open&&cur)draw(big.getContext("2d"),960,720,at(cur),view[0],view[1],true);
   requestAnimationFrame(tick);}
 requestAnimationFrame(tick);
 </script>

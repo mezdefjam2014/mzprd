@@ -10,13 +10,14 @@ for name, desc, vcat in items:
     s0 = segs[0][0] if segs else 0
     s0 = max(0, s0 - 10); s1 = min(n, s0 + int(MAXS * 30))
     if s1 - s0 < 30: s0, s1 = 0, min(n, int(MAXS * 30))
-    m = mocap.trim(m, s0 / 30, (s1 - 1) / 30)
-    m = mocap.resample(m, max(2, int(round(mocap.nframes(m) * GFPS / 30))))
+    if not vcat:
+        m = mocap.trim(m, s0 / 30, (s1 - 1) / 30)
+        m = mocap.resample(m, max(2, int(round(mocap.nframes(m) * GFPS / 30))))
     arr = np.stack([m[k] for k in mocap.PTS], 1)
     arr[:, :, 0] -= arr[0, 0, 0]; arr[:, :, 2] -= arr[0, 0, 2]
     if vcat: s0 = 0; m0 = m
     moves.append(dict(n=name, d=desc, c=vcat or name.rsplit("_", 1)[0], v=bool(vcat), src=doc.get("source", ""), t=round(n / 30, 1),
-                      start=round(s0 / 30, 1), f=np.round(arr).astype(int).tolist()))
+                      start=round(s0 / 30, 1), fps=30 if vcat else GFPS, f=np.round(arr).astype(int).tolist()))
 html = open(mocap.HERE / "gallery_template.html").read().replace("__DATA__", json.dumps(dict(pts=mocap.PTS, fps=GFPS, moves=moves), separators=(",", ":")))
 html = html.replace("__COUNT__", str(sum(not x["v"] for x in moves))).replace("__VCOUNT__", str(sum(x["v"] for x in moves)))
 open(sys.argv[1], "w").write(html); print("wrote", sys.argv[1], len(html) // 1024, "KB,", len(moves), "moves")

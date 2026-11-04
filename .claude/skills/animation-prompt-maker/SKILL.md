@@ -140,7 +140,7 @@ New moves from real ones (combine any of these; a move can be `name@start-end` i
 - `--then jump_3@0-2 --then fall_1`: chain moves with smooth transitions
 - `--blend run_1:0.3`: mix two moves (jog = walk + 30% run)
 - `--mirror` (left/right swap), `--speed 1.5`, `--exaggerate 0.4` (bigger, snappier), `--inplace` (remove travel for loops), `--keys 8` (number of storyboard panels)
-- Ready-made variations (62, in `library/variations/`, recipes in `library/build_variations.py`): attacks, blocking, waves, zombies, monsters, boxing, social, emotions. Use them by name like any move. Suspend or restore: `python3 $L suspend <name>|all` / `restore <name>|all`. Originals are never changed. Add a recipe to build_variations.py and rerun it to make more; rebuild the gallery with `python3 library/build_gallery.py tools/animation-preview/move-library.html`.
+- Ready-made variations (68 seamless in-place loops, one clean move each, Mixamo style; `library/loops.py` cuts any move to a perfect loop: `make_loop(move, 'action'|'cycle')`, in `library/variations/`, recipes in `library/build_variations.py`): attacks, blocking, waves, zombies, monsters, boxing, social, emotions. Use them by name like any move. Suspend or restore: `python3 $L suspend <name>|all` / `restore <name>|all`. Originals are never changed. Add a recipe to build_variations.py and rerun it to make more; rebuild the gallery with `python3 library/build_gallery.py tools/animation-preview/move-library.html`.
 - Own recordings (Rokoko Video, etc.): `python3 $L import my.bvh --name my_move`
 - If nothing in the library fits (gun reloads, creatures), fall back to hand posing with IK below.
 
