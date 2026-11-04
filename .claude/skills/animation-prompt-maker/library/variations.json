@@ -3806,7 +3806,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "horror_31x11_1": {
   "cat": "horror & creatures",
@@ -3814,7 +3814,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "climbing_13x34_1": {
   "cat": "climbing & parkour",
@@ -3822,7 +3822,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 64,
-  "status": "active"
+  "status": "older"
  },
  "climbing_13x34_2": {
   "cat": "climbing & parkour",
@@ -3830,7 +3830,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 41,
-  "status": "active"
+  "status": "older"
  },
  "climbing_13x35_1": {
   "cat": "climbing & parkour",
@@ -3838,7 +3838,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 82,
-  "status": "active"
+  "status": "older"
  },
  "climbing_13x35_2": {
   "cat": "climbing & parkour",
@@ -3886,7 +3886,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 46,
-  "status": "active"
+  "status": "older"
  },
  "climbing_14x30_2": {
   "cat": "climbing & parkour",
@@ -3894,7 +3894,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "climbing_14x33_1": {
   "cat": "climbing & parkour",
@@ -3910,7 +3910,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 92,
-  "status": "active"
+  "status": "older"
  },
  "climbing_14x34_1": {
   "cat": "climbing & parkour",
@@ -3918,7 +3918,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 73,
-  "status": "active"
+  "status": "older"
  },
  "climbing_14x34_2": {
   "cat": "climbing & parkour",
@@ -3934,7 +3934,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 102,
-  "status": "active"
+  "status": "older"
  },
  "climbing_14x35_2": {
   "cat": "climbing & parkour",
@@ -3942,7 +3942,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 62,
-  "status": "active"
+  "status": "older"
  },
  "climbing_15x02_1": {
   "cat": "climbing & parkour",
@@ -3950,7 +3950,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 69,
-  "status": "active"
+  "status": "older"
  },
  "climbing_15x02_2": {
   "cat": "climbing & parkour",
@@ -3958,7 +3958,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 129,
-  "status": "active"
+  "status": "older"
  },
  "climbing_16x04_1": {
   "cat": "climbing & parkour",
@@ -3966,7 +3966,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 75,
-  "status": "active"
+  "status": "older"
  },
  "climbing_16x05_1": {
   "cat": "climbing & parkour",
@@ -3974,7 +3974,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 62,
-  "status": "active"
+  "status": "older"
  },
  "climbing_16x07_1": {
   "cat": "climbing & parkour",
@@ -3998,7 +3998,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 84,
-  "status": "active"
+  "status": "older"
  },
  "climbing_40x06_2": {
   "cat": "climbing & parkour",
@@ -4070,7 +4070,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 26,
-  "status": "active"
+  "status": "older"
  },
  "climbing_76x11_1": {
   "cat": "climbing & parkour",
@@ -4078,7 +4078,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 36,
-  "status": "active"
+  "status": "older"
  },
  "climbing_81x14_1": {
   "cat": "climbing & parkour",
@@ -4094,7 +4094,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 106,
-  "status": "active"
+  "status": "older"
  },
  "climbing_81x15_1": {
   "cat": "climbing & parkour",
@@ -4102,7 +4102,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 88,
-  "status": "active"
+  "status": "older"
  },
  "climbing_81x15_2": {
   "cat": "climbing & parkour",
@@ -4110,7 +4110,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 72,
-  "status": "active"
+  "status": "older"
  },
  "climbing_86x13_1": {
   "cat": "climbing & parkour",
@@ -4118,7 +4118,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 99,
-  "status": "active"
+  "status": "older"
  },
  "climbing_86x13_2": {
   "cat": "climbing & parkour",
@@ -4166,7 +4166,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "older"
  },
  "climbing_127x28_1": {
   "cat": "climbing & parkour",
@@ -4174,7 +4174,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "climbing_141x09_1": {
   "cat": "climbing & parkour",
@@ -4182,7 +4182,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 25,
-  "status": "active"
+  "status": "older"
  },
  "climbing_143x14_1": {
   "cat": "climbing & parkour",
@@ -4190,7 +4190,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "climbing_143x15_1": {
   "cat": "climbing & parkour",
@@ -4198,7 +4198,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 25,
-  "status": "active"
+  "status": "older"
  },
  "climbing_143x16_1": {
   "cat": "climbing & parkour",
@@ -4206,7 +4206,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 32,
-  "status": "active"
+  "status": "older"
  },
  "climbing_143x37_1": {
   "cat": "climbing & parkour",
@@ -4222,7 +4222,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 56,
-  "status": "active"
+  "status": "older"
  },
  "fights_17x01_2": {
   "cat": "fights & interactions",
@@ -4230,7 +4230,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 50,
-  "status": "active"
+  "status": "older"
  },
  "fights_17x02_1": {
   "cat": "fights & interactions",
@@ -4238,7 +4238,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 27,
-  "status": "active"
+  "status": "older"
  },
  "fights_17x02_2": {
   "cat": "fights & interactions",
@@ -4246,7 +4246,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 54,
-  "status": "active"
+  "status": "older"
  },
  "fights_18x11_1": {
   "cat": "fights & interactions",
@@ -4254,7 +4254,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 58,
-  "status": "active"
+  "status": "older"
  },
  "fights_18x13_1": {
   "cat": "fights & interactions",
@@ -4262,7 +4262,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 47,
-  "status": "active"
+  "status": "older"
  },
  "fights_18x14_1": {
   "cat": "fights & interactions",
@@ -4270,7 +4270,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 32,
-  "status": "active"
+  "status": "older"
  },
  "fights_19x11_1": {
   "cat": "fights & interactions",
@@ -4278,7 +4278,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 26,
-  "status": "active"
+  "status": "older"
  },
  "fights_19x13_1": {
   "cat": "fights & interactions",
@@ -4286,7 +4286,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 51,
-  "status": "active"
+  "status": "older"
  },
  "fights_19x13_2": {
   "cat": "fights & interactions",
@@ -4294,7 +4294,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 42,
-  "status": "active"
+  "status": "older"
  },
  "fights_19x14_1": {
   "cat": "fights & interactions",
@@ -4302,7 +4302,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "fights_56x07_1": {
   "cat": "fights & interactions",
@@ -4310,7 +4310,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "older"
  },
  "fights_56x07_2": {
   "cat": "fights & interactions",
@@ -4318,7 +4318,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "fights_81x07_1": {
   "cat": "fights & interactions",
@@ -4326,7 +4326,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "fights_81x10_1": {
   "cat": "fights & interactions",
@@ -4334,7 +4334,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 65,
-  "status": "active"
+  "status": "older"
  },
  "fights_82x06_1": {
   "cat": "fights & interactions",
@@ -4342,7 +4342,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "older"
  },
  "fights_82x06_2": {
   "cat": "fights & interactions",
@@ -4374,7 +4374,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "fights_134x08_1": {
   "cat": "fights & interactions",
@@ -4382,7 +4382,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "fights_141x28_1": {
   "cat": "fights & interactions",
@@ -4390,7 +4390,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "older"
  },
  "horror_77x05_1": {
   "cat": "horror & creatures",
@@ -4398,7 +4398,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "older"
  },
  "horror_77x06_1": {
   "cat": "horror & creatures",
@@ -4406,7 +4406,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 68,
-  "status": "active"
+  "status": "older"
  },
  "horror_77x06_2": {
   "cat": "horror & creatures",
@@ -4414,7 +4414,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 39,
-  "status": "active"
+  "status": "older"
  },
  "horror_77x25_1": {
   "cat": "horror & creatures",
@@ -4422,7 +4422,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 58,
-  "status": "active"
+  "status": "older"
  },
  "horror_77x25_2": {
   "cat": "horror & creatures",
@@ -4430,7 +4430,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "older"
  },
  "horror_77x26_1": {
   "cat": "horror & creatures",
@@ -4438,7 +4438,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 51,
-  "status": "active"
+  "status": "older"
  },
  "horror_77x27_1": {
   "cat": "horror & creatures",
@@ -4446,7 +4446,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 22,
-  "status": "active"
+  "status": "older"
  },
  "horror_77x27_2": {
   "cat": "horror & creatures",
@@ -4454,7 +4454,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 28,
-  "status": "active"
+  "status": "older"
  },
  "horror_20x13_1": {
   "cat": "horror & creatures",
@@ -4470,7 +4470,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 62,
-  "status": "active"
+  "status": "older"
  },
  "horror_21x13_1": {
   "cat": "horror & creatures",
@@ -4478,7 +4478,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 34,
-  "status": "active"
+  "status": "older"
  },
  "horror_21x13_2": {
   "cat": "horror & creatures",
@@ -4574,7 +4574,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "horror_139x11_2": {
   "cat": "horror & creatures",
@@ -4582,7 +4582,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 38,
-  "status": "active"
+  "status": "older"
  },
  "horror_139x14_1": {
   "cat": "horror & creatures",
@@ -4622,7 +4622,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 54,
-  "status": "active"
+  "status": "older"
  },
  "horror_139x29_2": {
   "cat": "horror & creatures",
@@ -4630,7 +4630,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 44,
-  "status": "active"
+  "status": "older"
  },
  "horror_139x31_1": {
   "cat": "horror & creatures",
@@ -4670,7 +4670,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 38,
-  "status": "active"
+  "status": "older"
  },
  "horror_120x12_2": {
   "cat": "horror & creatures",
@@ -4710,7 +4710,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "horror_132x15_1": {
   "cat": "horror & creatures",
@@ -4718,7 +4718,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 42,
-  "status": "active"
+  "status": "older"
  },
  "horror_132x15_2": {
   "cat": "horror & creatures",
@@ -4726,7 +4726,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 39,
-  "status": "active"
+  "status": "older"
  },
  "horror_81x12_1": {
   "cat": "horror & creatures",
@@ -4734,7 +4734,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 52,
-  "status": "active"
+  "status": "older"
  },
  "horror_81x12_2": {
   "cat": "horror & creatures",
@@ -4750,7 +4750,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 42,
-  "status": "active"
+  "status": "older"
  },
  "horror_81x13_2": {
   "cat": "horror & creatures",
@@ -4758,6 +4758,1694 @@
   "loop": true,
   "oneshot": false,
   "frames": 45,
+  "status": "older"
+ },
+ "everyday_02x06_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.0s. Recording: 'bend over, scoop up, rise, lift arm' (CMU 02_06). Measured: drops low (head down 68cm), steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 61,
+  "status": "active"
+ },
+ "everyday_02x06_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.6s. Recording: 'bend over, scoop up, rise, lift arm' (CMU 02_06). Measured: drops low (head down 71cm), steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 78,
+  "status": "active"
+ },
+ "everyday_02x10_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.7s. Recording: 'wash self' (CMU 02_10). Measured: drops low (head down 54cm), steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "everyday_02x10_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.8s. Recording: 'wash self' (CMU 02_10). Measured: goes down onto the ground, steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 53,
+  "status": "active"
+ },
+ "everyday_13x20_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.7s. Recording: 'wash windows' (CMU 13_20). Measured: steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "everyday_13x20_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.8s. Recording: 'wash windows' (CMU 13_20). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 53,
+  "status": "active"
+ },
+ "everyday_13x21_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.6s. Recording: 'wash windows' (CMU 13_21). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 49,
+  "status": "active"
+ },
+ "everyday_13x22_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.6s. Recording: 'wash windows' (CMU 13_22). Measured: fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 48,
+  "status": "active"
+ },
+ "everyday_13x22_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.7s. Recording: 'wash windows' (CMU 13_22). Measured: steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 51,
+  "status": "active"
+ },
+ "everyday_13x25_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.4s. Recording: 'sweep floor' (CMU 13_25). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "everyday_14x10_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.7s. Recording: 'wash windows' (CMU 14_10). Measured: steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "everyday_14x10_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.7s. Recording: 'wash windows' (CMU 14_10). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "everyday_14x11_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.6s. Recording: 'wash windows' (CMU 14_11). Measured: goes down onto the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 78,
+  "status": "active"
+ },
+ "everyday_14x11_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.1s. Recording: 'wash windows' (CMU 14_11). Measured: steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 63,
+  "status": "active"
+ },
+ "everyday_14x12_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.6s. Recording: 'wash windows' (CMU 14_12). Measured: goes down onto the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 47,
+  "status": "active"
+ },
+ "everyday_14x12_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.5s. Recording: 'wash windows' (CMU 14_12). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 44,
+  "status": "active"
+ },
+ "everyday_14x13_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.8s. Recording: 'mop floor' (CMU 14_13). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 55,
+  "status": "active"
+ },
+ "everyday_26x11_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.2s. Recording: 'bend, lift' (CMU 26_11). Measured: goes down onto the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "everyday_62x12_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.9s. Recording: 'hard days drink' (CMU 62_12). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 58,
+  "status": "active"
+ },
+ "everyday_62x19_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.2s. Recording: 'opening a box' (CMU 62_19). Measured: fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 66,
+  "status": "active"
+ },
+ "everyday_62x20_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.2s. Recording: 'closing, moving and opening a box' (CMU 62_20). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 65,
+  "status": "active"
+ },
+ "everyday_69x06_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.1s. Recording: 'walk and turn (repeated)' (CMU 69_06). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "everyday_69x72_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.4s. Recording: 'walk up to object, pick up object, set down in another place' (CMU 69_72). Measured: goes down onto the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "everyday_69x72_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.7s. Recording: 'walk up to object, pick up object, set down in another place' (CMU 69_72). Measured: goes down onto the ground",
+  "loop": true,
+  "oneshot": false,
+  "frames": 51,
+  "status": "active"
+ },
+ "everyday_69x73_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.4s. Recording: 'walk up to object, lean over, pick up object, set down in another place' (CMU 69_73). Measured: goes down onto the ground, steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "everyday_69x73_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.4s. Recording: 'walk up to object, lean over, pick up object, set down in another place' (CMU 69_73). Measured: goes down onto the ground, steps sideways, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "everyday_69x75_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.5s. Recording: 'walk up to object, squat, pick up object, set down in another place' (CMU 69_75). Measured: drops low (head down 70cm), fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 45,
+  "status": "active"
+ },
+ "everyday_74x07_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.3s. Recording: 'lifting up' (CMU 74_07). Measured: drops low (head down 48cm), leaves the ground, steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 40,
+  "status": "active"
+ },
+ "everyday_75x17_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.4s. Recording: 'medium sit' (CMU 75_17). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 42,
+  "status": "active"
+ },
+ "everyday_75x18_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.0s. Recording: 'high sit' (CMU 75_18). Measured: drops low (head down 66cm), steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 59,
+  "status": "active"
+ },
+ "everyday_75x19_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.1s. Recording: 'medium sit' (CMU 75_19). Measured: drops low (head down 71cm), steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "everyday_75x20_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.2s. Recording: 'low sit' (CMU 75_20). Measured: drops low (head down 89cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "everyday_75x20_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.6s. Recording: 'low sit' (CMU 75_20). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 49,
+  "status": "active"
+ },
+ "everyday_77x03_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.4s. Recording: 'ready stance' (CMU 77_03). Measured: steps sideways",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "everyday_79x04_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.2s. Recording: 'digging' (CMU 79_04). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 36,
+  "status": "active"
+ },
+ "everyday_79x04_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.1s. Recording: 'digging' (CMU 79_04). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "everyday_79x24_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.6s. Recording: 'putting on button up sweater' (CMU 79_24). Measured: fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 79,
+  "status": "active"
+ },
+ "everyday_80x05_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.5s. Recording: 'digging a hole' (CMU 80_05). Measured: fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 44,
+  "status": "active"
+ },
+ "everyday_80x05_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.5s. Recording: 'digging a hole' (CMU 80_05). Measured: fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 46,
+  "status": "active"
+ },
+ "everyday_80x09_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.3s. Recording: 'planting a flower' (CMU 80_09). Measured: goes upside down, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 40,
+  "status": "active"
+ },
+ "everyday_80x09_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.4s. Recording: 'planting a flower' (CMU 80_09). Measured: goes upside down, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 42,
+  "status": "active"
+ },
+ "everyday_80x34_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.6s. Recording: 'rake leaves' (CMU 80_34). Measured: fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 77,
+  "status": "active"
+ },
+ "everyday_80x69_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 2.3s. Recording: 'painting' (CMU 80_69). Measured: goes down onto the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 70,
+  "status": "active"
+ },
+ "everyday_80x69_2": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.2s. Recording: 'painting' (CMU 80_69). Measured: goes down onto the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 36,
+  "status": "active"
+ },
+ "everyday_86x15_1": {
+  "cat": "everyday actions",
+  "how": "seamless loop, 1.5s. Recording: 'walking, sitting, hand motions' (CMU 86_15). Measured: goes down onto the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 44,
+  "status": "active"
+ },
+ "sports_06x02_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 0.8s. Recording: 'basketball - forward dribble' (CMU 06_02). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "sports_06x02_2": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.2s. Recording: 'basketball - forward dribble' (CMU 06_02). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 36,
+  "status": "active"
+ },
+ "sports_06x04_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 0.8s. Recording: 'basketball - forward dribble' (CMU 06_04). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "sports_06x05_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 0.8s. Recording: 'basketball - forward dribble' (CMU 06_05). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 25,
+  "status": "active"
+ },
+ "sports_06x06_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 0.9s. Recording: 'basketball - backward dribble' (CMU 06_06). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 28,
+  "status": "active"
+ },
+ "sports_06x07_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 0.9s. Recording: 'basketball - backward dribble' (CMU 06_07). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 26,
+  "status": "active"
+ },
+ "sports_06x10_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.7s. Recording: 'basketball - forward dribble, 90-degree left turns' (CMU 06_10). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 50,
+  "status": "active"
+ },
+ "sports_06x12_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.4s. Recording: 'basketball - forward dribble, 90-degree right turns, crossover dribble' (CMU 06_12). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "sports_06x13_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.0s. Recording: 'basketball - low, fast free style dribble, dribble through legs' (CMU 06_13). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "sports_06x13_2": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.0s. Recording: 'basketball - low, fast free style dribble, dribble through legs' (CMU 06_13). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "sports_06x14_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.5s. Recording: 'basketball - crossover dribble, shoot' (CMU 06_14). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 46,
+  "status": "active"
+ },
+ "sports_06x15_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 2.0s. Recording: 'basketball - dribble, shoot' (CMU 06_15). Measured: leaves the ground, steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 61,
+  "status": "active"
+ },
+ "sports_13x29_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.1s. Recording: 'jumping jacks, side twists, bend over, squats' (CMU 13_29). Measured: leaves the ground, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "sports_13x29_2": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.4s. Recording: 'jumping jacks, side twists, bend over, squats' (CMU 13_29). Measured: goes down onto the ground, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "sports_14x20_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 2.7s. Recording: 'jumping jacks, side twists, reach up, bend over' (CMU 14_20). Measured: goes down onto the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "sports_14x20_2": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.4s. Recording: 'jumping jacks, side twists, reach up, bend over' (CMU 14_20). Measured: lifts a leg high, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "sports_16x08_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 0.8s. Recording: 'run/jog, sudden stop' (CMU 16_08). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "sports_16x42_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 0.8s. Recording: 'run/jog, 90-degree left turn' (CMU 16_42). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "sports_16x43_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 0.8s. Recording: 'run/jog, 90-degree right turn' (CMU 16_43). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "sports_16x44_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 0.8s. Recording: 'run/jog, 90-degree right turn' (CMU 16_44). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "sports_22x14_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.9s. Recording: 'alternating squats (2 subjects - subject A)' (CMU 22_14). Measured: drops low (head down 70cm), fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 56,
+  "status": "active"
+ },
+ "sports_22x14_2": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 2.2s. Recording: 'alternating squats (2 subjects - subject A)' (CMU 22_14). Measured: drops low (head down 69cm)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 66,
+  "status": "active"
+ },
+ "sports_22x15_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 2.3s. Recording: 'alternating jumping jacks (2 subjects - subject A)' (CMU 22_15). Measured: leaves the ground, steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 68,
+  "status": "active"
+ },
+ "sports_22x16_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.3s. Recording: 'synchronized jumping jacks (2 subjects - subject A)' (CMU 22_16). Measured: leaves the ground, steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "sports_23x14_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 2.1s. Recording: 'alternating squats (2 subjects - subject B)' (CMU 23_14). Measured: drops low (head down 54cm), fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 63,
+  "status": "active"
+ },
+ "sports_23x16_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.0s. Recording: 'synchronized jumping jacks (2 subjects - subject B)' (CMU 23_16). Measured: leaves the ground, steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "sports_38x03_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 0.8s. Recording: 'run around in a circle' (CMU 38_03). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "sports_38x03_2": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 0.8s. Recording: 'run around in a circle' (CMU 38_03). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "sports_54x08_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 0.8s. Recording: 'roadrunner (human subject)' (CMU 54_08). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "sports_54x08_2": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.1s. Recording: 'roadrunner (human subject)' (CMU 54_08). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "sports_55x15_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.8s. Recording: 'roadrunner (human subject)' (CMU 55_15). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 55,
+  "status": "active"
+ },
+ "sports_55x15_2": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 2.2s. Recording: 'roadrunner (human subject)' (CMU 55_15). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 67,
+  "status": "active"
+ },
+ "sports_69x71_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.6s. Recording: 'walk up to object, squat, pick up object, set down in another place' (CMU 69_71). Measured: drops low (head down 71cm), fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 47,
+  "status": "active"
+ },
+ "sports_69x71_2": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.3s. Recording: 'walk up to object, squat, pick up object, set down in another place' (CMU 69_71). Measured: drops low (head down 69cm), fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "sports_69x75_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.5s. Recording: 'walk up to object, squat, pick up object, set down in another place' (CMU 69_75). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 44,
+  "status": "active"
+ },
+ "sports_75x02_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.3s. Recording: 'run jump' (CMU 75_02). Measured: drops low (head down 23cm), leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 40,
+  "status": "active"
+ },
+ "sports_75x04_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.6s. Recording: 'wide leg run' (CMU 75_04). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 49,
+  "status": "active"
+ },
+ "sports_75x05_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.9s. Recording: 'cross leg run' (CMU 75_05). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 56,
+  "status": "active"
+ },
+ "sports_77x10_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.8s. Recording: 'careful run' (CMU 77_10). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 53,
+  "status": "active"
+ },
+ "sports_77x12_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.2s. Recording: 'careful run in circle' (CMU 77_12). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "sports_77x12_2": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.0s. Recording: 'careful run in circle' (CMU 77_12). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "sports_77x13_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.5s. Recording: 'careful run in figure eight' (CMU 77_13). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 45,
+  "status": "active"
+ },
+ "sports_77x21_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 2.6s. Recording: 'stretching' (CMU 77_21). Measured: drops low (head down 66cm), fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 79,
+  "status": "active"
+ },
+ "sports_77x21_2": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 1.7s. Recording: 'stretching' (CMU 77_21). Measured: drops low (head down 58cm), fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 51,
+  "status": "active"
+ },
+ "sports_79x86_1": {
+  "cat": "sports & exercise",
+  "how": "seamless loop, 2.6s. Recording: 'shooting bow and arrow' (CMU 79_86). Measured: fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 79,
+  "status": "active"
+ },
+ "dance_05x09_1": {
+  "cat": "dance",
+  "how": "seamless loop, 2.3s. Recording: 'dance - glissade devant, glissade derriere, attitude/arabesque' (CMU 05_09). Measured: lifts a leg high, steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 68,
+  "status": "active"
+ },
+ "dance_05x09_2": {
+  "cat": "dance",
+  "how": "seamless loop, 2.0s. Recording: 'dance - glissade devant, glissade derriere, attitude/arabesque' (CMU 05_09). Measured: steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 59,
+  "status": "active"
+ },
+ "dance_05x10_1": {
+  "cat": "dance",
+  "how": "seamless loop, 2.2s. Recording: 'dance - glissade devant, glissade derriere, attitude/arabesque' (CMU 05_10). Measured: steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 66,
+  "status": "active"
+ },
+ "dance_05x12_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.4s. Recording: 'dance - arms held high, pointe tendue a terre, upper body rotation' (CMU 05_12). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "dance_05x12_2": {
+  "cat": "dance",
+  "how": "seamless loop, 2.6s. Recording: 'dance - arms held high, pointe tendue a terre, upper body rotation' (CMU 05_12). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 79,
+  "status": "active"
+ },
+ "dance_05x13_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.2s. Recording: 'dance - small jetes, pirouette' (CMU 05_13). Measured: lifts a leg high, steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 36,
+  "status": "active"
+ },
+ "dance_05x13_2": {
+  "cat": "dance",
+  "how": "seamless loop, 1.6s. Recording: 'dance - small jetes, pirouette' (CMU 05_13). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 49,
+  "status": "active"
+ },
+ "dance_05x14_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.2s. Recording: 'dance - retire derriere, attitude/arabesque' (CMU 05_14). Measured: lifts a leg high, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 36,
+  "status": "active"
+ },
+ "dance_05x14_2": {
+  "cat": "dance",
+  "how": "seamless loop, 1.2s. Recording: 'dance - retire derriere, attitude/arabesque' (CMU 05_14). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "dance_05x15_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.2s. Recording: 'dance - retire derriere, attitude/arabesque' (CMU 05_15). Measured: lifts a leg high, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "dance_05x16_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.0s. Recording: 'dance - coupe dessous, jete en tourant' (CMU 05_16). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "dance_05x16_2": {
+  "cat": "dance",
+  "how": "seamless loop, 1.7s. Recording: 'dance - coupe dessous, jete en tourant' (CMU 05_16). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 50,
+  "status": "active"
+ },
+ "dance_05x17_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.9s. Recording: 'dance - coupe dessous, grand jete en tourant' (CMU 05_17). Measured: leaves the ground, steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 58,
+  "status": "active"
+ },
+ "dance_05x17_2": {
+  "cat": "dance",
+  "how": "seamless loop, 1.0s. Recording: 'dance - coupe dessous, grand jete en tourant' (CMU 05_17). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 29,
+  "status": "active"
+ },
+ "dance_05x18_1": {
+  "cat": "dance",
+  "how": "seamless loop, 2.3s. Recording: 'dance - attitude/arabesque, jete en tourant, bending back' (CMU 05_18). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 69,
+  "status": "active"
+ },
+ "dance_05x18_2": {
+  "cat": "dance",
+  "how": "seamless loop, 2.7s. Recording: 'dance - attitude/arabesque, jete en tourant, bending back' (CMU 05_18). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "dance_05x19_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.6s. Recording: 'dance - attitude/arabesque, jete en tourant, bending back' (CMU 05_19). Measured: drops low (head down 29cm), fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 49,
+  "status": "active"
+ },
+ "dance_05x20_1": {
+  "cat": "dance",
+  "how": "seamless loop, 2.1s. Recording: 'dance - attitude/arabesque, jete en tourant, bending back' (CMU 05_20). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 64,
+  "status": "active"
+ },
+ "dance_05x20_2": {
+  "cat": "dance",
+  "how": "seamless loop, 1.3s. Recording: 'dance - attitude/arabesque, jete en tourant, bending back' (CMU 05_20). Measured: lifts a leg high, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 40,
+  "status": "active"
+ },
+ "dance_13x29_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.1s. Recording: 'jumping jacks, side twists, bend over, squats' (CMU 13_29). Measured: leaves the ground, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "dance_13x29_2": {
+  "cat": "dance",
+  "how": "seamless loop, 1.4s. Recording: 'jumping jacks, side twists, bend over, squats' (CMU 13_29). Measured: goes down onto the ground, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "dance_14x20_1": {
+  "cat": "dance",
+  "how": "seamless loop, 2.7s. Recording: 'jumping jacks, side twists, reach up, bend over' (CMU 14_20). Measured: goes down onto the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "dance_14x20_2": {
+  "cat": "dance",
+  "how": "seamless loop, 1.4s. Recording: 'jumping jacks, side twists, reach up, bend over' (CMU 14_20). Measured: lifts a leg high, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "dance_15x05_1": {
+  "cat": "dance",
+  "how": "seamless loop, 2.2s. Recording: 'wash windows, paint; hand signals; dance - Egyptian walk, the Dive, the Twist, the Cabbage Patch; boxing' (CMU 15_05). Measured: steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 67,
+  "status": "active"
+ },
+ "dance_15x05_2": {
+  "cat": "dance",
+  "how": "seamless loop, 2.5s. Recording: 'wash windows, paint; hand signals; dance - Egyptian walk, the Dive, the Twist, the Cabbage Patch; boxing' (CMU 15_05). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 75,
+  "status": "active"
+ },
+ "dance_20x01_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.9s. Recording: 'chicken dance (2 subjects - subject A)' (CMU 20_01). Measured: drops low (head down 23cm), fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 56,
+  "status": "active"
+ },
+ "dance_21x01_1": {
+  "cat": "dance",
+  "how": "seamless loop, 2.2s. Recording: 'chicken dance (2 subjects - subject B)' (CMU 21_01). Measured: drops low (head down 41cm), steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 66,
+  "status": "active"
+ },
+ "dance_55x01_1": {
+  "cat": "dance",
+  "how": "seamless loop, 2.4s. Recording: 'dance, whirl' (CMU 55_01). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 73,
+  "status": "active"
+ },
+ "dance_55x01_2": {
+  "cat": "dance",
+  "how": "seamless loop, 0.8s. Recording: 'dance, whirl' (CMU 55_01). Measured: steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "dance_55x02_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.6s. Recording: 'lambada dance' (CMU 55_02). Measured: steps sideways",
+  "loop": true,
+  "oneshot": false,
+  "frames": 49,
+  "status": "active"
+ },
+ "dance_55x02_2": {
+  "cat": "dance",
+  "how": "seamless loop, 2.0s. Recording: 'lambada dance' (CMU 55_02). Measured: steps sideways",
+  "loop": true,
+  "oneshot": false,
+  "frames": 59,
+  "status": "active"
+ },
+ "dance_60x03_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.6s. Recording: 'salsa dance' (CMU 60_03). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 47,
+  "status": "active"
+ },
+ "dance_60x03_2": {
+  "cat": "dance",
+  "how": "seamless loop, 1.3s. Recording: 'salsa dance' (CMU 60_03). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "dance_60x04_1": {
+  "cat": "dance",
+  "how": "seamless loop, 2.5s. Recording: 'salsa dance' (CMU 60_04). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 76,
+  "status": "active"
+ },
+ "dance_60x04_2": {
+  "cat": "dance",
+  "how": "seamless loop, 0.8s. Recording: 'salsa dance' (CMU 60_04). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "dance_60x05_1": {
+  "cat": "dance",
+  "how": "seamless loop, 2.4s. Recording: 'salsa dance' (CMU 60_05). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 73,
+  "status": "active"
+ },
+ "dance_60x05_2": {
+  "cat": "dance",
+  "how": "seamless loop, 2.2s. Recording: 'salsa dance' (CMU 60_05). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 66,
+  "status": "active"
+ },
+ "dance_60x06_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.3s. Recording: 'salsa dance' (CMU 60_06). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "dance_60x06_2": {
+  "cat": "dance",
+  "how": "seamless loop, 1.8s. Recording: 'salsa dance' (CMU 60_06). Measured: steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 53,
+  "status": "active"
+ },
+ "dance_60x07_1": {
+  "cat": "dance",
+  "how": "seamless loop, 2.7s. Recording: 'salsa dance' (CMU 60_07). Measured: steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "dance_60x07_2": {
+  "cat": "dance",
+  "how": "seamless loop, 2.7s. Recording: 'salsa dance' (CMU 60_07). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "dance_60x08_1": {
+  "cat": "dance",
+  "how": "seamless loop, 2.1s. Recording: 'salsa dance' (CMU 60_08). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 63,
+  "status": "active"
+ },
+ "dance_60x08_2": {
+  "cat": "dance",
+  "how": "seamless loop, 1.1s. Recording: 'salsa dance' (CMU 60_08). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "dance_60x09_1": {
+  "cat": "dance",
+  "how": "seamless loop, 1.8s. Recording: 'salsa dance' (CMU 60_09). Measured: steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 55,
+  "status": "active"
+ },
+ "dance_60x09_2": {
+  "cat": "dance",
+  "how": "seamless loop, 1.2s. Recording: 'salsa dance' (CMU 60_09). Measured: steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "emotions_13x15_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.4s. Recording: 'laugh' (CMU 13_15). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "emotions_13x15_2": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.4s. Recording: 'laugh' (CMU 13_15). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "emotions_13x16_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.4s. Recording: 'laugh' (CMU 13_16). Measured: steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "emotions_13x16_2": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.1s. Recording: 'laugh' (CMU 13_16). Measured: fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "emotions_14x18_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.4s. Recording: 'laugh' (CMU 14_18). Measured: drops low (head down 34cm), fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 42,
+  "status": "active"
+ },
+ "emotions_14x18_2": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 0.9s. Recording: 'laugh' (CMU 14_18). Measured: fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 27,
+  "status": "active"
+ },
+ "emotions_14x19_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.8s. Recording: 'laugh' (CMU 14_19). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 53,
+  "status": "active"
+ },
+ "emotions_14x19_2": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 2.0s. Recording: 'laugh' (CMU 14_19). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 61,
+  "status": "active"
+ },
+ "emotions_14x25_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 0.8s. Recording: 'direct traffic, wave, point' (CMU 14_25). Measured: steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "emotions_14x25_2": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.8s. Recording: 'direct traffic, wave, point' (CMU 14_25). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 55,
+  "status": "active"
+ },
+ "emotions_14x26_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 2.1s. Recording: 'direct traffic, wave, point' (CMU 14_26). Measured: steps sideways, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 62,
+  "status": "active"
+ },
+ "emotions_14x26_2": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 0.9s. Recording: 'direct traffic, wave, point' (CMU 14_26). Measured: steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 27,
+  "status": "active"
+ },
+ "emotions_79x69_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.7s. Recording: 'very happy' (CMU 79_69). Measured: fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 50,
+  "status": "active"
+ },
+ "emotions_79x69_2": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 2.0s. Recording: 'very happy' (CMU 79_69). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 59,
+  "status": "active"
+ },
+ "emotions_79x70_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.9s. Recording: 'laughing' (CMU 79_70). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 56,
+  "status": "active"
+ },
+ "emotions_79x86_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 2.6s. Recording: 'shooting bow and arrow' (CMU 79_86). Measured: fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 79,
+  "status": "active"
+ },
+ "emotions_80x44_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.7s. Recording: 'laughing' (CMU 80_44). Measured: fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 50,
+  "status": "active"
+ },
+ "emotions_82x12_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.0s. Recording: 'happy or fast walk forward' (CMU 82_12). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "emotions_91x13_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.5s. Recording: 'SadWalk' (CMU 91_13). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 46,
+  "status": "active"
+ },
+ "emotions_104x11_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 0.8s. Recording: 'HappyGoLuckWalk' (CMU 104_11). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "emotions_104x11_2": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 0.8s. Recording: 'HappyGoLuckWalk' (CMU 104_11). Measured: leaves the ground, steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "emotions_104x12_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 0.8s. Recording: 'ExcitedWalk' (CMU 104_12). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "emotions_104x12_2": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 0.8s. Recording: 'ExcitedWalk' (CMU 104_12). Measured: steps sideways, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "emotions_104x14_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.4s. Recording: 'HappyStartWalk' (CMU 104_14). Measured: leaves the ground, steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "emotions_111x02_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.3s. Recording: 'Bow' (CMU 111_02). Measured: lifts a leg high, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "emotions_113x02_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 2.5s. Recording: 'Bow' (CMU 113_02). Measured: goes down onto the ground, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 74,
+  "status": "active"
+ },
+ "emotions_120x15_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 2.1s. Recording: 'Mickey Surprised' (CMU 120_15). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 62,
+  "status": "active"
+ },
+ "emotions_120x15_2": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 2.0s. Recording: 'Mickey Surprised' (CMU 120_15). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 60,
+  "status": "active"
+ },
+ "emotions_120x16_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 2.1s. Recording: 'Mickey Surprised' (CMU 120_16). Measured: leaves the ground, steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 62,
+  "status": "active"
+ },
+ "emotions_120x16_2": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 0.9s. Recording: 'Mickey Surprised' (CMU 120_16). Measured: leaves the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 26,
+  "status": "active"
+ },
+ "emotions_142x08_1": {
+  "cat": "emotions & reactions",
+  "how": "seamless loop, 1.1s. Recording: 'Happy' (CMU 142_08). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "walks_07x05_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.5s. Recording: 'slow walk' (CMU 07_05). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 46,
+  "status": "active"
+ },
+ "walks_07x11_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.1s. Recording: 'walk' (CMU 07_11). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "walks_08x04_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.3s. Recording: 'slow walk' (CMU 08_04). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "walks_08x07_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.3s. Recording: 'walk, exaggerated stride' (CMU 08_07). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "walks_12x01_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.3s. Recording: 'walk' (CMU 12_01). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "walks_15x01_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.3s. Recording: 'walk/wander' (CMU 15_01). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "walks_16x14_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.0s. Recording: 'walk, veer right' (CMU 16_14). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "walks_16x24_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 0.9s. Recording: 'walk, veer left' (CMU 16_24). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 26,
+  "status": "active"
+ },
+ "walks_16x26_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 0.8s. Recording: 'walk, veer right' (CMU 16_26). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "walks_16x28_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 0.5s. Recording: 'walk, 90-degree left turn' (CMU 16_28). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 15,
+  "status": "active"
+ },
+ "walks_16x29_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 0.8s. Recording: 'walk, 90-degree right turn' (CMU 16_29). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 25,
+  "status": "active"
+ },
+ "walks_17x03_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.7s. Recording: 'walk stealthily' (CMU 17_03). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 52,
+  "status": "active"
+ },
+ "walks_17x03_2": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.7s. Recording: 'walk stealthily' (CMU 17_03). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 51,
+  "status": "active"
+ },
+ "walks_17x04_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 2.4s. Recording: 'walk stealthily' (CMU 17_04). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 72,
+  "status": "active"
+ },
+ "walks_17x04_2": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.2s. Recording: 'walk stealthily' (CMU 17_04). Measured: steps sideways",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "walks_17x05_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.2s. Recording: 'walk/hobble' (CMU 17_05). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "walks_17x07_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.6s. Recording: 'whistle, walk jauntily' (CMU 17_07). Measured: steps sideways",
+  "loop": true,
+  "oneshot": false,
+  "frames": 48,
+  "status": "active"
+ },
+ "walks_17x07_2": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.3s. Recording: 'whistle, walk jauntily' (CMU 17_07). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "walks_17x08_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.3s. Recording: 'muscular, heavyset person's walk' (CMU 17_08). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "walks_17x08_2": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.6s. Recording: 'muscular, heavyset person's walk' (CMU 17_08). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 47,
+  "status": "active"
+ },
+ "walks_18x07_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.3s. Recording: 'navigate busy sidewalk; A leads the way, takes B by the arm (2 subjects - subject A)' (CMU 18_07). Measured: steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 40,
+  "status": "active"
+ },
+ "walks_19x07_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.0s. Recording: 'navigate busy sidewalk; A leads the way, takes B by the arm (2 subjects - subject B)' (CMU 19_07). Measured: steps sideways, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "walks_20x03_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.2s. Recording: 'link arms, walk (2 subjects - subject A)' (CMU 20_03). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "walks_20x11_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.3s. Recording: 'high-five, walk (2 subjects - subject A)' (CMU 20_11). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 40,
+  "status": "active"
+ },
+ "walks_21x03_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.2s. Recording: 'link arms, walk (2 subjects - subject B)' (CMU 21_03). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 36,
+  "status": "active"
+ },
+ "walks_21x06_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.5s. Recording: 'soldiers march (2 subjects - subject B)' (CMU 21_06). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 45,
+  "status": "active"
+ },
+ "walks_21x11_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 0.8s. Recording: 'high-five, walk (2 subjects - subject B)' (CMU 21_11). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 25,
+  "status": "active"
+ },
+ "walks_38x02_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 0.8s. Recording: 'walk' (CMU 38_02). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "walks_38x04_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.1s. Recording: 'walk around, frequent turns, cyclic walk along a line' (CMU 38_04). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "walks_38x04_2": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.0s. Recording: 'walk around, frequent turns, cyclic walk along a line' (CMU 38_04). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 29,
+  "status": "active"
+ },
+ "walks_39x11_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 0.9s. Recording: 'walk forward, turn around, walk back' (CMU 39_11). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 26,
+  "status": "active"
+ },
+ "walks_45x01_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.1s. Recording: 'walk' (CMU 45_01). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "walks_45x01_2": {
+  "cat": "character walks",
+  "how": "seamless loop, 0.8s. Recording: 'walk' (CMU 45_01). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "walks_54x20_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.2s. Recording: 'follow path, walk around obstacles' (CMU 54_20). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "walks_54x20_2": {
+  "cat": "character walks",
+  "how": "seamless loop, 0.8s. Recording: 'follow path, walk around obstacles' (CMU 54_20). Measured: steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "walks_69x40_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.0s. Recording: 'walk backward, turn in place' (CMU 69_40). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "walks_69x51_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.1s. Recording: 'walk backwards and turn' (CMU 69_51). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "walks_69x54_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.1s. Recording: 'walk backwards and turn' (CMU 69_54). Measured: steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "walks_69x71_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.4s. Recording: 'walk up to object, squat, pick up object, set down in another place' (CMU 69_71). Measured: drops low (head down 66cm), leaves the ground, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "walks_69x71_2": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.6s. Recording: 'walk up to object, squat, pick up object, set down in another place' (CMU 69_71). Measured: drops low (head down 71cm), fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 47,
+  "status": "active"
+ },
+ "walks_69x72_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.4s. Recording: 'walk up to object, pick up object, set down in another place' (CMU 69_72). Measured: goes down onto the ground, steps forward/back, fast arm strike/swing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "walks_69x72_2": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.7s. Recording: 'walk up to object, pick up object, set down in another place' (CMU 69_72). Measured: goes down onto the ground",
+  "loop": true,
+  "oneshot": false,
+  "frames": 51,
+  "status": "active"
+ },
+ "walks_69x73_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.4s. Recording: 'walk up to object, lean over, pick up object, set down in another place' (CMU 69_73). Measured: goes down onto the ground, steps forward/back, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "walks_69x73_2": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.4s. Recording: 'walk up to object, lean over, pick up object, set down in another place' (CMU 69_73). Measured: goes down onto the ground, steps sideways, fast arm strike/swing, arms raised above the head",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "walks_69x74_1": {
+  "cat": "character walks",
+  "how": "seamless loop, 1.7s. Recording: 'walk up to object, lean over, pick up object, set down in another place' (CMU 69_74). Measured: goes down onto the ground, steps forward/back",
+  "loop": true,
+  "oneshot": false,
+  "frames": 52,
   "status": "active"
  }
 }

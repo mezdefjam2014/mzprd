@@ -6,8 +6,14 @@ IDX = json.load(open(mocap.HERE / "cmu_index.json"))
 THEMES = {
  "horror": (["zombie", "monster", "creep", "drag", "limp", "hurt", "injur", "wounded", "stagger", "drunk", "scared", "fear", "dinosaur", "gorilla", "bear", "spider", "snake", "frog", "dragon", "animal", "monkey", "dog", "cat", "mouse", "chicken", "elephant", "prairie", "penguin", "crab", "squirrel"], ["dance", "chicken dance", "dancing", "vacation"]),
  "climbing": (["ladder", "climb", "steps", "high jump", "forward jump", "leap", "vault", "hurdle", "jump over", "step over", "balance beam"], ["playground - climb, sit"]),
+ "everyday": (["drink", "eat", "phone", "wash", "sweep", "mop", "wipe", "open", "close", "door", "window", "pick up", "carry", "lift", "sit", "chair", "lie", "sleep", "read", "write", "type", "cook", "scoop", "plant", "dig", "rake", "shovel", "paint", "put on", "take off", "tie", "brush"], ["dance"]),
+ "sports": (["basketball", "soccer", "football", "golf", "tennis", "volleyball", "bowling", "frisbee", "dribble", "shoot", "bow and arrow", "throw", "catch", "skip", "jumping jacks", "squat", "stretch", "exercise", "jog", "run", "sprint", "race"], ["dance"]),
+ "dance": (["dance", "salsa", "waltz", "ballet", "jive", "twist", "breakdance", "hip hop", "charleston", "pirouette", "jete", "arabesque", "cha-cha", "tango", "disco"], []),
+ "emotions": (["laugh", "cry", "yawn", "shrug", "wave", "point", "clap", "cheer", "celebrate", "angry", "frustrat", "nervous", "surprise", "startle", "bow", "salute", "victory", "sad", "happy", "excited", "tired", "bored", "impatient", "think"], ["dance"]),
+ "walks": (["walk", "march", "strut", "stroll", "stride", "swagger", "tiptoe", "stomp", "shuffle", "hurry", "wander", "pace", "trudge"], ["dance", "walk on uneven", "playground"]),
  "fights": (["violence", "fight", "quarrel", "threat", "grab", "shove", "push", "angry", "frustrat", "scramble", "argue", "pull", "slap", "pound"], ["push heavy", "pushing a swing", "push off", "pushing broom", "pull up"]),
 }
+CATS = {"horror": "horror & creatures", "climbing": "climbing & parkour", "fights": "fights & interactions", "everyday": "everyday actions", "sports": "sports & exercise", "dance": "dance", "emotions": "emotions & reactions", "walks": "character walks"}
 def used_clips():
     u = set(os.path.basename(p)[:-4] for p in glob.glob(str(strikes.SRC / "*.npy")))
     for p in mocap.MOVES.glob("*.json.gz"):
@@ -37,7 +43,7 @@ def extract(c, th):
     if act.max() < 2: return out
     desc = IDX[c].lower()
     # locomotion-like clips (creature walks, limps, drunk, crawl...) -> gait cycles; everything else -> moves cut calm-to-calm
-    cyc = th == "horror" and any(w in desc for w in ["walk", "limp", "crawl", "drag", "stagger", "drunk", "creep", "monkey", "bear", "elephant", "dinosaur", "gorilla", "dog", "cat", "snake", "frog", "mouse", "spider", "penguin", "crab", "chicken", "prairie", "squirrel", "animal"])
+    cyc = (th == "walks") or th == "horror" and any(w in desc for w in ["walk", "limp", "crawl", "drag", "stagger", "drunk", "creep", "monkey", "bear", "elephant", "dinosaur", "gorilla", "dog", "cat", "snake", "frog", "mouse", "spider", "penguin", "crab", "chicken", "prairie", "squirrel", "animal"])
     if cyc:
         for m in build_more.cycles(a, 3): out.append(("loop", m))
     for pk in build_more.events(a, 3):
@@ -55,7 +61,11 @@ def good(m, th, kind):
     if q["stretch"] > .05 or q["sink"] > 1.5 or (kind == "loop" and q["seam"] > 1.8) or q["power"] < 2.5: return None
     a = loops.arr(m); meas = truth.measure(a)
     lowest = (F - a[:, :, 1]).min(1)
-    if th != "climbing" and (lowest > 20).mean() > .35 and meas["airborne"] < 3: return None       # floating with nothing under it
+    if (lowest > 12).mean() > .2 and meas["airborne"] < 4: return None          # standing/hanging on something that isn't drawn
+    loc, _ = loops.frames_local(a); body = float(np.ptp(loc, axis=0).max(1).mean())
+    legs = meas["step_side"] + meas["step_fwd"]
+    whole = legs > 45 or meas["head_drop"] > 25 or meas["airborne"] > 3 or meas["lying"]
+    if body < 20 or not (whole or (th in ("everyday", "emotions", "dance") and body > 30)): return None
     return meas
 
 def main(themes=("horror", "climbing", "fights"), per_theme=60):
@@ -83,8 +93,8 @@ def main(themes=("horror", "climbing", "fights"), per_theme=60):
                 really = truth.say(meas)
                 title = f"{short(IDX[c]).capitalize()}" + (f" #{k}" if k > 1 else "")
                 desc = f"{'one-shot' if kind == 'oneshot' else 'seamless loop'}, {meas['sec']}s. Recording: '{IDX[c]}' (CMU {c}). Measured: {really}"
-                a = loops.arr(m); weapons.save(name, desc, a, props if props else [[] for _ in range(len(a))], {"horror": "horror & creatures", "climbing": "climbing & parkour", "fights": "fights & interactions"}[th])
-                v[name] = dict(cat={"horror": "horror & creatures", "climbing": "climbing & parkour", "fights": "fights & interactions"}[th], how=desc, loop=kind != "oneshot", oneshot=kind == "oneshot", frames=len(a), status="active")
+                a = loops.arr(m); weapons.save(name, desc, a, props if props else [[] for _ in range(len(a))], CATS[th])
+                v[name] = dict(cat=CATS[th], how=desc, loop=kind != "oneshot", oneshot=kind == "oneshot", frames=len(a), status="active")
                 titles[name] = title; made.append(name)
         print(f"{th}: {n} new moves from {len(cl)} unused clips")
     mocap.VARS_INDEX.write_text(json.dumps(v, indent=1)); (mocap.HERE / "titles.json").write_text(json.dumps(titles, indent=1))
