@@ -4350,7 +4350,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 25,
-  "status": "active"
+  "status": "approved"
  },
  "fights_82x07_1": {
   "cat": "fights & interactions",
@@ -4358,7 +4358,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "approved"
  },
  "fights_82x07_2": {
   "cat": "fights & interactions",
@@ -4366,7 +4366,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "approved"
  },
  "fights_134x06_1": {
   "cat": "fights & interactions",
@@ -4550,7 +4550,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "horror_136x16_1": {
   "cat": "horror & creatures",
@@ -4558,7 +4558,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "horror_136x16_2": {
   "cat": "horror & creatures",
@@ -4566,7 +4566,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 32,
-  "status": "active"
+  "status": "approved"
  },
  "horror_139x11_1": {
   "cat": "horror & creatures",
