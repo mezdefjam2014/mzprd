@@ -4,13 +4,121 @@
  "fps": 12,
  "props": {},
  "keys": [
-  {"f":1,"n":"Fighting stance, fists up, weight even.","pose":{"lean":3,"rU":60,"rF":-80,"lU":70,"lF":-75,"fT":70,"fS":95,"bT":110,"bS":95}},
-  {"f":3,"n":"Weight shifts onto the back leg, body leans back slightly.","pose":{"x":-4,"lean":-6,"rU":65,"rF":-80,"lU":75,"lF":-70,"fT":78,"fS":100,"bT":100,"bS":92}},
-  {"f":5,"n":"Kicking knee chambers up to the chest.","pose":{"x":-4,"lean":-12,"rU":70,"rF":-75,"lU":80,"lF":-65,"fT":-10,"fS":95,"bT":95,"bS":92}},
-  {"f":7,"snap":true,"n":"Leg snaps out, foot strikes at head height.","pose":{"x":-6,"lean":-28,"head":-10,"rU":110,"rF":120,"lU":60,"lF":-80,"fT":-35,"fS":-32,"bT":97,"bS":92}},
-  {"f":9,"n":"Follow-through, leg rises a little past the target.","pose":{"x":-6,"lean":-32,"head":-8,"rU":115,"rF":125,"lU":62,"lF":-80,"fT":-45,"fS":-42,"bT":97,"bS":92}},
-  {"f":11,"n":"Knee re-chambers, foot pulls back toward the body.","pose":{"x":-4,"lean":-14,"rU":75,"rF":-70,"lU":75,"lF":-70,"fT":-5,"fS":100,"bT":96,"bS":92}},
-  {"f":14,"n":"Foot lands forward, back in fighting stance.","pose":{"lean":3,"rU":60,"rF":-80,"lU":70,"lF":-75,"fT":70,"fS":95,"bT":110,"bS":95}}
+  {
+   "f": 1,
+   "n": "Fighting stance, fists up, weight even.",
+   "pose": {
+    "lean": 3,
+    "rU": 60,
+    "rF": -80,
+    "lU": 70,
+    "lF": -75,
+    "fT": 70,
+    "fS": 95,
+    "bT": 110,
+    "bS": 95
+   }
+  },
+  {
+   "f": 3,
+   "n": "Weight shifts onto the back leg, body leans back slightly.",
+   "pose": {
+    "x": -4,
+    "lean": -6,
+    "rU": 65,
+    "rF": -80,
+    "lU": 75,
+    "lF": -70,
+    "fT": 78,
+    "fS": 100,
+    "bT": 100,
+    "bS": 92
+   }
+  },
+  {
+   "f": 5,
+   "n": "Kicking knee chambers up to the chest.",
+   "pose": {
+    "x": -4,
+    "lean": -12,
+    "rU": 70,
+    "rF": -75,
+    "lU": 80,
+    "lF": -65,
+    "fT": -10,
+    "fS": 95,
+    "bT": 95,
+    "bS": 92
+   }
+  },
+  {
+   "f": 7,
+   "snap": true,
+   "n": "Leg snaps out, foot strikes at head height.",
+   "pose": {
+    "x": -6,
+    "lean": -28,
+    "head": -10,
+    "rU": 110,
+    "rF": 120,
+    "lU": 60,
+    "lF": -80,
+    "fT": -35,
+    "fS": -32,
+    "bT": 97,
+    "bS": 92
+   }
+  },
+  {
+   "f": 9,
+   "n": "Follow-through, leg rises a little past the target.",
+   "pose": {
+    "x": -6,
+    "lean": -32,
+    "head": -8,
+    "rU": 115,
+    "rF": 125,
+    "lU": 62,
+    "lF": -80,
+    "fT": -45,
+    "fS": -42,
+    "bT": 97,
+    "bS": 92
+   }
+  },
+  {
+   "f": 11,
+   "n": "Knee re-chambers, foot pulls back toward the body.",
+   "pose": {
+    "x": -4,
+    "lean": -14,
+    "rU": 75,
+    "rF": -70,
+    "lU": 75,
+    "lF": -70,
+    "fT": -5,
+    "fS": 100,
+    "bT": 96,
+    "bS": 92
+   }
+  },
+  {
+   "f": 14,
+   "n": "Foot lands forward, back in fighting stance.",
+   "pose": {
+    "lean": 3,
+    "rU": 60,
+    "rF": -80,
+    "lU": 70,
+    "lF": -75,
+    "fT": 70,
+    "fS": 95,
+    "bT": 110,
+    "bS": 95
+   }
+  }
  ],
- "prompt": "Create a 7-panel 2D side-scroller sprite storyboard of a fighter doing a high kick, facing right, clean cartoon style. Lay the panels out left to right, numbered 1 to 7, same character, camera and scale in every panel. Each panel shows a different moment:\n\n1. Fighting stance, fists up, weight even.\n2. Weight shifts onto the back leg, body leans back slightly.\n3. Kicking knee chambers up to the chest.\n4. Leg snaps out, foot strikes at head height.\n5. Follow-through, leg rises a little past the target.\n6. Knee re-chambers, foot pulls back toward the body.\n7. Foot lands forward, back in fighting stance.\n\nKeep the silhouette readable in every panel and keep the standing foot planted.\nThen animate it as a 12 fps sprite sheet, 14 frames total."
+ "prompt": "Create a 7-panel 2D side-scroller sprite storyboard of a fighter doing a high kick, facing right, clean cartoon style. Lay the panels out left to right, numbered 1 to 7, same character, camera and scale in every panel. Each panel shows a different moment:\n\n1. Fighting stance, fists up, weight even.\n2. Weight shifts onto the back leg, body leans back slightly.\n3. Kicking knee chambers up to the chest.\n4. Leg snaps out, foot strikes at head height.\n5. Follow-through, leg rises a little past the target.\n6. Knee re-chambers, foot pulls back toward the body.\n7. Foot lands forward, back in fighting stance.\n\nKeep the silhouette readable in every panel and keep the standing foot planted.\nThen animate it as a 12 fps sprite sheet, 14 frames total.",
+ "dim": "2D",
+ "view": "side"
 }

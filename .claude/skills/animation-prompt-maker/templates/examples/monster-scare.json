@@ -1,17 +1,164 @@
 {
  "title": "Monster Scare Storyboard",
- "meta": "3D third-person · side view · 24 fps · frames 1–40 · one-shot",
+ "meta": "3D third-person · 3/4 view · 24 fps · frames 1–40 · one-shot",
  "note": "A jump scare: slow creepy build-up, then a sudden burst at frame 20 and a lunge at the camera.",
  "fps": 24,
  "props": {},
  "keys": [
-  {"f":1,"n":"Monster crouched low in the shadows, hunched over, arms hanging.","pose":{"y":25,"lean":40,"head":-15,"rU":110,"rF":100,"lU":115,"lF":105,"fT":20,"fS":110,"bT":60,"bS":145}},
-  {"f":8,"n":"Head slowly twitches up toward the camera.","pose":{"y":25,"lean":35,"head":-40,"rU":105,"rF":100,"lU":112,"lF":104,"fT":20,"fS":110,"bT":60,"bS":145}},
-  {"f":16,"n":"Sinks even lower, arms pulled back, coiling to spring.","pose":{"y":32,"lean":50,"head":-30,"rU":150,"rF":160,"lU":145,"lF":155,"fT":10,"fS":115,"bT":55,"bS":151}},
-  {"f":20,"snap":true,"n":"Bursts upright, arms flung high, claws spread.","pose":{"y":-4,"lean":-15,"head":-35,"rU":-60,"rF":-100,"lU":-75,"lF":-115,"fT":85,"fS":90,"bT":105,"bS":95}},
-  {"f":26,"n":"Roars at the camera, head thrown back, arms wide.","pose":{"y":0,"lean":-20,"head":-45,"rU":-30,"rF":-60,"lU":-120,"lF":-150,"fT":82,"fS":92,"bT":103,"bS":95}},
-  {"f":31,"snap":true,"n":"Lunges forward, both clawed hands reaching at the viewer.","pose":{"x":30,"y":8,"lean":35,"head":0,"rU":5,"rF":0,"lU":-5,"lF":-10,"fT":40,"fS":95,"bT":130,"bS":110}},
-  {"f":40,"n":"Freezes in the lunge, trembling, inches from the camera.","pose":{"x":34,"y":9,"lean":40,"head":-5,"rU":8,"rF":2,"lU":-3,"lF":-8,"fT":42,"fS":95,"bT":132,"bS":110}}
+  {
+   "f": 1,
+   "n": "Monster crouched low in the shadows, hunched over, arms hanging.",
+   "pose": {
+    "y": 25,
+    "lean": 40,
+    "head": -15,
+    "rU": 110,
+    "rF": 100,
+    "lU": 115,
+    "lF": 105,
+    "fT": 20,
+    "fS": 110,
+    "bT": 60,
+    "bS": 145,
+    "rO": 12,
+    "lO": 12,
+    "fO": 15,
+    "bO": 15
+   }
+  },
+  {
+   "f": 8,
+   "n": "Head slowly twitches up toward the camera.",
+   "pose": {
+    "y": 25,
+    "lean": 35,
+    "head": -40,
+    "rU": 105,
+    "rF": 100,
+    "lU": 112,
+    "lF": 104,
+    "fT": 20,
+    "fS": 110,
+    "bT": 60,
+    "bS": 145,
+    "rO": 12,
+    "lO": 12,
+    "fO": 15,
+    "bO": 15,
+    "look": -15
+   }
+  },
+  {
+   "f": 16,
+   "n": "Sinks even lower, arms pulled back, coiling to spring.",
+   "pose": {
+    "y": 32,
+    "lean": 50,
+    "head": -30,
+    "rU": 150,
+    "rF": 160,
+    "lU": 145,
+    "lF": 155,
+    "fT": 10,
+    "fS": 115,
+    "bT": 55,
+    "bS": 151,
+    "rO": 20,
+    "lO": 20,
+    "fO": 18,
+    "bO": 18
+   }
+  },
+  {
+   "f": 20,
+   "snap": true,
+   "n": "Bursts upright, arms flung high, claws spread.",
+   "pose": {
+    "y": -4,
+    "lean": -15,
+    "head": -35,
+    "rU": -60,
+    "rF": -100,
+    "lU": -75,
+    "lF": -115,
+    "fT": 85,
+    "fS": 90,
+    "bT": 105,
+    "bS": 95,
+    "rO": 30,
+    "lO": 30,
+    "fO": 6,
+    "bO": 6
+   }
+  },
+  {
+   "f": 26,
+   "n": "Roars at the camera, head thrown back, arms wide.",
+   "pose": {
+    "y": 0,
+    "lean": -20,
+    "head": -45,
+    "rU": -30,
+    "rF": -60,
+    "lU": -120,
+    "lF": -150,
+    "fT": 82,
+    "fS": 92,
+    "bT": 103,
+    "bS": 95,
+    "rO": 50,
+    "lO": 50,
+    "fO": 6,
+    "bO": 6
+   }
+  },
+  {
+   "f": 31,
+   "snap": true,
+   "n": "Lunges forward, both clawed hands reaching at the viewer.",
+   "pose": {
+    "x": 30,
+    "y": 8,
+    "lean": 35,
+    "head": 0,
+    "rU": 5,
+    "rF": 0,
+    "lU": -5,
+    "lF": -10,
+    "fT": 40,
+    "fS": 95,
+    "bT": 130,
+    "bS": 110,
+    "rO": -6,
+    "lO": -6,
+    "fO": 8,
+    "bO": 8
+   }
+  },
+  {
+   "f": 40,
+   "n": "Freezes in the lunge, trembling, inches from the camera.",
+   "pose": {
+    "x": 34,
+    "y": 9,
+    "lean": 40,
+    "head": -5,
+    "rU": 8,
+    "rF": 2,
+    "lU": -3,
+    "lF": -8,
+    "fT": 42,
+    "fS": 95,
+    "bT": 132,
+    "bS": 110,
+    "rO": -8,
+    "lO": -8,
+    "fO": 8,
+    "bO": 8
+   }
+  }
  ],
- "prompt": "Create a 7-panel 3D animation storyboard of a monster doing a jump scare, viewed from a third-person camera, dark horror style. Lay the panels out left to right, numbered 1 to 7, same monster, camera and scale in every panel. Each panel shows a different moment:\n\n1. Monster crouched low in the shadows, hunched over, arms hanging.\n2. Head slowly twitches up toward the camera.\n3. Sinks even lower, arms pulled back, coiling to spring.\n4. Bursts upright, arms flung high, claws spread.\n5. Roars at the camera, head thrown back, arms wide.\n6. Lunges forward, both clawed hands reaching at the viewer.\n7. Freezes in the lunge, trembling, inches from the camera.\n\nMake panels 1 to 3 slow and creepy and panels 4 to 6 sudden and violent.\nThen animate it in Blender at 24 fps over 40 frames, with the burst on frame 20."
+ "prompt": "Create a 7-panel 3D animation storyboard of a monster doing a jump scare, viewed from a third-person camera, dark horror style. Lay the panels out left to right, numbered 1 to 7, same monster, camera and scale in every panel. Each panel shows a different moment:\n\n1. Monster crouched low in the shadows, hunched over, arms hanging.\n2. Head slowly twitches up toward the camera.\n3. Sinks even lower, arms pulled back, coiling to spring.\n4. Bursts upright, arms flung high, claws spread.\n5. Roars at the camera, head thrown back, arms wide.\n6. Lunges forward, both clawed hands reaching at the viewer.\n7. Freezes in the lunge, trembling, inches from the camera.\n\nMake panels 1 to 3 slow and creepy and panels 4 to 6 sudden and violent.\nThen animate it in Blender at 24 fps over 40 frames, with the burst on frame 20.",
+ "dim": "3D",
+ "view": "3/4"
 }

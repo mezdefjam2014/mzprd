@@ -19,12 +19,15 @@ main{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
 h1{font-family:var(--display);font-size:clamp(26px,5vw,38px);margin:0;text-wrap:balance}
 .meta{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-top:6px}
 .stage{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
-#main{width:100%;aspect-ratio:16/9;max-width:100%;display:block}
+#main{touch-action:none;cursor:grab;width:100%;aspect-ratio:16/9;max-width:100%;display:block}
 .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 button{font-family:var(--display);font-weight:700;font-size:14px;background:var(--accent);color:#fff;border:0;border-radius:6px;padding:8px 16px;cursor:pointer}
 button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 button:focus-visible,input:focus-visible,.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 input[type=range]{flex:1;min-width:140px;accent-color:var(--accent)}
+.views{display:flex;flex-wrap:wrap;gap:6px}
+.views button{padding:6px 10px;font-size:12px}
+.views button.sel{border-color:var(--accent);color:var(--accent)}
 .readout{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);min-width:170px}
 .readout b{color:var(--ink)}
 h2{font-family:var(--display);font-size:20px;margin:0}
@@ -49,10 +52,11 @@ section{display:flex;flex-direction:column;gap:12px}
     <div class="controls">
       <button id="play">Pause</button>
       <button class="ghost" id="onion">Onion skin: off</button>
+      <div class="views" id="views" role="group" aria-label="Camera"></div>
       <input type="range" id="scrub" min="1" step="0.1" value="1" aria-label="Frame">
       <div class="readout" id="readout"></div>
     </div>
-    <p class="note" id="note"></p>
+    <p class="note"><span id="note"></span> Drag the stage to orbit the camera.</p>
   </section>
   <section><h2>Key frames</h2><div class="grid" id="grid"></div></section>
   <section>
@@ -183,33 +187,43 @@ const DATA = {
    }
   }
  ],
- "prompt": "Create a 7-panel 2D side-scroller sprite storyboard of a fighter doing a high kick, facing right, clean cartoon style. Lay the panels out left to right, numbered 1 to 7, same character, camera and scale in every panel. Each panel shows a different moment:\n\n1. Fighting stance, fists up, weight even.\n2. Weight shifts onto the back leg, body leans back slightly.\n3. Kicking knee chambers up to the chest.\n4. Leg snaps out, foot strikes at head height.\n5. Follow-through, leg rises a little past the target.\n6. Knee re-chambers, foot pulls back toward the body.\n7. Foot lands forward, back in fighting stance.\n\nKeep the silhouette readable in every panel and keep the standing foot planted.\nThen animate it as a 12 fps sprite sheet, 14 frames total."
+ "prompt": "Create a 7-panel 2D side-scroller sprite storyboard of a fighter doing a high kick, facing right, clean cartoon style. Lay the panels out left to right, numbered 1 to 7, same character, camera and scale in every panel. Each panel shows a different moment:\n\n1. Fighting stance, fists up, weight even.\n2. Weight shifts onto the back leg, body leans back slightly.\n3. Kicking knee chambers up to the chest.\n4. Leg snaps out, foot strikes at head height.\n5. Follow-through, leg rises a little past the target.\n6. Knee re-chambers, foot pulls back toward the body.\n7. Foot lands forward, back in fighting stance.\n\nKeep the silhouette readable in every panel and keep the standing foot planted.\nThen animate it as a 12 fps sprite sheet, 14 frames total.",
+ "dim": "2D",
+ "view": "side"
 };
 /*END DATA*/
 
 // ---------- engine (do not edit per animation) ----------
 const D=Math.PI/180;
-const L={torso:30,chest:28,neck:7,head:11.5,upper:30,fore:27,thigh:46,shin:45,foot:14,hipW:3};
+const L={torso:30,chest:28,neck:7,head:11.5,upper:30,fore:27,thigh:46,shin:45,foot:14,shW:9,hipW:5};
 const FLOOR=89;
-// relaxed standing pose: slight knee bend, arms hanging a touch forward, weight a little on the far leg
-const REST={x:0,y:0,lean:2,chest:0,head:4,rU:86,rF:80,lU:93,lF:86,fT:84,fS:97,bT:95,bS:90,fA:0,bA:0};
-const P=(x,y,a,l)=>[x+Math.cos(a*D)*l,y+Math.sin(a*D)*l];
+// relaxed standing pose. Sagittal angles (side view) + 3D: *O = limb swings out to the side, twist = upper body yaw, turn = whole body yaw, look = head yaw
+const REST={x:0,y:0,z:0,lean:2,chest:0,head:4,twist:0,turn:0,look:0,
+  rU:86,rF:80,lU:93,lF:86,rO:8,lO:8,fT:84,fS:97,bT:95,bS:90,fA:0,bA:0,fO:3,bO:3};
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const dir=(a,o=0,side=1)=>[Math.cos(a*D)*Math.cos(o*D),Math.sin(a*D)*Math.cos(o*D),side*Math.sin(o*D)];
+const mul=(v,k)=>[v[0]*k,v[1]*k,v[2]*k];
+const limb=(f,a,l,o=0,side=1)=>add(f,mul(dir(a,o,side),l));
+function rotY(p,c,t){const dx=p[0]-c[0],dz=p[2]-c[2],C=Math.cos(t*D),S=Math.sin(t*D);return [c[0]+dx*C+dz*S,p[1],c[2]-dx*S+dz*C];}
 function rawSolve(p){
-  const hip=[p.x,p.y];
-  const mid=P(...hip,-90+p.lean,L.torso);
-  const sh=P(...mid,-90+p.lean+p.chest,L.chest);
-  const nk=P(...sh,-90+p.lean*.5+p.chest*.5,L.neck);
-  const hd=P(...nk,-90+p.lean+p.chest+p.head*.6,L.head);
-  const shF=[sh[0]+1,sh[1]], shB=[sh[0]-2,sh[1]+1];
-  const rE=P(...shF,p.rU,L.upper), rH=P(...rE,p.rF,L.fore);
-  const lE=P(...shB,p.lU,L.upper), lH=P(...lE,p.lF,L.fore);
-  const hF=[hip[0]+L.hipW,hip[1]], hB=[hip[0]-L.hipW,hip[1]];
-  const fK=P(...hF,p.fT,L.thigh), fAn=P(...fK,p.fS,L.shin), fTo=P(...fAn,p.fA,L.foot);
-  const bK=P(...hB,p.bT,L.thigh), bAn=P(...bK,p.bS,L.shin), bTo=P(...bAn,p.bA,L.foot);
-  return {hip,mid,sh,shF,shB,nk,hd,rE,rH,lE,lH,hF,hB,fK,fAn,fTo,bK,bAn,bTo,
-    ang:{rH:p.rF,lH:p.lF,fFoot:p.fA,bFoot:p.bA,hip:p.lean,head:p.head,chest:p.lean+p.chest,world:0}};
+  const hip=[p.x,p.y,p.z];
+  const mid=limb(hip,-90+p.lean,L.torso);
+  const sh=limb(mid,-90+p.lean+p.chest,L.chest);
+  const nk=limb(sh,-90+p.lean*.5+p.chest*.5,L.neck);
+  const hd=limb(nk,-90+p.lean+p.chest+p.head*.6,L.head);
+  let shF=add(sh,[0,0,L.shW]), shB=add(sh,[0,0,-L.shW]);
+  let rE=limb(shF,p.rU,L.upper,p.rO,1), rH=limb(rE,p.rF,L.fore,p.rO,1);
+  let lE=limb(shB,p.lU,L.upper,p.lO,-1), lH=limb(lE,p.lF,L.fore,p.lO,-1);
+  [shF,shB,rE,rH,lE,lH]=[shF,shB,rE,rH,lE,lH].map(q=>rotY(q,sh,p.twist));
+  const hF=add(hip,[0,0,L.hipW]), hB=add(hip,[0,0,-L.hipW]);
+  const fK=limb(hF,p.fT,L.thigh,p.fO,1), fAn=limb(fK,p.fS,L.shin,p.fO,1), fTo=limb(fAn,p.fA,L.foot);
+  const bK=limb(hB,p.bT,L.thigh,p.bO,-1), bAn=limb(bK,p.bS,L.shin,p.bO,-1), bTo=limb(bAn,p.bA,L.foot);
+  const face=add(hd,mul(rotY([Math.cos((p.head*.6+p.lean)*D),Math.sin((p.head*.6+p.lean)*D),0],[0,0,0],p.twist+p.look),8));
+  const pts={hip,mid,sh,shF,shB,nk,hd,face,rE,rH,lE,lH,hF,hB,fK,fAn,fTo,bK,bAn,bTo};
+  if(p.turn)for(const k in pts)pts[k]=rotY(pts[k],hip,p.turn);
+  return {...pts,ang:{rH:p.rF,lH:p.lF,fFoot:p.fA,bFoot:p.bA,hip:p.lean,head:p.head,chest:p.lean+p.chest,world:0},
+    yaw:{rH:p.turn+p.twist,lH:p.turn+p.twist,chest:p.turn+p.twist,head:p.turn+p.twist+p.look,fFoot:p.turn,bFoot:p.turn,hip:p.turn,world:0}};
 }
-// plant the lowest foot on the floor unless the key is airborne ("air": true, then y lifts the body)
 function ground(k){
   const p={...REST,...(k.pose||{})};
   const s=rawSolve({...p,y:0});
@@ -225,10 +239,11 @@ const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim
 const ANCH={rH:"rH",lH:"lH",fFoot:"fAn",bFoot:"bAn",hip:"hip",head:"hd",chest:"sh"};
 function propXform(s,pr){
   if(!pr)return null;
-  if(pr.at==="world")return {x:pr.x||0,y:pr.y||0,r:pr.r||0};
-  const a=s[ANCH[pr.at]], base=pr.follow?s.ang[pr.at]:0, g=base*D;
-  const x=pr.x||0,y=pr.y||0;
-  return {x:a[0]+x*Math.cos(g)-y*Math.sin(g), y:a[1]+x*Math.sin(g)+y*Math.cos(g), r:base+(pr.r||0)};
+  if(pr.at==="world")return {pos:[pr.x||0,pr.y||0,pr.z||0],r:pr.r||0,yaw:pr.yaw||0};
+  const base=pr.follow?s.ang[pr.at]:0, yaw=s.yaw[pr.at]+(pr.yaw||0);
+  const g=base*D,x=pr.x||0,y=pr.y||0;
+  const off=rotY([x*Math.cos(g)-y*Math.sin(g),x*Math.sin(g)+y*Math.cos(g),pr.z||0],[0,0,0],yaw);
+  return {pos:add(s[ANCH[pr.at]],off),r:base+(pr.r||0),yaw};
 }
 function frameState(fr){
   fr=Math.max(KEYS[0].f,Math.min(LAST,fr));
@@ -238,47 +253,65 @@ function frameState(fr){
   t=b.snap?1-Math.pow(1-t,3):ease(t);
   const pose={};for(const k in a.pose)pose[k]=a.pose[k]+(b.pose[k]-a.pose[k])*t;
   const sa=solve(a.pose),sb=solve(b.pose),props={};
+  const lr=(u,v)=>u+(v-u)*t;
   for(const name in DATA.props){
     const xa=propXform(sa,a.props?.[name]), xb=propXform(sb,b.props?.[name]);
-    if(xa&&xb)props[name]={x:xa.x+(xb.x-xa.x)*t,y:xa.y+(xb.y-xa.y)*t,r:xa.r+(xb.r-xa.r)*t};
+    if(xa&&xb)props[name]={pos:xa.pos.map((v,j)=>lr(v,xb.pos[j])),r:lr(xa.r,xb.r),yaw:lr(xa.yaw,xb.yaw)};
     else if(xa&&t<.5)props[name]=xa; else if(xb&&t>=.5)props[name]=xb;
   }
   return {pose,props};
 }
 function keyState(k){const s=solve(k.pose),props={};for(const n in DATA.props){const x=propXform(s,k.props?.[n]);if(x)props[n]=x}return {pose:k.pose,props};}
 
+// ---------- camera ----------
+const VIEWS={side:[0,8],"3/4":[40,14],front:[90,8],"over shoulder":[-40,14],back:[-90,10],top:[0,70]};
+const is2D=/^2d/i.test(DATA.dim||"");
+const cam={yaw:0,pitch:8,...(()=>{const v=VIEWS[DATA.view||(is2D?"side":"3/4")]||VIEWS.side;return {yaw:v[0],pitch:v[1]}})()};
+const panelCam={...cam};
+function proj(p,c){
+  const dx=p[0]-6,dy=p[1]-6,dz=p[2];
+  const Y=c.yaw*D,Pt=c.pitch*D;
+  const x1=dx*Math.cos(Y)-dz*Math.sin(Y), z1=dx*Math.sin(Y)+dz*Math.cos(Y);
+  return [x1, dy*Math.cos(Pt)+z1*Math.sin(Pt), -dy*Math.sin(Pt)+z1*Math.cos(Pt)];
+}
+
 function draw(ctx,w,h,st,opt={}){
-  const s=solve(st.pose), sc=h/230, ox=w*.45, oy=h*.45;
-  ctx.save();ctx.translate(ox,oy);ctx.scale(sc,sc);ctx.lineCap="round";ctx.lineJoin="round";
-  const near=opt.ghost?css("--line"):css("--figure");
-  const far=opt.ghost?css("--line"):css("--figure-far");
-  const line=(pts,c,wd)=>{ctx.strokeStyle=c;ctx.lineWidth=wd;ctx.beginPath();ctx.moveTo(...pts[0]);for(const q of pts.slice(1))ctx.lineTo(...q);ctx.stroke();};
-  const dot=(pt,r,c)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(...pt,r,0,7);ctx.fill();};
+  const c=opt.cam||cam, s=solve(st.pose), sc=h/262;
+  ctx.save();ctx.translate(w*.5,h*.5);ctx.scale(sc,sc);ctx.lineCap="round";ctx.lineJoin="round";
+  const J=k=>proj(s[k],c);
+  const near=opt.ghost?css("--line"):css("--figure"), far=opt.ghost?css("--line"):css("--figure-far");
   if(!opt.ghost){
-    ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-110,FLOOR);ctx.lineTo(140,FLOOR);ctx.stroke();
-    // contact shadow shrinks as the body leaves the floor
+    // floor disc and contact shadow
+    ctx.strokeStyle=css("--line");ctx.lineWidth=1.2;
+    for(const r of [40,80]){ctx.beginPath();for(let i=0;i<=48;i++){const a=i/48*2*Math.PI;const q=proj([s.hip[0]+Math.cos(a)*r,FLOOR,s.hip[2]+Math.sin(a)*r],c);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]);}ctx.stroke();}
     const lift=Math.max(0,FLOOR-4-Math.max(s.fAn[1],s.bAn[1]));
-    ctx.fillStyle=css("--line");ctx.globalAlpha=Math.max(.15,.6-lift/80);
-    ctx.beginPath();ctx.ellipse(s.hip[0]+4,FLOOR+1,Math.max(12,26-lift/4),3,0,0,7);ctx.fill();ctx.globalAlpha=1;
+    ctx.fillStyle=css("--line");ctx.globalAlpha=Math.max(.15,.6-lift/80);ctx.beginPath();
+    for(let i=0;i<=24;i++){const a=i/24*2*Math.PI,r=Math.max(10,22-lift/4);const q=proj([s.hip[0]+4+Math.cos(a)*r,FLOOR,s.hip[2]+Math.sin(a)*r*.7],c);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]);}
+    ctx.fill();ctx.globalAlpha=1;
   }
-  const drawProps=layer=>{if(opt.ghost)return;for(const n in st.props){const def=DATA.props[n];if((def.layer||"front")!==layer)continue;const x=st.props[n];
-    ctx.save();ctx.translate(x.x,x.y);ctx.rotate(x.r*D);for(const sh of def.shapes){ctx.fillStyle=css(sh[4]||def.color||"--prop1");ctx.fillRect(sh[0],sh[1],sh[2],sh[3]);}ctx.restore();}};
-  drawProps("back");
-  // far side (lighter, behind the body)
-  line([s.shB,s.lE,s.lH],far,6);dot(s.lH,3.6,far);
-  line([s.hB,s.bK,s.bAn],far,7.5);line([s.bAn,s.bTo],far,5.5);
-  // torso: pelvis, belly, chest, neck, head
-  line([s.hip,s.mid],near,13);line([s.mid,s.sh],near,16);line([s.sh,s.nk],near,6);
-  ctx.fillStyle=opt.ghost?"transparent":css("--panel");ctx.strokeStyle=near;ctx.lineWidth=3.5;
-  ctx.save();ctx.translate(...s.hd);ctx.rotate((st.pose.lean+st.pose.chest+st.pose.head*.6)*D);
-  ctx.beginPath();ctx.ellipse(0,-2,9.5,11.5,0,0,7);ctx.fill();ctx.stroke();
-  if(!opt.ghost)dot([5,-3],1.8,near);
-  ctx.restore();
-  // near leg
-  line([s.hF,s.fK,s.fAn],near,8.5);line([s.fAn,s.fTo],near,6);
-  drawProps("front");
-  line([s.shF,s.rE,s.rH],near,7);dot(s.rH,3.8,near);
-  drawProps("top");
+  const hipD=J("hip")[2];
+  const items=[];
+  const seg=(a,b,wd)=>{const A=J(a),B=J(b);items.push({d:(A[2]+B[2])/2,f:col=>{ctx.strokeStyle=col;ctx.lineWidth=wd;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();}});};
+  const dot=(a,r)=>{const A=J(a);items.push({d:A[2]+.1,f:col=>{ctx.fillStyle=col;ctx.beginPath();ctx.arc(A[0],A[1],r,0,7);ctx.fill();}});};
+  seg("hip","hF",10);seg("hip","hB",10);seg("hip","mid",13);seg("mid","sh",16);seg("shF","shB",9);seg("sh","nk",6);
+  seg("shF","rE",7);seg("rE","rH",6.5);dot("rH",3.8);
+  seg("shB","lE",7);seg("lE","lH",6.5);dot("lH",3.8);
+  seg("hF","fK",9);seg("fK","fAn",8);seg("fAn","fTo",6);
+  seg("hB","bK",9);seg("bK","bAn",8);seg("bAn","bTo",6);
+  // head
+  const H=J("hd"),F=J("face");
+  items.push({d:H[2],f:col=>{ctx.fillStyle=opt.ghost?"transparent":css("--panel");ctx.strokeStyle=col;ctx.lineWidth=3.5;ctx.beginPath();ctx.arc(H[0],H[1]-1,10.5,0,7);ctx.fill();ctx.stroke();
+    if(!opt.ghost&&F[2]>H[2]-3){ctx.fillStyle=col;ctx.beginPath();ctx.arc(H[0]+(F[0]-H[0])*.7,H[1]+(F[1]-H[1])*.7-2,1.9,0,7);ctx.fill();}}});
+  // props as flat 3D plates
+  if(!opt.ghost)for(const n in st.props){const def=DATA.props[n],x=st.props[n];
+    for(const sh of def.shapes){
+      const cr=[[sh[0],sh[1]],[sh[0]+sh[2],sh[1]],[sh[0]+sh[2],sh[1]+sh[3]],[sh[0],sh[1]+sh[3]]].map(([u,v])=>{
+        const g=x.r*D,l=[u*Math.cos(g)-v*Math.sin(g),u*Math.sin(g)+v*Math.cos(g),0];return proj(add(x.pos,rotY(l,[0,0,0],x.yaw)),c);});
+      const d=cr.reduce((m,q)=>m+q[2],0)/4+(def.layer==="top"?3:def.layer==="back"?-3:.5);
+      items.push({d,prop:true,f:()=>{ctx.fillStyle=css(sh[4]||def.color||"--prop1");ctx.beginPath();cr.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();ctx.fill();}});
+    }}
+  items.sort((a,b)=>a.d-b.d);
+  for(const it of items)it.f(it.d<hipD-3?far:near);
   ctx.restore();
 }
 
@@ -311,6 +344,15 @@ const stop=()=>{playing=false;playBtn.textContent="Play"};
 playBtn.onclick=()=>{playing=!playing;playBtn.textContent=playing?"Pause":"Play"};
 document.getElementById("onion").onclick=e=>{onion=!onion;e.target.textContent="Onion skin: "+(onion?"on":"off")};
 scrub.oninput=()=>{frame=+scrub.value;stop()};
+// camera buttons + drag to orbit
+const vb=document.getElementById("views");
+function setView(name){const v=VIEWS[name];cam.yaw=v[0];cam.pitch=v[1];vb.querySelectorAll("button").forEach(b=>b.classList.toggle("sel",b.dataset.v===name));}
+Object.keys(VIEWS).forEach(n=>{const b=document.createElement("button");b.className="ghost";b.dataset.v=n;b.textContent=n[0].toUpperCase()+n.slice(1);b.onclick=()=>setView(n);vb.appendChild(b);});
+setView(DATA.view||(is2D?"side":"3/4"));
+let drag=null;
+mc.addEventListener("pointerdown",e=>{drag=[e.clientX,e.clientY,cam.yaw,cam.pitch];mc.setPointerCapture(e.pointerId);});
+mc.addEventListener("pointermove",e=>{if(!drag)return;cam.yaw=drag[2]-(e.clientX-drag[0])*.5;cam.pitch=Math.max(-10,Math.min(85,drag[3]+(e.clientY-drag[1])*.4));vb.querySelectorAll("button").forEach(b=>b.classList.remove("sel"));});
+mc.addEventListener("pointerup",()=>drag=null);
 const grid=document.getElementById("grid");
 KEYS.forEach((k,i)=>{
   const c=document.createElement("div");c.className="card";c.tabIndex=0;
@@ -319,7 +361,7 @@ KEYS.forEach((k,i)=>{
   const go=()=>{frame=k.f;stop()};c.onclick=go;c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}};
   grid.appendChild(c);
 });
-function drawPanels(){document.querySelectorAll(".card canvas").forEach((cv,i)=>{const x=cv.getContext("2d");x.fillStyle=css("--panel");x.fillRect(0,0,cv.width,cv.height);draw(x,cv.width,cv.height,keyState(KEYS[i]))})}
+function drawPanels(){document.querySelectorAll(".card canvas").forEach((cv,i)=>{const x=cv.getContext("2d");x.fillStyle=css("--panel");x.fillRect(0,0,cv.width,cv.height);draw(x,cv.width,cv.height,keyState(KEYS[i]),{cam:panelCam})})}
 drawPanels();
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawPanels);
 new MutationObserver(drawPanels).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});

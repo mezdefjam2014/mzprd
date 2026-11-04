@@ -96,7 +96,13 @@ Pose values (side view, figure faces right; angles in degrees, 0 = pointing righ
 - Real joints only bend one way: knee = shin angle bigger than thigh angle (foot behind knee); elbow = forearm angle smaller than upper arm angle when the hand comes forward/up. Keep the torso lean within -35..60 and the head within -45..45.
 - Examples: arm pointing forward = upper 15, forearm -5. Fists up guard = upper 60, forearm -80. Knee chambered = thigh -10, shin 95. Kick at head height = thigh -35, shin -32. Deep crouch = thigh 15, shin 125, lean 30.
 
-Props: define `"props": {"name": {"color": "--prop1".."--prop4", "layer": "back"|"front"|"top", "shapes": [[x, y, w, h], ...]}}`, rectangles in local units (the figure is ~200 units tall). In each key, place props with `{"at": "rH"|"lH"|"fFoot"|"bFoot"|"hip"|"head"|"chest"|"world", "x", "y", "r", "follow": true to rotate with the limb}`. A prop left out of a key is hidden. Props blend smoothly between keys, so swapping hands or dropping something to the floor (`"at": "world"`) just works.
+3D (the preview and Blender rig are fully 3D; the angles above are the side-view swing, these add depth):
+- `rO`, `lO`: arm swings out to the side (positive = away from the body, negative = across the body toward center, e.g. two-handed grip: rO -8, lO -28). `fO`, `bO`: legs out to the side (wide stance 15).
+- `twist`: upper-body rotation in degrees (positive = chest turns to the character's left). Use for walk/run arm swing (±5-8), punches (±30), throws.
+- `turn`: whole-body rotation around the hips (e.g. spinning kick, turning to face the camera). `look`: head turn left (+) / right (-). `z`: move sideways.
+- Top-level `"dim": "2D"|"3D"` and `"view": "side"|"3/4"|"front"|"over shoulder"|"back"|"top"` set the default camera (2D defaults to side, 3D to 3/4). Use the perspective the user picked. Viewers can switch views and drag to orbit.
+
+Props: define `"props": {"name": {"color": "--prop1".."--prop4", "layer": "back"|"front"|"top", "shapes": [[x, y, w, h], ...]}}`, flat plates in local units (the figure is ~175 units tall). In each key, place props with `{"at": "rH"|"lH"|"fFoot"|"bFoot"|"hip"|"head"|"chest"|"world", "x", "y", "z", "r", "yaw", "follow": true to rotate with the limb}`. Props turn with the body automatically. A prop left out of a key is hidden. Props blend smoothly between keys, so swapping hands or dropping something to the floor (`"at": "world"`) just works.
 
 ## Step 5 — Blender rebuild (when the user uses Blender or asks for it)
 
@@ -104,7 +110,7 @@ The same JSON also rebuilds the animation in Blender, so Blender gets exactly wh
 
 `python3 .claude/skills/animation-prompt-maker/templates/to_blender.py data.json <name>_blender.py`
 
-Give the user the file and say: in Blender, open the Scripting tab, open the file, press Run Script. It creates a stick-figure armature (spine, neck, head, upper_arm/forearm .L/.R, thigh/shin .L/.R) keyframed on every key frame, props as boxes, the scene fps and frame range set, and hard snaps on "snap" keys. If the user has their own character, tell them to retarget this rig's action onto theirs (for example with the Rokoko or Auto-Rig Pro retargeting tools), or ask for their bone names and adapt the script.
+Give the user the file and say: in Blender, open the Scripting tab, open the file, press Run Script. It creates a 3D stick-figure armature (spine, chest, neck, head, shoulder/upper_arm/forearm .L/.R, pelvis/thigh/shin/foot .L/.R) keyframed on every key frame, props as boxes, the scene fps and frame range set, and hard snaps on "snap" keys. If the user has their own character, tell them to retarget this rig's action onto theirs (for example with the Rokoko or Auto-Rig Pro retargeting tools), or ask for their bone names and adapt the script.
 
 ## Fast path
 
