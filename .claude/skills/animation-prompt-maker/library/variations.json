@@ -6478,7 +6478,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "older"
  },
  "cb_144x05_1": {
   "cat": "battle & combat",
@@ -6526,7 +6526,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "cb_144x10_1": {
   "cat": "battle & combat",
@@ -6542,7 +6542,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "cb_90x07_1": {
   "cat": "battle & combat",
@@ -6558,7 +6558,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 81,
-  "status": "active"
+  "status": "older"
  },
  "cb_22x17_2": {
   "cat": "battle & combat",
@@ -6566,7 +6566,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 57,
-  "status": "active"
+  "status": "older"
  },
  "cb_23x17_1": {
   "cat": "battle & combat",
@@ -6574,7 +6574,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 59,
-  "status": "active"
+  "status": "older"
  },
  "cb_23x17_2": {
   "cat": "battle & combat",
@@ -6582,7 +6582,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 81,
-  "status": "active"
+  "status": "older"
  },
  "cb_91x46_1": {
   "cat": "battle & combat",
@@ -6590,7 +6590,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "cb_91x53_1": {
   "cat": "battle & combat",
@@ -6598,7 +6598,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 46,
-  "status": "active"
+  "status": "older"
  },
  "cb_75x08_1": {
   "cat": "battle & combat",
@@ -6606,7 +6606,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "cb_75x08_2": {
   "cat": "battle & combat",
@@ -6614,7 +6614,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 58,
-  "status": "active"
+  "status": "older"
  },
  "cb_139x16_1": {
   "cat": "knockdown & recovery",
@@ -6654,7 +6654,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 133,
-  "status": "active"
+  "status": "older"
  },
  "cb_140x04_1": {
   "cat": "knockdown & recovery",
@@ -6678,7 +6678,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 107,
-  "status": "active"
+  "status": "older"
  },
  "cb_139x33_2": {
   "cat": "horror & creatures",
@@ -6718,7 +6718,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 21,
-  "status": "active"
+  "status": "older"
  },
  "pistol_139x16_low_ready": {
   "cat": "combat pistol",
@@ -6750,7 +6750,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 98,
-  "status": "active"
+  "status": "older"
  },
  "pistol_140x08_low_ready": {
   "cat": "combat pistol",
@@ -6766,7 +6766,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 107,
-  "status": "active"
+  "status": "older"
  },
  "pistol_139x34_low_ready": {
   "cat": "combat pistol",
@@ -6782,7 +6782,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "older"
  },
  "pistol_139x34_one-handed_right": {
   "cat": "combat pistol",
@@ -6790,7 +6790,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "older"
  },
  "pistol_142x22_low_ready": {
   "cat": "combat pistol",
@@ -6806,7 +6806,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 54,
-  "status": "active"
+  "status": "older"
  },
  "pistol_142x22_one-handed_right": {
   "cat": "combat pistol",
@@ -6815,5 +6815,103 @@
   "oneshot": false,
   "frames": 54,
   "status": "approved"
+ },
+ "crawler_idle": {
+  "cat": "creatures (all fours)",
+  "how": "Crawler: idle, breathing, head twitching",
+  "loop": true,
+  "frames": 60,
+  "status": "active"
+ },
+ "crawler_crawl": {
+  "cat": "creatures (all fours)",
+  "how": "Crawler: crawl forward on all fours",
+  "loop": true,
+  "frames": 44,
+  "status": "active"
+ },
+ "crawler_scurry": {
+  "cat": "creatures (all fours)",
+  "how": "Crawler: fast scurry",
+  "loop": true,
+  "frames": 26,
+  "status": "active"
+ },
+ "crawler_creep": {
+  "cat": "creatures (all fours)",
+  "how": "Crawler: slow creep (stalking)",
+  "loop": true,
+  "frames": 80,
+  "status": "active"
+ },
+ "crawler_pounce": {
+  "cat": "creatures (all fours)",
+  "how": "Crawler: coil and pounce forward, claws out",
+  "loop": true,
+  "frames": 44,
+  "status": "active"
+ },
+ "brute_idle": {
+  "cat": "creatures (all fours)",
+  "how": "Brute: heavy idle on its knuckles, breathing",
+  "loop": true,
+  "frames": 70,
+  "status": "active"
+ },
+ "brute_prowl": {
+  "cat": "creatures (all fours)",
+  "how": "Brute: knuckle-walk prowl",
+  "loop": true,
+  "frames": 56,
+  "status": "active"
+ },
+ "brute_charge": {
+  "cat": "creatures (all fours)",
+  "how": "Brute: charge (bounding gallop)",
+  "loop": true,
+  "frames": 24,
+  "status": "active"
+ },
+ "brute_roar": {
+  "cat": "creatures (all fours)",
+  "how": "Brute: rear up and roar, then slam down",
+  "loop": true,
+  "frames": 56,
+  "status": "active"
+ },
+ "brute_swipe": {
+  "cat": "creatures (all fours)",
+  "how": "Brute: rearing claw swipe (right arm)",
+  "loop": true,
+  "frames": 40,
+  "status": "active"
+ },
+ "brute_swipe_left": {
+  "cat": "creatures (all fours)",
+  "how": "Brute: rearing claw swipe (left arm)",
+  "loop": true,
+  "frames": 40,
+  "status": "active"
+ },
+ "brute_slam": {
+  "cat": "creatures (all fours)",
+  "how": "Brute: two-handed ground slam",
+  "loop": true,
+  "frames": 40,
+  "status": "active"
+ },
+ "brute_stunned": {
+  "cat": "creatures (all fours)",
+  "how": "Brute: stunned and dazed, swaying",
+  "loop": true,
+  "frames": 72,
+  "status": "active"
+ },
+ "brute_hit_react": {
+  "cat": "creatures (all fours)",
+  "how": "Brute: flinch from a hit",
+  "loop": true,
+  "frames": 26,
+  "status": "active"
  }
 }

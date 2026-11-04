@@ -573,5 +573,19 @@
  "pistol_139x34_one-handed_right": "Sneaking with pistol, one-handed aim (right)",
  "pistol_142x22_low_ready": "Sneaky creep with pistol, low ready",
  "pistol_142x22_two-handed_aim": "Sneaky creep with pistol, two-handed aim",
- "pistol_142x22_one-handed_right": "Sneaky creep with pistol, one-handed aim (right)"
+ "pistol_142x22_one-handed_right": "Sneaky creep with pistol, one-handed aim (right)",
+ "crawler_idle": "Crawler: idle, breathing, head twitching",
+ "crawler_crawl": "Crawler: crawl forward on all fours",
+ "crawler_scurry": "Crawler: fast scurry",
+ "crawler_creep": "Crawler: slow creep (stalking)",
+ "crawler_pounce": "Crawler: coil and pounce forward, claws out",
+ "brute_idle": "Brute: heavy idle on its knuckles, breathing",
+ "brute_prowl": "Brute: knuckle-walk prowl",
+ "brute_charge": "Brute: charge (bounding gallop)",
+ "brute_roar": "Brute: rear up and roar, then slam down",
+ "brute_swipe": "Brute: rearing claw swipe (right arm)",
+ "brute_swipe_left": "Brute: rearing claw swipe (left arm)",
+ "brute_slam": "Brute: two-handed ground slam",
+ "brute_stunned": "Brute: stunned and dazed, swaying",
+ "brute_hit_react": "Brute: flinch from a hit"
 }
