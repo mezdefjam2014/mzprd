@@ -60,133 +60,70 @@
   "how": "two-handed isosceles aim, breathing (both hands)",
   "loop": true,
   "frames": 40,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_fire": {
   "cat": "weapons",
   "how": "two-handed shot: muzzle flip, recover on target (both hands)",
   "loop": true,
   "frames": 30,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_double_tap": {
   "cat": "weapons",
   "how": "two-handed double tap (both hands)",
   "loop": true,
   "frames": 34,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_draw_holster": {
   "cat": "weapons",
   "how": "four-count draw from the hip, aim, reholster",
   "loop": true,
   "frames": 56,
-  "status": "active"
- },
- "pistol_speed_reload": {
-  "cat": "weapons",
-  "how": "speed reload in the workspace: drop mag, seat, overhand rack",
-  "loop": true,
-  "frames": 46,
-  "status": "active"
- },
- "pistol_speed_reload_fast": {
-  "cat": "weapons",
-  "how": "fast speed reload",
-  "loop": true,
-  "frames": 34,
-  "status": "active"
- },
- "pistol_whip": {
-  "cat": "weapons",
-  "how": "pistol whip: cock by the ear, strike down and across with the slide",
-  "loop": true,
-  "frames": 26,
-  "status": "active"
- },
- "pistol_whip_backhand": {
-  "cat": "weapons",
-  "how": "backhand pistol whip",
-  "loop": true,
-  "frames": 26,
-  "status": "active"
- },
- "knife_slash_combo": {
-  "cat": "weapons",
-  "how": "forward-grip forehand + backhand slash (figure 8)",
-  "loop": true,
-  "frames": 24,
-  "status": "active"
- },
- "knife_thrust": {
-  "cat": "weapons",
-  "how": "lunging knife thrust",
-  "loop": true,
-  "frames": 28,
-  "status": "active"
- },
- "knife_icepick_stab": {
-  "cat": "weapons",
-  "how": "reverse-grip overhead stab",
-  "loop": true,
-  "frames": 22,
-  "status": "active"
- },
- "pistol_whip_lefty": {
-  "cat": "weapons",
-  "how": "left-handed pistol whip",
-  "loop": true,
-  "frames": 26,
-  "status": "active"
- },
- "knife_slash_combo_lefty": {
-  "cat": "weapons",
-  "how": "left-handed knife slashes",
-  "loop": true,
-  "frames": 24,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_fire_right_hand": {
   "cat": "weapons",
   "how": "one-handed shot, right hand",
   "loop": true,
   "frames": 32,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_double_tap_right_hand": {
   "cat": "weapons",
   "how": "one-handed double tap, right hand",
   "loop": true,
   "frames": 38,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_aim_right_hand": {
   "cat": "weapons",
   "how": "one-handed aim, right hand",
   "loop": true,
   "frames": 40,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_fire_left_hand": {
   "cat": "weapons",
   "how": "one-handed shot, left hand",
   "loop": true,
   "frames": 32,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_double_tap_left_hand": {
   "cat": "weapons",
   "how": "one-handed double tap, left hand",
   "loop": true,
   "frames": 38,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_aim_left_hand": {
   "cat": "weapons",
   "how": "one-handed aim, left hand",
   "loop": true,
   "frames": 40,
-  "status": "active"
+  "status": "approved"
  },
  "snap_jab": {
   "cat": "attacks",
@@ -459,5 +396,670 @@
   "frames": 33,
   "seam": 0.8,
   "status": "approved"
+ },
+ "box_jab_1": {
+  "cat": "boxing",
+  "how": "jab (lead straight), real boxer take 1 (CMU 15_13)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "box_cross_1": {
+  "cat": "boxing",
+  "how": "cross (rear straight), real boxer take 1 (CMU 143_23)",
+  "loop": true,
+  "frames": 25,
+  "status": "active"
+ },
+ "box_cross_2": {
+  "cat": "boxing",
+  "how": "cross (rear straight), real boxer take 2 (CMU 13_17)",
+  "loop": true,
+  "frames": 31,
+  "status": "active"
+ },
+ "box_cross_3": {
+  "cat": "boxing",
+  "how": "cross (rear straight), real boxer take 3 (CMU 14_01)",
+  "loop": true,
+  "frames": 24,
+  "status": "active"
+ },
+ "box_cross_4": {
+  "cat": "boxing",
+  "how": "cross (rear straight), real boxer take 4 (CMU 17_10)",
+  "loop": true,
+  "frames": 18,
+  "status": "active"
+ },
+ "box_cross_5": {
+  "cat": "boxing",
+  "how": "cross (rear straight), real boxer take 5 (CMU 14_03)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "box_cross_6": {
+  "cat": "boxing",
+  "how": "cross (rear straight), real boxer take 6 (CMU 143_23)",
+  "loop": true,
+  "frames": 21,
+  "status": "active"
+ },
+ "box_rear_hook_1": {
+  "cat": "boxing",
+  "how": "rear hook, real boxer take 1 (CMU 144_20)",
+  "loop": true,
+  "frames": 18,
+  "status": "active"
+ },
+ "box_rear_hook_2": {
+  "cat": "boxing",
+  "how": "rear hook, real boxer take 2 (CMU 144_13)",
+  "loop": true,
+  "frames": 18,
+  "status": "active"
+ },
+ "box_lead_uppercut_1": {
+  "cat": "boxing",
+  "how": "lead uppercut, real boxer take 1 (CMU 15_13)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "box_lead_uppercut_2": {
+  "cat": "boxing",
+  "how": "lead uppercut, real boxer take 2 (CMU 13_18)",
+  "loop": true,
+  "frames": 18,
+  "status": "active"
+ },
+ "box_rear_uppercut_1": {
+  "cat": "boxing",
+  "how": "rear uppercut, real boxer take 1 (CMU 14_01)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "box_rear_uppercut_2": {
+  "cat": "boxing",
+  "how": "rear uppercut, real boxer take 2 (CMU 14_03)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "box_rear_uppercut_3": {
+  "cat": "boxing",
+  "how": "rear uppercut, real boxer take 3 (CMU 14_03)",
+  "loop": true,
+  "frames": 30,
+  "status": "active"
+ },
+ "box_rear_uppercut_4": {
+  "cat": "boxing",
+  "how": "rear uppercut, real boxer take 4 (CMU 02_05)",
+  "loop": true,
+  "frames": 33,
+  "status": "active"
+ },
+ "box_lead_hook_body_1": {
+  "cat": "boxing",
+  "how": "lead hook to the body, real boxer take 1 (CMU 15_13)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "box_combo_3b_6_1": {
+  "cat": "boxing",
+  "how": "combination 3b-6 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
+  "loop": true,
+  "frames": 35,
+  "status": "active"
+ },
+ "box_combo_6_4b_1": {
+  "cat": "boxing",
+  "how": "combination 6-4b (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_03)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "box_combo_5_5_1": {
+  "cat": "boxing",
+  "how": "combination 5-5 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 15_13)",
+  "loop": true,
+  "frames": 44,
+  "status": "active"
+ },
+ "box_combo_1_2_1": {
+  "cat": "boxing",
+  "how": "combination 1-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_03)",
+  "loop": true,
+  "frames": 54,
+  "status": "active"
+ },
+ "box_combo_3b_5_1": {
+  "cat": "boxing",
+  "how": "combination 3b-5 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 15_13)",
+  "loop": true,
+  "frames": 53,
+  "status": "active"
+ },
+ "box_combo_1_2_2": {
+  "cat": "boxing",
+  "how": "combination 1-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
+  "loop": true,
+  "frames": 28,
+  "status": "active"
+ },
+ "box_combo_5_6_1": {
+  "cat": "boxing",
+  "how": "combination 5-6 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 13_17)",
+  "loop": true,
+  "frames": 24,
+  "status": "active"
+ },
+ "box_combo_6_1_2_1": {
+  "cat": "boxing",
+  "how": "combination 6-1-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
+  "loop": true,
+  "frames": 57,
+  "status": "active"
+ },
+ "box_combo_2_1_1": {
+  "cat": "boxing",
+  "how": "combination 2-1 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
+  "loop": true,
+  "frames": 48,
+  "status": "active"
+ },
+ "box_combo_1_2_2_1": {
+  "cat": "boxing",
+  "how": "combination 1-2-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_03)",
+  "loop": true,
+  "frames": 38,
+  "status": "active"
+ },
+ "box_combo_3b_5_2": {
+  "cat": "boxing",
+  "how": "combination 3b-5 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 15_13)",
+  "loop": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "box_combo_4b_2b_1": {
+  "cat": "boxing",
+  "how": "combination 4b-2b (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 15_13)",
+  "loop": true,
+  "frames": 39,
+  "status": "active"
+ },
+ "box_combo_3b_4b_1": {
+  "cat": "boxing",
+  "how": "combination 3b-4b (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 13_17)",
+  "loop": true,
+  "frames": 47,
+  "status": "active"
+ },
+ "box_combo_3_2_1_1": {
+  "cat": "boxing",
+  "how": "combination 3-2-1 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
+  "loop": true,
+  "frames": 44,
+  "status": "active"
+ },
+ "box_combo_6_1_2_2": {
+  "cat": "boxing",
+  "how": "combination 6-1-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_03)",
+  "loop": true,
+  "frames": 45,
+  "status": "active"
+ },
+ "box_combo_2_3_1": {
+  "cat": "boxing",
+  "how": "combination 2-3 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_03)",
+  "loop": true,
+  "frames": 51,
+  "status": "active"
+ },
+ "box_combo_4_1_1": {
+  "cat": "boxing",
+  "how": "combination 4-1 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_03)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "box_combo_2_1_2_1": {
+  "cat": "boxing",
+  "how": "combination 2-1-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
+  "loop": true,
+  "frames": 56,
+  "status": "active"
+ },
+ "box_combo_2_3_2_1": {
+  "cat": "boxing",
+  "how": "combination 2-3-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
+  "loop": true,
+  "frames": 43,
+  "status": "active"
+ },
+ "box_combo_5_2_1": {
+  "cat": "boxing",
+  "how": "combination 5-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
+  "loop": true,
+  "frames": 40,
+  "status": "active"
+ },
+ "box_combo_1_5_2_1": {
+  "cat": "boxing",
+  "how": "combination 1-5-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
+  "loop": true,
+  "frames": 81,
+  "status": "active"
+ },
+ "box_combo_1_2_1_1": {
+  "cat": "boxing",
+  "how": "combination 1-2-1 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
+  "loop": true,
+  "frames": 45,
+  "status": "active"
+ },
+ "box_combo_6_3b_5_1": {
+  "cat": "boxing",
+  "how": "combination 6-3b-5 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 13_18)",
+  "loop": true,
+  "frames": 49,
+  "status": "active"
+ },
+ "box_combo_2_1_2": {
+  "cat": "boxing",
+  "how": "combination 2-1 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
+  "loop": true,
+  "frames": 32,
+  "status": "active"
+ },
+ "box_combo_1_2b_1": {
+  "cat": "boxing",
+  "how": "combination 1-2b (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 13_18)",
+  "loop": true,
+  "frames": 35,
+  "status": "active"
+ },
+ "box_combo_2_1_2_2": {
+  "cat": "boxing",
+  "how": "combination 2-1-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
+  "loop": true,
+  "frames": 45,
+  "status": "active"
+ },
+ "box_combo_2_2_1": {
+  "cat": "boxing",
+  "how": "combination 2-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
+  "loop": true,
+  "frames": 35,
+  "status": "active"
+ },
+ "box_combo_2_2_2": {
+  "cat": "boxing",
+  "how": "combination 2-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 144_21)",
+  "loop": true,
+  "frames": 28,
+  "status": "active"
+ },
+ "box_combo_2_2_2_1": {
+  "cat": "boxing",
+  "how": "combination 2-2-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 144_20)",
+  "loop": true,
+  "frames": 60,
+  "status": "active"
+ },
+ "box_combo_6_5_1": {
+  "cat": "boxing",
+  "how": "combination 6-5 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
+  "loop": true,
+  "frames": 39,
+  "status": "active"
+ },
+ "box_combo_2_2_2_2": {
+  "cat": "boxing",
+  "how": "combination 2-2-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 144_20)",
+  "loop": true,
+  "frames": 67,
+  "status": "active"
+ },
+ "knife_combo_thrusts_1": {
+  "cat": "knife",
+  "how": "knife combination (thrusts), from real punches 1-2 (CMU 14_03)",
+  "loop": true,
+  "frames": 54,
+  "status": "active"
+ },
+ "knife_combo_thrusts_2": {
+  "cat": "knife",
+  "how": "knife combination (thrusts), from real punches 1-2 (CMU 14_02)",
+  "loop": true,
+  "frames": 28,
+  "status": "active"
+ },
+ "knife_combo_thrusts_3": {
+  "cat": "knife",
+  "how": "knife combination (thrusts), from real punches 1-2 (CMU 13_17)",
+  "loop": true,
+  "frames": 56,
+  "status": "active"
+ },
+ "knife_combo_thrusts_4": {
+  "cat": "knife",
+  "how": "knife combination (thrusts), from real punches 1-2-1 (CMU 14_02)",
+  "loop": true,
+  "frames": 51,
+  "status": "active"
+ },
+ "knife_combo_thrusts_5": {
+  "cat": "knife",
+  "how": "knife combination (thrusts), from real punches 2-1 (CMU 14_02)",
+  "loop": true,
+  "frames": 48,
+  "status": "active"
+ },
+ "knife_combo_thrusts_6": {
+  "cat": "knife",
+  "how": "knife combination (thrusts), from real punches 1-2-2 (CMU 14_03)",
+  "loop": true,
+  "frames": 38,
+  "status": "active"
+ },
+ "knife_combo_slashes_7": {
+  "cat": "knife",
+  "how": "knife combination (slashes), from real punches 4b-2b (CMU 15_13)",
+  "loop": true,
+  "frames": 39,
+  "status": "active"
+ },
+ "knife_combo_thrusts_8": {
+  "cat": "knife",
+  "how": "knife combination (thrusts), from real punches 1-2 (CMU 14_03)",
+  "loop": true,
+  "frames": 43,
+  "status": "active"
+ },
+ "box_guard_bounce_1": {
+  "cat": "boxing",
+  "how": "boxer's guard, bouncing on the toes, no punches (CMU 17_10)",
+  "loop": true,
+  "frames": 45,
+  "status": "active"
+ },
+ "box_southpaw_jab": {
+  "cat": "boxing",
+  "how": "southpaw jab (lead straight) (mirrored real take)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "box_southpaw_cross": {
+  "cat": "boxing",
+  "how": "southpaw cross (rear straight) (mirrored real take)",
+  "loop": true,
+  "frames": 25,
+  "status": "active"
+ },
+ "box_southpaw_rear_hook": {
+  "cat": "boxing",
+  "how": "southpaw rear hook (mirrored real take)",
+  "loop": true,
+  "frames": 18,
+  "status": "active"
+ },
+ "box_southpaw_lead_uppercut": {
+  "cat": "boxing",
+  "how": "southpaw lead uppercut (mirrored real take)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "box_southpaw_rear_uppercut": {
+  "cat": "boxing",
+  "how": "southpaw rear uppercut (mirrored real take)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "knife_thrust_1": {
+  "cat": "knife",
+  "how": "forward-grip thrust (rear hand, driven like a cross), from a real strike (CMU 143_23)",
+  "loop": true,
+  "frames": 25,
+  "status": "active"
+ },
+ "knife_thrust_2": {
+  "cat": "knife",
+  "how": "forward-grip thrust (rear hand, driven like a cross), from a real strike (CMU 13_17)",
+  "loop": true,
+  "frames": 31,
+  "status": "active"
+ },
+ "knife_thrust_3": {
+  "cat": "knife",
+  "how": "forward-grip thrust (rear hand, driven like a cross), from a real strike (CMU 14_01)",
+  "loop": true,
+  "frames": 24,
+  "status": "active"
+ },
+ "knife_jab_thrust_1": {
+  "cat": "knife",
+  "how": "quick lead-hand thrust (driven like a jab), from a real strike (CMU 15_13)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "knife_rising_stab_1": {
+  "cat": "knife",
+  "how": "rising stab under the ribs, from a real strike (CMU 14_01)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "knife_rising_stab_2": {
+  "cat": "knife",
+  "how": "rising stab under the ribs, from a real strike (CMU 14_03)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "knife_body_slash_1": {
+  "cat": "knife",
+  "how": "low slash to the body, from a real strike (CMU 13_17)",
+  "loop": true,
+  "frames": 23,
+  "status": "active"
+ },
+ "sword_down_1": {
+  "cat": "weapon swings",
+  "how": "sword: downward chop, real take (CMU 02_09)",
+  "loop": true,
+  "frames": 21,
+  "status": "active"
+ },
+ "sword_down_2": {
+  "cat": "weapon swings",
+  "how": "sword: downward chop, real take (CMU 02_07)",
+  "loop": true,
+  "frames": 45,
+  "status": "active"
+ },
+ "sword_down_3": {
+  "cat": "weapon swings",
+  "how": "sword: downward chop, real take (CMU 02_07)",
+  "loop": true,
+  "frames": 48,
+  "status": "active"
+ },
+ "sword_side_1": {
+  "cat": "weapon swings",
+  "how": "sword: horizontal swing, real take (CMU 02_07)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "sword_side_2": {
+  "cat": "weapon swings",
+  "how": "sword: horizontal swing, real take (CMU 02_08)",
+  "loop": true,
+  "frames": 35,
+  "status": "active"
+ },
+ "sword_side_3": {
+  "cat": "weapon swings",
+  "how": "sword: horizontal swing, real take (CMU 02_08)",
+  "loop": true,
+  "frames": 40,
+  "status": "active"
+ },
+ "sword_up_2": {
+  "cat": "weapon swings",
+  "how": "sword: rising swing, real take (CMU 02_07)",
+  "loop": true,
+  "frames": 43,
+  "status": "active"
+ },
+ "machete_down_1": {
+  "cat": "weapon swings",
+  "how": "machete: downward chop, real take (CMU 02_09)",
+  "loop": true,
+  "frames": 47,
+  "status": "active"
+ },
+ "machete_side_1": {
+  "cat": "weapon swings",
+  "how": "machete: horizontal swing, real take (CMU 02_09)",
+  "loop": true,
+  "frames": 44,
+  "status": "active"
+ },
+ "machete_side_2": {
+  "cat": "weapon swings",
+  "how": "machete: horizontal swing, real take (CMU 02_07)",
+  "loop": true,
+  "frames": 47,
+  "status": "active"
+ },
+ "machete_side_3": {
+  "cat": "weapon swings",
+  "how": "machete: horizontal swing, real take (CMU 02_07)",
+  "loop": true,
+  "frames": 48,
+  "status": "active"
+ },
+ "axe_down_1": {
+  "cat": "weapon swings",
+  "how": "axe: downward chop, real take (CMU 80_71)",
+  "loop": true,
+  "frames": 29,
+  "status": "active"
+ },
+ "axe_down_2": {
+  "cat": "weapon swings",
+  "how": "axe: downward chop, real take (CMU 79_01)",
+  "loop": true,
+  "frames": 48,
+  "status": "active"
+ },
+ "axe_down_3": {
+  "cat": "weapon swings",
+  "how": "axe: downward chop, real take (CMU 80_71)",
+  "loop": true,
+  "frames": 27,
+  "status": "active"
+ },
+ "axe_side_1": {
+  "cat": "weapon swings",
+  "how": "axe: horizontal swing, real take (CMU 80_71)",
+  "loop": true,
+  "frames": 48,
+  "status": "active"
+ },
+ "bat_swing_side_2": {
+  "cat": "weapon swings",
+  "how": "bat swing: horizontal swing, real take (CMU 124_07)",
+  "loop": true,
+  "frames": 48,
+  "status": "active"
+ },
+ "bat_swing_down_1": {
+  "cat": "weapon swings",
+  "how": "bat swing: downward chop, real take (CMU 124_07)",
+  "loop": true,
+  "frames": 48,
+  "status": "active"
+ },
+ "knife_combo_thrusts_left_hand": {
+  "cat": "knife",
+  "how": "left-handed knife combination (thrusts), from real punches 1-2 (CMU 14_03)",
+  "loop": true,
+  "frames": 54,
+  "status": "active"
+ },
+ "knife_thrust_left_hand": {
+  "cat": "knife",
+  "how": "left-handed forward-grip thrust (rear hand, driven like a cross), from a real strike (CMU 143_23)",
+  "loop": true,
+  "frames": 25,
+  "status": "active"
+ },
+ "knife_jab_thrust_left_hand": {
+  "cat": "knife",
+  "how": "left-handed quick lead-hand thrust (driven like a jab), from a real strike (CMU 15_13)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "knife_rising_stab_left_hand": {
+  "cat": "knife",
+  "how": "left-handed rising stab under the ribs, from a real strike (CMU 14_01)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "knife_body_slash_left_hand": {
+  "cat": "knife",
+  "how": "left-handed low slash to the body, from a real strike (CMU 13_17)",
+  "loop": true,
+  "frames": 23,
+  "status": "active"
+ },
+ "bat_overhead_smash_1": {
+  "cat": "weapon swings",
+  "how": "bat: two-handed overhead smash, real take (CMU 80_71)",
+  "loop": true,
+  "frames": 29,
+  "status": "active"
+ },
+ "bat_overhead_smash_2": {
+  "cat": "weapon swings",
+  "how": "bat: two-handed overhead smash, real take (CMU 79_01)",
+  "loop": true,
+  "frames": 48,
+  "status": "active"
+ },
+ "bat_overhead_smash_3": {
+  "cat": "weapon swings",
+  "how": "bat: two-handed overhead smash, real take (CMU 80_71)",
+  "loop": true,
+  "frames": 27,
+  "status": "active"
+ },
+ "bat_swing_side_2_lefty": {
+  "cat": "weapon swings",
+  "how": "left-handed bat swing: horizontal swing, real take (CMU 124_07)",
+  "loop": true,
+  "frames": 48,
+  "status": "active"
+ },
+ "bat_swing_down_1_lefty": {
+  "cat": "weapon swings",
+  "how": "left-handed bat swing: downward chop, real take (CMU 124_07)",
+  "loop": true,
+  "frames": 48,
+  "status": "active"
  }
 }

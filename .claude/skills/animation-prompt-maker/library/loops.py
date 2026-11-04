@@ -27,18 +27,22 @@ def activity(loc, w=9):
 def pose_dist(loc, i, j): return np.linalg.norm(loc[i] - loc[j], axis=1).mean()
 def ydiff(a, b): return abs(math.remainder(a - b, 2 * math.pi))
 
-def action_window(a, focus=None, min_s=1.0, max_s=3.0):
+def action_window(a, focus=None, min_s=1.0, max_s=3.0, pk=None, ok=None):
     loc, yaw = frames_local(a); act = activity(loc); N = len(a)
     score = act.copy()
     if focus == "kick": score = score + np.maximum(0, loc[:, [P.index("fAn"), P.index("bAn")], 1].max(1) - 25) / 4
     if focus == "hands":
         h = loc[:, [P.index("rH"), P.index("lH")]]
         score = np.convolve(np.linalg.norm(np.diff(h, axis=0, append=h[-1:]), axis=2).sum(1), np.ones(5) / 5, "same")
-    pk = int(np.argmax(score[int(.05 * N):int(.95 * N)])) + int(.05 * N)
+    if pk is None: pk = int(np.argmax(score[int(.05 * N):int(.95 * N)])) + int(.05 * N)
     calm = np.percentile(act, 35)
     B = 8
     S = [s for s in range(max(0, pk - int(2.2 * FPS)), pk - int(.2 * FPS)) if act[s] <= calm * 1.6] or list(range(max(0, pk - int(1.5 * FPS)), max(1, pk - 3)))
     E = [e for e in range(pk + int(.25 * FPS), min(N - B - 1, pk + int(2.6 * FPS))) if act[e] <= calm * 1.6] or list(range(pk + 4, max(pk + 5, min(N - B - 1, pk + int(2 * FPS)))))
+    S = [x for x in S if 0 <= x < N]; E = [x for x in E if x < N - B - 1]
+    if ok is not None:   # only cut on allowed frames (e.g. boxing guard)
+        S2 = [x for x in range(max(0, pk - int(1.2 * FPS)), pk - 4) if ok[x]]; E2 = [x for x in range(pk + 6, min(N - B - 1, pk + int(1.4 * FPS))) if ok[x]]
+        S, E = S2, E2
     best = None
     for s in S:
         for e in E:
@@ -91,7 +95,9 @@ def build(a, s, e, kind):
         w = 0.5 - 0.5 * math.cos(math.pi * (j + 1) / (B + 1))
         tail = seg[L + j].copy()
         out[j] = tail * (1 - w) + seg[j] * w
-    return out
+    # blending two poses shortens limbs slightly: restore every bone to its real recorded length
+    ref = unarr(a[s:e]); fixed = mocap.fix_lengths(unarr(out), ref)
+    return np.stack([fixed[k] for k in P], 1)
 
 def make_loop(m, kind="action", focus=None, **kw):
     a = arr(m)
