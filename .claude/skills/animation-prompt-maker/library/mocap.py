@@ -44,6 +44,7 @@ def _rot(axis, deg):
     m[:, i, i] = c; m[:, j, j] = c; m[:, i, j] = -s; m[:, j, i] = s
     return m
 
+ROTS = {}   # world rotation matrices of joints from the last read_bvh (used for wrist/weapon orientation)
 def read_bvh(path):
     txt = pathlib.Path(path).read_text(errors="ignore")
     head, motion = re.split(r"\bMOTION\b", txt, maxsplit=1)
@@ -93,6 +94,7 @@ def read_bvh(path):
         if j["end"] is not None:
             ends[j["name"]] = P[k] + np.einsum("nij,j->ni", W[k], np.array(j["end"]))
     pos = {j["name"]: P[k] for k, j in enumerate(joints)}
+    ROTS.clear(); ROTS.update({j["name"]: W[k] for k, j in enumerate(joints)})
     return pos, ends, 1.0 / ft
 
 def _pick(pos, *names):
@@ -121,7 +123,11 @@ def to_points(pos, ends, src_fps, start=None, end=None):
     s0 = 0 if start is None else start; s1 = t_src[-1] if end is None else min(end, t_src[-1])
     tt = np.arange(s0, s1 + 1e-9, 1 / FPS)
     rs = lambda a: np.stack([np.interp(tt, t_src, a[:, c]) for c in range(3)], 1)
-    J = dict(hip=(rUL + lUL) / 2, mid=spine, shF=rA, shB=lA, nk=neck, hd=(head + headTop) / 2,
+    extra = {}
+    if "RightHand" in ROTS and len(ROTS["RightHand"]) == len(rH):     # real wrist orientation: bat/handle axis = hand's thumb-side axis
+        extra["rGrip"] = rH + ROTS["RightHand"][:, :, 2] * (leg_guess := np.median(np.linalg.norm(rL - rUL, axis=1))) * .3
+        extra["lGrip"] = lH + ROTS["LeftHand"][:, :, 2] * leg_guess * .3
+    J = dict(**extra, hip=(rUL + lUL) / 2, mid=spine, shF=rA, shB=lA, nk=neck, hd=(head + headTop) / 2,
              rE=rFA, rH=rH, lE=lFA, lH=lH, hF=rUL, hB=lUL, fK=rL, fAn=rF, fTo=rT, bK=lL, bAn=lF, bTo=lT)
     J = {k: rs(v) for k, v in J.items()}
     J["sh"] = (J["shF"] + J["shB"]) / 2

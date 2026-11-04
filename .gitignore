@@ -17,3 +17,4 @@ _preview/
 _*.js
 _loops/
 .thcache/
+.claude/skills/animation-prompt-maker/library/sources/

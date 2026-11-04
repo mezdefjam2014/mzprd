@@ -409,28 +409,28 @@
   "how": "cross (rear straight), real boxer take 1 (CMU 143_23)",
   "loop": true,
   "frames": 25,
-  "status": "active"
+  "status": "approved"
  },
  "box_cross_2": {
   "cat": "boxing",
   "how": "cross (rear straight), real boxer take 2 (CMU 13_17)",
   "loop": true,
   "frames": 31,
-  "status": "active"
+  "status": "approved"
  },
  "box_cross_3": {
   "cat": "boxing",
   "how": "cross (rear straight), real boxer take 3 (CMU 14_01)",
   "loop": true,
   "frames": 24,
-  "status": "active"
+  "status": "approved"
  },
  "box_cross_4": {
   "cat": "boxing",
   "how": "cross (rear straight), real boxer take 4 (CMU 17_10)",
   "loop": true,
   "frames": 18,
-  "status": "active"
+  "status": "approved"
  },
  "box_cross_5": {
   "cat": "boxing",
@@ -444,7 +444,7 @@
   "how": "cross (rear straight), real boxer take 6 (CMU 143_23)",
   "loop": true,
   "frames": 21,
-  "status": "active"
+  "status": "approved"
  },
  "box_rear_hook_1": {
   "cat": "boxing",
@@ -458,112 +458,112 @@
   "how": "rear hook, real boxer take 2 (CMU 144_13)",
   "loop": true,
   "frames": 18,
-  "status": "active"
+  "status": "approved"
  },
  "box_lead_uppercut_1": {
   "cat": "boxing",
   "how": "lead uppercut, real boxer take 1 (CMU 15_13)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "box_lead_uppercut_2": {
   "cat": "boxing",
   "how": "lead uppercut, real boxer take 2 (CMU 13_18)",
   "loop": true,
   "frames": 18,
-  "status": "active"
+  "status": "approved"
  },
  "box_rear_uppercut_1": {
   "cat": "boxing",
   "how": "rear uppercut, real boxer take 1 (CMU 14_01)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "box_rear_uppercut_2": {
   "cat": "boxing",
   "how": "rear uppercut, real boxer take 2 (CMU 14_03)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "box_rear_uppercut_3": {
   "cat": "boxing",
   "how": "rear uppercut, real boxer take 3 (CMU 14_03)",
   "loop": true,
   "frames": 30,
-  "status": "active"
+  "status": "approved"
  },
  "box_rear_uppercut_4": {
   "cat": "boxing",
   "how": "rear uppercut, real boxer take 4 (CMU 02_05)",
   "loop": true,
   "frames": 33,
-  "status": "active"
+  "status": "approved"
  },
  "box_lead_hook_body_1": {
   "cat": "boxing",
   "how": "lead hook to the body, real boxer take 1 (CMU 15_13)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_3b_6_1": {
   "cat": "boxing",
   "how": "combination 3b-6 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
   "loop": true,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_6_4b_1": {
   "cat": "boxing",
   "how": "combination 6-4b (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_03)",
   "loop": true,
   "frames": 66,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_5_5_1": {
   "cat": "boxing",
   "how": "combination 5-5 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 15_13)",
   "loop": true,
   "frames": 44,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_1_2_1": {
   "cat": "boxing",
   "how": "combination 1-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_03)",
   "loop": true,
   "frames": 54,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_3b_5_1": {
   "cat": "boxing",
   "how": "combination 3b-5 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 15_13)",
   "loop": true,
   "frames": 53,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_1_2_2": {
   "cat": "boxing",
   "how": "combination 1-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
   "loop": true,
   "frames": 28,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_5_6_1": {
   "cat": "boxing",
   "how": "combination 5-6 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 13_17)",
   "loop": true,
   "frames": 24,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_6_1_2_1": {
   "cat": "boxing",
   "how": "combination 6-1-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
   "loop": true,
   "frames": 57,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_2_1_1": {
   "cat": "boxing",
@@ -577,14 +577,14 @@
   "how": "combination 1-2-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_03)",
   "loop": true,
   "frames": 38,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_3b_5_2": {
   "cat": "boxing",
   "how": "combination 3b-5 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 15_13)",
   "loop": true,
   "frames": 63,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_4b_2b_1": {
   "cat": "boxing",
@@ -598,21 +598,21 @@
   "how": "combination 3b-4b (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 13_17)",
   "loop": true,
   "frames": 47,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_3_2_1_1": {
   "cat": "boxing",
   "how": "combination 3-2-1 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
   "loop": true,
   "frames": 44,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_6_1_2_2": {
   "cat": "boxing",
   "how": "combination 6-1-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_03)",
   "loop": true,
   "frames": 45,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_2_3_1": {
   "cat": "boxing",
@@ -626,77 +626,77 @@
   "how": "combination 4-1 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_03)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_2_1_2_1": {
   "cat": "boxing",
   "how": "combination 2-1-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
   "loop": true,
   "frames": 56,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_2_3_2_1": {
   "cat": "boxing",
   "how": "combination 2-3-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
   "loop": true,
   "frames": 43,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_5_2_1": {
   "cat": "boxing",
   "how": "combination 5-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
   "loop": true,
   "frames": 40,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_1_5_2_1": {
   "cat": "boxing",
   "how": "combination 1-5-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
   "loop": true,
   "frames": 81,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_1_2_1_1": {
   "cat": "boxing",
   "how": "combination 1-2-1 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
   "loop": true,
   "frames": 45,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_6_3b_5_1": {
   "cat": "boxing",
   "how": "combination 6-3b-5 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 13_18)",
   "loop": true,
   "frames": 49,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_2_1_2": {
   "cat": "boxing",
   "how": "combination 2-1 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
   "loop": true,
   "frames": 32,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_1_2b_1": {
   "cat": "boxing",
   "how": "combination 1-2b (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 13_18)",
   "loop": true,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_2_1_2_2": {
   "cat": "boxing",
   "how": "combination 2-1-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
   "loop": true,
   "frames": 45,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_2_2_1": {
   "cat": "boxing",
   "how": "combination 2-2 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_01)",
   "loop": true,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_2_2_2": {
   "cat": "boxing",
@@ -717,7 +717,7 @@
   "how": "combination 6-5 (1 jab, 2 cross, 3 lead hook, 4 rear hook, 5/6 uppercuts, b = body), real boxer (CMU 14_02)",
   "loop": true,
   "frames": 39,
-  "status": "active"
+  "status": "approved"
  },
  "box_combo_2_2_2_2": {
   "cat": "boxing",
@@ -731,28 +731,28 @@
   "how": "knife combination (thrusts), from real punches 1-2 (CMU 14_03)",
   "loop": true,
   "frames": 54,
-  "status": "active"
+  "status": "approved"
  },
  "knife_combo_thrusts_2": {
   "cat": "knife",
   "how": "knife combination (thrusts), from real punches 1-2 (CMU 14_02)",
   "loop": true,
   "frames": 28,
-  "status": "active"
+  "status": "approved"
  },
  "knife_combo_thrusts_3": {
   "cat": "knife",
   "how": "knife combination (thrusts), from real punches 1-2 (CMU 13_17)",
   "loop": true,
   "frames": 56,
-  "status": "active"
+  "status": "approved"
  },
  "knife_combo_thrusts_4": {
   "cat": "knife",
   "how": "knife combination (thrusts), from real punches 1-2-1 (CMU 14_02)",
   "loop": true,
   "frames": 51,
-  "status": "active"
+  "status": "approved"
  },
  "knife_combo_thrusts_5": {
   "cat": "knife",
@@ -766,28 +766,28 @@
   "how": "knife combination (thrusts), from real punches 1-2-2 (CMU 14_03)",
   "loop": true,
   "frames": 38,
-  "status": "active"
+  "status": "approved"
  },
  "knife_combo_slashes_7": {
   "cat": "knife",
   "how": "knife combination (slashes), from real punches 4b-2b (CMU 15_13)",
   "loop": true,
   "frames": 39,
-  "status": "active"
+  "status": "approved"
  },
  "knife_combo_thrusts_8": {
   "cat": "knife",
   "how": "knife combination (thrusts), from real punches 1-2 (CMU 14_03)",
   "loop": true,
   "frames": 43,
-  "status": "active"
+  "status": "approved"
  },
  "box_guard_bounce_1": {
   "cat": "boxing",
   "how": "boxer's guard, bouncing on the toes, no punches (CMU 17_10)",
   "loop": true,
   "frames": 45,
-  "status": "active"
+  "status": "approved"
  },
  "box_southpaw_jab": {
   "cat": "boxing",
@@ -801,7 +801,7 @@
   "how": "southpaw cross (rear straight) (mirrored real take)",
   "loop": true,
   "frames": 25,
-  "status": "active"
+  "status": "approved"
  },
  "box_southpaw_rear_hook": {
   "cat": "boxing",
@@ -815,49 +815,49 @@
   "how": "southpaw lead uppercut (mirrored real take)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "box_southpaw_rear_uppercut": {
   "cat": "boxing",
   "how": "southpaw rear uppercut (mirrored real take)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "knife_thrust_1": {
   "cat": "knife",
   "how": "forward-grip thrust (rear hand, driven like a cross), from a real strike (CMU 143_23)",
   "loop": true,
   "frames": 25,
-  "status": "active"
+  "status": "approved"
  },
  "knife_thrust_2": {
   "cat": "knife",
   "how": "forward-grip thrust (rear hand, driven like a cross), from a real strike (CMU 13_17)",
   "loop": true,
   "frames": 31,
-  "status": "active"
+  "status": "approved"
  },
  "knife_thrust_3": {
   "cat": "knife",
   "how": "forward-grip thrust (rear hand, driven like a cross), from a real strike (CMU 14_01)",
   "loop": true,
   "frames": 24,
-  "status": "active"
+  "status": "approved"
  },
  "knife_jab_thrust_1": {
   "cat": "knife",
   "how": "quick lead-hand thrust (driven like a jab), from a real strike (CMU 15_13)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "knife_rising_stab_1": {
   "cat": "knife",
   "how": "rising stab under the ribs, from a real strike (CMU 14_01)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "knife_rising_stab_2": {
   "cat": "knife",
@@ -871,7 +871,7 @@
   "how": "low slash to the body, from a real strike (CMU 13_17)",
   "loop": true,
   "frames": 23,
-  "status": "active"
+  "status": "approved"
  },
  "sword_down_1": {
   "cat": "weapon swings",
@@ -997,21 +997,21 @@
   "how": "left-handed knife combination (thrusts), from real punches 1-2 (CMU 14_03)",
   "loop": true,
   "frames": 54,
-  "status": "active"
+  "status": "approved"
  },
  "knife_thrust_left_hand": {
   "cat": "knife",
   "how": "left-handed forward-grip thrust (rear hand, driven like a cross), from a real strike (CMU 143_23)",
   "loop": true,
   "frames": 25,
-  "status": "active"
+  "status": "approved"
  },
  "knife_jab_thrust_left_hand": {
   "cat": "knife",
   "how": "left-handed quick lead-hand thrust (driven like a jab), from a real strike (CMU 15_13)",
   "loop": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "knife_rising_stab_left_hand": {
   "cat": "knife",
@@ -1060,6 +1060,2744 @@
   "how": "left-handed bat swing: downward chop, real take (CMU 124_07)",
   "loop": true,
   "frames": 48,
+  "status": "active"
+ },
+ "duck_1": {
+  "cat": "duck",
+  "how": "duck (seamless loop), real take: duck to avoid flying object (CMU 77_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "duck_1_mirrored": {
+  "cat": "duck",
+  "how": "duck, mirrored (other side), real take (CMU 77_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "duck_2": {
+  "cat": "duck",
+  "how": "duck (seamless loop), real take: duck to avoid flying object (CMU 77_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "duck_2_mirrored": {
+  "cat": "duck",
+  "how": "duck, mirrored (other side), real take (CMU 77_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "duck_3": {
+  "cat": "duck",
+  "how": "duck (seamless loop), real take: Run Duck Underneath (CMU 127_29)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "duck_3_mirrored": {
+  "cat": "duck",
+  "how": "duck, mirrored (other side), real take (CMU 127_29)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "duck_4": {
+  "cat": "duck",
+  "how": "duck (seamless loop), real take: Run Duck Underneath (CMU 127_30)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "duck_4_mirrored": {
+  "cat": "duck",
+  "how": "duck, mirrored (other side), real take (CMU 127_30)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "duck_5": {
+  "cat": "duck",
+  "how": "duck (seamless loop), real take: Run Duck Underneath (CMU 127_31)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 27,
+  "status": "active"
+ },
+ "duck_5_mirrored": {
+  "cat": "duck",
+  "how": "duck, mirrored (other side), real take (CMU 127_31)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 27,
+  "status": "active"
+ },
+ "duck_6": {
+  "cat": "duck",
+  "how": "duck (seamless loop), real take: Duck Under (CMU 134_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "duck_6_mirrored": {
+  "cat": "duck",
+  "how": "duck, mirrored (other side), real take (CMU 134_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "duck_7": {
+  "cat": "duck",
+  "how": "duck (seamless loop), real take: Ducking (CMU 139_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "duck_7_mirrored": {
+  "cat": "duck",
+  "how": "duck, mirrored (other side), real take (CMU 139_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "duck_8": {
+  "cat": "duck",
+  "how": "duck (seamless loop), real take: Ducking (CMU 139_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "duck_8_mirrored": {
+  "cat": "duck",
+  "how": "duck, mirrored (other side), real take (CMU 139_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "dodge_1": {
+  "cat": "dodge",
+  "how": "dodge (seamless loop), real take: avoid attacker (CMU 76_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "dodge_1_mirrored": {
+  "cat": "dodge",
+  "how": "dodge, mirrored (other side), real take (CMU 76_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "dodge_2": {
+  "cat": "dodge",
+  "how": "dodge (seamless loop), real take: duck to avoid flying object (CMU 77_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "dodge_2_mirrored": {
+  "cat": "dodge",
+  "how": "dodge, mirrored (other side), real take (CMU 77_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "dodge_3": {
+  "cat": "dodge",
+  "how": "dodge (seamless loop), real take: duck to avoid flying object (CMU 77_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "dodge_3_mirrored": {
+  "cat": "dodge",
+  "how": "dodge, mirrored (other side), real take (CMU 77_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "dodge_4": {
+  "cat": "dodge",
+  "how": "dodge (seamless loop), real take: Duck Under (CMU 134_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "dodge_4_mirrored": {
+  "cat": "dodge",
+  "how": "dodge, mirrored (other side), real take (CMU 134_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "roll_1": {
+  "cat": "roll",
+  "how": "roll (one-shot), real take: Roll over (CMU 111_21)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "roll_1_mirrored": {
+  "cat": "roll",
+  "how": "roll, mirrored (other side), real take (CMU 111_21)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "roll_2": {
+  "cat": "roll",
+  "how": "roll (one-shot), real take: Roll over (CMU 111_21)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 87,
+  "status": "active"
+ },
+ "roll_2_mirrored": {
+  "cat": "roll",
+  "how": "roll, mirrored (other side), real take (CMU 111_21)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 87,
+  "status": "active"
+ },
+ "roll_3": {
+  "cat": "roll",
+  "how": "roll (one-shot), real take: Roll over (CMU 111_21)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 97,
+  "status": "active"
+ },
+ "roll_3_mirrored": {
+  "cat": "roll",
+  "how": "roll, mirrored (other side), real take (CMU 111_21)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 97,
+  "status": "active"
+ },
+ "roll_4": {
+  "cat": "roll",
+  "how": "roll (one-shot), real take: Run Dive Over Roll Run (CMU 127_23)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "roll_4_mirrored": {
+  "cat": "roll",
+  "how": "roll, mirrored (other side), real take (CMU 127_23)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "roll_5": {
+  "cat": "roll",
+  "how": "roll (one-shot), real take: Run Dive Over Roll Run (CMU 127_24)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 79,
+  "status": "active"
+ },
+ "roll_5_mirrored": {
+  "cat": "roll",
+  "how": "roll, mirrored (other side), real take (CMU 127_24)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 79,
+  "status": "active"
+ },
+ "roll_6": {
+  "cat": "roll",
+  "how": "roll (one-shot), real take: Run Dive Over Roll Run (CMU 128_10)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 78,
+  "status": "active"
+ },
+ "roll_6_mirrored": {
+  "cat": "roll",
+  "how": "roll, mirrored (other side), real take (CMU 128_10)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 78,
+  "status": "active"
+ },
+ "roll_7": {
+  "cat": "roll",
+  "how": "roll (one-shot), real take: Run Dive Over Roll Run (CMU 128_11)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 59,
+  "status": "active"
+ },
+ "roll_7_mirrored": {
+  "cat": "roll",
+  "how": "roll, mirrored (other side), real take (CMU 128_11)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 59,
+  "status": "active"
+ },
+ "crawl_3": {
+  "cat": "crawl",
+  "how": "crawl (seamless loop), real take: Walk Crawl (CMU 133_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "crawl_3_mirrored": {
+  "cat": "crawl",
+  "how": "crawl, mirrored (other side), real take (CMU 133_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "crawl_4": {
+  "cat": "crawl",
+  "how": "crawl (seamless loop), real take: Walk Crawl (CMU 133_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 46,
+  "status": "active"
+ },
+ "crawl_4_mirrored": {
+  "cat": "crawl",
+  "how": "crawl, mirrored (other side), real take (CMU 133_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 46,
+  "status": "active"
+ },
+ "stairs_9": {
+  "cat": "stairs",
+  "how": "stairs (seamless loop), real take: Walking up stairs (CMU 111_27)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 42,
+  "status": "active"
+ },
+ "stairs_15": {
+  "cat": "stairs",
+  "how": "stairs (seamless loop), real take: Walking up and down stairs (CMU 114_07)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "stairs_16": {
+  "cat": "stairs",
+  "how": "stairs (seamless loop), real take: Walking up and down stairs (CMU 114_07)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "stairs_18": {
+  "cat": "stairs",
+  "how": "stairs (seamless loop), real take: Walking up and down stairs (CMU 114_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "stairs_19": {
+  "cat": "stairs",
+  "how": "stairs (seamless loop), real take: Walking up and down stairs (CMU 114_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "stairs_20": {
+  "cat": "stairs",
+  "how": "stairs (seamless loop), real take: Walking up and down stairs (CMU 114_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "fall_1": {
+  "cat": "fall",
+  "how": "fall (one-shot), real take: 90TwistsFall (CMU 85_15)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 69,
+  "status": "active"
+ },
+ "fall_1_mirrored": {
+  "cat": "fall",
+  "how": "fall, mirrored (other side), real take (CMU 85_15)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 69,
+  "status": "active"
+ },
+ "fall_2": {
+  "cat": "fall",
+  "how": "fall (one-shot), real take: fall on face (CMU 90_16)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 97,
+  "status": "active"
+ },
+ "fall_2_mirrored": {
+  "cat": "fall",
+  "how": "fall, mirrored (other side), real take (CMU 90_16)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 97,
+  "status": "active"
+ },
+ "get_up_1": {
+  "cat": "get up",
+  "how": "get up (one-shot), real take: laying down, getting up, careful ready pose (CMU 77_16)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 92,
+  "status": "active"
+ },
+ "get_up_1_mirrored": {
+  "cat": "get up",
+  "how": "get up, mirrored (other side), real take (CMU 77_16)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 92,
+  "status": "active"
+ },
+ "get_up_2": {
+  "cat": "get up",
+  "how": "get up (one-shot), real take: laying down, getting up, careful ready pose (CMU 77_17)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 82,
+  "status": "active"
+ },
+ "get_up_2_mirrored": {
+  "cat": "get up",
+  "how": "get up, mirrored (other side), real take (CMU 77_17)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 82,
+  "status": "active"
+ },
+ "get_up_3": {
+  "cat": "get up",
+  "how": "get up (one-shot), real take: Get up from floor (CMU 111_06)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 105,
+  "status": "active"
+ },
+ "get_up_3_mirrored": {
+  "cat": "get up",
+  "how": "get up, mirrored (other side), real take (CMU 111_06)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 105,
+  "status": "active"
+ },
+ "get_up_4": {
+  "cat": "get up",
+  "how": "get up (one-shot), real take: Get up from floor (CMU 111_07)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 79,
+  "status": "active"
+ },
+ "get_up_4_mirrored": {
+  "cat": "get up",
+  "how": "get up, mirrored (other side), real take (CMU 111_07)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 79,
+  "status": "active"
+ },
+ "get_up_5": {
+  "cat": "get up",
+  "how": "get up (one-shot), real take: Get up from floor (CMU 111_08)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 89,
+  "status": "active"
+ },
+ "get_up_5_mirrored": {
+  "cat": "get up",
+  "how": "get up, mirrored (other side), real take (CMU 111_08)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 89,
+  "status": "active"
+ },
+ "get_up_6": {
+  "cat": "get up",
+  "how": "get up (one-shot), real take: Lay down and get up (CMU 113_08)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 89,
+  "status": "active"
+ },
+ "get_up_6_mirrored": {
+  "cat": "get up",
+  "how": "get up, mirrored (other side), real take (CMU 113_08)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 89,
+  "status": "active"
+ },
+ "get_up_7": {
+  "cat": "get up",
+  "how": "get up (one-shot), real take: Getting up from chair (CMU 114_04)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 76,
+  "status": "active"
+ },
+ "get_up_7_mirrored": {
+  "cat": "get up",
+  "how": "get up, mirrored (other side), real take (CMU 114_04)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 76,
+  "status": "active"
+ },
+ "sit_down_1": {
+  "cat": "sit down",
+  "how": "sit down (one-shot), real take: sit on stepstool, chin in hand (CMU 13_04)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 77,
+  "status": "active"
+ },
+ "sit_down_2": {
+  "cat": "sit down",
+  "how": "sit down (one-shot), real take: sit on stepstool, hands against chin, fidget, stand up (CMU 13_05)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 91,
+  "status": "active"
+ },
+ "sit_down_3": {
+  "cat": "sit down",
+  "how": "sit down (one-shot), real take: sit on stepstool, hands against chin, elbow out, stand up (CMU 13_06)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 83,
+  "status": "active"
+ },
+ "stand_up_1": {
+  "cat": "stand up",
+  "how": "stand up (one-shot), real take: sit on stepstool, hands against chin, fidget, stand up (CMU 13_05)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 58,
+  "status": "active"
+ },
+ "stand_up_2": {
+  "cat": "stand up",
+  "how": "stand up (one-shot), real take: sit on stepstool, hands against chin, elbow out, stand up (CMU 13_06)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 95,
+  "status": "active"
+ },
+ "stand_up_3": {
+  "cat": "stand up",
+  "how": "stand up (one-shot), real take: sit on stepstool, stand up (CMU 14_31)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 76,
+  "status": "active"
+ },
+ "stand_up_4": {
+  "cat": "stand up",
+  "how": "stand up (one-shot), real take: sit on stepstool, stand up (CMU 14_32)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 82,
+  "status": "active"
+ },
+ "stand_up_5": {
+  "cat": "stand up",
+  "how": "stand up (one-shot), real take: sit on stepstool, stand up (CMU 14_36)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 76,
+  "status": "active"
+ },
+ "flip_1": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: KickFlip (CMU 85_06)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 83,
+  "status": "active"
+ },
+ "flip_2": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: KickFlipStumble (CMU 85_07)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 113,
+  "status": "active"
+ },
+ "flip_3": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: BreakSequencewithFlips (CMU 85_14)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 105,
+  "status": "active"
+ },
+ "flip_4": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: backflip (CMU 87_04)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 43,
+  "status": "active"
+ },
+ "flip_5": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: backflip (CMU 88_01)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 50,
+  "status": "active"
+ },
+ "flip_6": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: backflips, jump onto platform, handstands, vertical pushups (CMU 88_02)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 46,
+  "status": "active"
+ },
+ "flip_7": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: backflips, jump onto platform, handstands, vertical pushups (CMU 88_02)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 52,
+  "status": "active"
+ },
+ "flip_8": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: stretches, cartwheels, flips, spin kicks, spins, and fall (CMU 88_04)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "flip_9": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: stretches, cartwheels, flips, spin kicks, spins, and fall (CMU 88_04)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 58,
+  "status": "active"
+ },
+ "flip_10": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: flip and stand on one hand (CMU 89_03)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 62,
+  "status": "active"
+ },
+ "flip_11": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: spins, flips, stand on one hand (CMU 89_04)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 79,
+  "status": "active"
+ },
+ "flip_12": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: spins, flips, stand on one hand (CMU 89_04)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 69,
+  "status": "active"
+ },
+ "flip_13": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: spin upside down, handstand, flips (CMU 89_05)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 54,
+  "status": "active"
+ },
+ "flip_14": {
+  "cat": "flip",
+  "how": "flip (one-shot), real take: spin upside down, handstand, flips (CMU 89_05)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 49,
+  "status": "active"
+ },
+ "cartwheel_1": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: dance - cartwheel-like start, pirouettes, jete (CMU 05_06)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 60,
+  "status": "active"
+ },
+ "cartwheel_1_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 05_06)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 60,
+  "status": "active"
+ },
+ "cartwheel_2": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: cartwheel (CMU 49_06)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 100,
+  "status": "active"
+ },
+ "cartwheel_2_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 49_06)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 100,
+  "status": "active"
+ },
+ "cartwheel_3": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: cartwheel (CMU 49_07)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 98,
+  "status": "active"
+ },
+ "cartwheel_3_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 49_07)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 98,
+  "status": "active"
+ },
+ "cartwheel_4": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: cartwheels (CMU 49_08)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "cartwheel_4_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 49_08)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "cartwheel_5": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: cartwheels (CMU 49_08)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 78,
+  "status": "active"
+ },
+ "cartwheel_5_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 49_08)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 78,
+  "status": "active"
+ },
+ "cartwheel_6": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: cartwheels (CMU 87_05)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 60,
+  "status": "active"
+ },
+ "cartwheel_6_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 87_05)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 60,
+  "status": "active"
+ },
+ "cartwheel_7": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: stretches, cartwheels, flips, spin kicks, spins, and fall (CMU 88_04)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "cartwheel_7_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 88_04)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "cartwheel_8": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: stretches, cartwheels, flips, spin kicks, spins, and fall (CMU 88_04)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 58,
+  "status": "active"
+ },
+ "cartwheel_8_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 88_04)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 58,
+  "status": "active"
+ },
+ "cartwheel_9": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: stretch and cartwheel (CMU 88_09)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 88,
+  "status": "active"
+ },
+ "cartwheel_9_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 88_09)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 88,
+  "status": "active"
+ },
+ "cartwheel_10": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: Cartwheels (CMU 144_01)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 87,
+  "status": "active"
+ },
+ "cartwheel_10_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 144_01)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 87,
+  "status": "active"
+ },
+ "cartwheel_11": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: Cartwheels (CMU 144_01)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 80,
+  "status": "active"
+ },
+ "cartwheel_11_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 144_01)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 80,
+  "status": "active"
+ },
+ "cartwheel_12": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: Cartwheels001 (CMU 144_02)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 84,
+  "status": "active"
+ },
+ "cartwheel_12_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 144_02)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 84,
+  "status": "active"
+ },
+ "cartwheel_13": {
+  "cat": "cartwheel",
+  "how": "cartwheel (one-shot), real take: Cartwheels001 (CMU 144_02)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 97,
+  "status": "active"
+ },
+ "cartwheel_13_mirrored": {
+  "cat": "cartwheel",
+  "how": "cartwheel, mirrored (other side), real take (CMU 144_02)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 97,
+  "status": "active"
+ },
+ "jump_1": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: playground - forward jumps, turn around (CMU 01_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 63,
+  "status": "active"
+ },
+ "jump_2": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: playground - forward jumps, turn around (CMU 01_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "jump_3": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: playground - climb, sit, dangle legs, jump down (CMU 01_07)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "jump_4": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: playground - climb, sit, dangle legs, jump down (CMU 01_07)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "jump_5": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: playground - climb, hang, lean over, jump down (CMU 01_11)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 36,
+  "status": "active"
+ },
+ "jump_6": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: playground - climb, hang, lean over, jump down (CMU 01_11)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "jump_7": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: playground - climb, go under, jump down (CMU 01_13)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 25,
+  "status": "active"
+ },
+ "jump_8": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: playground - climb, go under, jump down (CMU 01_13)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 56,
+  "status": "active"
+ },
+ "jump_9": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: jump, balance (CMU 02_04)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 64,
+  "status": "active"
+ },
+ "jump_10": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: jump up to grab, reach for, tiptoe (CMU 13_10)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "jump_11": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: forward jump (CMU 13_11)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 69,
+  "status": "active"
+ },
+ "jump_12": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: jump up to grab, reach for, tiptoe (CMU 13_12)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 49,
+  "status": "active"
+ },
+ "jump_13": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: jump up to grab, reach for, tiptoe (CMU 13_12)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 61,
+  "status": "active"
+ },
+ "jump_14": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: forward jump (CMU 13_13)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "jump_15": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: forward jump (CMU 13_32)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 66,
+  "status": "active"
+ },
+ "jump_16": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: jump (CMU 13_39)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 70,
+  "status": "active"
+ },
+ "jump_17": {
+  "cat": "jump",
+  "how": "jump (seamless loop), real take: jump (CMU 13_40)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "hop_1": {
+  "cat": "hop",
+  "how": "hop (seamless loop), real take: jump/hop on uneven terrain (CMU 36_37)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 48,
+  "status": "active"
+ },
+ "hop_1_mirrored": {
+  "cat": "hop",
+  "how": "hop, mirrored (other side), real take (CMU 36_37)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 48,
+  "status": "active"
+ },
+ "hop_2": {
+  "cat": "hop",
+  "how": "hop (seamless loop), real take: jump/hop on uneven terrain (CMU 36_37)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 64,
+  "status": "active"
+ },
+ "hop_2_mirrored": {
+  "cat": "hop",
+  "how": "hop, mirrored (other side), real take (CMU 36_37)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 64,
+  "status": "active"
+ },
+ "hop_3": {
+  "cat": "hop",
+  "how": "hop (seamless loop), real take: jump up and down, hop on one foot (CMU 49_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "hop_3_mirrored": {
+  "cat": "hop",
+  "how": "hop, mirrored (other side), real take (CMU 49_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "hop_4": {
+  "cat": "hop",
+  "how": "hop (seamless loop), real take: jump up and down, hop on one foot (CMU 49_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 42,
+  "status": "active"
+ },
+ "hop_4_mirrored": {
+  "cat": "hop",
+  "how": "hop, mirrored (other side), real take (CMU 49_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 42,
+  "status": "active"
+ },
+ "hop_5": {
+  "cat": "hop",
+  "how": "hop (seamless loop), real take: jump up and down, hop on one foot (CMU 49_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 62,
+  "status": "active"
+ },
+ "hop_5_mirrored": {
+  "cat": "hop",
+  "how": "hop, mirrored (other side), real take (CMU 49_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 62,
+  "status": "active"
+ },
+ "hop_6": {
+  "cat": "hop",
+  "how": "hop (seamless loop), real take: jump up and down, hop on one foot (CMU 49_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 45,
+  "status": "active"
+ },
+ "hop_6_mirrored": {
+  "cat": "hop",
+  "how": "hop, mirrored (other side), real take (CMU 49_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 45,
+  "status": "active"
+ },
+ "hop_7": {
+  "cat": "hop",
+  "how": "hop (seamless loop), real take: vignettes - lift open window, smash against wall, hop, walk, run/jog, yawn, stretch (CMU 56_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "hop_7_mirrored": {
+  "cat": "hop",
+  "how": "hop, mirrored (other side), real take (CMU 56_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "hop_8": {
+  "cat": "hop",
+  "how": "hop (seamless loop), real take: vignettes - lift open window, smash against wall, hop, walk, run/jog, yawn, stretch (CMU 56_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "hop_8_mirrored": {
+  "cat": "hop",
+  "how": "hop, mirrored (other side), real take (CMU 56_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "hop_9": {
+  "cat": "hop",
+  "how": "hop (seamless loop), real take: medium hop forward (CMU 83_46)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 79,
+  "status": "active"
+ },
+ "hop_9_mirrored": {
+  "cat": "hop",
+  "how": "hop, mirrored (other side), real take (CMU 83_46)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 79,
+  "status": "active"
+ },
+ "kick_1": {
+  "cat": "kick",
+  "how": "kick (seamless loop), real take: jumps kicks and punches (CMU 86_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 71,
+  "status": "active"
+ },
+ "kick_1_mirrored": {
+  "cat": "kick",
+  "how": "kick, mirrored (other side), real take (CMU 86_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 71,
+  "status": "active"
+ },
+ "kick_2": {
+  "cat": "kick",
+  "how": "kick (seamless loop), real take: jumps kicks and punches (CMU 86_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 66,
+  "status": "active"
+ },
+ "kick_2_mirrored": {
+  "cat": "kick",
+  "how": "kick, mirrored (other side), real take (CMU 86_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 66,
+  "status": "active"
+ },
+ "kick_3": {
+  "cat": "kick",
+  "how": "kick (seamless loop), real take: jumps kicks and punches (CMU 86_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 69,
+  "status": "active"
+ },
+ "kick_3_mirrored": {
+  "cat": "kick",
+  "how": "kick, mirrored (other side), real take (CMU 86_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 69,
+  "status": "active"
+ },
+ "kick_4": {
+  "cat": "kick",
+  "how": "kick (seamless loop), real take: walking, running, jumping, kicking, and stretching (CMU 86_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 66,
+  "status": "active"
+ },
+ "kick_4_mirrored": {
+  "cat": "kick",
+  "how": "kick, mirrored (other side), real take (CMU 86_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 66,
+  "status": "active"
+ },
+ "kick_5": {
+  "cat": "kick",
+  "how": "kick (seamless loop), real take: walking, running, jumping, kicking, and stretching (CMU 86_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 54,
+  "status": "active"
+ },
+ "kick_5_mirrored": {
+  "cat": "kick",
+  "how": "kick, mirrored (other side), real take (CMU 86_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 54,
+  "status": "active"
+ },
+ "kick_6": {
+  "cat": "kick",
+  "how": "kick (seamless loop), real take: walking, running, jumping, kicking, and stretching (CMU 86_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 45,
+  "status": "active"
+ },
+ "kick_6_mirrored": {
+  "cat": "kick",
+  "how": "kick, mirrored (other side), real take (CMU 86_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 45,
+  "status": "active"
+ },
+ "kick_7": {
+  "cat": "kick",
+  "how": "kick (seamless loop), real take: walking, running, kicking, punching, knee kicking, and stretching (CMU 86_06)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 61,
+  "status": "active"
+ },
+ "kick_7_mirrored": {
+  "cat": "kick",
+  "how": "kick, mirrored (other side), real take (CMU 86_06)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 61,
+  "status": "active"
+ },
+ "kick_8": {
+  "cat": "kick",
+  "how": "kick (seamless loop), real take: walking, squats, stretching, kicking, and punching (CMU 86_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 79,
+  "status": "active"
+ },
+ "kick_8_mirrored": {
+  "cat": "kick",
+  "how": "kick, mirrored (other side), real take (CMU 86_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 79,
+  "status": "active"
+ },
+ "kick_9": {
+  "cat": "kick",
+  "how": "kick (seamless loop), real take: walking, squats, stretching, kicking, and punching (CMU 86_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 64,
+  "status": "active"
+ },
+ "kick_9_mirrored": {
+  "cat": "kick",
+  "how": "kick, mirrored (other side), real take (CMU 86_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 64,
+  "status": "active"
+ },
+ "kick_10": {
+  "cat": "kick",
+  "how": "kick (seamless loop), real take: walking, squats, stretching, kicking, and punching (CMU 86_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 61,
+  "status": "active"
+ },
+ "kick_10_mirrored": {
+  "cat": "kick",
+  "how": "kick, mirrored (other side), real take (CMU 86_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 61,
+  "status": "active"
+ },
+ "kick_11": {
+  "cat": "kick",
+  "how": "kick (seamless loop), real take: Jump with kick and spin (CMU 87_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "kick_11_mirrored": {
+  "cat": "kick",
+  "how": "kick, mirrored (other side), real take (CMU 87_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "kick_12": {
+  "cat": "kick",
+  "how": "kick (seamless loop), real take: Jump with kick and spin (CMU 87_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "kick_12_mirrored": {
+  "cat": "kick",
+  "how": "kick, mirrored (other side), real take (CMU 87_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "throw_1": {
+  "cat": "throw",
+  "how": "throw (seamless loop), real take: wash windows; basketball - dribble, lay-up shot, pass; throw ball; dance - Egyptian walk, the Dive, the Twist; strew (CMU 15_12)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 78,
+  "status": "active"
+ },
+ "throw_1_mirrored": {
+  "cat": "throw",
+  "how": "throw, mirrored (other side), real take (CMU 15_12)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 78,
+  "status": "active"
+ },
+ "throw_2": {
+  "cat": "throw",
+  "how": "throw (seamless loop), real take: wash windows; basketball - dribble, lay-up shot, pass; throw ball; dance - Egyptian walk, the Dive, the Twist; strew (CMU 15_12)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 70,
+  "status": "active"
+ },
+ "throw_2_mirrored": {
+  "cat": "throw",
+  "how": "throw, mirrored (other side), real take (CMU 15_12)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 70,
+  "status": "active"
+ },
+ "throw_3": {
+  "cat": "throw",
+  "how": "throw (seamless loop), real take: football - throw, catch (2 subjects - subject A) (CMU 33_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 67,
+  "status": "active"
+ },
+ "throw_3_mirrored": {
+  "cat": "throw",
+  "how": "throw, mirrored (other side), real take (CMU 33_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 67,
+  "status": "active"
+ },
+ "throw_4": {
+  "cat": "throw",
+  "how": "throw (seamless loop), real take: football - throw, catch (2 subjects - subject A) (CMU 33_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "throw_4_mirrored": {
+  "cat": "throw",
+  "how": "throw, mirrored (other side), real take (CMU 33_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "throw_5": {
+  "cat": "throw",
+  "how": "throw (seamless loop), real take: football - throw, catch, jump around (2 subjects - subject A) (CMU 33_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "throw_5_mirrored": {
+  "cat": "throw",
+  "how": "throw, mirrored (other side), real take (CMU 33_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "throw_6": {
+  "cat": "throw",
+  "how": "throw (seamless loop), real take: football - throw, catch, jump around (2 subjects - subject A) (CMU 33_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "throw_6_mirrored": {
+  "cat": "throw",
+  "how": "throw, mirrored (other side), real take (CMU 33_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "throw_7": {
+  "cat": "throw",
+  "how": "throw (seamless loop), real take: football - throw, catch (2 subjects - subject B) (CMU 34_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 60,
+  "status": "active"
+ },
+ "throw_7_mirrored": {
+  "cat": "throw",
+  "how": "throw, mirrored (other side), real take (CMU 34_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 60,
+  "status": "active"
+ },
+ "throw_8": {
+  "cat": "throw",
+  "how": "throw (seamless loop), real take: football - throw, catch, jump around (2 subjects - subject B) (CMU 34_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "throw_8_mirrored": {
+  "cat": "throw",
+  "how": "throw, mirrored (other side), real take (CMU 34_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "throw_9": {
+  "cat": "throw",
+  "how": "throw (seamless loop), real take: vignettes - fists up, wipe window, yawn, stretch, angrily grab, smash against wall, lift open window, throw punches, skip (CMU 56_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "throw_9_mirrored": {
+  "cat": "throw",
+  "how": "throw, mirrored (other side), real take (CMU 56_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "throw_10": {
+  "cat": "throw",
+  "how": "throw (seamless loop), real take: vignettes - fists up, wipe window, yawn, stretch, angrily grab, smash against wall, lift open window, throw punches, skip (CMU 56_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 29,
+  "status": "active"
+ },
+ "throw_10_mirrored": {
+  "cat": "throw",
+  "how": "throw, mirrored (other side), real take (CMU 56_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 29,
+  "status": "active"
+ },
+ "stumble_1": {
+  "cat": "stumble",
+  "how": "stumble (one-shot), real take: KickFlipStumble (CMU 85_07)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 113,
+  "status": "active"
+ },
+ "stumble_1_mirrored": {
+  "cat": "stumble",
+  "how": "stumble, mirrored (other side), real take (CMU 85_07)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 113,
+  "status": "active"
+ },
+ "stumble_2": {
+  "cat": "stumble",
+  "how": "stumble (one-shot), real take: StumbleWalk (CMU 104_13)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 60,
+  "status": "active"
+ },
+ "stumble_2_mirrored": {
+  "cat": "stumble",
+  "how": "stumble, mirrored (other side), real take (CMU 104_13)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 60,
+  "status": "active"
+ },
+ "stumble_3": {
+  "cat": "stumble",
+  "how": "stumble (one-shot), real take: StumbleWalk (CMU 104_13)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 49,
+  "status": "active"
+ },
+ "stumble_3_mirrored": {
+  "cat": "stumble",
+  "how": "stumble, mirrored (other side), real take (CMU 104_13)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 49,
+  "status": "active"
+ },
+ "push_pull_2": {
+  "cat": "push pull",
+  "how": "push / pull (seamless loop), real take: A pulls B; B resists (2 subjects - subject A) (CMU 18_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 67,
+  "status": "active"
+ },
+ "push_pull_2_mirrored": {
+  "cat": "push pull",
+  "how": "push / pull, mirrored (other side), real take (CMU 18_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 67,
+  "status": "active"
+ },
+ "push_pull_3": {
+  "cat": "push pull",
+  "how": "push / pull (seamless loop), real take: A pulls B by the elbow; B resists (2 subjects - subject B) (CMU 19_06)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "push_pull_3_mirrored": {
+  "cat": "push pull",
+  "how": "push / pull, mirrored (other side), real take (CMU 19_06)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "push_pull_4": {
+  "cat": "push pull",
+  "how": "push / pull (seamless loop), real take: B sits; A pulls up B (2 subjects - subject A) (CMU 22_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "push_pull_4_mirrored": {
+  "cat": "push pull",
+  "how": "push / pull, mirrored (other side), real take (CMU 22_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "push_pull_5": {
+  "cat": "push pull",
+  "how": "push / pull (seamless loop), real take: B sits; A pulls up B (subjects - subject B) (CMU 23_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "push_pull_5_mirrored": {
+  "cat": "push pull",
+  "how": "push / pull, mirrored (other side), real take (CMU 23_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "push_pull_6": {
+  "cat": "push pull",
+  "how": "push / pull (seamless loop), real take: A sits; B pulls up A (subjects - subject B) (CMU 23_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "push_pull_6_mirrored": {
+  "cat": "push pull",
+  "how": "push / pull, mirrored (other side), real take (CMU 23_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "carry_1": {
+  "cat": "carry",
+  "how": "carry (seamless loop), real take: carry 5.5lb suitcase (CMU 70_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 53,
+  "status": "active"
+ },
+ "carry_2": {
+  "cat": "carry",
+  "how": "carry (seamless loop), real take: carry 5.5lb suitcase (CMU 70_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 49,
+  "status": "active"
+ },
+ "carry_3": {
+  "cat": "carry",
+  "how": "carry (seamless loop), real take: carry 19.5lb suitcase (CMU 70_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 54,
+  "status": "active"
+ },
+ "carry_4": {
+  "cat": "carry",
+  "how": "carry (seamless loop), real take: carry 19.5lb suitcase (CMU 70_04)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 48,
+  "status": "active"
+ },
+ "carry_5": {
+  "cat": "carry",
+  "how": "carry (seamless loop), real take: carry 19.5lb suitcase (CMU 70_07)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 53,
+  "status": "active"
+ },
+ "carry_6": {
+  "cat": "carry",
+  "how": "carry (seamless loop), real take: carry 19.5lb suitcase (CMU 70_09)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "carry_7": {
+  "cat": "carry",
+  "how": "carry (seamless loop), real take: carry 12.5lb suitcase (CMU 70_10)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "sidestep_1": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: basketball - sideways dribble (CMU 06_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "sidestep_1_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 06_08)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 41,
+  "status": "active"
+ },
+ "sidestep_3": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: navigate - walk forward, backward, sideways, on a diagonal (CMU 41_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "sidestep_3_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 41_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "sidestep_4": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: navigate - walk forward, backward, sideways, on a diagonal (CMU 41_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 29,
+  "status": "active"
+ },
+ "sidestep_4_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 41_02)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 29,
+  "status": "active"
+ },
+ "sidestep_5": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: navigate - walk forward, backward, sideways, on a diagonal (CMU 41_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "sidestep_5_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 41_03)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "sidestep_6": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: walk sideways and turn (repeated) (CMU 69_42)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "sidestep_6_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 69_42)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "sidestep_7": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: walk sideways and turn (repeated) (CMU 69_42)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "sidestep_7_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 69_42)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "sidestep_8": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: walk sideways and turn (repeated) (CMU 69_43)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "sidestep_8_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 69_43)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "sidestep_9": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: walk sideways and turn (repeated) (CMU 69_43)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 28,
+  "status": "active"
+ },
+ "sidestep_9_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 69_43)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 28,
+  "status": "active"
+ },
+ "sidestep_10": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: walk sideways and turn (repeated) (CMU 69_44)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "sidestep_10_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 69_44)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "sidestep_11": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: walk sideways and turn (repeated) (CMU 69_44)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "sidestep_11_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 69_44)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "sidestep_12": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: walk sideways and turn (repeated) (CMU 69_45)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "sidestep_12_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 69_45)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "sidestep_13": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: walk sideways and turn (repeated) (CMU 69_45)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 29,
+  "status": "active"
+ },
+ "sidestep_13_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 69_45)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 29,
+  "status": "active"
+ },
+ "sidestep_14": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: walk sideways and turn (repeated) (CMU 69_46)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "sidestep_14_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 69_46)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "sidestep_15": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: walk sideways and turn (repeated) (CMU 69_46)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "sidestep_15_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 69_46)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "sidestep_16": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: walk sideways and turn (repeated) (CMU 69_47)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "sidestep_16_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 69_47)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "sidestep_17": {
+  "cat": "sidestep",
+  "how": "side step (seamless loop), real take: walk sideways and turn (repeated) (CMU 69_47)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 46,
+  "status": "active"
+ },
+ "sidestep_17_mirrored": {
+  "cat": "sidestep",
+  "how": "side step, mirrored (other side), real take (CMU 69_47)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 46,
+  "status": "active"
+ },
+ "backward_1": {
+  "cat": "backward",
+  "how": "backward (seamless loop), real take: navigate - walk forward, backward, sideways (CMU 09_12)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "backward_2": {
+  "cat": "backward",
+  "how": "backward (seamless loop), real take: navigate - walk forward, backward, on a diagonal (CMU 40_04)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "backward_3": {
+  "cat": "backward",
+  "how": "backward (seamless loop), real take: navigate - walk forward, backward, on a diagonal (CMU 40_05)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 40,
+  "status": "active"
+ },
+ "backward_4": {
+  "cat": "backward",
+  "how": "backward (seamless loop), real take: walk backwards and turn (CMU 69_34)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "backward_5": {
+  "cat": "backward",
+  "how": "backward (seamless loop), real take: walk backwards and turn (CMU 69_35)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 33,
+  "status": "active"
+ },
+ "backward_6": {
+  "cat": "backward",
+  "how": "backward (seamless loop), real take: walk backwards and turn (CMU 69_36)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 30,
+  "status": "active"
+ },
+ "backward_7": {
+  "cat": "backward",
+  "how": "backward (seamless loop), real take: walk backwards and turn (CMU 69_37)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "balance_1": {
+  "cat": "balance",
+  "how": "balance (seamless loop), real take: jump, balance (CMU 02_04)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 64,
+  "status": "active"
+ },
+ "balance_2": {
+  "cat": "balance",
+  "how": "balance (seamless loop), real take: jump, balance (CMU 02_04)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 44,
+  "status": "active"
+ },
+ "balance_3": {
+  "cat": "balance",
+  "how": "balance (seamless loop), real take: balance on one leg, outstretched arms (CMU 49_18)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "balance_4": {
+  "cat": "balance",
+  "how": "balance (seamless loop), real take: balance on one leg, outstretched arms (CMU 49_18)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "balance_5": {
+  "cat": "balance",
+  "how": "balance (seamless loop), real take: balance on one leg, outstretched arms (CMU 49_19)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 29,
+  "status": "active"
+ },
+ "balance_6": {
+  "cat": "balance",
+  "how": "balance (seamless loop), real take: balance on one leg, outstretched arms (CMU 49_19)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "balance_7": {
+  "cat": "balance",
+  "how": "balance (seamless loop), real take: balance on one leg, outstretched arms (CMU 49_20)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "balance_8": {
+  "cat": "balance",
+  "how": "balance (seamless loop), real take: balance on one leg, outstretched arms (CMU 49_20)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "balance_9": {
+  "cat": "balance",
+  "how": "balance (seamless loop), real take: dance - lean back on bent leg, balance, bend elbow by ear (CMU 49_22)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
+  "status": "active"
+ },
+ "balance_10": {
+  "cat": "balance",
+  "how": "balance (seamless loop), real take: dance - lean back on bent leg, balance, bend elbow by ear (CMU 49_22)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 25,
+  "status": "active"
+ },
+ "balance_11": {
+  "cat": "balance",
+  "how": "balance (seamless loop), real take: balance object on forehead (CMU 89_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 49,
+  "status": "active"
+ },
+ "balance_12": {
+  "cat": "balance",
+  "how": "balance (seamless loop), real take: balance object on forehead (CMU 89_01)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 72,
+  "status": "active"
+ },
+ "bat_horizontal_1": {
+  "cat": "bat swings",
+  "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 124_07)",
+  "loop": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "bat_horizontal_1_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 124_07)",
+  "loop": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "bat_horizontal_2": {
+  "cat": "bat swings",
+  "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 124_07)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_horizontal_2_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 124_07)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_1": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 124_07)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_1_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 124_07)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_2": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 124_08)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_2_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 124_08)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_3": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 79_01)",
+  "loop": true,
+  "frames": 62,
+  "status": "active"
+ },
+ "bat_overhead_3_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 79_01)",
+  "loop": true,
+  "frames": 62,
+  "status": "active"
+ },
+ "bat_overhead_4": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 79_01)",
+  "loop": true,
+  "frames": 42,
+  "status": "active"
+ },
+ "bat_overhead_4_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 79_01)",
+  "loop": true,
+  "frames": 42,
+  "status": "active"
+ },
+ "bat_overhead_5": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 80_71)",
+  "loop": true,
+  "frames": 27,
+  "status": "active"
+ },
+ "bat_overhead_5_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 80_71)",
+  "loop": true,
+  "frames": 27,
+  "status": "active"
+ },
+ "bat_overhead_6": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 80_71)",
+  "loop": true,
+  "frames": 27,
+  "status": "active"
+ },
+ "bat_overhead_6_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 80_71)",
+  "loop": true,
+  "frames": 27,
+  "status": "active"
+ },
+ "bat_overhead_7": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 80_71)",
+  "loop": true,
+  "frames": 28,
+  "status": "active"
+ },
+ "bat_overhead_7_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 80_71)",
+  "loop": true,
+  "frames": 28,
+  "status": "active"
+ },
+ "bat_overhead_8": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 80_71)",
+  "loop": true,
+  "frames": 35,
+  "status": "active"
+ },
+ "bat_overhead_8_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 80_71)",
+  "loop": true,
+  "frames": 35,
+  "status": "active"
+ },
+ "bat_overhead_9": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 80_71)",
+  "loop": true,
+  "frames": 55,
+  "status": "active"
+ },
+ "bat_overhead_9_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 80_71)",
+  "loop": true,
+  "frames": 55,
+  "status": "active"
+ },
+ "bat_overhead_10": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_10_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_11": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 64,
+  "status": "active"
+ },
+ "bat_overhead_11_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 64,
+  "status": "active"
+ },
+ "bat_overhead_12": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "bat_overhead_12_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "bat_overhead_13": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "bat_overhead_13_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "bat_overhead_14": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 59,
+  "status": "active"
+ },
+ "bat_overhead_14_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 59,
+  "status": "active"
+ },
+ "bat_overhead_15": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "bat_overhead_15_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "bat_overhead_16": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_16_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_17": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 55,
+  "status": "active"
+ },
+ "bat_overhead_17_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 55,
+  "status": "active"
+ },
+ "bat_overhead_18": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "bat_overhead_18_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "bat_overhead_19": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 39,
+  "status": "active"
+ },
+ "bat_overhead_19_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 39,
+  "status": "active"
+ },
+ "bat_overhead_20": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_20_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_21": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 62,
+  "status": "active"
+ },
+ "bat_overhead_21_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 62,
+  "status": "active"
+ },
+ "bat_overhead_22": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 42,
+  "status": "active"
+ },
+ "bat_overhead_22_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_04)",
+  "loop": true,
+  "frames": 42,
+  "status": "active"
+ },
+ "bat_overhead_23": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 64,
+  "status": "active"
+ },
+ "bat_overhead_23_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 64,
+  "status": "active"
+ },
+ "bat_overhead_24": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_24_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_25": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_25_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_diagonal_1": {
+  "cat": "bat swings",
+  "how": "diagonal downward bat swing, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "bat_diagonal_1_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed diagonal downward bat swing, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "bat_overhead_26": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "bat_overhead_26_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "bat_overhead_27": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "bat_overhead_27_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "bat_horizontal_3": {
+  "cat": "bat swings",
+  "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 52,
+  "status": "active"
+ },
+ "bat_horizontal_3_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 52,
+  "status": "active"
+ },
+ "bat_horizontal_4": {
+  "cat": "bat swings",
+  "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_horizontal_4_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_horizontal_5": {
+  "cat": "bat swings",
+  "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "bat_horizontal_5_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 61,
+  "status": "active"
+ },
+ "bat_overhead_28": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_28_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_29": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "bat_overhead_29_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "bat_overhead_30": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "bat_overhead_30_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "bat_horizontal_6": {
+  "cat": "bat swings",
+  "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_horizontal_6_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 66,
+  "status": "active"
+ },
+ "bat_overhead_31": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 40,
+  "status": "active"
+ },
+ "bat_overhead_31_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 40,
+  "status": "active"
+ },
+ "bat_overhead_32": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 39,
+  "status": "active"
+ },
+ "bat_overhead_32_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 39,
+  "status": "active"
+ },
+ "bat_overhead_33": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 43,
+  "status": "active"
+ },
+ "bat_overhead_33_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 43,
+  "status": "active"
+ },
+ "bat_horizontal_7": {
+  "cat": "bat swings",
+  "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 24,
+  "status": "active"
+ },
+ "bat_horizontal_7_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 24,
+  "status": "active"
+ },
+ "bat_overhead_34": {
+  "cat": "bat swings",
+  "how": "two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 43,
+  "status": "active"
+ },
+ "bat_overhead_34_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed two-handed overhead bat smash, real motion (CMU 86_05)",
+  "loop": true,
+  "frames": 43,
+  "status": "active"
+ },
+ "bat_horizontal_8": {
+  "cat": "bat swings",
+  "how": "level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 62_10)",
+  "loop": true,
+  "frames": 64,
+  "status": "active"
+ },
+ "bat_horizontal_8_lefty": {
+  "cat": "bat swings",
+  "how": "left-handed level two-handed bat swing (load, hips, whip, follow-through), real motion (CMU 62_10)",
+  "loop": true,
+  "frames": 64,
   "status": "active"
  }
 }

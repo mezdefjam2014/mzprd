@@ -80,7 +80,7 @@ def build(a, s, e, kind):
     seg = align(a[s:e + B], yaw[s], o)                     # L + B frames
     hip = seg[:, HIP, :].copy()
     if kind == "cycle":
-        v = (hip[L] - hip[0]) / L; v[1] = 0                # steady travel per frame
+        v = (hip[L] - hip[0]) / L                         # steady travel per frame (incl. climbing up stairs/ladders)
         seg = seg - (np.arange(len(seg))[:, None] * v)[:, None, :]
     else:
         # leftover step and turn between end and start: spread evenly over the clip (Mixamo "in place")
