@@ -1,4 +1,5 @@
 <title>Move Library</title>
+<meta charset="utf-8">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono&display=swap">
 <style>
@@ -21,6 +22,9 @@ input[type=search]{font:inherit;padding:8px 12px;border:1px solid var(--line);bo
 .tile{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px 8px;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
 .tile:hover,.tile:focus-visible{border-color:var(--accent);outline:none}
 .tile canvas{width:100%;aspect-ratio:1/1;display:block}
+[hidden]{display:none!important}
+.tile.var{border-style:dashed}
+.tag{font-family:var(--display);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
 .tile b{font-family:var(--mono);font-size:13px}
 .tile span{font-size:12px;color:var(--muted);line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);padding:16px;width:min(720px,92vw)}
@@ -37,9 +41,10 @@ button.x{font-family:var(--display);font-weight:700;border:1px solid var(--line)
 <main>
   <header>
     <h1>Move Library</h1>
-    <p class="sub">All __COUNT__ saved moves, each real motion capture (CMU, free for commercial use). Each tile loops the main action. Click one for a big player and the command that turns it into a storyboard, preview and Blender file.</p>
+    <p class="sub">__COUNT__ original moves (real motion capture, CMU, free for commercial use) and __VCOUNT__ new variations made from them. Each tile loops the main action. Click one for a big player and the command that turns it into a storyboard, preview and Blender file.</p>
   </header>
   <div class="bar"><input type="search" id="q" placeholder="Search moves, e.g. kick, zombie, jump" aria-label="Search moves"><span class="count" id="count"></span></div>
+  <div class="chips" id="sets"></div>
   <div class="chips" id="chips"></div>
   <div class="grid" id="grid"></div>
 </main>
@@ -72,7 +77,7 @@ const grid=document.getElementById("grid"),tiles=[];
 const cats=[...new Set(DATA.moves.map(m=>m.c))];
 DATA.moves.forEach((m,i)=>{
   const t=document.createElement("div");t.className="tile";t.tabIndex=0;t.setAttribute("role","button");
-  t.innerHTML=`<canvas width="300" height="300"></canvas><b></b><span></span>`;
+  t.innerHTML=`<canvas width="300" height="300"></canvas>${m.v?'<div class="tag">New variation</div>':""}<b></b><span></span>`;if(m.v)t.classList.add("var");
   t.querySelector("b").textContent=m.n;t.querySelector("span").textContent=m.d;
   t.onclick=()=>open(i);t.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open(i)}};
   grid.appendChild(t);tiles.push({el:t,cv:t.querySelector("canvas"),m,vis:false});
@@ -81,11 +86,13 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{const t=tiles.find(x=>x.el=
 tiles.forEach(t=>io.observe(t.el));
 tiles.forEach(t=>draw(t.cv.getContext("2d"),300,300,t.m.f[Math.floor(t.m.f.length/2)]));
 // filters
-let cat="all";const chips=document.getElementById("chips"),q=document.getElementById("q");
-function chip(name,label){const b=document.createElement("button");b.className="chip"+(name==="all"?" on":"");b.textContent=label;b.onclick=()=>{cat=name;chips.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));filter();};chips.appendChild(b);}
-chip("all","All");cats.forEach(c=>chip(c,c.replace(/_/g," ")));
+let cat="all",set="var";const chips=document.getElementById("chips"),sets=document.getElementById("sets"),q=document.getElementById("q");
+function chip(name,label){const b=document.createElement("button");b.className="chip"+(name==="all"?" on":"");b.dataset.c=name;b.textContent=label;b.onclick=()=>{cat=name;chips.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));filter();};chips.appendChild(b);}
+function setChips(){chips.innerHTML="";cat="all";chip("all","All");[...new Set(DATA.moves.filter(m=>set==="all"||(set==="var")===m.v).map(m=>m.c))].forEach(c=>chip(c,c.replace(/_/g," ")));}
+[["var","New variations"],["orig","Originals"],["all","Everything"]].forEach(([k,l])=>{const b=document.createElement("button");b.className="chip"+(k==="var"?" on":"");b.textContent=l;b.onclick=()=>{set=k;sets.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));setChips();filter();};sets.appendChild(b);});
+setChips();
 function filter(){const w=q.value.toLowerCase().split(/\s+/).filter(Boolean);let n=0;
-  tiles.forEach(t=>{const s=(t.m.n+" "+t.m.d).toLowerCase();const ok=(cat==="all"||t.m.c===cat)&&w.every(x=>s.includes(x));t.el.hidden=!ok;if(ok)n++;});
+  tiles.forEach(t=>{const s=(t.m.n+" "+t.m.d+" "+t.m.c).toLowerCase();const ok=(set==="all"||(set==="var")===t.m.v)&&(cat==="all"||t.m.c===cat)&&w.every(x=>s.includes(x));t.el.hidden=!ok;if(ok)n++;});
   document.getElementById("count").textContent=n+" of "+tiles.length+" moves";}
 q.oninput=filter;filter();
 // dialog player
@@ -95,7 +102,7 @@ const vb=document.getElementById("views");
 Object.entries(VIEWS).forEach(([k,v])=>{const b=document.createElement("button");b.className="chip"+(k==="3/4"?" on":"");b.textContent=k;b.onclick=()=>{view=v;vb.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));};vb.appendChild(b);});
 function open(i){cur=DATA.moves[i];document.getElementById("dn").textContent=cur.n;
   document.getElementById("dd").textContent=`${cur.d} | ${cur.src} | full clip ${cur.t}s (tile shows from ${cur.start}s)`;
-  document.getElementById("cmd").textContent=`python3 .claude/skills/animation-prompt-maker/library/mocap.py make ${cur.n} --start ${cur.start} --end ${(cur.start+cur.f.length/DATA.fps).toFixed(1)} -o out`;
+  document.getElementById("cmd").textContent=cur.v?`python3 .claude/skills/animation-prompt-maker/library/mocap.py make ${cur.n} -o out     (don't like it? mocap.py suspend ${cur.n})`:`python3 .claude/skills/animation-prompt-maker/library/mocap.py make ${cur.n} --start ${cur.start} --end ${(cur.start+cur.f.length/DATA.fps).toFixed(1)} -o out`;
   dlg.showModal();}
 document.getElementById("close").onclick=()=>dlg.close();
 document.getElementById("copy").onclick=async e=>{const t=document.getElementById("cmd").textContent;try{await navigator.clipboard.writeText(t);e.target.textContent="Copied"}catch{const r=document.createRange();r.selectNodeContents(document.getElementById("cmd"));getSelection().removeAllRanges();getSelection().addRange(r);e.target.textContent="Selected"}setTimeout(()=>e.target.textContent="Copy",1500);};

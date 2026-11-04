@@ -19,6 +19,8 @@ import numpy as np
 
 HERE = pathlib.Path(__file__).resolve().parent
 MOVES = HERE / "moves"
+VARS = HERE / "variations"
+VARS_INDEX = HERE / "variations.json"
 INDEX = HERE / "cmu_index.json"
 TEMPL = HERE.parent / "templates"
 CMU_URL = "https://raw.githubusercontent.com/una-dinosauria/cmu-mocap/master/data/{s:03d}/{c}.bvh"
@@ -147,6 +149,7 @@ def save_move(name, pts, meta):
 
 def load_move(name):
     p = MOVES / f"{name}.json.gz"
+    if not p.exists() and (VARS / f"{name}.json.gz").exists(): p = VARS / f"{name}.json.gz"
     if not p.exists():
         if re.fullmatch(r"\d+_\d+", name): return load_move(fetch(name, name)[0])
         sys.exit(f"No saved move '{name}'. Try: mocap.py search {name}")
@@ -179,8 +182,11 @@ def fetch(clip, name, start=None, end=None):
 SAVED = HERE / "saved.json"
 def _saved():
     return json.loads(SAVED.read_text()) if SAVED.exists() else {}
+import threading
+_LOCK = threading.Lock()
 def _remember(name, desc):
-    d = _saved(); d[name] = desc; SAVED.write_text(json.dumps(dict(sorted(d.items())), indent=0))
+    with _LOCK:
+        d = _saved(); d[name] = desc; SAVED.write_text(json.dumps(dict(sorted(d.items())), indent=0))
 
 def _index():
     return json.loads(INDEX.read_text()) if INDEX.exists() else {}
@@ -223,6 +229,24 @@ def exaggerate(m, k):
         sm = np.stack([np.convolve(np.pad(v[:, c], w // 2, mode="edge"), ker, "valid") for c in range(3)], 1)
         out[j] = v + (v - sm) * k
     return ground(fix_lengths(out, m))
+def lean(m, deg):
+    """tilt the upper body forward (+) / back (-) around the hips, every frame (hunched monsters, proud walks)"""
+    out = {k: v.copy() for k, v in m.items()}; a = math.radians(deg)
+    for i in range(nframes(m)):
+        f, r = facing(m, i); piv = m["hip"][i]
+        for k in UPPER + ["mid"]:
+            d = m[k][i] - piv; up = -d[1]; fw = d @ f
+            nfw = fw * math.cos(a) + up * math.sin(a); nup = -fw * math.sin(a) + up * math.cos(a)
+            side = d - fw * f - np.array([0, d[1], 0])
+            out[k][i] = piv + nfw * f + np.array([0, -nup, 0]) + side
+    return out
+def auto_window(m, maxs=5.0):
+    """the main active stretch of a clip (skips T-poses and idle lead-ins)"""
+    segs = segments(m)
+    if not segs: return m
+    s0 = max(0, segs[0][0] - 6); s1 = min(nframes(m), s0 + int(maxs * FPS))
+    return trim(m, s0 / FPS, (s1 - 1) / FPS)
+
 def _local(m, i, k, origin):
     f, r = facing(m, i); u = np.array([0, -1.0, 0]); d = m[k][i] - m[origin][i]
     return np.array([d @ f, d @ u, d @ r])
@@ -343,6 +367,7 @@ def main():
     f = sub.add_parser("fetch"); f.add_argument("clip"); f.add_argument("--name"); f.add_argument("--start", type=float); f.add_argument("--end", type=float)
     im = sub.add_parser("import"); im.add_argument("bvh"); im.add_argument("--name", required=True); im.add_argument("--start", type=float); im.add_argument("--end", type=float)
     pk = sub.add_parser("peek"); pk.add_argument("move")
+    for c in ("suspend", "restore"): sub.add_parser(c).add_argument("names", nargs="+")
     mk = sub.add_parser("make"); mk.add_argument("move")
     for a in ("--start", "--end", "--speed", "--exaggerate"): mk.add_argument(a, type=float)
     mk.add_argument("--mirror", action="store_true"); mk.add_argument("--inplace", action="store_true")
@@ -366,6 +391,14 @@ def main():
     elif a.cmd == "import":
         pos, ends, fps = read_bvh(a.bvh); p = save_move(a.name, to_points(pos, ends, fps, a.start, a.end), dict(name=a.name, source=os.path.basename(a.bvh), desc=""))
         _remember(a.name, "imported from " + os.path.basename(a.bvh)); print(f"saved {a.name} ({p.stat().st_size // 1024} KB)")
+    elif a.cmd in ("suspend", "restore"):
+        idx = json.loads(VARS_INDEX.read_text())
+        for n in a.names:
+            if n == "all":
+                for v in idx.values(): v["status"] = "suspended" if a.cmd == "suspend" else "active"
+            elif n in idx: idx[n]["status"] = "suspended" if a.cmd == "suspend" else "active"
+            else: print("not a variation:", n)
+        VARS_INDEX.write_text(json.dumps(idx, indent=1)); print(a.cmd, "done. Originals are never affected.")
     elif a.cmd == "peek":
         m, doc = load_move(a.move); print(doc.get("desc", ""), f"| {nframes(m) / FPS:.1f}s")
         for s0, s1 in segments(m):
