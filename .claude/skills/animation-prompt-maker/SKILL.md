@@ -53,22 +53,23 @@ Output the prompt as plain text inside a single code block so the user can copy 
 - Write it as direct instructions to the AI that will do the work ("Create a 60-frame first-person rifle reload in Blender at 24 fps...").
 - Use short paragraphs and plain numbered lines for frames, e.g. "Frame 12 (mag release): ..."
 
-Follow this order inside the prompt:
+Keep it SHORT: 120-200 words total. Long prompts lose coherence. Cut anything the AI can infer.
+- 5-7 key frames max, ONE line each, only the essential pose change.
+- One line of setup, one line of polish, one line of tool instruction.
+- No sound cues, rig bone lists, or camera specs unless the user asks.
 
-Create a [name] animation for a [2D/3D] game, viewed from [perspective], in [tool]. Use [fps] fps, frames [start] to [end], [loop/one-shot], [style] style.
+Template:
 
-[2-3 sentences: what happens, the feel, what must read clearly from this camera.]
+Create a [name] animation for a [2D/3D] [perspective] game in [tool]. [fps] fps, frames [start]-[end], [one-shot/loop], [style].
 
-Setup: [rig/bones or objects, camera position/angle/FOV, props and what they are parented to].
+[One sentence: what happens and the feel.]
 
-Animate these key poses:
 Frame 1 (idle): ...
-Frame 6 (anticipation): ...
-... (usually 6-12 keys, each with body, arms, legs, head, props, concrete degrees/cm, and easing into the next key)
+Frame N (phase): ...
+(5-7 lines total)
 
-Timing and polish: [holds, arcs, overlap/secondary motion, impact shake, sound cue frames, mistakes to avoid].
-
-[Tool instructions in plain sentences: for Blender, write a bpy script that inserts these keyframes on the pose bones and sets interpolation; for sprites, the sheet layout, cell size, frame count and facing direction; for engines, clip settings and events at contact frames.]
+[One sentence of polish: easing, snaps, overlap, mistake to avoid.]
+[One sentence of tool instruction, e.g. "Write a bpy script that keyframes these poses."]
 
 Outside the code block, add at most one short line before it (the settings used) and one line after it offering variations (faster, heavier, empty reload, mirrored, other perspective). Nothing else.
 
