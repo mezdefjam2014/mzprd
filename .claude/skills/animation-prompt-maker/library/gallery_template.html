@@ -1,0 +1,109 @@
+<title>Move Library</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono&display=swap">
+<style>
+/* Layout: filter bar, then a dense grid of looping move tiles; click a tile for a large player */
+:root{--bg:#eef1f4;--panel:#fff;--ink:#1b2430;--muted:#5b6878;--line:#cfd6de;--accent:#e0661b;--figure:#1b2430;--far:#7d8896;
+  --display:"Chakra Petch",system-ui,sans-serif;--body:"IBM Plex Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161c;--panel:#1b2129;--ink:#e6ebf1;--muted:#97a3b2;--line:#2e3742;--accent:#ff8a3d;--figure:#e6ebf1;--far:#7b8796;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12161c;--panel:#1b2129;--ink:#e6ebf1;--muted:#97a3b2;--line:#2e3742;--accent:#ff8a3d;--figure:#e6ebf1;--far:#7b8796;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+main{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-family:var(--display);font-size:clamp(26px,5vw,38px);margin:0}
+.sub{color:var(--muted);margin:4px 0 0;max-width:70ch;line-height:1.45}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input[type=search]{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);min-width:0;flex:1 1 220px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--display);font-size:12px;font-weight:700;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:5px 11px;cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.count{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px 8px;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile:hover,.tile:focus-visible{border-color:var(--accent);outline:none}
+.tile canvas{width:100%;aspect-ratio:1/1;display:block}
+.tile b{font-family:var(--mono);font-size:13px}
+.tile span{font-size:12px;color:var(--muted);line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);padding:16px;width:min(720px,92vw)}
+dialog::backdrop{background:rgba(10,14,20,.55)}
+dialog canvas{width:100%;aspect-ratio:4/3;display:block}
+.dh{display:flex;justify-content:space-between;gap:12px;align-items:start}
+.dh h2{font-family:var(--display);margin:0;font-size:22px}
+.dh p{margin:4px 0 0;color:var(--muted);font-size:14px}
+button.x{font-family:var(--display);font-weight:700;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:6px;padding:6px 12px;cursor:pointer}
+.cmd{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.cmd code{font-family:var(--mono);font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;overflow-x:auto;flex:1;min-width:0;white-space:nowrap}
+.views{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+</style>
+<main>
+  <header>
+    <h1>Move Library</h1>
+    <p class="sub">All __COUNT__ saved moves, each real motion capture (CMU, free for commercial use). Each tile loops the main action. Click one for a big player and the command that turns it into a storyboard, preview and Blender file.</p>
+  </header>
+  <div class="bar"><input type="search" id="q" placeholder="Search moves, e.g. kick, zombie, jump" aria-label="Search moves"><span class="count" id="count"></span></div>
+  <div class="chips" id="chips"></div>
+  <div class="grid" id="grid"></div>
+</main>
+<dialog id="dlg">
+  <div class="dh"><div><h2 id="dn"></h2><p id="dd"></p></div><button class="x" id="close">Close</button></div>
+  <canvas id="big" width="960" height="720"></canvas>
+  <div class="views" id="views"></div>
+  <div class="cmd"><code id="cmd"></code><button class="x" id="copy">Copy</button></div>
+</dialog>
+<script>
+const DATA=__DATA__;
+const D=Math.PI/180, FLOOR=89, css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const P=DATA.pts, ix=Object.fromEntries(P.map((k,i)=>[k,i]));
+const SEG=[["hip","hF",9],["hip","hB",9],["hip","mid",12],["mid","sh",14],["shF","shB",8],["sh","nk",5],["shF","rE",6],["rE","rH",6],["shB","lE",6],["lE","lH",6],["hF","fK",8],["fK","fAn",7],["fAn","fTo",5],["hB","bK",8],["bK","bAn",7],["bAn","bTo",5]];
+function proj(p,c,yaw,pitch){const dx=p[0]-c[0],dy=p[1]-6,dz=p[2]-c[1],Y=yaw*D,Pt=pitch*D;const x1=dx*Math.cos(Y)-dz*Math.sin(Y),z1=dx*Math.sin(Y)+dz*Math.cos(Y);return [x1,dy*Math.cos(Pt)+z1*Math.sin(Pt),-dy*Math.sin(Pt)+z1*Math.cos(Pt)];}
+function draw(ctx,w,h,fr,yaw=40,pitch=14,big=false){
+  ctx.fillStyle=css("--panel");ctx.fillRect(0,0,w,h);
+  const hip=fr[ix.hip],c=[hip[0],hip[2]],sc=h/(big?250:270);
+  ctx.save();ctx.translate(w/2,h*.5);ctx.scale(sc,sc);ctx.lineCap="round";
+  ctx.strokeStyle=css("--line");ctx.lineWidth=1.2;ctx.beginPath();
+  for(let i=0;i<=40;i++){const a=i/40*2*Math.PI,q=proj([hip[0]+Math.cos(a)*55,FLOOR,hip[2]+Math.sin(a)*55],c,yaw,pitch);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]);}ctx.stroke();
+  const J=k=>proj(fr[ix[k]],c,yaw,pitch),hd=J("hip")[2],items=[];
+  for(const [a,b,wd] of SEG){const A=J(a),B=J(b);items.push([(A[2]+B[2])/2,()=>{ctx.lineWidth=wd;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();}]);}
+  const H=J("hd");items.push([H[2],()=>{ctx.fillStyle=css("--panel");ctx.lineWidth=3.5;ctx.beginPath();ctx.arc(H[0],H[1],10,0,7);ctx.fill();ctx.stroke();}]);
+  items.sort((a,b)=>a[0]-b[0]);for(const [d,f] of items){ctx.strokeStyle=d<hd-3?css("--far"):css("--figure");f();}
+  ctx.restore();
+}
+// tiles
+const grid=document.getElementById("grid"),tiles=[];
+const cats=[...new Set(DATA.moves.map(m=>m.c))];
+DATA.moves.forEach((m,i)=>{
+  const t=document.createElement("div");t.className="tile";t.tabIndex=0;t.setAttribute("role","button");
+  t.innerHTML=`<canvas width="300" height="300"></canvas><b></b><span></span>`;
+  t.querySelector("b").textContent=m.n;t.querySelector("span").textContent=m.d;
+  t.onclick=()=>open(i);t.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open(i)}};
+  grid.appendChild(t);tiles.push({el:t,cv:t.querySelector("canvas"),m,vis:false});
+});
+const io=new IntersectionObserver(es=>es.forEach(e=>{const t=tiles.find(x=>x.el===e.target);t.vis=e.isIntersecting;}));
+tiles.forEach(t=>io.observe(t.el));
+tiles.forEach(t=>draw(t.cv.getContext("2d"),300,300,t.m.f[Math.floor(t.m.f.length/2)]));
+// filters
+let cat="all";const chips=document.getElementById("chips"),q=document.getElementById("q");
+function chip(name,label){const b=document.createElement("button");b.className="chip"+(name==="all"?" on":"");b.textContent=label;b.onclick=()=>{cat=name;chips.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));filter();};chips.appendChild(b);}
+chip("all","All");cats.forEach(c=>chip(c,c.replace(/_/g," ")));
+function filter(){const w=q.value.toLowerCase().split(/\s+/).filter(Boolean);let n=0;
+  tiles.forEach(t=>{const s=(t.m.n+" "+t.m.d).toLowerCase();const ok=(cat==="all"||t.m.c===cat)&&w.every(x=>s.includes(x));t.el.hidden=!ok;if(ok)n++;});
+  document.getElementById("count").textContent=n+" of "+tiles.length+" moves";}
+q.oninput=filter;filter();
+// dialog player
+const dlg=document.getElementById("dlg"),big=document.getElementById("big");let cur=null,view=[40,14];
+const VIEWS={"3/4":[40,14],Side:[0,8],Front:[90,8],Back:[-90,10],Top:[0,70]};
+const vb=document.getElementById("views");
+Object.entries(VIEWS).forEach(([k,v])=>{const b=document.createElement("button");b.className="chip"+(k==="3/4"?" on":"");b.textContent=k;b.onclick=()=>{view=v;vb.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));};vb.appendChild(b);});
+function open(i){cur=DATA.moves[i];document.getElementById("dn").textContent=cur.n;
+  document.getElementById("dd").textContent=`${cur.d} | ${cur.src} | full clip ${cur.t}s (tile shows from ${cur.start}s)`;
+  document.getElementById("cmd").textContent=`python3 .claude/skills/animation-prompt-maker/library/mocap.py make ${cur.n} --start ${cur.start} --end ${(cur.start+cur.f.length/DATA.fps).toFixed(1)} -o out`;
+  dlg.showModal();}
+document.getElementById("close").onclick=()=>dlg.close();
+document.getElementById("copy").onclick=async e=>{const t=document.getElementById("cmd").textContent;try{await navigator.clipboard.writeText(t);e.target.textContent="Copied"}catch{const r=document.createRange();r.selectNodeContents(document.getElementById("cmd"));getSelection().removeAllRanges();getSelection().addRange(r);e.target.textContent="Selected"}setTimeout(()=>e.target.textContent="Copy",1500);};
+// animation loop (only visible tiles)
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function tick(t){const fi=Math.floor(t/1000*DATA.fps);
+  if(!reduce)for(const x of tiles)if(x.vis&&!x.el.hidden)draw(x.cv.getContext("2d"),300,300,x.m.f[fi%x.m.f.length]);
+  if(dlg.open&&cur)draw(big.getContext("2d"),960,720,cur.f[fi%cur.f.length],view[0],view[1],true);
+  requestAnimationFrame(tick);}
+requestAnimationFrame(tick);
+</script>
