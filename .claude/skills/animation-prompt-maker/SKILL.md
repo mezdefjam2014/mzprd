@@ -142,7 +142,8 @@ New moves from real ones (combine any of these; a move can be `name@start-end` i
 - `--mirror` (left/right swap), `--speed 1.5`, `--exaggerate 0.4` (bigger, snappier), `--inplace` (remove travel for loops), `--keys 8` (number of storyboard panels)
 - Ready-made variations (57 seamless in-place loops, one clean move each, Mixamo style; `library/loops.py` cuts any move to a perfect loop: `make_loop(move, 'action'|'cycle')`, in `library/variations/`, recipes in `library/build_variations.py`): attacks, blocking, waves, zombies, monsters, boxing, social, emotions. Use them by name like any move. Rejected moves are listed in `library/rejected.json`: never rebuild, show or suggest them. Suspend or restore: `python3 $L suspend <name>|all` / `restore <name>|all`. Originals are never changed. Add a recipe to build_variations.py and rerun it to make more; rebuild the gallery with `python3 library/build_gallery.py tools/animation-preview/move-library.html`.
 - Own recordings (Rokoko Video, etc.): `python3 $L import my.bvh --name my_move`
-- If nothing in the library fits (gun reloads, creatures), fall back to hand posing with IK below.
+- Weapons: `library/weapons2.py` hand-animates pistol (aim, fire with recoil, double tap, 4-count draw, speed reload, pistol whip) and knife (slash combo, thrust, reverse-grip stab) loops from real technique; copy its key lists to make new ones.
+- If nothing in the library fits (creatures), fall back to hand posing with IK below.
 
 ## Fast path (hand-posed)
 
