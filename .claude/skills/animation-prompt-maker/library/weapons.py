@@ -72,9 +72,10 @@ def pistol_gun(pts, g0, g1, t):
     tilt = math.radians(g0["tilt"] + (g1["tilt"] - g0["tilt"]) * t)
     d = np.array([math.cos(tilt), math.sin(tilt), 0]); h = pts["rH"]; dn = np.array([-math.sin(tilt), math.cos(tilt), 0])
     slide = (g0.get("slide", 0) + (g1.get("slide", 0) - g0.get("slide", 0)) * t) * 4
-    out = [seg(h - d * (3 + slide), h + d * (13 - slide), 0, 5), seg(h, h + dn * 7 - d * 2, 0, 4)]
-    well = h + dn * 7 - d * 2
-    out += mag(pts, g0, g1, t, well, dn, 7)
+    top = h - dn * 6 + d * 1.5                      # hand on the grip, slide above the hand
+    out = [seg(h + dn * 3 - d * 1, top, 0, 4.5), seg(top - d * (3 + slide), top + d * (14 - slide), 0, 5)]
+    well = h + dn * 3 - d * 1
+    out += mag(pts, g0, g1, t, well, dn, 6)
     return out
 def rifle_gun(pts, g0, g1, t):
     tilt = math.radians(g0["tilt"] + (g1["tilt"] - g0["tilt"]) * t)
@@ -98,6 +99,7 @@ def mag(pts, g0, g1, t, well, dn, L):
         p = well + np.array([0, 1, 0]) * (85 - well[1]) * t * t
         return [seg(p, p + dn * L, 1, 4)] if t < .95 else []
     if a is None or b is None: return []
+    if g0["mag"] == "gun" and g1["mag"] == "gun" and L < 9: return [seg(well, well - dn * 5, 1, 2.5)]   # pistol: seated inside the grip
     p = a + (b - a) * t
     return [seg(p, p + dn * L, 1, 4)]
 
@@ -153,6 +155,7 @@ def mocap_weapon(src, kind, focus="hands", mirror=False, speed=None, **kw):
     return loops.arr(m), props_for(m, kind)
 
 def build():
+    blocked = set(json.loads((mocap.HERE / "rejected.json").read_text())) if (mocap.HERE / "rejected.json").exists() else set()
     out = []
     pf, pp = bake(PISTOL_KEYS, pistol_gun); rf, rp = bake(RIFLE_KEYS, rifle_gun)
     out.append(save("pistol_reload", "pistol reload: mag out, new mag, slide release", pf, pp))
@@ -179,6 +182,9 @@ def build():
         ("grenade_throw", "big overhand throw (real pitching mocap)", "pitch_1", "ball", {}),
     ]:
         f, p = mocap_weapon(src, kind, **kw); out.append(save(name, desc, f, p))
+    for name, _, _ in out:
+        if name in blocked: (mocap.VARS / f"{name}.json.gz").unlink(missing_ok=True)
+    out = [o for o in out if o[0] not in blocked]
     v = json.loads(mocap.VARS_INDEX.read_text())
     for name, desc, n in out:
         v[name] = dict(cat="weapons", how=desc, loop=True, frames=n, status=v.get(name, {}).get("status", "active"))

@@ -3,6 +3,8 @@ import sys, json, numpy as np, mocap
 GFPS, MAXS = 15, 6.0
 saved = mocap._saved(); moves = []
 VAR = json.loads(mocap.VARS_INDEX.read_text()) if mocap.VARS_INDEX.exists() else {}
+BLOCKED = set(json.loads((mocap.HERE / "rejected.json").read_text())) if (mocap.HERE / "rejected.json").exists() else set()
+VAR = {n: x for n, x in VAR.items() if n not in BLOCKED}
 items = [(n, d, None) for n, d in saved.items()] + [(n, v["how"], v["cat"]) for n, v in VAR.items() if v["status"] == "active" and n not in saved]
 for name, desc, vcat in items:
     m, doc = mocap.load_move(name); n = mocap.nframes(m)

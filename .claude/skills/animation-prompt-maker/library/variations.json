@@ -55,6 +55,139 @@
   "frames": 55,
   "status": "approved"
  },
+ "pistol_aim_idle": {
+  "cat": "weapons",
+  "how": "two-handed isosceles aim, breathing (both hands)",
+  "loop": true,
+  "frames": 40,
+  "status": "active"
+ },
+ "pistol_fire": {
+  "cat": "weapons",
+  "how": "two-handed shot: muzzle flip, recover on target (both hands)",
+  "loop": true,
+  "frames": 30,
+  "status": "active"
+ },
+ "pistol_double_tap": {
+  "cat": "weapons",
+  "how": "two-handed double tap (both hands)",
+  "loop": true,
+  "frames": 34,
+  "status": "active"
+ },
+ "pistol_draw_holster": {
+  "cat": "weapons",
+  "how": "four-count draw from the hip, aim, reholster",
+  "loop": true,
+  "frames": 56,
+  "status": "active"
+ },
+ "pistol_speed_reload": {
+  "cat": "weapons",
+  "how": "speed reload in the workspace: drop mag, seat, overhand rack",
+  "loop": true,
+  "frames": 46,
+  "status": "active"
+ },
+ "pistol_speed_reload_fast": {
+  "cat": "weapons",
+  "how": "fast speed reload",
+  "loop": true,
+  "frames": 34,
+  "status": "active"
+ },
+ "pistol_whip": {
+  "cat": "weapons",
+  "how": "pistol whip: cock by the ear, strike down and across with the slide",
+  "loop": true,
+  "frames": 26,
+  "status": "active"
+ },
+ "pistol_whip_backhand": {
+  "cat": "weapons",
+  "how": "backhand pistol whip",
+  "loop": true,
+  "frames": 26,
+  "status": "active"
+ },
+ "knife_slash_combo": {
+  "cat": "weapons",
+  "how": "forward-grip forehand + backhand slash (figure 8)",
+  "loop": true,
+  "frames": 24,
+  "status": "active"
+ },
+ "knife_thrust": {
+  "cat": "weapons",
+  "how": "lunging knife thrust",
+  "loop": true,
+  "frames": 28,
+  "status": "active"
+ },
+ "knife_icepick_stab": {
+  "cat": "weapons",
+  "how": "reverse-grip overhead stab",
+  "loop": true,
+  "frames": 22,
+  "status": "active"
+ },
+ "pistol_whip_lefty": {
+  "cat": "weapons",
+  "how": "left-handed pistol whip",
+  "loop": true,
+  "frames": 26,
+  "status": "active"
+ },
+ "knife_slash_combo_lefty": {
+  "cat": "weapons",
+  "how": "left-handed knife slashes",
+  "loop": true,
+  "frames": 24,
+  "status": "active"
+ },
+ "pistol_fire_right_hand": {
+  "cat": "weapons",
+  "how": "one-handed shot, right hand",
+  "loop": true,
+  "frames": 32,
+  "status": "active"
+ },
+ "pistol_double_tap_right_hand": {
+  "cat": "weapons",
+  "how": "one-handed double tap, right hand",
+  "loop": true,
+  "frames": 38,
+  "status": "active"
+ },
+ "pistol_aim_right_hand": {
+  "cat": "weapons",
+  "how": "one-handed aim, right hand",
+  "loop": true,
+  "frames": 40,
+  "status": "active"
+ },
+ "pistol_fire_left_hand": {
+  "cat": "weapons",
+  "how": "one-handed shot, left hand",
+  "loop": true,
+  "frames": 32,
+  "status": "active"
+ },
+ "pistol_double_tap_left_hand": {
+  "cat": "weapons",
+  "how": "one-handed double tap, left hand",
+  "loop": true,
+  "frames": 38,
+  "status": "active"
+ },
+ "pistol_aim_left_hand": {
+  "cat": "weapons",
+  "how": "one-handed aim, left hand",
+  "loop": true,
+  "frames": 40,
+  "status": "active"
+ },
  "snap_jab": {
   "cat": "attacks",
   "how": "fast snappy jab",
@@ -326,96 +459,5 @@
   "frames": 33,
   "seam": 0.8,
   "status": "approved"
- },
- "pistol_aim_idle": {
-  "cat": "weapons",
-  "how": "two-handed isosceles aim, breathing",
-  "loop": true,
-  "frames": 40,
-  "status": "active"
- },
- "pistol_fire": {
-  "cat": "weapons",
-  "how": "aim and fire one shot: muzzle flip, recover on target",
-  "loop": true,
-  "frames": 30,
-  "status": "active"
- },
- "pistol_double_tap": {
-  "cat": "weapons",
-  "how": "two fast shots",
-  "loop": true,
-  "frames": 34,
-  "status": "active"
- },
- "pistol_draw_holster": {
-  "cat": "weapons",
-  "how": "four-count draw from the hip, aim, reholster",
-  "loop": true,
-  "frames": 56,
-  "status": "active"
- },
- "pistol_speed_reload": {
-  "cat": "weapons",
-  "how": "speed reload in the workspace: drop mag, seat, overhand rack",
-  "loop": true,
-  "frames": 46,
-  "status": "active"
- },
- "pistol_speed_reload_fast": {
-  "cat": "weapons",
-  "how": "fast speed reload",
-  "loop": true,
-  "frames": 34,
-  "status": "active"
- },
- "pistol_whip": {
-  "cat": "weapons",
-  "how": "pistol whip: cock by the ear, strike down and across with the slide",
-  "loop": true,
-  "frames": 26,
-  "status": "active"
- },
- "pistol_whip_backhand": {
-  "cat": "weapons",
-  "how": "backhand pistol whip",
-  "loop": true,
-  "frames": 26,
-  "status": "active"
- },
- "knife_slash_combo": {
-  "cat": "weapons",
-  "how": "forward-grip forehand + backhand slash (figure 8)",
-  "loop": true,
-  "frames": 24,
-  "status": "active"
- },
- "knife_thrust": {
-  "cat": "weapons",
-  "how": "lunging knife thrust",
-  "loop": true,
-  "frames": 28,
-  "status": "active"
- },
- "knife_icepick_stab": {
-  "cat": "weapons",
-  "how": "reverse-grip overhead stab",
-  "loop": true,
-  "frames": 22,
-  "status": "active"
- },
- "pistol_whip_lefty": {
-  "cat": "weapons",
-  "how": "left-handed pistol whip",
-  "loop": true,
-  "frames": 26,
-  "status": "active"
- },
- "knife_slash_combo_lefty": {
-  "cat": "weapons",
-  "how": "left-handed knife slashes",
-  "loop": true,
-  "frames": 24,
-  "status": "active"
  }
 }

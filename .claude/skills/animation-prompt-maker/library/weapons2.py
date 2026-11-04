@@ -36,17 +36,23 @@ def pistol(pts, g0, g1, t, first):
     h0, d0, n0 = gun_frame(pts, g0); h1, d1, n1 = gun_frame(pts, g1)
     h, d, dn = lerpv(h0, h1, t), nrm(lerpv(d0, d1, t)), nrm(lerpv(n0, n1, t))
     sl = lerpv([g0.get("slide", 0)], [g1.get("slide", 0)], t)[0] * 4
-    out = [seg(h - d * (3 + sl), h + d * (14 - sl), 0, 5.5), seg(h - d * 1, h + dn * 8 - d * 2.5, 0, 4.5)]
-    well = h + dn * 8 - d * 2.5
+    top = h - dn * 6 + d * 1.5                       # the hand wraps the grip; slide sits above the web of the hand
+    out = [seg(h + dn * 3 - d * 1, top, 0, 5),          # grip (handle), angled slightly back like a real pistol
+           seg(top - d * (3 + sl), top + d * (15 - sl), 0, 5.5)]   # slide / barrel
+    well = h + dn * 3 - d * 1
     m0, m1 = g0.get("mag", "gun"), g1.get("mag", "gun")
     def where(st):
         return {"gun": well, "hand": pts["lH"] + np.array([0, -2, 0]), "pouch": np.array([7.0, 1, -11])}.get(st)
     if m0 == "gun" and m1 == "drop":
-        p = well + np.array([0, 1.0, 0]) * (84 - well[1]) * t * t; out.append(seg(p, p + dn * 7, 1, 4))
+        p = well + np.array([0, 1.0, 0]) * (84 - well[1]) * t * t; out.append(seg(p, p + dn * 6, 1, 4))
     elif m0 in ("drop",) and m1 == "pouch": pass
+    elif m0 == "gun" and m1 == "gun":
+        out.append(seg(well, well - dn * 5, 1, 2.5))          # seated: inside the grip, flush with its base
     elif where(m0) is not None and where(m1) is not None:
-        p = lerpv(where(m0), where(m1), t); out.append(seg(p, p + (dn if m1 == "gun" or m0 == "gun" else np.array([0, 1.0, 0])) * 7, 1, 4))
-    if g0.get("flash") and first: out.append(seg(h + d * 15, h + d * 24, 1, 7))   # muzzle flash on the shot frame
+        p = lerpv(where(m0), where(m1), t)
+        if m1 == "gun": p = p + dn * 6 * (1 - t)               # slides up into the grip as it seats
+        out.append(seg(p, p - dn * 5 if m1 == "gun" else p + np.array([0, 1.0, 0]) * 6, 1, 3.5))
+    if g0.get("flash") and first: out.append(seg(top + d * 16, top + d * 25, 1, 7))   # muzzle flash on the shot frame
     return out
 def knife(pts, g0, g1, t, first):
     rev = g0.get("grip") == "reverse"
@@ -66,6 +72,16 @@ def recoil(f):   # one shot: muzzle flip and hands rise for 2 frames, settle ove
 FIRE = [(0, AIM, G())] + recoil(8) + [(30, AIM, G())]
 DOUBLE = [(0, AIM, G())] + recoil(6)[:-1] + recoil(13) + [(34, AIM, G())]
 AIM_IDLE = [(0, AIM, G()), (20, dict(AIM, rHand=[61, -59.3, 1.4], lHand=[59, -58.3, -.6], lean=8.5), G()), (40, AIM, G())]
+
+ONE = dict(rHand=[63, -61, 6], lHand=[16, -40, -4], lean=6, head=2, twist=-12)     # one-handed: bladed stance, gun arm straight, off hand tucked at the chest
+def recoil1(f):   # one hand takes more muzzle flip
+    return [(f, ONE, G(flash=True)),
+            (f + 2, dict(ONE, rHand=[59, -70, 6], head=1, lean=5), G(tilt=-28, slide=1, snap=True)),
+            (f + 4, dict(ONE, rHand=[62, -64, 6]), G(tilt=-9)),
+            (f + 8, ONE, G())]
+FIRE1 = [(0, ONE, G())] + recoil1(8) + [(32, ONE, G())]
+DOUBLE1 = [(0, ONE, G())] + recoil1(6)[:-1] + recoil1(14) + [(38, ONE, G())]
+AIM1_IDLE = [(0, ONE, G()), (20, dict(ONE, rHand=[63, -60.2, 6.5], lean=6.5), G()), (40, ONE, G())]
 
 RELAX = dict(rHand=[5, 14, 15], lHand=[5, 14, -15], lean=3, head=4)
 DRAW = [  # four-count draw, then reholster so it loops
@@ -144,9 +160,9 @@ def retime(keys, k): return [(int(round(f * k)), p, g) for f, p, g in keys]
 def build():
     blocked = set(json.load(open(mocap.HERE / "rejected.json")))
     items = [
-        ("pistol_aim_idle", "two-handed isosceles aim, breathing", bake(AIM_IDLE, pistol)),
-        ("pistol_fire", "aim and fire one shot: muzzle flip, recover on target", bake(FIRE, pistol)),
-        ("pistol_double_tap", "two fast shots", bake(DOUBLE, pistol)),
+        ("pistol_aim_idle", "two-handed isosceles aim, breathing (both hands)", bake(AIM_IDLE, pistol)),
+        ("pistol_fire", "two-handed shot: muzzle flip, recover on target (both hands)", bake(FIRE, pistol)),
+        ("pistol_double_tap", "two-handed double tap (both hands)", bake(DOUBLE, pistol)),
         ("pistol_draw_holster", "four-count draw from the hip, aim, reholster", bake(DRAW, pistol)),
         ("pistol_speed_reload", "speed reload in the workspace: drop mag, seat, overhand rack", bake(RELOAD, pistol)),
         ("pistol_speed_reload_fast", "fast speed reload", bake(retime(RELOAD, .75), pistol)),
@@ -156,12 +172,20 @@ def build():
         ("knife_thrust", "lunging knife thrust", bake(THRUST, knife)),
         ("knife_icepick_stab", "reverse-grip overhead stab", bake(ICEPICK, knife)),
     ]
+    items += [
+        ("pistol_fire_right_hand", "one-handed shot, right hand", bake(FIRE1, pistol)),
+        ("pistol_double_tap_right_hand", "one-handed double tap, right hand", bake(DOUBLE1, pistol)),
+        ("pistol_aim_right_hand", "one-handed aim, right hand", bake(AIM1_IDLE, pistol)),
+    ]
     v = json.loads(mocap.VARS_INDEX.read_text()); out = []
     for name, desc, (f, p) in items:
         if name in blocked: continue
         save(name, desc, f, p); out.append(name)
         v[name] = dict(cat="weapons", how=desc, loop=True, frames=len(f), status=v.get(name, {}).get("status", "active"))
-    for name, desc, src in [("pistol_whip_lefty", "left-handed pistol whip", "pistol_whip"), ("knife_slash_combo_lefty", "left-handed knife slashes", "knife_slash_combo")]:
+    for name, desc, src in [("pistol_whip_lefty", "left-handed pistol whip", "pistol_whip"), ("knife_slash_combo_lefty", "left-handed knife slashes", "knife_slash_combo"),
+                            ("pistol_fire_left_hand", "one-handed shot, left hand", "pistol_fire_right_hand"),
+                            ("pistol_double_tap_left_hand", "one-handed double tap, left hand", "pistol_double_tap_right_hand"),
+                            ("pistol_aim_left_hand", "one-handed aim, left hand", "pistol_aim_right_hand")]:
         if name in blocked: continue
         f, p = dict((n, r) for n, _, r in items)[src]; f2, p2 = mirror_frames(f, p); save(name, desc, f2, p2); out.append(name)
         v[name] = dict(cat="weapons", how=desc, loop=True, frames=len(f2), status=v.get(name, {}).get("status", "active"))
