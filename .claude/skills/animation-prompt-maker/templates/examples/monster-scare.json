@@ -9,64 +9,76 @@
    "f": 1,
    "n": "Monster crouched low in the shadows, hunched over, arms hanging.",
    "pose": {
-    "y": 25,
     "lean": 40,
     "head": -15,
     "rU": 110,
     "rF": 100,
     "lU": 115,
     "lF": 105,
-    "fT": 20,
-    "fS": 110,
-    "bT": 60,
-    "bS": 145,
     "rO": 12,
     "lO": 12,
-    "fO": 15,
-    "bO": 15
+    "hipH": 50,
+    "bFoot": [
+     -20,
+     85,
+     -14
+    ],
+    "fFoot": [
+     22,
+     85,
+     14
+    ]
    }
   },
   {
    "f": 8,
    "n": "Head slowly twitches up toward the camera.",
    "pose": {
-    "y": 25,
     "lean": 35,
     "head": -40,
     "rU": 105,
     "rF": 100,
     "lU": 112,
     "lF": 104,
-    "fT": 20,
-    "fS": 110,
-    "bT": 60,
-    "bS": 145,
     "rO": 12,
     "lO": 12,
-    "fO": 15,
-    "bO": 15,
-    "look": -15
+    "look": -15,
+    "hipH": 50,
+    "bFoot": [
+     -20,
+     85,
+     -14
+    ],
+    "fFoot": [
+     22,
+     85,
+     14
+    ]
    }
   },
   {
    "f": 16,
    "n": "Sinks even lower, arms pulled back, coiling to spring.",
    "pose": {
-    "y": 32,
     "lean": 50,
     "head": -30,
     "rU": 150,
     "rF": 160,
     "lU": 145,
     "lF": 155,
-    "fT": 10,
-    "fS": 115,
-    "bT": 55,
-    "bS": 151,
     "rO": 20,
     "lO": 20,
-    "fO": 18,
-    "bO": 18
+    "hipH": 44,
+    "bFoot": [
+     -20,
+     85,
+     -14
+    ],
+    "fFoot": [
+     22,
+     85,
+     14
+    ]
    }
   },
   {
@@ -74,42 +86,50 @@
    "snap": true,
    "n": "Bursts upright, arms flung high, claws spread.",
    "pose": {
-    "y": -4,
     "lean": -15,
     "head": -35,
     "rU": -60,
     "rF": -100,
     "lU": -75,
     "lF": -115,
-    "fT": 85,
-    "fS": 90,
-    "bT": 105,
-    "bS": 95,
     "rO": 30,
     "lO": 30,
-    "fO": 6,
-    "bO": 6
+    "hipH": 86,
+    "bFoot": [
+     -20,
+     85,
+     -14
+    ],
+    "fFoot": [
+     22,
+     85,
+     14
+    ]
    }
   },
   {
    "f": 26,
    "n": "Roars at the camera, head thrown back, arms wide.",
    "pose": {
-    "y": 0,
     "lean": -20,
     "head": -45,
     "rU": -30,
     "rF": -60,
     "lU": -120,
     "lF": -150,
-    "fT": 82,
-    "fS": 92,
-    "bT": 103,
-    "bS": 95,
     "rO": 50,
     "lO": 50,
-    "fO": 6,
-    "bO": 6
+    "hipH": 86,
+    "bFoot": [
+     -20,
+     85,
+     -14
+    ],
+    "fFoot": [
+     22,
+     85,
+     14
+    ]
    }
   },
   {
@@ -118,21 +138,25 @@
    "n": "Lunges forward, both clawed hands reaching at the viewer.",
    "pose": {
     "x": 30,
-    "y": 8,
     "lean": 35,
     "head": 0,
     "rU": 5,
     "rF": 0,
     "lU": -5,
     "lF": -10,
-    "fT": 40,
-    "fS": 95,
-    "bT": 130,
-    "bS": 110,
     "rO": -6,
     "lO": -6,
-    "fO": 8,
-    "bO": 8
+    "hipH": 70,
+    "bFoot": [
+     -20,
+     85,
+     -14
+    ],
+    "fFoot": [
+     58,
+     85,
+     14
+    ]
    }
   },
   {
@@ -140,21 +164,25 @@
    "n": "Freezes in the lunge, trembling, inches from the camera.",
    "pose": {
     "x": 34,
-    "y": 9,
     "lean": 40,
     "head": -5,
     "rU": 8,
     "rF": 2,
     "lU": -3,
     "lF": -8,
-    "fT": 42,
-    "fS": 95,
-    "bT": 132,
-    "bS": 110,
     "rO": -8,
     "lO": -8,
-    "fO": 8,
-    "bO": 8
+    "hipH": 68,
+    "bFoot": [
+     -20,
+     85,
+     -14
+    ],
+    "fFoot": [
+     58,
+     85,
+     14
+    ]
    }
   }
  ],

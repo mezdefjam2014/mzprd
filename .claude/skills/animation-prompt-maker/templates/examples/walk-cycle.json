@@ -9,158 +9,213 @@
    "f": 1,
    "n": "Contact: front heel touches down, back toe pushing off, arms opposite.",
    "pose": {
-    "y": 4,
     "lean": 3,
     "rU": 105,
     "rF": 100,
     "lU": 70,
     "lF": 60,
-    "fT": 65,
-    "fS": 80,
-    "bT": 118,
-    "bS": 112,
-    "bA": 35,
-    "twist": -7
+    "twist": -7,
+    "hipH": 82,
+    "fFoot": [
+     22,
+     85,
+     5
+    ],
+    "bFoot": [
+     -24,
+     82,
+     -5
+    ],
+    "bP": 35
    }
   },
   {
    "f": 4,
    "n": "Down: weight sinks onto the front leg, knee bends.",
    "pose": {
-    "y": 8,
     "lean": 4,
     "rU": 98,
     "rF": 95,
     "lU": 78,
     "lF": 68,
-    "fT": 78,
-    "fS": 95,
-    "bT": 115,
-    "bS": 125,
-    "bA": 60,
-    "twist": -5
+    "twist": -5,
+    "hipH": 79,
+    "fFoot": [
+     11,
+     85,
+     5
+    ],
+    "bFoot": [
+     -26,
+     72,
+     -5
+    ]
    }
   },
   {
    "f": 7,
    "n": "Passing: back leg swings past the standing leg.",
    "pose": {
-    "y": 1,
     "lean": 4,
     "rU": 90,
     "rF": 88,
     "lU": 88,
     "lF": 80,
-    "fT": 95,
-    "fS": 93,
-    "bT": 85,
-    "bS": 120,
-    "twist": 0
+    "twist": 0,
+    "hipH": 84,
+    "fFoot": [
+     0,
+     85,
+     5
+    ],
+    "bFoot": [
+     0,
+     74,
+     -5
+    ]
    }
   },
   {
    "f": 10,
    "n": "Up: body rises on the standing leg, swinging foot reaches forward.",
    "pose": {
-    "y": -2,
     "lean": 4,
     "rU": 80,
     "rF": 72,
     "lU": 98,
     "lF": 92,
-    "fT": 105,
-    "fS": 100,
-    "bT": 65,
-    "bS": 95,
-    "twist": 5
+    "twist": 5,
+    "hipH": 86,
+    "fFoot": [
+     -11,
+     85,
+     5
+    ],
+    "bFoot": [
+     16,
+     79,
+     -5
+    ]
    }
   },
   {
    "f": 13,
    "n": "Contact: other heel touches down, mirrored from frame 1.",
    "pose": {
-    "y": 4,
     "lean": 3,
     "rU": 70,
     "rF": 60,
     "lU": 105,
     "lF": 100,
-    "fT": 118,
-    "fS": 112,
-    "bT": 65,
-    "bS": 80,
-    "fA": 35,
-    "twist": 7
+    "twist": 7,
+    "hipH": 82,
+    "fFoot": [
+     -24,
+     82,
+     5
+    ],
+    "bFoot": [
+     22,
+     85,
+     -5
+    ],
+    "fP": 35
    }
   },
   {
    "f": 16,
    "n": "Down: weight sinks onto the new front leg.",
    "pose": {
-    "y": 8,
     "lean": 4,
     "rU": 78,
     "rF": 68,
     "lU": 98,
     "lF": 95,
-    "fT": 115,
-    "fS": 125,
-    "bT": 78,
-    "bS": 95,
-    "fA": 60,
-    "twist": 5
+    "twist": 5,
+    "hipH": 79,
+    "fFoot": [
+     -26,
+     72,
+     5
+    ],
+    "bFoot": [
+     11,
+     85,
+     -5
+    ],
+    "fP": null
    }
   },
   {
    "f": 19,
    "n": "Passing: the other leg swings through.",
    "pose": {
-    "y": 1,
     "lean": 4,
     "rU": 88,
     "rF": 80,
     "lU": 90,
     "lF": 88,
-    "fT": 85,
-    "fS": 120,
-    "bT": 95,
-    "bS": 93,
-    "twist": 0
+    "twist": 0,
+    "hipH": 84,
+    "fFoot": [
+     0,
+     74,
+     5
+    ],
+    "bFoot": [
+     0,
+     85,
+     -5
+    ],
+    "fP": null
    }
   },
   {
    "f": 22,
    "n": "Up: rise again, front foot reaches forward.",
    "pose": {
-    "y": -2,
     "lean": 4,
     "rU": 98,
     "rF": 92,
     "lU": 80,
     "lF": 72,
-    "fT": 65,
-    "fS": 95,
-    "bT": 105,
-    "bS": 100,
-    "twist": -5
+    "twist": -5,
+    "hipH": 86,
+    "fFoot": [
+     16,
+     79,
+     5
+    ],
+    "bFoot": [
+     -11,
+     85,
+     -5
+    ],
+    "fP": null
    }
   },
   {
    "f": 25,
    "n": "Back to the first contact pose to close the loop.",
    "pose": {
-    "y": 4,
     "lean": 3,
     "rU": 105,
     "rF": 100,
     "lU": 70,
     "lF": 60,
-    "fT": 65,
-    "fS": 80,
-    "bT": 118,
-    "bS": 112,
-    "bA": 35,
-    "twist": -7
+    "twist": -7,
+    "hipH": 82,
+    "fFoot": [
+     22,
+     85,
+     5
+    ],
+    "bFoot": [
+     -24,
+     82,
+     -5
+    ],
+    "bP": 35
    }
   }
  ],

@@ -56,6 +56,7 @@ section{display:flex;flex-direction:column;gap:12px}
       <input type="range" id="scrub" min="1" step="0.1" value="1" aria-label="Frame">
       <div class="readout" id="readout"></div>
     </div>
+    <p class="note" id="check"></p>
     <p class="note"><span id="note"></span> Drag the stage to orbit the camera.</p>
   </section>
   <section><h2>Key frames</h2><div class="grid" id="grid"></div></section>
@@ -78,158 +79,213 @@ const DATA = {
    "f": 1,
    "n": "Contact: front heel touches down, back toe pushing off, arms opposite.",
    "pose": {
-    "y": 4,
     "lean": 3,
     "rU": 105,
     "rF": 100,
     "lU": 70,
     "lF": 60,
-    "fT": 65,
-    "fS": 80,
-    "bT": 118,
-    "bS": 112,
-    "bA": 35,
-    "twist": -7
+    "twist": -7,
+    "hipH": 82,
+    "fFoot": [
+     22,
+     85,
+     5
+    ],
+    "bFoot": [
+     -24,
+     82,
+     -5
+    ],
+    "bP": 35
    }
   },
   {
    "f": 4,
    "n": "Down: weight sinks onto the front leg, knee bends.",
    "pose": {
-    "y": 8,
     "lean": 4,
     "rU": 98,
     "rF": 95,
     "lU": 78,
     "lF": 68,
-    "fT": 78,
-    "fS": 95,
-    "bT": 115,
-    "bS": 125,
-    "bA": 60,
-    "twist": -5
+    "twist": -5,
+    "hipH": 79,
+    "fFoot": [
+     11,
+     85,
+     5
+    ],
+    "bFoot": [
+     -26,
+     72,
+     -5
+    ]
    }
   },
   {
    "f": 7,
    "n": "Passing: back leg swings past the standing leg.",
    "pose": {
-    "y": 1,
     "lean": 4,
     "rU": 90,
     "rF": 88,
     "lU": 88,
     "lF": 80,
-    "fT": 95,
-    "fS": 93,
-    "bT": 85,
-    "bS": 120,
-    "twist": 0
+    "twist": 0,
+    "hipH": 84,
+    "fFoot": [
+     0,
+     85,
+     5
+    ],
+    "bFoot": [
+     0,
+     74,
+     -5
+    ]
    }
   },
   {
    "f": 10,
    "n": "Up: body rises on the standing leg, swinging foot reaches forward.",
    "pose": {
-    "y": -2,
     "lean": 4,
     "rU": 80,
     "rF": 72,
     "lU": 98,
     "lF": 92,
-    "fT": 105,
-    "fS": 100,
-    "bT": 65,
-    "bS": 95,
-    "twist": 5
+    "twist": 5,
+    "hipH": 86,
+    "fFoot": [
+     -11,
+     85,
+     5
+    ],
+    "bFoot": [
+     16,
+     79,
+     -5
+    ]
    }
   },
   {
    "f": 13,
    "n": "Contact: other heel touches down, mirrored from frame 1.",
    "pose": {
-    "y": 4,
     "lean": 3,
     "rU": 70,
     "rF": 60,
     "lU": 105,
     "lF": 100,
-    "fT": 118,
-    "fS": 112,
-    "bT": 65,
-    "bS": 80,
-    "fA": 35,
-    "twist": 7
+    "twist": 7,
+    "hipH": 82,
+    "fFoot": [
+     -24,
+     82,
+     5
+    ],
+    "bFoot": [
+     22,
+     85,
+     -5
+    ],
+    "fP": 35
    }
   },
   {
    "f": 16,
    "n": "Down: weight sinks onto the new front leg.",
    "pose": {
-    "y": 8,
     "lean": 4,
     "rU": 78,
     "rF": 68,
     "lU": 98,
     "lF": 95,
-    "fT": 115,
-    "fS": 125,
-    "bT": 78,
-    "bS": 95,
-    "fA": 60,
-    "twist": 5
+    "twist": 5,
+    "hipH": 79,
+    "fFoot": [
+     -26,
+     72,
+     5
+    ],
+    "bFoot": [
+     11,
+     85,
+     -5
+    ],
+    "fP": null
    }
   },
   {
    "f": 19,
    "n": "Passing: the other leg swings through.",
    "pose": {
-    "y": 1,
     "lean": 4,
     "rU": 88,
     "rF": 80,
     "lU": 90,
     "lF": 88,
-    "fT": 85,
-    "fS": 120,
-    "bT": 95,
-    "bS": 93,
-    "twist": 0
+    "twist": 0,
+    "hipH": 84,
+    "fFoot": [
+     0,
+     74,
+     5
+    ],
+    "bFoot": [
+     0,
+     85,
+     -5
+    ],
+    "fP": null
    }
   },
   {
    "f": 22,
    "n": "Up: rise again, front foot reaches forward.",
    "pose": {
-    "y": -2,
     "lean": 4,
     "rU": 98,
     "rF": 92,
     "lU": 80,
     "lF": 72,
-    "fT": 65,
-    "fS": 95,
-    "bT": 105,
-    "bS": 100,
-    "twist": -5
+    "twist": -5,
+    "hipH": 86,
+    "fFoot": [
+     16,
+     79,
+     5
+    ],
+    "bFoot": [
+     -11,
+     85,
+     -5
+    ],
+    "fP": null
    }
   },
   {
    "f": 25,
    "n": "Back to the first contact pose to close the loop.",
    "pose": {
-    "y": 4,
     "lean": 3,
     "rU": 105,
     "rF": 100,
     "lU": 70,
     "lF": 60,
-    "fT": 65,
-    "fS": 80,
-    "bT": 118,
-    "bS": 112,
-    "bA": 35,
-    "twist": -7
+    "twist": -7,
+    "hipH": 82,
+    "fFoot": [
+     22,
+     85,
+     5
+    ],
+    "bFoot": [
+     -24,
+     82,
+     -5
+    ],
+    "bP": 35
    }
   }
  ],
@@ -242,15 +298,41 @@ const DATA = {
 // ---------- engine (do not edit per animation) ----------
 const D=Math.PI/180;
 const L={torso:30,chest:28,neck:7,head:11.5,upper:30,fore:27,thigh:46,shin:45,foot:14,shW:9,hipW:5};
-const FLOOR=89;
-// relaxed standing pose. Sagittal angles (side view) + 3D: *O = limb swings out to the side, twist = upper body yaw, turn = whole body yaw, look = head yaw
-const REST={x:0,y:0,z:0,lean:2,chest:0,head:4,twist:0,turn:0,look:0,
-  rU:86,rF:80,lU:93,lF:86,rO:8,lO:8,fT:84,fS:97,bT:95,bS:90,fA:0,bA:0,fO:3,bO:3};
+const FLOOR=89, ANKLE=4;               // ankle sits 4 units above the floor when planted
+const LIM={knee:150,elbow:150};        // max bend in degrees (joints never bend backwards: IK bends toward the pole)
+// rest pose. Limbs can be posed by angles (rU, fT...) or by IK targets in world space (rHand, lHand, fFoot, bFoot = [x,y,z]).
+const REST={x:0,y:0,z:0,hipH:null,lean:2,chest:0,head:4,twist:0,turn:0,look:0,
+  rU:86,rF:80,lU:93,lF:86,rO:8,lO:8,fT:84,fS:97,bT:95,bS:90,fO:3,bO:3,fP:null,bP:null};
+const VEC=["rHand","lHand","fFoot","bFoot"];
 const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
-const dir=(a,o=0,side=1)=>[Math.cos(a*D)*Math.cos(o*D),Math.sin(a*D)*Math.cos(o*D),side*Math.sin(o*D)];
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
 const mul=(v,k)=>[v[0]*k,v[1]*k,v[2]*k];
+const dotv=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const len=v=>Math.hypot(...v);
+const norm=v=>{const l=len(v)||1;return mul(v,1/l)};
+const dir=(a,o=0,side=1)=>[Math.cos(a*D)*Math.cos(o*D),Math.sin(a*D)*Math.cos(o*D),side*Math.sin(o*D)];
 const limb=(f,a,l,o=0,side=1)=>add(f,mul(dir(a,o,side),l));
 function rotY(p,c,t){const dx=p[0]-c[0],dz=p[2]-c[2],C=Math.cos(t*D),S=Math.sin(t*D);return [c[0]+dx*C+dz*S,p[1],c[2]-dx*S+dz*C];}
+// two-bone IK: root -> mid -> end reaching target, mid bends toward pole. Returns [mid,end,stretched]
+function ik(root,target,a,b,pole,maxBend){
+  let d=sub(target,root),dist=len(d);const n=norm(d);
+  const dMin=Math.sqrt(a*a+b*b-2*a*b*Math.cos((180-maxBend)*D));
+  const stretched=dist>a+b-.01;
+  dist=Math.min(a+b-.01,Math.max(dMin,dist));
+  const cosA=(a*a+dist*dist-b*b)/(2*a*dist), sinA=Math.sqrt(Math.max(0,1-cosA*cosA));
+  let perp=sub(pole,mul(n,dotv(pole,n)));if(len(perp)<1e-4)perp=[0,-1,0];perp=norm(perp);
+  const mid=add(root,add(mul(n,a*cosA),mul(perp,a*sinA)));
+  return [mid,add(root,mul(n,dist)),stretched];
+}
+// foot: flat on the floor when planted, otherwise follows the shin with the toe pointed (fP/bP override: 0 neutral .. 90 fully pointed)
+function footTip(knee,ankle,fwd,plantar){
+  const sd=norm(sub(ankle,knee));
+  const grounded=ankle[1]>=FLOOR-ANKLE-3;
+  if(plantar==null&&grounded)return add(ankle,mul(norm([fwd[0],0,fwd[2]]),L.foot));
+  const k=(plantar==null?55:plantar)/90;
+  let neutral=sub(fwd,mul(sd,dotv(fwd,sd)));if(len(neutral)<1e-4)neutral=fwd;neutral=norm(neutral);
+  return add(ankle,mul(norm(add(mul(neutral,1-k),mul(sd,k))),L.foot));
+}
 function rawSolve(p){
   const hip=[p.x,p.y,p.z];
   const mid=limb(hip,-90+p.lean,L.torso);
@@ -262,22 +344,52 @@ function rawSolve(p){
   let lE=limb(shB,p.lU,L.upper,p.lO,-1), lH=limb(lE,p.lF,L.fore,p.lO,-1);
   [shF,shB,rE,rH,lE,lH]=[shF,shB,rE,rH,lE,lH].map(q=>rotY(q,sh,p.twist));
   const hF=add(hip,[0,0,L.hipW]), hB=add(hip,[0,0,-L.hipW]);
-  const fK=limb(hF,p.fT,L.thigh,p.fO,1), fAn=limb(fK,p.fS,L.shin,p.fO,1), fTo=limb(fAn,p.fA,L.foot);
-  const bK=limb(hB,p.bT,L.thigh,p.bO,-1), bAn=limb(bK,p.bS,L.shin,p.bO,-1), bTo=limb(bAn,p.bA,L.foot);
+  let fK=limb(hF,p.fT,L.thigh,p.fO,1), fAn=limb(fK,p.fS,L.shin,p.fO,1);
+  let bK=limb(hB,p.bT,L.thigh,p.bO,-1), bAn=limb(bK,p.bS,L.shin,p.bO,-1);
   const face=add(hd,mul(rotY([Math.cos((p.head*.6+p.lean)*D),Math.sin((p.head*.6+p.lean)*D),0],[0,0,0],p.twist+p.look),8));
-  const pts={hip,mid,sh,shF,shB,nk,hd,face,rE,rH,lE,lH,hF,hB,fK,fAn,fTo,bK,bAn,bTo};
+  const pts={hip,mid,sh,shF,shB,nk,hd,face,rE,rH,lE,lH,hF,hB,fK,fAn,bK,bAn};
   if(p.turn)for(const k in pts)pts[k]=rotY(pts[k],hip,p.turn);
-  return {...pts,ang:{rH:p.rF,lH:p.lF,fFoot:p.fA,bFoot:p.bA,hip:p.lean,head:p.head,chest:p.lean+p.chest,world:0},
+  // IK limbs (targets are world space, so the body can move while hands/feet stay put)
+  const fwd=rotY([1,0,0],[0,0,0],p.turn), chestFwd=rotY([1,0,0],[0,0,0],p.turn+p.twist);
+  const right=rotY([0,0,1],[0,0,0],p.turn), chestRight=rotY([0,0,1],[0,0,0],p.turn+p.twist);
+  const warn=[];
+  const kneePole=side=>norm(add(fwd,mul(side==1?right:mul(right,-1),.25)));
+  const elbowPole=side=>norm(add(add(mul(chestFwd,-1),[0,.6,0]),mul(chestRight,side*.6)));
+  if(p.fFoot){const r=ik(pts.hF,p.fFoot,L.thigh,L.shin,kneePole(1),LIM.knee);pts.fK=r[0];pts.fAn=r[1];if(r[2])warn.push("front leg can't reach its target");}
+  if(p.bFoot){const r=ik(pts.hB,p.bFoot,L.thigh,L.shin,kneePole(-1),LIM.knee);pts.bK=r[0];pts.bAn=r[1];if(r[2])warn.push("back leg can't reach its target");}
+  if(p.rHand){const r=ik(pts.shF,p.rHand,L.upper,L.fore,elbowPole(1),LIM.elbow);pts.rE=r[0];pts.rH=r[1];if(r[2])warn.push("right arm can't reach its target");}
+  if(p.lHand){const r=ik(pts.shB,p.lHand,L.upper,L.fore,elbowPole(-1),LIM.elbow);pts.lE=r[0];pts.lH=r[1];if(r[2])warn.push("left arm can't reach its target");}
+  pts.fTo=footTip(pts.fK,pts.fAn,fwd,p.fP); pts.bTo=footTip(pts.bK,pts.bAn,fwd,p.bP);
+  // limb angles for props that "follow" a hand or foot (side-view angle of the forearm/foot)
+  const ang2=(a,b)=>Math.atan2(b[1]-a[1],Math.hypot(b[0]-a[0],b[2]-a[2])*Math.sign((b[0]-a[0])*fwd[0]+(b[2]-a[2])*fwd[2]||1))/D;
+  return {...pts,warn,ang:{rH:ang2(pts.rE,pts.rH),lH:ang2(pts.lE,pts.lH),fFoot:ang2(pts.fAn,pts.fTo),bFoot:ang2(pts.bAn,pts.bTo),hip:p.lean,head:p.head,chest:p.lean+p.chest,world:0},
     yaw:{rH:p.turn+p.twist,lH:p.turn+p.twist,chest:p.turn+p.twist,head:p.turn+p.twist+p.look,fFoot:p.turn,bFoot:p.turn,hip:p.turn,world:0}};
 }
 function ground(k){
   const p={...REST,...(k.pose||{})};
+  if(p.hipH!=null||p.fFoot||p.bFoot){p.y=FLOOR-(p.hipH??84);return p;}   // IK legs: hip height is explicit
   const s=rawSolve({...p,y:0});
-  const low=Math.max(s.fAn[1]+4,s.fTo[1],s.bAn[1]+4,s.bTo[1]);
+  const low=Math.max(s.fAn[1]+ANKLE,s.fTo[1],s.bAn[1]+ANKLE,s.bTo[1]);
   p.y=(FLOOR-low)+(k.air?(p.y||0):0);
   return p;
 }
+// pose checker: flags anything a real body can't do
+function check(k,i){
+  const s=rawSolve(k.pose),out=[...s.warn];
+  const fwd=rotY([1,0,0],[0,0,0],k.pose.turn);
+  for(const [h,kn,an,nm] of [[s.hF,s.fK,s.fAn,"front knee"],[s.hB,s.bK,s.bAn,"back knee"]]){
+    const m=mul(add(h,an),.5),kd=sub(kn,m);const ax=norm(sub(an,h));
+    const off=sub(kd,mul(ax,dotv(kd,ax)));
+    if(len(off)>2&&dotv(off,fwd)<-1)out.push(nm+" bends backwards");
+  }
+  for(const [q,nm] of [[s.fAn,"front foot"],[s.bAn,"back foot"],[s.rH,"right hand"],[s.lH,"left hand"],[s.hd,"head"]])
+    if(q[1]>FLOOR-ANKLE+1.5)out.push(nm+" goes through the floor");
+  if(!k.air&&Math.min(FLOOR-s.fAn[1],FLOOR-s.bAn[1])>ANKLE+8)out.push("both feet off the floor (add \"air\": true if it's a jump)");
+  return out.map(w=>`Key ${i+1} (frame ${k.f}): ${w}`);
+}
 const KEYS=DATA.keys.map(k=>({...k,pose:ground(k)}));
+const WARNINGS=KEYS.flatMap(check);
+window.POSE_WARNINGS=WARNINGS;
 const LAST=KEYS[KEYS.length-1].f;
 const solve=rawSolve;
 const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
@@ -291,14 +403,24 @@ function propXform(s,pr){
   const off=rotY([x*Math.cos(g)-y*Math.sin(g),x*Math.sin(g)+y*Math.cos(g),pr.z||0],[0,0,0],yaw);
   return {pos:add(s[ANCH[pr.at]],off),r:base+(pr.r||0),yaw};
 }
+// interpolate the controls (angles AND IK targets), then solve: a foot whose target doesn't change stays locked to the floor
+function lerpPose(a,b,t,sa,sb){
+  const o={};
+  for(const k in a){const va=a[k],vb=b[k];
+    if(VEC.includes(k)||VEC.includes(k))continue;
+    o[k]=(typeof va==="number"&&typeof vb==="number")?va+(vb-va)*t:(t<.5?va:vb);}
+  const end={rHand:"rH",lHand:"lH",fFoot:"fAn",bFoot:"bAn"};
+  for(const k of VEC){ if(a[k]||b[k]){const A=a[k]||sa[end[k]],B=b[k]||sb[end[k]];o[k]=A.map((v,j)=>v+(B[j]-v)*t);} }
+  return o;
+}
 function frameState(fr){
   fr=Math.max(KEYS[0].f,Math.min(LAST,fr));
   let i=0;while(i<KEYS.length-2&&fr>KEYS[i+1].f)i++;
   const a=KEYS[i],b=KEYS[i+1]||a;
   let t=b.f===a.f?0:(fr-a.f)/(b.f-a.f);
   t=b.snap?1-Math.pow(1-t,3):ease(t);
-  const pose={};for(const k in a.pose)pose[k]=a.pose[k]+(b.pose[k]-a.pose[k])*t;
-  const sa=solve(a.pose),sb=solve(b.pose),props={};
+  const sa=solve(a.pose),sb=solve(b.pose);
+  const pose=lerpPose(a.pose,b.pose,t,sa,sb),props={};
   const lr=(u,v)=>u+(v-u)*t;
   for(const name in DATA.props){
     const xa=propXform(sa,a.props?.[name]), xb=propXform(sb,b.props?.[name]);
@@ -365,6 +487,7 @@ function draw(ctx,w,h,st,opt={}){
 document.getElementById("title").textContent=DATA.title;
 document.getElementById("meta").textContent=DATA.meta;
 document.getElementById("note").textContent=DATA.note||"";
+document.getElementById("check").textContent=WARNINGS.length?"Pose check: "+WARNINGS.join(" · "):"Pose check: all joints within human limits, feet on the floor.";
 document.getElementById("prompt").textContent=DATA.prompt;
 const mc=document.getElementById("main"),mx=mc.getContext("2d");
 const scrub=document.getElementById("scrub"),readout=document.getElementById("readout"),playBtn=document.getElementById("play");

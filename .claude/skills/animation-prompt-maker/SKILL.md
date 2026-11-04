@@ -82,17 +82,28 @@ Outside the code block, add at most one short line before it (the settings used)
 
 After the prompt, make a playable stick-figure preview. Do NOT write HTML from scratch: the engine is saved in `templates/motion-preview.html`. You only write a small JSON file.
 
-1. Copy the closest example from `templates/examples/` (`pistol-reload.json` = props/weapons, `high-kick.json` = full-body move) and edit it.
+1. Copy the closest example from `templates/examples/` and edit it: `pistol-reload.json` (props, hand work, planted feet), `high-kick.json` (IK kick, locked standing foot), `monster-scare.json` (crouch, burst, lunge step), `walk-cycle.json` (looping locomotion).
 2. Fill in: `title`, `meta` (settings line), `fps`, `note` (optional), `prompt` (the exact prompt from Step 3), `props`, `keys`.
 3. Each key: `{"f": frame, "n": panel caption (same text as the prompt line), "snap": true for hard hits, "pose": {...}, "props": {...}}`. Frame 1..N captions match the prompt's numbered lines.
 4. Run `python3 .claude/skills/animation-prompt-maker/templates/build.py data.json <out>.html` (out file in the scratchpad or the user's folder), then publish it with the Artifact tool. Skip extra screenshots unless something looks broken.
 
-Pose values (side view, figure faces right; angles in degrees, 0 = pointing right, 90 = straight down, -90 = straight up; each limb angle is absolute, not relative to its parent). Omitted values use the rest pose:
-- Feet are planted on the floor automatically, so never fight gravity with `y`. For jumps, flips or anything airborne add `"air": true` to the key and use `y` (negative = up) to lift the body.
+POSE WITH IK (preferred). Place hands and feet where they should be; the engine works out shoulders, elbows, hips and knees with real two-bone IK. Knees always bend forward, elbows bend back/down, and no joint bends past 150 degrees.
+
+World coordinates (same units as the preview, figure ~175 tall): `x` forward, `y` DOWN (floor = 89, planted ankle = 85), `z` = character's right side (+) / left (-). With the default `hipH` the hip is at y = 5, shoulders ~y -50, head ~y -75.
+- `hipH`: hip height above the floor (standing 84, soft stance 80-82, crouch 50, deep crouch 44). Required when feet use IK.
+- `fFoot`, `bFoot`: ankle targets for the right/near and left/far foot, e.g. stance `[22,85,5]` and `[-22,85,-5]`. Keep a planted foot's target IDENTICAL across keys and it stays locked to the floor (no sliding). Lifted foot: raise y (smaller number), e.g. knee chamber `[8,24,5]`, head-height kick `[58,-44,5]`.
+- `rHand`, `lHand`: hand targets, e.g. guard by the chin `[16,-40,6]`, gun forward at chest `[40,-38,0]`, hip pouch `[-6,10,-12]`.
+- Feet are automatic: flat on the floor when planted, toe pointed along the shin when lifted (kicks look right). Override with `fP`/`bP` (0 = flexed, 90 = fully pointed), e.g. toe-off in a walk `"bP": 35`.
+- `x`, `z` move the hips (lunges, steps). Angles below still work for any limb you don't give a target (arms in a walk swing nicely with angles).
+
+ALWAYS CHECK: after build.py, run `node .claude/skills/animation-prompt-maker/templates/check.js <out>.html` (set NODE_PATH to the global node_modules if playwright isn't found). It prints any pose a body can't do (knee backwards, limb can't reach its target, body part through the floor, both feet off the ground without `"air": true`) and saves a `.check.png` screenshot. Fix every warning before publishing, and delete the `.check.png` afterwards. The same check shows on the page under the stage.
+
+Angle controls (side view, figure faces right; degrees, 0 = pointing forward, 90 = straight down, -90 = straight up; absolute, not relative to the parent). Omitted values use the rest pose:
+- Without foot targets, feet are planted on the floor automatically, so never fight gravity with `y`. For jumps, flips or anything airborne add `"air": true` to the key and use `y` (negative = up) to lift the body.
 - `x`: move the body forward/back.
 - `lean`: lower-body tilt (positive = forward). `chest`: extra upper-back bend on top of lean (hunch +, arch -). `head`: look down (+) or up (-).
 - `rU`, `rF`: near (right) upper arm and forearm. `lU`, `lF`: far (left) arm. Rest: 86/80 and 93/86 (relaxed, hands slightly forward).
-- `fT`, `fS`, `fA`: near (front) thigh, shin, foot. `bT`, `bS`, `bA`: far (back) leg. Rest: 84/97/0 and 95/90/0 (soft knees). Foot 0 = flat; toe-off ~ 40, heel strike ~ -20.
+- `fT`, `fS`: near (front) thigh and shin. `bT`, `bS`: far (back) leg. Rest: 84/97 and 95/90 (soft knees). Prefer `fFoot`/`bFoot` targets for legs.
 - Real joints only bend one way: knee = shin angle bigger than thigh angle (foot behind knee); elbow = forearm angle smaller than upper arm angle when the hand comes forward/up. Keep the torso lean within -35..60 and the head within -45..45.
 - Examples: arm pointing forward = upper 15, forearm -5. Fists up guard = upper 60, forearm -80. Knee chambered = thigh -10, shin 95. Kick at head height = thigh -35, shin -32. Deep crouch = thigh 15, shin 125, lean 30.
 
@@ -110,7 +121,7 @@ The same JSON also rebuilds the animation in Blender, so Blender gets exactly wh
 
 `python3 .claude/skills/animation-prompt-maker/templates/to_blender.py data.json <name>_blender.py`
 
-Give the user the file and say: in Blender, open the Scripting tab, open the file, press Run Script. It creates a 3D stick-figure armature (spine, chest, neck, head, shoulder/upper_arm/forearm .L/.R, pelvis/thigh/shin/foot .L/.R) keyframed on every key frame, props as boxes, the scene fps and frame range set, and hard snaps on "snap" keys. If the user has their own character, tell them to retarget this rig's action onto theirs (for example with the Rokoko or Auto-Rig Pro retargeting tools), or ask for their bone names and adapt the script.
+Give the user the file and say: in Blender, open the Scripting tab, open the file, press Run Script. It creates a 3D armature (spine, chest, neck, head, shoulder/upper_arm/forearm .L/.R, pelvis/thigh/shin/foot .L/.R) with REAL IK: hand.L/R and foot_ik.L/R target controls plus .pole controls for elbows and knees, all keyframed on every key frame, so the user can grab a hand or foot in Blender and adjust it. Also props as boxes, scene fps and frame range, and hard snaps on "snap" keys. If the user has their own character, tell them to retarget this rig's action onto theirs (for example with the Rokoko or Auto-Rig Pro retargeting tools), or ask for their bone names and adapt the script.
 
 ## Fast path
 
