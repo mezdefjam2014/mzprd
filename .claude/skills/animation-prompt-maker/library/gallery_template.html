@@ -69,7 +69,7 @@ const D=Math.PI/180, FLOOR=89, css=v=>getComputedStyle(document.documentElement)
 const P=DATA.pts, ix=Object.fromEntries(P.map((k,i)=>[k,i]));
 const SEG=[["hip","hF",9],["hip","hB",9],["hip","mid",12],["mid","sh",14],["shF","shB",8],["sh","nk",5],["shF","rE",6],["rE","rH",6],["shB","lE",6],["lE","lH",6],["hF","fK",8],["fK","fAn",7],["fAn","fTo",5],["hB","bK",8],["bK","bAn",7],["bAn","bTo",5]];
 function proj(p,c,yaw,pitch){const dx=p[0]-c[0],dy=p[1]-6,dz=p[2]-c[1],Y=yaw*D,Pt=pitch*D;const x1=dx*Math.cos(Y)-dz*Math.sin(Y),z1=dx*Math.sin(Y)+dz*Math.cos(Y);return [x1,dy*Math.cos(Pt)+z1*Math.sin(Pt),-dy*Math.sin(Pt)+z1*Math.cos(Pt)];}
-function draw(ctx,w,h,fr,yaw=40,pitch=14,big=false){
+function draw(ctx,w,h,fr,yaw=40,pitch=14,big=false,g=null){
   ctx.fillStyle=css("--panel");ctx.fillRect(0,0,w,h);
   const hip=fr[ix.hip],c=[hip[0],hip[2]],sc=h/(big?250:270);
   ctx.save();ctx.translate(w/2,h*.5);ctx.scale(sc,sc);ctx.lineCap="round";
@@ -78,6 +78,8 @@ function draw(ctx,w,h,fr,yaw=40,pitch=14,big=false){
   const J=k=>proj(fr[ix[k]],c,yaw,pitch),hd=J("hip")[2],items=[];
   for(const [a,b,wd] of SEG){const A=J(a),B=J(b);items.push([(A[2]+B[2])/2,()=>{ctx.lineWidth=wd;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();}]);}
   const H=J("hd");items.push([H[2],()=>{ctx.fillStyle=css("--panel");ctx.lineWidth=3.5;ctx.beginPath();ctx.arc(H[0],H[1],10,0,7);ctx.fill();ctx.stroke();}]);
+  const PC=["#2f7fd6","#e8b400","#8a5a2b"];
+  if(g)for(const sg of g){const A=proj(sg.slice(0,3),c,yaw,pitch),B=proj(sg.slice(3,6),c,yaw,pitch);items.push([(A[2]+B[2])/2+.5,()=>{ctx.save();ctx.strokeStyle=PC[sg[6]];ctx.lineWidth=sg[7];ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();ctx.restore();}]);}
   items.sort((a,b)=>a[0]-b[0]);for(const [d,f] of items){ctx.strokeStyle=d<hd-3?css("--far"):css("--figure");f();}
   ctx.restore();
 }
@@ -93,7 +95,7 @@ DATA.moves.forEach((m,i)=>{
 });
 const io=new IntersectionObserver(es=>es.forEach(e=>{const t=tiles.find(x=>x.el===e.target);t.vis=e.isIntersecting;}));
 tiles.forEach(t=>io.observe(t.el));
-tiles.forEach(t=>draw(t.cv.getContext("2d"),300,300,t.m.f[Math.floor(t.m.f.length/2)]));
+tiles.forEach(t=>{const i=Math.floor(t.m.f.length/2);draw(t.cv.getContext("2d"),300,300,t.m.f[i],40,14,false,t.m.g?t.m.g[i]:null)});
 // filters
 let cat="all",set="var";const approved=new Set();let db=null;const chips=document.getElementById("chips"),sets=document.getElementById("sets"),q=document.getElementById("q");
 function chip(name,label){const b=document.createElement("button");b.className="chip"+(name==="all"?" on":"");b.dataset.c=name;b.textContent=label;b.onclick=()=>{cat=name;chips.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));filter();};chips.appendChild(b);}
@@ -137,9 +139,9 @@ async function toggle(n){if(!db||pending.has(n))return;pending.add(n);const on=a
 })();
 // animation loop (only visible tiles)
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-function tick(t){const sec=t/1000;const at=m=>m.f[Math.floor(sec*(m.fps||DATA.fps))%m.f.length];
-  if(!reduce)for(const x of tiles)if(x.vis&&!x.el.hidden)draw(x.cv.getContext("2d"),300,300,at(x.m));
-  if(dlg.open&&cur)draw(big.getContext("2d"),960,720,at(cur),view[0],view[1],true);
+function tick(t){const sec=t/1000;const ix_=m=>Math.floor(sec*(m.fps||DATA.fps))%m.f.length;const at=m=>m.f[ix_(m)];const gat=m=>m.g?m.g[ix_(m)]:null;
+  if(!reduce)for(const x of tiles)if(x.vis&&!x.el.hidden)draw(x.cv.getContext("2d"),300,300,at(x.m),40,14,false,gat(x.m));
+  if(dlg.open&&cur)draw(big.getContext("2d"),960,720,at(cur),view[0],view[1],true,gat(cur));
   requestAnimationFrame(tick);}
 requestAnimationFrame(tick);
 </script>

@@ -13,7 +13,7 @@
   "loop": true,
   "frames": 32,
   "seam": 0.99,
-  "status": "active"
+  "status": "approved"
  },
  "heavy_haymaker": {
   "cat": "attacks",
@@ -29,7 +29,7 @@
   "loop": true,
   "frames": 43,
   "seam": 1.01,
-  "status": "active"
+  "status": "approved"
  },
  "lunge_punch": {
   "cat": "attacks",
@@ -61,7 +61,7 @@
   "loop": true,
   "frames": 48,
   "seam": 1.03,
-  "status": "active"
+  "status": "approved"
  },
  "left_kick": {
   "cat": "attacks",
@@ -69,7 +69,7 @@
   "loop": true,
   "frames": 63,
   "seam": 1.07,
-  "status": "active"
+  "status": "approved"
  },
  "jump_kick": {
   "cat": "attacks",
@@ -77,7 +77,7 @@
   "loop": true,
   "frames": 66,
   "seam": 0.75,
-  "status": "active"
+  "status": "approved"
  },
  "jump_kick_left": {
   "cat": "attacks",
@@ -85,7 +85,7 @@
   "loop": true,
   "frames": 66,
   "seam": 0.75,
-  "status": "active"
+  "status": "approved"
  },
  "spin_kick": {
   "cat": "attacks",
@@ -96,11 +96,10 @@
   "status": "active"
  },
  "sword_slash": {
-  "cat": "attacks",
-  "how": "single sword slash",
+  "cat": "weapons",
+  "how": "one-handed sword slash (real mocap)",
   "loop": true,
   "frames": 58,
-  "seam": 0.62,
   "status": "active"
  },
  "sword_heavy": {
@@ -181,7 +180,7 @@
   "loop": true,
   "frames": 48,
   "seam": 0.85,
-  "status": "active"
+  "status": "approved"
  },
  "tired_wave": {
   "cat": "waves",
@@ -189,7 +188,7 @@
   "loop": true,
   "frames": 92,
   "seam": 0.65,
-  "status": "active"
+  "status": "approved"
  },
  "left_hand_wave": {
   "cat": "waves",
@@ -213,7 +212,7 @@
   "loop": true,
   "frames": 48,
   "seam": 1.28,
-  "status": "active"
+  "status": "approved"
  },
  "zombie_hunched": {
   "cat": "zombies",
@@ -221,7 +220,7 @@
   "loop": true,
   "frames": 48,
   "seam": 1.24,
-  "status": "active"
+  "status": "approved"
  },
  "zombie_heavy": {
   "cat": "zombies",
@@ -229,7 +228,7 @@
   "loop": true,
   "frames": 59,
   "seam": 1.01,
-  "status": "active"
+  "status": "approved"
  },
  "zombie_mirrored": {
   "cat": "zombies",
@@ -237,7 +236,7 @@
   "loop": true,
   "frames": 41,
   "seam": 0.97,
-  "status": "active"
+  "status": "approved"
  },
  "zombie_lurch": {
   "cat": "zombies",
@@ -245,7 +244,7 @@
   "loop": true,
   "frames": 42,
   "seam": 0.71,
-  "status": "active"
+  "status": "approved"
  },
  "limp_walk": {
   "cat": "zombies",
@@ -253,7 +252,7 @@
   "loop": true,
   "frames": 39,
   "seam": 0.78,
-  "status": "active"
+  "status": "approved"
  },
  "ape_rage": {
   "cat": "monsters",
@@ -261,7 +260,7 @@
   "loop": true,
   "frames": 44,
   "seam": 0.61,
-  "status": "active"
+  "status": "approved"
  },
  "monster_stalk": {
   "cat": "monsters",
@@ -277,7 +276,7 @@
   "loop": true,
   "frames": 23,
   "seam": 1.36,
-  "status": "active"
+  "status": "approved"
  },
  "dino_snap": {
   "cat": "monsters",
@@ -293,7 +292,7 @@
   "loop": true,
   "frames": 38,
   "seam": 0.84,
-  "status": "active"
+  "status": "approved"
  },
  "giant_stomp": {
   "cat": "monsters",
@@ -301,7 +300,7 @@
   "loop": true,
   "frames": 51,
   "seam": 0.84,
-  "status": "active"
+  "status": "approved"
  },
  "boxing_combo": {
   "cat": "boxing",
@@ -309,7 +308,7 @@
   "loop": true,
   "frames": 48,
   "seam": 0.7,
-  "status": "active"
+  "status": "approved"
  },
  "boxing_fast": {
   "cat": "boxing",
@@ -317,7 +316,7 @@
   "loop": true,
   "frames": 22,
   "seam": 1.21,
-  "status": "active"
+  "status": "approved"
  },
  "southpaw": {
   "cat": "boxing",
@@ -325,7 +324,7 @@
   "loop": true,
   "frames": 48,
   "seam": 0.7,
-  "status": "active"
+  "status": "approved"
  },
  "heavyweight": {
   "cat": "boxing",
@@ -333,7 +332,7 @@
   "loop": true,
   "frames": 78,
   "seam": 0.5,
-  "status": "active"
+  "status": "approved"
  },
  "boxing_bounce": {
   "cat": "boxing",
@@ -341,7 +340,7 @@
   "loop": true,
   "frames": 77,
   "seam": 0.96,
-  "status": "active"
+  "status": "approved"
  },
  "boxing_hook": {
   "cat": "boxing",
@@ -349,7 +348,7 @@
   "loop": true,
   "frames": 79,
   "seam": 0.3,
-  "status": "active"
+  "status": "approved"
  },
  "talking": {
   "cat": "social",
@@ -357,7 +356,7 @@
   "loop": true,
   "frames": 36,
   "seam": 0.63,
-  "status": "active"
+  "status": "approved"
  },
  "animated_talker": {
   "cat": "social",
@@ -365,7 +364,7 @@
   "loop": true,
   "frames": 36,
   "seam": 1.05,
-  "status": "active"
+  "status": "approved"
  },
  "arguing": {
   "cat": "social",
@@ -381,7 +380,7 @@
   "loop": true,
   "frames": 75,
   "seam": 0.21,
-  "status": "active"
+  "status": "approved"
  },
  "laugh": {
   "cat": "social",
@@ -413,7 +412,7 @@
   "loop": true,
   "frames": 34,
   "seam": 1.0,
-  "status": "active"
+  "status": "approved"
  },
  "sad_walk": {
   "cat": "emotions",
@@ -421,7 +420,7 @@
   "loop": true,
   "frames": 35,
   "seam": 0.94,
-  "status": "active"
+  "status": "approved"
  },
  "sneak": {
   "cat": "emotions",
@@ -429,7 +428,7 @@
   "loop": true,
   "frames": 48,
   "seam": 1.62,
-  "status": "active"
+  "status": "approved"
  },
  "creep": {
   "cat": "emotions",
@@ -437,7 +436,7 @@
   "loop": true,
   "frames": 39,
   "seam": 1.03,
-  "status": "active"
+  "status": "approved"
  },
  "run_cycle": {
   "cat": "emotions",
@@ -445,7 +444,7 @@
   "loop": true,
   "frames": 23,
   "seam": 1.32,
-  "status": "active"
+  "status": "approved"
  },
  "walk_cycle": {
   "cat": "emotions",
@@ -453,6 +452,146 @@
   "loop": true,
   "frames": 33,
   "seam": 0.8,
+  "status": "approved"
+ },
+ "pistol_reload": {
+  "cat": "weapons",
+  "how": "pistol reload: mag out, new mag, slide release",
+  "loop": true,
+  "frames": 42,
+  "status": "active"
+ },
+ "pistol_reload_fast": {
+  "cat": "weapons",
+  "how": "fast tactical pistol reload",
+  "loop": true,
+  "frames": 29,
+  "status": "active"
+ },
+ "pistol_reload_lefty": {
+  "cat": "weapons",
+  "how": "left-handed pistol reload",
+  "loop": true,
+  "frames": 42,
+  "status": "active"
+ },
+ "rifle_reload": {
+  "cat": "weapons",
+  "how": "rifle reload: mag out, new mag, charging handle",
+  "loop": true,
+  "frames": 48,
+  "status": "active"
+ },
+ "rifle_reload_fast": {
+  "cat": "weapons",
+  "how": "fast rifle reload",
+  "loop": true,
+  "frames": 35,
+  "status": "active"
+ },
+ "rifle_reload_slow": {
+  "cat": "weapons",
+  "how": "slow, deliberate rifle reload",
+  "loop": true,
+  "frames": 62,
+  "status": "active"
+ },
+ "pistol_shoot": {
+  "cat": "weapons",
+  "how": "aim and fire a pistol (real mocap)",
+  "loop": true,
+  "frames": 54,
+  "status": "active"
+ },
+ "pistol_shoot_lefty": {
+  "cat": "weapons",
+  "how": "left-handed pistol shot",
+  "loop": true,
+  "frames": 54,
+  "status": "active"
+ },
+ "gun_draw": {
+  "cat": "weapons",
+  "how": "draw the gun and aim (real mocap)",
+  "loop": true,
+  "frames": 32,
+  "status": "active"
+ },
+ "bat_swing": {
+  "cat": "weapons",
+  "how": "baseball bat swing (real mocap)",
+  "loop": true,
+  "frames": 89,
+  "status": "active"
+ },
+ "bat_swing_lefty": {
+  "cat": "weapons",
+  "how": "bat swing, left-handed",
+  "loop": true,
+  "frames": 89,
+  "status": "active"
+ },
+ "bat_swing_fast": {
+  "cat": "weapons",
+  "how": "fast bat swing",
+  "loop": true,
+  "frames": 68,
+  "status": "active"
+ },
+ "axe_chop": {
+  "cat": "weapons",
+  "how": "overhead axe chop (real mocap)",
+  "loop": true,
+  "frames": 63,
+  "status": "active"
+ },
+ "axe_chop_heavy": {
+  "cat": "weapons",
+  "how": "heavy axe chop, second take",
+  "loop": true,
+  "frames": 55,
+  "status": "active"
+ },
+ "sword_slash_2": {
+  "cat": "weapons",
+  "how": "sword attack, second take",
+  "loop": true,
+  "frames": 77,
+  "status": "active"
+ },
+ "sword_slash_3": {
+  "cat": "weapons",
+  "how": "sword attack, third take",
+  "loop": true,
+  "frames": 46,
+  "status": "active"
+ },
+ "knife_slash": {
+  "cat": "weapons",
+  "how": "knife slash (slash motion from swordplay)",
+  "loop": true,
+  "frames": 46,
+  "status": "active"
+ },
+ "knife_stab": {
+  "cat": "weapons",
+  "how": "knife stab (thrust motion from strike)",
+  "loop": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "knife_slash_lefty": {
+  "cat": "weapons",
+  "how": "left-handed knife slash",
+  "loop": true,
+  "frames": 46,
+  "status": "active"
+ },
+ "grenade_throw": {
+  "cat": "weapons",
+  "how": "big overhand throw (real pitching mocap)",
+  "loop": true,
+  "frames": 89,
   "status": "active"
  }
 }
