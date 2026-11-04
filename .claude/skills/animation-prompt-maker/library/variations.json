@@ -4766,7 +4766,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 61,
-  "status": "active"
+  "status": "approved"
  },
  "everyday_02x06_2": {
   "cat": "everyday actions",
@@ -4782,7 +4782,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 80,
-  "status": "active"
+  "status": "approved"
  },
  "everyday_02x10_2": {
   "cat": "everyday actions",
@@ -4790,7 +4790,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 53,
-  "status": "active"
+  "status": "approved"
  },
  "everyday_13x20_1": {
   "cat": "everyday actions",
@@ -4830,7 +4830,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 51,
-  "status": "active"
+  "status": "approved"
  },
  "everyday_13x25_1": {
   "cat": "everyday actions",
@@ -4966,7 +4966,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "approved"
  },
  "everyday_69x75_1": {
   "cat": "everyday actions",
@@ -5038,7 +5038,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "everyday_79x04_2": {
   "cat": "everyday actions",
@@ -5046,7 +5046,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "approved"
  },
  "everyday_79x24_1": {
   "cat": "everyday actions",
@@ -5222,7 +5222,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "approved"
  },
  "sports_13x29_2": {
   "cat": "sports & exercise",
@@ -5246,7 +5246,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "approved"
  },
  "sports_16x08_1": {
   "cat": "sports & exercise",
@@ -5278,7 +5278,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "approved"
  },
  "sports_22x14_1": {
   "cat": "sports & exercise",
@@ -5310,7 +5310,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 39,
-  "status": "active"
+  "status": "approved"
  },
  "sports_23x14_1": {
   "cat": "sports & exercise",
@@ -5334,7 +5334,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "approved"
  },
  "sports_38x03_2": {
   "cat": "sports & exercise",
@@ -5542,7 +5542,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "dance_05x14_2": {
   "cat": "dance",
@@ -5550,7 +5550,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "approved"
  },
  "dance_05x15_1": {
   "cat": "dance",
@@ -5558,7 +5558,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "dance_05x16_1": {
   "cat": "dance",
@@ -5566,7 +5566,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "approved"
  },
  "dance_05x16_2": {
   "cat": "dance",
@@ -5574,7 +5574,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 50,
-  "status": "active"
+  "status": "approved"
  },
  "dance_05x17_1": {
   "cat": "dance",
@@ -5638,7 +5638,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "approved"
  },
  "dance_13x29_2": {
   "cat": "dance",
@@ -5646,7 +5646,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "approved"
  },
  "dance_14x20_1": {
   "cat": "dance",
@@ -5894,7 +5894,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 53,
-  "status": "active"
+  "status": "approved"
  },
  "emotions_14x19_2": {
   "cat": "emotions & reactions",
@@ -5910,7 +5910,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "approved"
  },
  "emotions_14x25_2": {
   "cat": "emotions & reactions",
@@ -6094,7 +6094,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 46,
-  "status": "active"
+  "status": "approved"
  },
  "walks_07x11_1": {
   "cat": "character walks",
@@ -6102,7 +6102,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 32,
-  "status": "active"
+  "status": "approved"
  },
  "walks_08x04_1": {
   "cat": "character walks",
@@ -6206,7 +6206,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "approved"
  },
  "walks_17x05_1": {
   "cat": "character walks",
@@ -6230,7 +6230,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 39,
-  "status": "active"
+  "status": "approved"
  },
  "walks_17x08_1": {
   "cat": "character walks",
@@ -6238,7 +6238,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 38,
-  "status": "active"
+  "status": "approved"
  },
  "walks_17x08_2": {
   "cat": "character walks",
@@ -6270,7 +6270,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "walks_20x11_1": {
   "cat": "character walks",
@@ -6278,7 +6278,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 40,
-  "status": "active"
+  "status": "approved"
  },
  "walks_21x03_1": {
   "cat": "character walks",
