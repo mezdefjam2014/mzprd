@@ -30,8 +30,8 @@ def gait(N, body, hands, feet, stride, lift, phase=(0, .25, .5, .75), duty=.75, 
     if not root: keys[-1] = (N, keys[0][1], {})
     return keys
 # ---------------- body types ----------------
-CRAWL = dict(hipH=44, lean=88, chest=6, head=-38, turn=0)          # low crawler: belly near the ground, head craned up
-BRUTE = dict(hipH=47, lean=82, chest=14, head=-34)                   # hulking knuckle-walker: humped back, heavy shoulders
+CRAWL = dict(hipH=44, lean=88, chest=6, head=-38, turn=0, x=0, twist=0, look=0)          # low crawler: belly near the ground, head craned up
+BRUTE = dict(hipH=47, lean=82, chest=14, head=-34, x=0, twist=0, look=0)                   # hulking knuckle-walker: humped back, heavy shoulders
 def still(body, hands, feet, N, breathe=2.0, head_twitch=0.0, sway=0.0):
     keys = []
     for f in range(0, N + 1, 2):

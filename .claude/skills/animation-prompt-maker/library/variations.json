@@ -6822,7 +6822,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 60,
-  "status": "active"
+  "status": "approved"
  },
  "crawler_crawl": {
   "cat": "creatures (all fours)",
@@ -6830,7 +6830,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 44,
-  "status": "active"
+  "status": "approved"
  },
  "crawler_scurry": {
   "cat": "creatures (all fours)",
@@ -6838,7 +6838,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 26,
-  "status": "active"
+  "status": "approved"
  },
  "crawler_creep": {
   "cat": "creatures (all fours)",
@@ -6846,7 +6846,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 80,
-  "status": "active"
+  "status": "older"
  },
  "crawler_pounce": {
   "cat": "creatures (all fours)",
@@ -6854,7 +6854,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 44,
-  "status": "active"
+  "status": "older"
  },
  "brute_idle": {
   "cat": "creatures (all fours)",
@@ -6862,7 +6862,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 70,
-  "status": "active"
+  "status": "approved"
  },
  "brute_prowl": {
   "cat": "creatures (all fours)",
@@ -6870,7 +6870,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 56,
-  "status": "active"
+  "status": "approved"
  },
  "brute_charge": {
   "cat": "creatures (all fours)",
@@ -6878,7 +6878,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
-  "status": "active"
+  "status": "older"
  },
  "brute_roar": {
   "cat": "creatures (all fours)",
@@ -6886,7 +6886,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 56,
-  "status": "active"
+  "status": "approved"
  },
  "brute_swipe": {
   "cat": "creatures (all fours)",
@@ -6894,14 +6894,14 @@
   "loop": true,
   "oneshot": false,
   "frames": 40,
-  "status": "active"
+  "status": "older"
  },
  "brute_swipe_left": {
   "cat": "creatures (all fours)",
   "how": "Brute: rearing claw swipe (left arm)",
   "loop": true,
   "frames": 40,
-  "status": "active"
+  "status": "older"
  },
  "brute_slam": {
   "cat": "creatures (all fours)",
@@ -6909,7 +6909,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 40,
-  "status": "active"
+  "status": "older"
  },
  "brute_stunned": {
   "cat": "creatures (all fours)",
@@ -6917,7 +6917,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 72,
-  "status": "active"
+  "status": "older"
  },
  "brute_hit_react": {
   "cat": "creatures (all fours)",
@@ -6925,7 +6925,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 26,
-  "status": "active"
+  "status": "approved"
  },
  "crawler_crawl_root_motion": {
   "cat": "creatures (all fours)",
@@ -6933,7 +6933,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 44,
-  "status": "active"
+  "status": "approved"
  },
  "crawler_scurry_root_motion": {
   "cat": "creatures (all fours)",
@@ -6941,7 +6941,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 26,
-  "status": "active"
+  "status": "approved"
  },
  "crawler_creep_root_motion": {
   "cat": "creatures (all fours)",
@@ -6949,7 +6949,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 80,
-  "status": "active"
+  "status": "older"
  },
  "brute_prowl_root_motion": {
   "cat": "creatures (all fours)",
@@ -6957,7 +6957,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 56,
-  "status": "active"
+  "status": "older"
  },
  "brute_charge_root_motion": {
   "cat": "creatures (all fours)",
@@ -6965,6 +6965,102 @@
   "loop": true,
   "oneshot": false,
   "frames": 24,
+  "status": "older"
+ },
+ "crawler_lunge_bite": {
+  "cat": "creature attacks",
+  "how": "Crawler: lunge forward and bite",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "crawler_snap_bites": {
+  "cat": "creature attacks",
+  "how": "Crawler: rapid snapping bites",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "crawler_claw_swipe": {
+  "cat": "creature attacks",
+  "how": "Crawler: rear up on one arm and claw swipe (right)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "crawler_claw_swipe_left": {
+  "cat": "creature attacks",
+  "how": "Crawler: rear up on one arm and claw swipe (left)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "crawler_feed": {
+  "cat": "creature attacks",
+  "how": "Crawler: feeding on a downed victim (tearing bites)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "crawler_pounce_bite": {
+  "cat": "creature attacks",
+  "how": "Crawler: pounce and bite on landing (one-shot)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 44,
+  "status": "active"
+ },
+ "brute_lunge_bite": {
+  "cat": "creature attacks",
+  "how": "Brute: lunge forward and bite",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "brute_grab_bite": {
+  "cat": "creature attacks",
+  "how": "Brute: rear up, grab with both hands, bite and shake",
+  "loop": true,
+  "oneshot": false,
+  "frames": 54,
+  "status": "active"
+ },
+ "brute_bite_tear": {
+  "cat": "creature attacks",
+  "how": "Brute: bite down and tear (head shakes)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 42,
+  "status": "active"
+ },
+ "brute_double_swipe": {
+  "cat": "creature attacks",
+  "how": "Brute: left-right claw swipes",
+  "loop": true,
+  "oneshot": false,
+  "frames": 42,
+  "status": "active"
+ },
+ "brute_double_swipe_left": {
+  "cat": "creature attacks",
+  "how": "Brute: right-left claw swipes",
+  "loop": true,
+  "oneshot": false,
+  "frames": 42,
+  "status": "active"
+ },
+ "brute_pounce_bite": {
+  "cat": "creature attacks",
+  "how": "Brute: leap and bite on landing (one-shot)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 44,
   "status": "active"
  }
 }

@@ -592,5 +592,17 @@
  "crawler_scurry_root_motion": "Crawler: fast scurry (root motion: travels forward, planted limbs never slide)",
  "crawler_creep_root_motion": "Crawler: slow creep (root motion: travels forward, planted limbs never slide)",
  "brute_prowl_root_motion": "Brute: knuckle-walk prowl (root motion: travels forward, planted limbs never slide)",
- "brute_charge_root_motion": "Brute: charge (root motion: travels forward, planted limbs never slide)"
+ "brute_charge_root_motion": "Brute: charge (root motion: travels forward, planted limbs never slide)",
+ "crawler_lunge_bite": "Crawler: lunge forward and bite",
+ "crawler_snap_bites": "Crawler: rapid snapping bites",
+ "crawler_claw_swipe": "Crawler: rear up on one arm and claw swipe (right)",
+ "crawler_claw_swipe_left": "Crawler: rear up on one arm and claw swipe (left)",
+ "crawler_feed": "Crawler: feeding on a downed victim (tearing bites)",
+ "crawler_pounce_bite": "Crawler: pounce and bite on landing (one-shot)",
+ "brute_lunge_bite": "Brute: lunge forward and bite",
+ "brute_grab_bite": "Brute: rear up, grab with both hands, bite and shake",
+ "brute_bite_tear": "Brute: bite down and tear (head shakes)",
+ "brute_double_swipe": "Brute: left-right claw swipes",
+ "brute_double_swipe_left": "Brute: right-left claw swipes",
+ "brute_pounce_bite": "Brute: leap and bite on landing (one-shot)"
 }
