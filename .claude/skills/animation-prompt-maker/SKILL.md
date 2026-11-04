@@ -51,7 +51,7 @@ Typical timing at 24 fps (scale ×0.5 for 12 fps):
 Output the prompt as plain text inside a single code block so the user can copy it in one click. The prompt itself must be clean natural language:
 - NO markdown inside the prompt: no #, ##, **, tables, bullets with -, or ASCII charts.
 - Write it as direct instructions to the AI that will do the work ("Create a 60-frame first-person rifle reload in Blender at 24 fps...").
-- Use short paragraphs and plain numbered lines for frames, e.g. "Frame 12 (mag release): ..."
+- Use short paragraphs and plain numbered lines for frames, e.g. "1. ...", "2. ...", "3. ..."
 
 Keep it SHORT: 100-180 words total. Long prompts lose coherence. Cut anything the AI can infer.
 - 6-8 frames max, ONE line each, only the essential pose change.
