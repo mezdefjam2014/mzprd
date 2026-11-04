@@ -46,45 +46,31 @@ Typical timing at 24 fps (scale ×0.5 for 12 fps):
 | Idle breathe (loop) | 48–96 | very small motion |
 | Death / knockdown | 30–60 | |
 
-## Step 3 — Write the output in this exact format
+## Step 3 — Write ONE clean, paste-ready prompt
 
-````
-# ANIMATION PROMPT: <Name>
-Settings: <2D/3D> · <perspective> · <tool> · <fps> fps · frames <start>–<end> · <loop/one-shot> · <style>
+Output the prompt as plain text inside a single code block so the user can copy it in one click. The prompt itself must be clean natural language:
+- NO markdown inside the prompt: no #, ##, **, tables, bullets with -, or ASCII charts.
+- Write it as direct instructions to the AI that will do the work ("Create a 60-frame first-person rifle reload in Blender at 24 fps...").
+- Use short paragraphs and plain numbered lines for frames, e.g. "Frame 12 (mag release): ..."
 
-## Overview
-<2–3 sentences: what happens, the feel, what the viewer must read clearly from this camera.>
+Follow this order inside the prompt:
 
-## Setup
-- Scene/rig: <bones or objects involved, using the user's names or standard Rigify/Mixamo names>
-- Camera: <position, angle, FOV — e.g. FPS viewmodel: camera at head, weapon lower-right, 70° FOV>
-- Props: <weapon, magazine, etc. and where they parent at each phase>
+Create a [name] animation for a [2D/3D] game, viewed from [perspective], in [tool]. Use [fps] fps, frames [start] to [end], [loop/one-shot], [style] style.
 
-## Keyframes
-### Frame <N> — <Phase name>
-- Body/root: <position & rotation, concrete values when possible (e.g. "hips down 5 cm, rotate 10° left")>
-- Arms/hands: <...>
-- Legs/feet: <...>
-- Head/eyes: <...>
-- Props: <...>
-- What the camera sees: <one line describing the silhouette from the chosen perspective>
-- Easing into next key: <ease-in / ease-out / linear / hold>
+[2-3 sentences: what happens, the feel, what must read clearly from this camera.]
 
-(repeat for every key pose — usually 6–12)
+Setup: [rig/bones or objects, camera position/angle/FOV, props and what they are parented to].
 
-## Timing Chart
-<ASCII timeline, e.g.>
-1----8-----16---22--28------40-----48
-Idle Antic  Act  Hit Follow  Settle Idle
+Animate these key poses:
+Frame 1 (idle): ...
+Frame 6 (anticipation): ...
+... (usually 6-12 keys, each with body, arms, legs, head, props, concrete degrees/cm, and easing into the next key)
 
-## Polish Notes
-- Overlap/secondary motion (hair, clothing, weapon sway, camera shake on impact)
-- Arcs to check, smear frames (2D), motion blur, sound cue frames
-- Common mistakes to avoid for this action
+Timing and polish: [holds, arcs, overlap/secondary motion, impact shake, sound cue frames, mistakes to avoid].
 
-## Tool Instructions
-<For Blender: a short bpy script skeleton that inserts the keyframes above (keyframe_insert on pose bones, set fcurve interpolation), OR step-by-step manual instructions. For sprites: sprite-sheet layout (frames per row, cell size, facing direction). For Unity/Unreal: clip settings, events at contact frames.>
-````
+[Tool instructions in plain sentences: for Blender, write a bpy script that inserts these keyframes on the pose bones and sets interpolation; for sprites, the sheet layout, cell size, frame count and facing direction; for engines, clip settings and events at contact frames.]
+
+Outside the code block, add at most one short line before it (the settings used) and one line after it offering variations (faster, heavier, empty reload, mirrored, other perspective). Nothing else.
 
 ## Rules
 
@@ -93,4 +79,5 @@ Idle Antic  Act  Hit Follow  Settle Idle
 - **2D sprites:** list each drawn frame (e.g. 8 frames), mention holds ("hold 2 frames"), smears, and facing direction.
 - **Concrete numbers** (degrees, cm, frames) beat adjectives.
 - Real-world correctness: reload steps must match the weapon type (mag release → mag out → new mag in → seat/slap → bolt/slide if empty); kicks need chamber → extend → retract; walks need opposite arm/leg.
+- Keep the prompt clean: no markdown symbols inside it.
 - After the prompt, offer: "Want a variation (faster, heavier, empty-reload, mirrored), the full Blender script, or a different perspective?"
