@@ -39,7 +39,7 @@ def lock_feet(a, loop=False):
 
 def no_penetration(a):
     low = a[:, :, 1].max(1)                                         # y points down: largest y = lowest point
-    lift = np.maximum(0, low - (FLOOR + 0.5))
+    lift = np.maximum(0, low - FLOOR)
     a[:, :, 1] -= lift[:, None]
     return a
 

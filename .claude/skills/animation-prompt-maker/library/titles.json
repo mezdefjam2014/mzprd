@@ -587,5 +587,10 @@
  "brute_swipe_left": "Brute: rearing claw swipe (left arm)",
  "brute_slam": "Brute: two-handed ground slam",
  "brute_stunned": "Brute: stunned and dazed, swaying",
- "brute_hit_react": "Brute: flinch from a hit"
+ "brute_hit_react": "Brute: flinch from a hit",
+ "crawler_crawl_root_motion": "Crawler: crawl forward (root motion: travels forward, planted limbs never slide)",
+ "crawler_scurry_root_motion": "Crawler: fast scurry (root motion: travels forward, planted limbs never slide)",
+ "crawler_creep_root_motion": "Crawler: slow creep (root motion: travels forward, planted limbs never slide)",
+ "brute_prowl_root_motion": "Brute: knuckle-walk prowl (root motion: travels forward, planted limbs never slide)",
+ "brute_charge_root_motion": "Brute: charge (root motion: travels forward, planted limbs never slide)"
 }

@@ -149,7 +149,7 @@ def to_points(pos, ends, src_fps, start=None, end=None):
 # ---------------- library storage ----------------
 def save_move(name, pts, meta):
     arr = np.stack([pts[k] for k in PTS], 1)  # frames x joints x 3
-    doc = dict(meta, fps=FPS, joints=PTS, frames=np.round(arr).astype(int).tolist())
+    doc = dict(meta, fps=FPS, joints=PTS, frames=np.round(arr, 1).tolist())
     with gzip.open(MOVES / f"{name}.json.gz", "wt") as fh: json.dump(doc, fh, separators=(",", ":"))
     return MOVES / f"{name}.json.gz"
 

@@ -6820,6 +6820,7 @@
   "cat": "creatures (all fours)",
   "how": "Crawler: idle, breathing, head twitching",
   "loop": true,
+  "oneshot": false,
   "frames": 60,
   "status": "active"
  },
@@ -6827,6 +6828,7 @@
   "cat": "creatures (all fours)",
   "how": "Crawler: crawl forward on all fours",
   "loop": true,
+  "oneshot": false,
   "frames": 44,
   "status": "active"
  },
@@ -6834,6 +6836,7 @@
   "cat": "creatures (all fours)",
   "how": "Crawler: fast scurry",
   "loop": true,
+  "oneshot": false,
   "frames": 26,
   "status": "active"
  },
@@ -6841,13 +6844,15 @@
   "cat": "creatures (all fours)",
   "how": "Crawler: slow creep (stalking)",
   "loop": true,
+  "oneshot": false,
   "frames": 80,
   "status": "active"
  },
  "crawler_pounce": {
   "cat": "creatures (all fours)",
-  "how": "Crawler: coil and pounce forward, claws out",
-  "loop": true,
+  "how": "Crawler: coil and pounce forward, claws out (one-shot)",
+  "loop": false,
+  "oneshot": true,
   "frames": 44,
   "status": "active"
  },
@@ -6855,6 +6860,7 @@
   "cat": "creatures (all fours)",
   "how": "Brute: heavy idle on its knuckles, breathing",
   "loop": true,
+  "oneshot": false,
   "frames": 70,
   "status": "active"
  },
@@ -6862,6 +6868,7 @@
   "cat": "creatures (all fours)",
   "how": "Brute: knuckle-walk prowl",
   "loop": true,
+  "oneshot": false,
   "frames": 56,
   "status": "active"
  },
@@ -6869,6 +6876,7 @@
   "cat": "creatures (all fours)",
   "how": "Brute: charge (bounding gallop)",
   "loop": true,
+  "oneshot": false,
   "frames": 24,
   "status": "active"
  },
@@ -6876,6 +6884,7 @@
   "cat": "creatures (all fours)",
   "how": "Brute: rear up and roar, then slam down",
   "loop": true,
+  "oneshot": false,
   "frames": 56,
   "status": "active"
  },
@@ -6883,6 +6892,7 @@
   "cat": "creatures (all fours)",
   "how": "Brute: rearing claw swipe (right arm)",
   "loop": true,
+  "oneshot": false,
   "frames": 40,
   "status": "active"
  },
@@ -6897,6 +6907,7 @@
   "cat": "creatures (all fours)",
   "how": "Brute: two-handed ground slam",
   "loop": true,
+  "oneshot": false,
   "frames": 40,
   "status": "active"
  },
@@ -6904,6 +6915,7 @@
   "cat": "creatures (all fours)",
   "how": "Brute: stunned and dazed, swaying",
   "loop": true,
+  "oneshot": false,
   "frames": 72,
   "status": "active"
  },
@@ -6911,7 +6923,48 @@
   "cat": "creatures (all fours)",
   "how": "Brute: flinch from a hit",
   "loop": true,
+  "oneshot": false,
   "frames": 26,
+  "status": "active"
+ },
+ "crawler_crawl_root_motion": {
+  "cat": "creatures (all fours)",
+  "how": "Crawler: crawl forward (root motion: travels forward, planted limbs never slide)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 44,
+  "status": "active"
+ },
+ "crawler_scurry_root_motion": {
+  "cat": "creatures (all fours)",
+  "how": "Crawler: fast scurry (root motion: travels forward, planted limbs never slide)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 26,
+  "status": "active"
+ },
+ "crawler_creep_root_motion": {
+  "cat": "creatures (all fours)",
+  "how": "Crawler: slow creep (root motion: travels forward, planted limbs never slide)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 80,
+  "status": "active"
+ },
+ "brute_prowl_root_motion": {
+  "cat": "creatures (all fours)",
+  "how": "Brute: knuckle-walk prowl (root motion: travels forward, planted limbs never slide)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 56,
+  "status": "active"
+ },
+ "brute_charge_root_motion": {
+  "cat": "creatures (all fours)",
+  "how": "Brute: charge (root motion: travels forward, planted limbs never slide)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 24,
   "status": "active"
  }
 }

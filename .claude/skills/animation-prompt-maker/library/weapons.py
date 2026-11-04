@@ -135,7 +135,7 @@ def mirror_keys(keys): return keys  # (left-handed reloads come from mirroring t
 
 def save(name, desc, frames, props, cat="weapons"):
     doc = dict(name=name, source="variation", desc=desc, cat=cat, loop=True, fps=mocap.FPS, joints=P,
-               frames=np.round(frames).astype(int).tolist(), g=[[[round(x, 1) if isinstance(x, float) else x for x in s] for s in fr] for fr in props])
+               frames=np.round(frames, 1).tolist(), g=[[[round(x, 1) if isinstance(x, float) else x for x in s] for s in fr] for fr in props])
     with gzip.open(mocap.VARS / f"{name}.json.gz", "wt") as fh: json.dump(doc, fh, separators=(",", ":"))
     return name, desc, len(frames)
 
