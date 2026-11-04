@@ -163,10 +163,13 @@ function check(k,i){
   if(!k.air&&Math.min(FLOOR-s.fAn[1],FLOOR-s.bAn[1])>ANKLE+8)out.push("both feet off the floor (add \"air\": true if it's a jump)");
   return out.map(w=>`Key ${i+1} (frame ${k.f}): ${w}`);
 }
+const MOTION=DATA.motion?DATA.motion.frames.map(fr=>{const o={};DATA.motion.joints.forEach((j,i)=>o[j]=fr[i]);return o;}):null;
+function withFace(o){const r=sub(o.shF,o.shB),f=norm([r[2],0,-r[0]]);const up=norm(sub(o.hd,o.nk));
+  return {...o,face:add(o.hd,mul(norm(add(f,mul(up,-.1))),8)),warn:[]};}
 const KEYS=DATA.keys.map(k=>({...k,pose:ground(k)}));
-const WARNINGS=KEYS.flatMap(check);
+const WARNINGS=MOTION?[]:KEYS.flatMap(check);
 window.POSE_WARNINGS=WARNINGS;
-const LAST=KEYS[KEYS.length-1].f;
+const LAST=MOTION?MOTION.length:KEYS[KEYS.length-1].f;
 const solve=rawSolve;
 const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
 const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -190,6 +193,8 @@ function lerpPose(a,b,t,sa,sb){
   return o;
 }
 function frameState(fr){
+  if(MOTION){const t=Math.max(0,Math.min(MOTION.length-1,fr-1)),i=Math.floor(t),j=Math.min(i+1,MOTION.length-1),u=t-i,o={};
+    for(const k in MOTION[i])o[k]=MOTION[i][k].map((v,c)=>v+(MOTION[j][k][c]-v)*u);return {pts:withFace(o),props:{}};}
   fr=Math.max(KEYS[0].f,Math.min(LAST,fr));
   let i=0;while(i<KEYS.length-2&&fr>KEYS[i+1].f)i++;
   const a=KEYS[i],b=KEYS[i+1]||a;
@@ -205,22 +210,24 @@ function frameState(fr){
   }
   return {pose,props};
 }
-function keyState(k){const s=solve(k.pose),props={};for(const n in DATA.props){const x=propXform(s,k.props?.[n]);if(x)props[n]=x}return {pose:k.pose,props};}
+function keyState(k){if(MOTION)return {pts:withFace(MOTION[k.f-1]),props:{}};const s=solve(k.pose),props={};for(const n in DATA.props){const x=propXform(s,k.props?.[n]);if(x)props[n]=x}return {pose:k.pose,props};}
 
 // ---------- camera ----------
 const VIEWS={side:[0,8],"3/4":[40,14],front:[90,8],"over shoulder":[-40,14],back:[-90,10],top:[0,70]};
 const is2D=/^2d/i.test(DATA.dim||"");
 const cam={yaw:0,pitch:8,...(()=>{const v=VIEWS[DATA.view||(is2D?"side":"3/4")]||VIEWS.side;return {yaw:v[0],pitch:v[1]}})()};
 const panelCam={...cam};
+let camC=[0,0];
 function proj(p,c){
-  const dx=p[0]-6,dy=p[1]-6,dz=p[2];
+  const dx=p[0]-camC[0]-6,dy=p[1]-6,dz=p[2]-camC[1];
   const Y=c.yaw*D,Pt=c.pitch*D;
   const x1=dx*Math.cos(Y)-dz*Math.sin(Y), z1=dx*Math.sin(Y)+dz*Math.cos(Y);
   return [x1, dy*Math.cos(Pt)+z1*Math.sin(Pt), -dy*Math.sin(Pt)+z1*Math.cos(Pt)];
 }
 
 function draw(ctx,w,h,st,opt={}){
-  const c=opt.cam||cam, s=solve(st.pose), sc=h/262;
+  const c=opt.cam||cam, s=st.pts||solve(st.pose), sc=h/262;
+  camC=MOTION?[s.hip[0],s.hip[2]]:[0,0];
   ctx.save();ctx.translate(w*.5,h*.5);ctx.scale(sc,sc);ctx.lineCap="round";ctx.lineJoin="round";
   const J=k=>proj(s[k],c);
   const near=opt.ghost?css("--line"):css("--figure"), far=opt.ghost?css("--line"):css("--figure-far");
@@ -228,6 +235,7 @@ function draw(ctx,w,h,st,opt={}){
     // floor disc and contact shadow
     ctx.strokeStyle=css("--line");ctx.lineWidth=1.2;
     for(const r of [40,80]){ctx.beginPath();for(let i=0;i<=48;i++){const a=i/48*2*Math.PI;const q=proj([s.hip[0]+Math.cos(a)*r,FLOOR,s.hip[2]+Math.sin(a)*r],c);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]);}ctx.stroke();}
+    if(MOTION){ctx.globalAlpha=.5;for(let gx=Math.floor((s.hip[0]-80)/40)*40;gx<=s.hip[0]+80;gx+=40){const a=proj([gx,FLOOR,s.hip[2]-50],c),b=proj([gx,FLOOR,s.hip[2]+50],c);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();}ctx.globalAlpha=1;}
     const lift=Math.max(0,FLOOR-4-Math.max(s.fAn[1],s.bAn[1]));
     ctx.fillStyle=css("--line");ctx.globalAlpha=Math.max(.15,.6-lift/80);ctx.beginPath();
     for(let i=0;i<=24;i++){const a=i/24*2*Math.PI,r=Math.max(10,22-lift/4);const q=proj([s.hip[0]+4+Math.cos(a)*r,FLOOR,s.hip[2]+Math.sin(a)*r*.7],c);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]);}
@@ -263,7 +271,7 @@ function draw(ctx,w,h,st,opt={}){
 document.getElementById("title").textContent=DATA.title;
 document.getElementById("meta").textContent=DATA.meta;
 document.getElementById("note").textContent=DATA.note||"";
-document.getElementById("check").textContent=WARNINGS.length?"Pose check: "+WARNINGS.join(" · "):"Pose check: all joints within human limits, feet on the floor.";
+document.getElementById("check").textContent=MOTION?"Recorded motion capture: real human movement, played frame by frame.":WARNINGS.length?"Pose check: "+WARNINGS.join(" · "):"Pose check: all joints within human limits, feet on the floor.";
 document.getElementById("prompt").textContent=DATA.prompt;
 const mc=document.getElementById("main"),mx=mc.getContext("2d");
 const scrub=document.getElementById("scrub"),readout=document.getElementById("readout"),playBtn=document.getElementById("play");

@@ -1,6 +1,6 @@
 ---
 name: animation-prompt-maker
-description: Universal animation maker for games. Use WHENEVER the user asks to make, animate, or get a prompt for ANY motion - reloads, attacks, kicks, punches, monster or creature scares, roars, walk/run/sprint cycles, jumps, idles, deaths, emotes, dances, climbing, picking up items, UI motion, camera moves - in 2D or 3D, for Blender, Unity, Unreal, Godot or sprite sheets. Trigger even on short asks like "make me a reload", "can you do a monster scare", "I need a run cycle". It returns a clean frame-by-frame prompt, a playable motion-graphic preview, and a Blender script that rebuilds the same animation.
+description: Universal animation maker for games, backed by a real motion-capture library. Use WHENEVER the user asks to make, animate, or get a prompt for ANY motion - reloads, attacks, kicks, punches, monster or creature scares, roars, walk/run/sprint cycles, jumps, idles, deaths, emotes, dances, climbing, picking up items, UI motion, camera moves - in 2D or 3D, for Blender, Unity, Unreal, Godot or sprite sheets. Trigger even on short asks like "make me a reload", "can you do a monster scare", "I need a run cycle". It returns a clean frame-by-frame prompt, a playable motion-graphic preview, and a Blender script that rebuilds the same animation.
 ---
 
 # Animation Prompt Maker
@@ -122,6 +122,28 @@ The same JSON also rebuilds the animation in Blender, so Blender gets exactly wh
 `python3 .claude/skills/animation-prompt-maker/templates/to_blender.py data.json <name>_blender.py`
 
 Give the user the file and say: in Blender, open the Scripting tab, open the file, press Run Script. It creates a 3D armature (spine, chest, neck, head, shoulder/upper_arm/forearm .L/.R, pelvis/thigh/shin/foot .L/.R) with REAL IK: hand.L/R and foot_ik.L/R target controls plus .pole controls for elbows and knees, all keyframed on every key frame, so the user can grab a hand or foot in Blender and adjust it. Also props as boxes, scene fps and frame range, and hard snaps on "snap" keys. If the user has their own character, tell them to retarget this rig's action onto theirs (for example with the Rokoko or Auto-Rig Pro retargeting tools), or ask for their bone names and adapt the script.
+
+## Fastest path: the motion-capture library (try this FIRST)
+
+`library/` holds real recorded human motion (CMU mocap, free for commercial use): 157 moves saved locally (walks, runs, jumps, kicks, jump/spin kicks, punches, boxing, sword, falls, flips, rolls, crawls, climbs, throws, zombie walks, limps, drunk walks, sneaks, idles, pick-ups, dances...) plus a searchable list of all 2,435 CMU clips that download in about 1 second on first use.
+
+```
+L=.claude/skills/animation-prompt-maker/library/mocap.py
+python3 $L search zombie walk                      # saved names + CMU clip ids
+python3 $L peek zombie_3                           # where the action happens (to trim)
+python3 $L make zombie_3 --start 0 --end 4 -o <dir> --title "Zombie Walk Storyboard" --view 3/4
+```
+`make` writes the prompt (printed), `<name>.html` preview and `<name>_blender.py` in one step, so publish the html and you're done. Don't hand-write poses when a library move fits.
+
+New moves from real ones (combine any of these; a move can be `name@start-end` in seconds):
+- `--upper boxing_1@4.8-8.8`: upper body from another move (walking punch, zombie brawler, running throw)
+- `--then jump_3@0-2 --then fall_1`: chain moves with smooth transitions
+- `--blend run_1:0.3`: mix two moves (jog = walk + 30% run)
+- `--mirror` (left/right swap), `--speed 1.5`, `--exaggerate 0.4` (bigger, snappier), `--inplace` (remove travel for loops), `--keys 8` (number of storyboard panels)
+- Own recordings (Rokoko Video, etc.): `python3 $L import my.bvh --name my_move`
+- If nothing in the library fits (gun reloads, creatures), fall back to hand posing with IK below.
+
+## Fast path (hand-posed)
 
 ## Fast path
 
