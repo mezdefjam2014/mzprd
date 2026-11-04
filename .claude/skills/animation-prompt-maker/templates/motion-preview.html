@@ -245,7 +245,7 @@ function draw(ctx,w,h,st,opt={}){
   const items=[];
   const seg=(a,b,wd)=>{const A=J(a),B=J(b);items.push({d:(A[2]+B[2])/2,f:col=>{ctx.strokeStyle=col;ctx.lineWidth=wd;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();}});};
   const dot=(a,r)=>{const A=J(a);items.push({d:A[2]+.1,f:col=>{ctx.fillStyle=col;ctx.beginPath();ctx.arc(A[0],A[1],r,0,7);ctx.fill();}});};
-  seg("hip","hF",10);seg("hip","hB",10);seg("hip","mid",13);seg("mid","sh",16);seg("shF","shB",9);seg("sh","nk",6);
+  seg("hip","hF",10);seg("hip","hB",10);seg("hip","mid",13);seg("mid","sh",16);seg("shF","shB",9);seg("sh","nk",6);seg("nk","hd",6);
   seg("shF","rE",7);seg("rE","rH",6.5);dot("rH",3.8);
   seg("shB","lE",7);seg("lE","lH",6.5);dot("lH",3.8);
   seg("hF","fK",9);seg("fK","fAn",8);seg("fAn","fTo",6);

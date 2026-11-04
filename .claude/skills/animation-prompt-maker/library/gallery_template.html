@@ -69,7 +69,7 @@ button.x{font-family:var(--display);font-weight:700;border:1px solid var(--line)
 const DATA=__DATA__;
 const D=Math.PI/180, FLOOR=89, css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const P=DATA.pts, ix=Object.fromEntries(P.map((k,i)=>[k,i]));
-const SEG=[["hip","hF",9],["hip","hB",9],["hip","mid",12],["mid","sh",14],["shF","shB",8],["sh","nk",5],["shF","rE",6],["rE","rH",6],["shB","lE",6],["lE","lH",6],["hF","fK",8],["fK","fAn",7],["fAn","fTo",5],["hB","bK",8],["bK","bAn",7],["bAn","bTo",5]];
+const SEG=[["hip","hF",9],["hip","hB",9],["hip","mid",12],["mid","sh",14],["shF","shB",8],["sh","nk",5],["nk","hd",5],["shF","rE",6],["rE","rH",6],["shB","lE",6],["lE","lH",6],["hF","fK",8],["fK","fAn",7],["fAn","fTo",5],["hB","bK",8],["bK","bAn",7],["bAn","bTo",5]];
 function proj(p,c,yaw,pitch){const dx=p[0]-c[0],dy=p[1]-6,dz=p[2]-c[1],Y=yaw*D,Pt=pitch*D;const x1=dx*Math.cos(Y)-dz*Math.sin(Y),z1=dx*Math.sin(Y)+dz*Math.cos(Y);return [x1,dy*Math.cos(Pt)+z1*Math.sin(Pt),-dy*Math.sin(Pt)+z1*Math.cos(Pt)];}
 function draw(ctx,w,h,fr,yaw=40,pitch=14,big=false,g=null){
   ctx.fillStyle=css("--panel");ctx.fillRect(0,0,w,h);

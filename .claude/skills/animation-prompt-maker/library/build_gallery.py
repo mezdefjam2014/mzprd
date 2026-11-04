@@ -8,7 +8,10 @@ VAR = {n: x for n, x in VAR.items() if n not in BLOCKED}
 items = [(n, d, None) for n, d in saved.items()] + [(n, v["how"], v["cat"]) for n, v in VAR.items() if v["status"] == "active" and n not in saved]
 TITLES = json.loads((mocap.HERE / "titles.json").read_text()) if (mocap.HERE / "titles.json").exists() else {}
 for name, desc, vcat in items:
-    if name in TITLES: desc = TITLES[name] + "  |  " + desc.replace("approved loop: ", "").replace("approved: ", "")
+    if name in TITLES:
+        rest = desc.replace("approved loop: ", "").replace("approved: ", "")
+        rest = rest.replace(TITLES[name], "").strip(" |")
+        desc = TITLES[name] + ("  |  " + rest if rest else "")
     m, doc = mocap.load_move(name); n = mocap.nframes(m)
     segs = [] if vcat else mocap.segments(m)
     s0 = segs[0][0] if segs else 0
