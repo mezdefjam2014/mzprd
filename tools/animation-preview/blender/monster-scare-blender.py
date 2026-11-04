@@ -119,35 +119,53 @@ from mathutils import Matrix, Vector
 
 # side view: figure faces +X, up is +Z. 100 preview units = 1 m.
 S = 0.01
-L = dict(torso=58, neck=8, head=12, upper=31, fore=29, thigh=44, shin=44)
-REST = dict(x=0, y=0, lean=0, head=0, rU=80, rF=85, lU=95, lF=92, fT=80, fS=92, bT=100, bS=95)
+L = dict(torso=30, chest=28, neck=7, head=11.5, upper=30, fore=27, thigh=46, shin=45, foot=14, hipW=3)
+FLOOR = 89
+REST = dict(x=0, y=0, lean=2, chest=0, head=4, rU=86, rF=80, lU=93, lF=86, fT=84, fS=97, bT=95, bS=90, fA=0, bA=0)
 
-def V(p):  # preview (x, y-down) -> Blender (X, Z-up), lifted so feet stand on Z=0
-    return Vector((p[0] * S, 0.0, (89 - p[1]) * S))
+def V(p):  # preview (x, y-down) -> Blender (X, Z-up), floor at Z=0
+    return Vector((p[0] * S, 0.0, (FLOOR - p[1]) * S))
 
 def P(o, a, l):
     r = math.radians(a)
     return (o[0] + math.cos(r) * l, o[1] + math.sin(r) * l)
 
-def solve(p):
+def raw(p):
     hip = (p["x"], p["y"])
-    sh = P(hip, -90 + p["lean"], L["torso"])
-    nk = P(sh, -90 + p["lean"] * .5, L["neck"])
-    hd = P(nk, -90 + p["lean"] + p["head"] * .6, L["head"] * 2)
-    sl = (sh[0] - 3, sh[1] + 1)
-    rE = P(sh, p["rU"], L["upper"]); rH = P(rE, p["rF"], L["fore"])
-    lE = P(sl, p["lU"], L["upper"]); lH = P(lE, p["lF"], L["fore"])
-    fK = P(hip, p["fT"], L["thigh"]); fF = P(fK, p["fS"], L["shin"])
-    bK = P(hip, p["bT"], L["thigh"]); bF = P(bK, p["bS"], L["shin"])
-    # bone name: (head, tail, parent)
-    return {
-        "spine": (hip, sh, None), "neck": (sh, nk, "spine"), "head": (nk, hd, "neck"),
-        "upper_arm.R": (sh, rE, "spine"), "forearm.R": (rE, rH, "upper_arm.R"),
-        "upper_arm.L": (sl, lE, "spine"), "forearm.L": (lE, lH, "upper_arm.L"),
-        "thigh.R": (hip, fK, "spine"), "shin.R": (fK, fF, "thigh.R"),
-        "thigh.L": (hip, bK, "spine"), "shin.L": (bK, bF, "thigh.L"),
-    }, {"rH": rH, "lH": lH, "fFoot": fF, "bFoot": bF, "hip": hip, "head": hd, "chest": sh}, \
-       {"rH": p["rF"], "lH": p["lF"], "fFoot": p["fS"], "bFoot": p["bS"], "hip": p["lean"], "head": p["head"], "world": 0}
+    mid = P(hip, -90 + p["lean"], L["torso"])
+    sh = P(mid, -90 + p["lean"] + p["chest"], L["chest"])
+    nk = P(sh, -90 + p["lean"] * .5 + p["chest"] * .5, L["neck"])
+    hd = P(nk, -90 + p["lean"] + p["chest"] + p["head"] * .6, L["head"] * 2)
+    shF, shB = (sh[0] + 1, sh[1]), (sh[0] - 2, sh[1] + 1)
+    rE = P(shF, p["rU"], L["upper"]); rH = P(rE, p["rF"], L["fore"])
+    lE = P(shB, p["lU"], L["upper"]); lH = P(lE, p["lF"], L["fore"])
+    hF, hB = (hip[0] + L["hipW"], hip[1]), (hip[0] - L["hipW"], hip[1])
+    fK = P(hF, p["fT"], L["thigh"]); fAn = P(fK, p["fS"], L["shin"]); fTo = P(fAn, p["fA"], L["foot"])
+    bK = P(hB, p["bT"], L["thigh"]); bAn = P(bK, p["bS"], L["shin"]); bTo = P(bAn, p["bA"], L["foot"])
+    return dict(hip=hip, mid=mid, sh=sh, shF=shF, shB=shB, nk=nk, hd=hd, rE=rE, rH=rH, lE=lE, lH=lH,
+                hF=hF, hB=hB, fK=fK, fAn=fAn, fTo=fTo, bK=bK, bAn=bAn, bTo=bTo)
+
+def ground(k):
+    p = {**REST, **k.get("pose", {})}
+    s = raw({**p, "y": 0})
+    low = max(s["fAn"][1] + 4, s["fTo"][1], s["bAn"][1] + 4, s["bTo"][1])
+    p["y"] = (FLOOR - low) + (p.get("y", 0) if k.get("air") else 0)
+    return p
+
+def solve(p):
+    s = raw(p)
+    bones = {
+        "spine": (s["hip"], s["mid"], None), "chest": (s["mid"], s["sh"], "spine"),
+        "neck": (s["sh"], s["nk"], "chest"), "head": (s["nk"], s["hd"], "neck"),
+        "upper_arm.R": (s["shF"], s["rE"], "chest"), "forearm.R": (s["rE"], s["rH"], "upper_arm.R"),
+        "upper_arm.L": (s["shB"], s["lE"], "chest"), "forearm.L": (s["lE"], s["lH"], "upper_arm.L"),
+        "thigh.R": (s["hF"], s["fK"], "spine"), "shin.R": (s["fK"], s["fAn"], "thigh.R"), "foot.R": (s["fAn"], s["fTo"], "shin.R"),
+        "thigh.L": (s["hB"], s["bK"], "spine"), "shin.L": (s["bK"], s["bAn"], "thigh.L"), "foot.L": (s["bAn"], s["bTo"], "shin.L"),
+    }
+    anchors = {"rH": s["rH"], "lH": s["lH"], "fFoot": s["fAn"], "bFoot": s["bAn"], "hip": s["hip"], "head": s["hd"], "chest": s["sh"]}
+    angs = {"rH": p["rF"], "lH": p["lF"], "fFoot": p["fA"], "bFoot": p["bA"], "hip": p["lean"], "head": p["head"],
+            "chest": p["lean"] + p["chest"], "world": 0}
+    return bones, anchors, angs
 
 def bone_matrix(h, t):
     y = (V(t) - V(h)).normalized()
@@ -157,12 +175,12 @@ def bone_matrix(h, t):
     m.translation = V(h)
     return m
 
-ORDER = ["spine", "neck", "head", "upper_arm.R", "forearm.R", "upper_arm.L", "forearm.L",
-         "thigh.R", "shin.R", "thigh.L", "shin.L"]
+ORDER = ["spine", "chest", "neck", "head", "upper_arm.R", "forearm.R", "upper_arm.L", "forearm.L",
+         "thigh.R", "shin.R", "foot.R", "thigh.L", "shin.L", "foot.L"]
 
 scene = bpy.context.scene
 scene.render.fps = DATA.get("fps", 24)
-keys = [dict(k, pose={**REST, **k.get("pose", {})}) for k in DATA["keys"]]
+keys = [dict(k, pose=ground(k)) for k in DATA["keys"]]
 scene.frame_start, scene.frame_end = keys[0]["f"], keys[-1]["f"]
 
 # armature in rest pose
@@ -173,7 +191,7 @@ rig = bpy.data.objects.new(name + " Rig", arm)
 scene.collection.objects.link(rig)
 bpy.context.view_layer.objects.active = rig
 bpy.ops.object.mode_set(mode="EDIT")
-rest_bones, _, _ = solve(REST)
+rest_bones, _, _ = solve(ground({}))
 for b in ORDER:
     h, t, par = rest_bones[b]
     eb = arm.edit_bones.new(b)

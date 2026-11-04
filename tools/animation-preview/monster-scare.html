@@ -5,15 +5,15 @@
 /* Layout: animator's light-table — playback stage, numbered key panels, paste-ready prompt */
 :root{
   --bg:#eef1f4; --panel:#ffffff; --ink:#1b2430; --muted:#5b6878; --line:#cfd6de;
-  --accent:#e0661b; --figure:#1b2430; --prop1:#3b4654; --prop2:#e0661b; --prop3:#9aa5b1; --prop4:#2f7fd6;
+  --accent:#e0661b; --figure:#1b2430; --figure-far:#7d8896; --prop1:#3b4654; --prop2:#e0661b; --prop3:#9aa5b1; --prop4:#2f7fd6;
   --display:"Chakra Petch",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#12161c; --panel:#1b2129; --ink:#e6ebf1; --muted:#97a3b2; --line:#2e3742;
-  --accent:#ff8a3d; --figure:#e6ebf1; --prop1:#b7c2ce; --prop2:#ff8a3d; --prop3:#5f6b78; --prop4:#5ea8ff; color-scheme:dark}}
+  --accent:#ff8a3d; --figure:#e6ebf1; --figure-far:#7b8796; --prop1:#b7c2ce; --prop2:#ff8a3d; --prop3:#5f6b78; --prop4:#5ea8ff; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#12161c; --panel:#1b2129; --ink:#e6ebf1; --muted:#97a3b2; --line:#2e3742;
-  --accent:#ff8a3d; --figure:#e6ebf1; --prop1:#b7c2ce; --prop2:#ff8a3d; --prop3:#5f6b78; --prop4:#5ea8ff; color-scheme:dark}
+  --accent:#ff8a3d; --figure:#e6ebf1; --figure-far:#7b8796; --prop1:#b7c2ce; --prop2:#ff8a3d; --prop3:#5f6b78; --prop4:#5ea8ff; color-scheme:dark}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
 main{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
 h1{font-family:var(--display);font-size:clamp(26px,5vw,38px);margin:0;text-wrap:balance}
@@ -200,28 +200,40 @@ const DATA = {
 
 // ---------- engine (do not edit per animation) ----------
 const D=Math.PI/180;
-const L={torso:58,neck:8,head:12,upper:31,fore:29,thigh:44,shin:44};
-const REST={x:0,y:0,lean:0,head:0,rU:80,rF:85,lU:95,lF:92,fT:80,fS:92,bT:100,bS:95};
-const KEYS=DATA.keys.map(k=>({...k,pose:{...REST,...(k.pose||{})}}));
-const LAST=KEYS[KEYS.length-1].f;
-const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
-const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const L={torso:30,chest:28,neck:7,head:11.5,upper:30,fore:27,thigh:46,shin:45,foot:14,hipW:3};
+const FLOOR=89;
+// relaxed standing pose: slight knee bend, arms hanging a touch forward, weight a little on the far leg
+const REST={x:0,y:0,lean:2,chest:0,head:4,rU:86,rF:80,lU:93,lF:86,fT:84,fS:97,bT:95,bS:90,fA:0,bA:0};
 const P=(x,y,a,l)=>[x+Math.cos(a*D)*l,y+Math.sin(a*D)*l];
-
-function solve(p){
+function rawSolve(p){
   const hip=[p.x,p.y];
-  const sh=P(hip[0],hip[1],-90+p.lean,L.torso);
-  const nk=P(sh[0],sh[1],-90+p.lean*.5,L.neck);
-  const hd=P(nk[0],nk[1],-90+p.lean+p.head*.6,L.head);
-  const rE=P(...sh,p.rU,L.upper), rH=P(...rE,p.rF,L.fore);
-  const lE=P(sh[0]-3,sh[1]+1,p.lU,L.upper), lH=P(...lE,p.lF,L.fore);
-  const fK=P(...hip,p.fT,L.thigh), fFt=P(...fK,p.fS,L.shin);
-  const bK=P(...hip,p.bT,L.thigh), bFt=P(...bK,p.bS,L.shin);
-  return {hip,sh,nk,hd,rE,rH,lE,lH,fK,fFt,bK,bFt,
-    ang:{rH:p.rF,lH:p.lF,fFoot:p.fS,bFoot:p.bS,hip:p.lean,head:p.head,world:0}};
+  const mid=P(...hip,-90+p.lean,L.torso);
+  const sh=P(...mid,-90+p.lean+p.chest,L.chest);
+  const nk=P(...sh,-90+p.lean*.5+p.chest*.5,L.neck);
+  const hd=P(...nk,-90+p.lean+p.chest+p.head*.6,L.head);
+  const shF=[sh[0]+1,sh[1]], shB=[sh[0]-2,sh[1]+1];
+  const rE=P(...shF,p.rU,L.upper), rH=P(...rE,p.rF,L.fore);
+  const lE=P(...shB,p.lU,L.upper), lH=P(...lE,p.lF,L.fore);
+  const hF=[hip[0]+L.hipW,hip[1]], hB=[hip[0]-L.hipW,hip[1]];
+  const fK=P(...hF,p.fT,L.thigh), fAn=P(...fK,p.fS,L.shin), fTo=P(...fAn,p.fA,L.foot);
+  const bK=P(...hB,p.bT,L.thigh), bAn=P(...bK,p.bS,L.shin), bTo=P(...bAn,p.bA,L.foot);
+  return {hip,mid,sh,shF,shB,nk,hd,rE,rH,lE,lH,hF,hB,fK,fAn,fTo,bK,bAn,bTo,
+    ang:{rH:p.rF,lH:p.lF,fFoot:p.fA,bFoot:p.bA,hip:p.lean,head:p.head,chest:p.lean+p.chest,world:0}};
 }
-const ANCH={rH:"rH",lH:"lH",fFoot:"fFt",bFoot:"bFt",hip:"hip",head:"hd",chest:"sh"};
-// world transform of a prop in a key: anchor point + local offset rotated by anchor angle (if follow) + own rotation
+// plant the lowest foot on the floor unless the key is airborne ("air": true, then y lifts the body)
+function ground(k){
+  const p={...REST,...(k.pose||{})};
+  const s=rawSolve({...p,y:0});
+  const low=Math.max(s.fAn[1]+4,s.fTo[1],s.bAn[1]+4,s.bTo[1]);
+  p.y=(FLOOR-low)+(k.air?(p.y||0):0);
+  return p;
+}
+const KEYS=DATA.keys.map(k=>({...k,pose:ground(k)}));
+const LAST=KEYS[KEYS.length-1].f;
+const solve=rawSolve;
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const ANCH={rH:"rH",lH:"lH",fFoot:"fAn",bFoot:"bAn",hip:"hip",head:"hd",chest:"sh"};
 function propXform(s,pr){
   if(!pr)return null;
   if(pr.at==="world")return {x:pr.x||0,y:pr.y||0,r:pr.r||0};
@@ -234,7 +246,7 @@ function frameState(fr){
   let i=0;while(i<KEYS.length-2&&fr>KEYS[i+1].f)i++;
   const a=KEYS[i],b=KEYS[i+1]||a;
   let t=b.f===a.f?0:(fr-a.f)/(b.f-a.f);
-  t=b.snap?Math.min(1,t*1.8):ease(t);
+  t=b.snap?1-Math.pow(1-t,3):ease(t);
   const pose={};for(const k in a.pose)pose[k]=a.pose[k]+(b.pose[k]-a.pose[k])*t;
   const sa=solve(a.pose),sb=solve(b.pose),props={};
   for(const name in DATA.props){
@@ -249,21 +261,34 @@ function keyState(k){const s=solve(k.pose),props={};for(const n in DATA.props){c
 function draw(ctx,w,h,st,opt={}){
   const s=solve(st.pose), sc=h/230, ox=w*.45, oy=h*.45;
   ctx.save();ctx.translate(ox,oy);ctx.scale(sc,sc);ctx.lineCap="round";ctx.lineJoin="round";
-  const fig=opt.ghost?css("--line"):css("--figure");
+  const near=opt.ghost?css("--line"):css("--figure");
+  const far=opt.ghost?css("--line"):css("--figure-far");
   const line=(pts,c,wd)=>{ctx.strokeStyle=c;ctx.lineWidth=wd;ctx.beginPath();ctx.moveTo(...pts[0]);for(const q of pts.slice(1))ctx.lineTo(...q);ctx.stroke();};
-  if(!opt.ghost){ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-110,89);ctx.lineTo(140,89);ctx.stroke();}
+  const dot=(pt,r,c)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(...pt,r,0,7);ctx.fill();};
+  if(!opt.ghost){
+    ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-110,FLOOR);ctx.lineTo(140,FLOOR);ctx.stroke();
+    // contact shadow shrinks as the body leaves the floor
+    const lift=Math.max(0,FLOOR-4-Math.max(s.fAn[1],s.bAn[1]));
+    ctx.fillStyle=css("--line");ctx.globalAlpha=Math.max(.15,.6-lift/80);
+    ctx.beginPath();ctx.ellipse(s.hip[0]+4,FLOOR+1,Math.max(12,26-lift/4),3,0,0,7);ctx.fill();ctx.globalAlpha=1;
+  }
   const drawProps=layer=>{if(opt.ghost)return;for(const n in st.props){const def=DATA.props[n];if((def.layer||"front")!==layer)continue;const x=st.props[n];
     ctx.save();ctx.translate(x.x,x.y);ctx.rotate(x.r*D);for(const sh of def.shapes){ctx.fillStyle=css(sh[4]||def.color||"--prop1");ctx.fillRect(sh[0],sh[1],sh[2],sh[3]);}ctx.restore();}};
   drawProps("back");
-  line([s.sh,s.lE,s.lH],fig,6);                 // far arm
-  line([s.hip,s.bK,s.bFt],fig,7);               // far leg
-  line([s.hip,s.sh],fig,9);line([s.sh,s.nk],fig,6);
-  ctx.fillStyle=opt.ghost?"transparent":css("--panel");ctx.strokeStyle=fig;ctx.lineWidth=4;
-  ctx.beginPath();ctx.arc(...s.hd,L.head,0,7);ctx.fill();ctx.stroke();
-  const ed=P(...s.hd,st.pose.head*1.4,L.head*.6);ctx.fillStyle=fig;ctx.beginPath();ctx.arc(...ed,2,0,7);ctx.fill();
-  line([s.hip,s.fK,s.fFt],fig,7);               // near leg
+  // far side (lighter, behind the body)
+  line([s.shB,s.lE,s.lH],far,6);dot(s.lH,3.6,far);
+  line([s.hB,s.bK,s.bAn],far,7.5);line([s.bAn,s.bTo],far,5.5);
+  // torso: pelvis, belly, chest, neck, head
+  line([s.hip,s.mid],near,13);line([s.mid,s.sh],near,16);line([s.sh,s.nk],near,6);
+  ctx.fillStyle=opt.ghost?"transparent":css("--panel");ctx.strokeStyle=near;ctx.lineWidth=3.5;
+  ctx.save();ctx.translate(...s.hd);ctx.rotate((st.pose.lean+st.pose.chest+st.pose.head*.6)*D);
+  ctx.beginPath();ctx.ellipse(0,-2,9.5,11.5,0,0,7);ctx.fill();ctx.stroke();
+  if(!opt.ghost)dot([5,-3],1.8,near);
+  ctx.restore();
+  // near leg
+  line([s.hF,s.fK,s.fAn],near,8.5);line([s.fAn,s.fTo],near,6);
   drawProps("front");
-  line([s.sh,s.rE,s.rH],fig,7);                 // near arm
+  line([s.shF,s.rE,s.rH],near,7);dot(s.rH,3.8,near);
   drawProps("top");
   ctx.restore();
 }

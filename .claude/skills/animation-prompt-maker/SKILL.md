@@ -88,11 +88,13 @@ After the prompt, make a playable stick-figure preview. Do NOT write HTML from s
 4. Run `python3 .claude/skills/animation-prompt-maker/templates/build.py data.json <out>.html` (out file in the scratchpad or the user's folder), then publish it with the Artifact tool. Skip extra screenshots unless something looks broken.
 
 Pose values (side view, figure faces right; angles in degrees, 0 = pointing right, 90 = straight down, -90 = straight up; each limb angle is absolute, not relative to its parent). Omitted values use the rest pose:
-- `x`, `y`: move the hips (y negative = up, for jumps). Floor is y = 89 at rest.
-- `lean`: torso tilt (positive = forward). `head`: look down (+) or up (-).
-- `rU`, `rF`: near (right) upper arm and forearm. `lU`, `lF`: far (left) arm. Rest: 80/85 and 95/92.
-- `fT`, `fS`: near (front) thigh and shin. `bT`, `bS`: far (back) leg. Rest: 80/92 and 100/95.
-- Examples: arm pointing forward = upper 15, forearm -5. Fists up guard = upper 60, forearm -80. Knee chambered = thigh -10, shin 95. Kick at head height = thigh -35, shin -32.
+- Feet are planted on the floor automatically, so never fight gravity with `y`. For jumps, flips or anything airborne add `"air": true` to the key and use `y` (negative = up) to lift the body.
+- `x`: move the body forward/back.
+- `lean`: lower-body tilt (positive = forward). `chest`: extra upper-back bend on top of lean (hunch +, arch -). `head`: look down (+) or up (-).
+- `rU`, `rF`: near (right) upper arm and forearm. `lU`, `lF`: far (left) arm. Rest: 86/80 and 93/86 (relaxed, hands slightly forward).
+- `fT`, `fS`, `fA`: near (front) thigh, shin, foot. `bT`, `bS`, `bA`: far (back) leg. Rest: 84/97/0 and 95/90/0 (soft knees). Foot 0 = flat; toe-off ~ 40, heel strike ~ -20.
+- Real joints only bend one way: knee = shin angle bigger than thigh angle (foot behind knee); elbow = forearm angle smaller than upper arm angle when the hand comes forward/up. Keep the torso lean within -35..60 and the head within -45..45.
+- Examples: arm pointing forward = upper 15, forearm -5. Fists up guard = upper 60, forearm -80. Knee chambered = thigh -10, shin 95. Kick at head height = thigh -35, shin -32. Deep crouch = thigh 15, shin 125, lean 30.
 
 Props: define `"props": {"name": {"color": "--prop1".."--prop4", "layer": "back"|"front"|"top", "shapes": [[x, y, w, h], ...]}}`, rectangles in local units (the figure is ~200 units tall). In each key, place props with `{"at": "rH"|"lH"|"fFoot"|"bFoot"|"hip"|"head"|"chest"|"world", "x", "y", "r", "follow": true to rotate with the limb}`. A prop left out of a key is hidden. Props blend smoothly between keys, so swapping hands or dropping something to the floor (`"at": "world"`) just works.
 
