@@ -6702,7 +6702,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "approved"
  },
  "cb_142x22_1": {
   "cat": "horror & creatures",
@@ -6758,7 +6758,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 106,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_140x09_low_ready": {
   "cat": "combat pistol",
