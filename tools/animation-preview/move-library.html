@@ -37,7 +37,8 @@ input[type=search]{font:inherit;padding:8px 12px;border:1px solid var(--line);bo
 .tile span{font-size:12px;color:var(--muted);line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);padding:16px;width:min(720px,92vw)}
 dialog::backdrop{background:rgba(10,14,20,.55)}
-dialog canvas{width:100%;aspect-ratio:4/3;display:block}
+dialog canvas{width:100%;aspect-ratio:4/3;display:block;cursor:grab;touch-action:none}
+dialog canvas:active{cursor:grabbing}
 .dh{display:flex;justify-content:space-between;gap:12px;align-items:start}
 .dh h2{font-family:var(--display);margin:0;font-size:22px}
 .dh p{margin:4px 0 0;color:var(--muted);font-size:14px}
@@ -61,6 +62,7 @@ button.x{font-family:var(--display);font-weight:700;border:1px solid var(--line)
   <div class="dh"><div><h2 id="dn"></h2><p id="dd"></p></div><div style="display:flex;gap:8px"><button class="x" id="dok" hidden></button><button class="x" id="close">Close</button></div></div>
   <canvas id="big" width="960" height="720"></canvas>
   <div class="views" id="views"></div>
+  <p class="sub" style="margin:6px 0 0;font-size:13px">Drag the figure to rotate the camera.</p>
   <div class="cmd"><code id="cmd"></code><button class="x" id="copy">Copy</button></div>
 </dialog>
 <script>
@@ -119,6 +121,11 @@ function open(i){cur=DATA.moves[i];document.getElementById("dn").textContent=cur
 function paintDlg(){const b=document.getElementById("dok");if(!cur)return;b.hidden=!(cur.v&&db);b.textContent=approved.has(cur.n)?"✓ Approved":"Approve";b.style.borderColor=approved.has(cur.n)?"var(--ok)":"";b.style.color=approved.has(cur.n)?"var(--ok)":"";}
 document.getElementById("dok").onclick=()=>cur&&toggle(cur.n);
 document.getElementById("close").onclick=()=>dlg.close();
+// drag on the big player to rotate the camera (mouse or finger)
+let drag=null;
+big.addEventListener("pointerdown",e=>{drag=[e.clientX,e.clientY,view[0],view[1]];big.setPointerCapture(e.pointerId);});
+big.addEventListener("pointermove",e=>{if(!drag)return;view=[drag[2]-(e.clientX-drag[0])*.5,Math.max(-10,Math.min(85,drag[3]+(e.clientY-drag[1])*.4))];vb.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));});
+big.addEventListener("pointerup",()=>drag=null);big.addEventListener("pointercancel",()=>drag=null);
 document.getElementById("copy").onclick=async e=>{const t=document.getElementById("cmd").textContent;try{await navigator.clipboard.writeText(t);e.target.textContent="Copied"}catch{const r=document.createRange();r.selectNodeContents(document.getElementById("cmd"));getSelection().removeAllRanges();getSelection().addRange(r);e.target.textContent="Selected"}setTimeout(()=>e.target.textContent="Copy",1500);};
 // approvals, saved for Claude to read back (collection "approvals", one doc per approved move)
 function paint(){tiles.forEach(t=>{if(!t.m.v)return;const on=approved.has(t.m.n);t.el.classList.toggle("ok",on);const tag=t.el.querySelector(".tag");if(tag)tag.textContent=on?"Approved":"New variation";const c=t.el.querySelector(".chk");c.setAttribute("aria-pressed",on);});
