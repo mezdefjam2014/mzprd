@@ -1,0 +1,19 @@
+{
+ "title": "Walk Cycle Storyboard",
+ "meta": "3D third-person · side view · 24 fps · frames 1–25 · loop",
+ "note": "Loop: frame 25 is the same pose as frame 1, so the cycle repeats seamlessly.",
+ "fps": 24,
+ "props": {},
+ "keys": [
+  {"f":1,"n":"Contact: front heel touches down, back toe pushing off, arms opposite.","pose":{"y":4,"lean":3,"rU":105,"rF":100,"lU":70,"lF":60,"fT":65,"fS":80,"bT":118,"bS":112}},
+  {"f":4,"n":"Down: weight sinks onto the front leg, knee bends.","pose":{"y":8,"lean":4,"rU":98,"rF":95,"lU":78,"lF":68,"fT":78,"fS":95,"bT":115,"bS":125}},
+  {"f":7,"n":"Passing: back leg swings past the standing leg.","pose":{"y":1,"lean":4,"rU":90,"rF":88,"lU":88,"lF":80,"fT":95,"fS":93,"bT":85,"bS":120}},
+  {"f":10,"n":"Up: body rises on the standing leg, swinging foot reaches forward.","pose":{"y":-2,"lean":4,"rU":80,"rF":72,"lU":98,"lF":92,"fT":105,"fS":100,"bT":65,"bS":95}},
+  {"f":13,"n":"Contact: other heel touches down, mirrored from frame 1.","pose":{"y":4,"lean":3,"rU":70,"rF":60,"lU":105,"lF":100,"fT":118,"fS":112,"bT":65,"bS":80}},
+  {"f":16,"n":"Down: weight sinks onto the new front leg.","pose":{"y":8,"lean":4,"rU":78,"rF":68,"lU":98,"lF":95,"fT":115,"fS":125,"bT":78,"bS":95}},
+  {"f":19,"n":"Passing: the other leg swings through.","pose":{"y":1,"lean":4,"rU":88,"rF":80,"lU":90,"lF":88,"fT":85,"fS":120,"bT":95,"bS":93}},
+  {"f":22,"n":"Up: rise again, front foot reaches forward.","pose":{"y":-2,"lean":4,"rU":98,"rF":92,"lU":80,"lF":72,"fT":65,"fS":95,"bT":105,"bS":100}},
+  {"f":25,"n":"Back to the first contact pose to close the loop.","pose":{"y":4,"lean":3,"rU":105,"rF":100,"lU":70,"lF":60,"fT":65,"fS":80,"bT":118,"bS":112}}
+ ],
+ "prompt": "Create an 8-panel 3D animation storyboard of a character doing a looping walk cycle, viewed from the side, realistic style. Lay the panels out left to right, numbered 1 to 8, same character, camera and scale in every panel. Each panel shows a different moment:\n\n1. Contact: front heel touches down, back toe pushing off, arms opposite.\n2. Down: weight sinks onto the front leg, knee bends.\n3. Passing: back leg swings past the standing leg.\n4. Up: body rises on the standing leg, swinging foot reaches forward.\n5. Contact: other heel touches down, mirrored from panel 1.\n6. Down: weight sinks onto the new front leg.\n7. Passing: the other leg swings through.\n8. Up: rise again, front foot reaches forward.\n\nArms always swing opposite to the legs, and the head bobs gently with the up and down poses.\nThen animate it in Blender at 24 fps as a 24-frame loop."
+}

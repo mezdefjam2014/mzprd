@@ -1,6 +1,6 @@
 ---
 name: animation-prompt-maker
-description: Turns any animation request into a step-by-step, frame-by-frame prompt that another AI (Claude, a Blender Python agent, an image/sprite generator) can follow exactly. Use this WHENEVER the user mentions an animation, or asks for a prompt for one: weapon reloads, attacks, kicks, punches, jumps, walk/run cycles, idles, deaths, emotes, UI motion, camera moves, VFX, cutscenes, Blender/Unity/Unreal/Godot/Spine/sprite-sheet work, 2D or 3D. Trigger even if the user only says "make me a prompt for a ___ animation" or "animate ___".
+description: Universal animation maker for games. Use WHENEVER the user asks to make, animate, or get a prompt for ANY motion - reloads, attacks, kicks, punches, monster or creature scares, roars, walk/run/sprint cycles, jumps, idles, deaths, emotes, dances, climbing, picking up items, UI motion, camera moves - in 2D or 3D, for Blender, Unity, Unreal, Godot or sprite sheets. Trigger even on short asks like "make me a reload", "can you do a monster scare", "I need a run cycle". It returns a clean frame-by-frame prompt, a playable motion-graphic preview, and a Blender script that rebuilds the same animation.
 ---
 
 # Animation Prompt Maker
@@ -95,6 +95,18 @@ Pose values (side view, figure faces right; angles in degrees, 0 = pointing righ
 - Examples: arm pointing forward = upper 15, forearm -5. Fists up guard = upper 60, forearm -80. Knee chambered = thigh -10, shin 95. Kick at head height = thigh -35, shin -32.
 
 Props: define `"props": {"name": {"color": "--prop1".."--prop4", "layer": "back"|"front"|"top", "shapes": [[x, y, w, h], ...]}}`, rectangles in local units (the figure is ~200 units tall). In each key, place props with `{"at": "rH"|"lH"|"fFoot"|"bFoot"|"hip"|"head"|"chest"|"world", "x", "y", "r", "follow": true to rotate with the limb}`. A prop left out of a key is hidden. Props blend smoothly between keys, so swapping hands or dropping something to the floor (`"at": "world"`) just works.
+
+## Step 5 — Blender rebuild (when the user uses Blender or asks for it)
+
+The same JSON also rebuilds the animation in Blender, so Blender gets exactly what the preview shows:
+
+`python3 .claude/skills/animation-prompt-maker/templates/to_blender.py data.json <name>_blender.py`
+
+Give the user the file and say: in Blender, open the Scripting tab, open the file, press Run Script. It creates a stick-figure armature (spine, neck, head, upper_arm/forearm .L/.R, thigh/shin .L/.R) keyframed on every key frame, props as boxes, the scene fps and frame range set, and hard snaps on "snap" keys. If the user has their own character, tell them to retarget this rig's action onto theirs (for example with the Rokoko or Auto-Rig Pro retargeting tools), or ask for their bone names and adapt the script.
+
+## Fast path
+
+For "make me a ___" requests: ask only what you can't infer (2D/3D, perspective), write the prompt, write the JSON (start from the closest file in `templates/examples/`: pistol-reload, high-kick, monster-scare, walk-cycle), run build.py and publish, run to_blender.py if they use Blender. Don't redesign the page or rewrite the engine.
 
 ## Rules
 
