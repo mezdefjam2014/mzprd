@@ -6454,7 +6454,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 53,
-  "status": "active"
+  "status": "approved"
  },
  "cb_135x04_2": {
   "cat": "battle & combat",
@@ -6462,7 +6462,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "approved"
  },
  "cb_143x24_1": {
   "cat": "battle & combat",
@@ -6470,7 +6470,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 46,
-  "status": "active"
+  "status": "approved"
  },
  "cb_143x24_2": {
   "cat": "battle & combat",
@@ -6486,7 +6486,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 54,
-  "status": "active"
+  "status": "approved"
  },
  "cb_144x05_2": {
   "cat": "battle & combat",
@@ -6494,7 +6494,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 58,
-  "status": "active"
+  "status": "approved"
  },
  "cb_144x06_1": {
   "cat": "battle & combat",
@@ -6502,7 +6502,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 66,
-  "status": "active"
+  "status": "approved"
  },
  "cb_144x06_2": {
   "cat": "battle & combat",
@@ -6510,7 +6510,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 65,
-  "status": "active"
+  "status": "approved"
  },
  "cb_144x09_1": {
   "cat": "battle & combat",
@@ -6518,7 +6518,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 64,
-  "status": "active"
+  "status": "approved"
  },
  "cb_144x09_2": {
   "cat": "battle & combat",
@@ -6534,7 +6534,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 63,
-  "status": "active"
+  "status": "approved"
  },
  "cb_144x10_2": {
   "cat": "battle & combat",
@@ -6550,7 +6550,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "cb_22x17_1": {
   "cat": "battle & combat",
@@ -6622,7 +6622,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 94,
-  "status": "active"
+  "status": "approved"
  },
  "cb_139x17_1": {
   "cat": "knockdown & recovery",
@@ -6630,7 +6630,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 109,
-  "status": "active"
+  "status": "approved"
  },
  "cb_139x17_2": {
   "cat": "knockdown & recovery",
@@ -6638,7 +6638,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 79,
-  "status": "active"
+  "status": "approved"
  },
  "cb_140x02_1": {
   "cat": "knockdown & recovery",
@@ -6646,7 +6646,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 148,
-  "status": "active"
+  "status": "approved"
  },
  "cb_140x02_2": {
   "cat": "knockdown & recovery",
@@ -6662,7 +6662,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 98,
-  "status": "active"
+  "status": "approved"
  },
  "cb_140x08_1": {
   "cat": "knockdown & recovery",
@@ -6670,7 +6670,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 106,
-  "status": "active"
+  "status": "approved"
  },
  "cb_140x09_1": {
   "cat": "knockdown & recovery",
@@ -6686,7 +6686,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 21,
-  "status": "active"
+  "status": "approved"
  },
  "cb_139x34_1": {
   "cat": "horror & creatures",
@@ -6694,7 +6694,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "approved"
  },
  "cb_139x34_2": {
   "cat": "horror & creatures",
@@ -6710,7 +6710,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 54,
-  "status": "active"
+  "status": "approved"
  },
  "cb_142x22_2": {
   "cat": "horror & creatures",
@@ -6726,7 +6726,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 94,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_139x17_low_ready": {
   "cat": "combat pistol",
@@ -6734,7 +6734,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 109,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_140x02_low_ready": {
   "cat": "combat pistol",
@@ -6742,7 +6742,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 148,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_140x04_low_ready": {
   "cat": "combat pistol",
@@ -6774,7 +6774,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 30,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_139x34_two-handed_aim": {
   "cat": "combat pistol",
@@ -6798,7 +6798,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 54,
-  "status": "active"
+  "status": "approved"
  },
  "pistol_142x22_two-handed_aim": {
   "cat": "combat pistol",
@@ -6814,6 +6814,6 @@
   "loop": true,
   "oneshot": false,
   "frames": 54,
-  "status": "active"
+  "status": "approved"
  }
 }
