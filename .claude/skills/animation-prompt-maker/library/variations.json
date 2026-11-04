@@ -3846,7 +3846,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 44,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_13x37_1": {
   "cat": "climbing & parkour",
@@ -3854,7 +3854,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 81,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_13x37_2": {
   "cat": "climbing & parkour",
@@ -3862,7 +3862,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 55,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_14x22_1": {
   "cat": "climbing & parkour",
@@ -3870,7 +3870,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 125,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_14x22_2": {
   "cat": "climbing & parkour",
@@ -3878,7 +3878,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 51,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_14x30_1": {
   "cat": "climbing & parkour",
@@ -3902,7 +3902,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 67,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_14x33_2": {
   "cat": "climbing & parkour",
@@ -3926,7 +3926,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 76,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_14x35_1": {
   "cat": "climbing & parkour",
@@ -3982,7 +3982,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 65,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_16x09_1": {
   "cat": "climbing & parkour",
@@ -3990,7 +3990,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_40x06_1": {
   "cat": "climbing & parkour",
@@ -4006,7 +4006,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 50,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_40x07_1": {
   "cat": "climbing & parkour",
@@ -4014,7 +4014,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 88,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_40x07_2": {
   "cat": "climbing & parkour",
@@ -4022,7 +4022,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 106,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_40x08_1": {
   "cat": "climbing & parkour",
@@ -4030,7 +4030,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 49,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_40x08_2": {
   "cat": "climbing & parkour",
@@ -4038,7 +4038,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 47,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_41x08_1": {
   "cat": "climbing & parkour",
@@ -4046,7 +4046,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 96,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_41x09_1": {
   "cat": "climbing & parkour",
@@ -4054,7 +4054,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 106,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_41x09_2": {
   "cat": "climbing & parkour",
@@ -4062,7 +4062,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 75,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_49x04_1": {
   "cat": "climbing & parkour",
@@ -4086,7 +4086,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 97,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_81x14_2": {
   "cat": "climbing & parkour",
@@ -4126,7 +4126,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_113x22_1": {
   "cat": "climbing & parkour",
@@ -4134,7 +4134,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 45,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_113x22_2": {
   "cat": "climbing & parkour",
@@ -4142,7 +4142,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 47,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_127x25_1": {
   "cat": "climbing & parkour",
@@ -4150,7 +4150,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 26,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_127x26_1": {
   "cat": "climbing & parkour",
@@ -4158,7 +4158,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 27,
-  "status": "active"
+  "status": "approved"
  },
  "climbing_127x27_1": {
   "cat": "climbing & parkour",
@@ -4214,7 +4214,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 66,
-  "status": "active"
+  "status": "approved"
  },
  "fights_17x01_1": {
   "cat": "fights & interactions",
@@ -4462,7 +4462,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "horror_20x13_2": {
   "cat": "horror & creatures",
@@ -4486,7 +4486,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "approved"
  },
  "horror_136x12_1": {
   "cat": "horror & creatures",
@@ -4494,7 +4494,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 44,
-  "status": "active"
+  "status": "approved"
  },
  "horror_136x12_2": {
   "cat": "horror & creatures",
@@ -4502,7 +4502,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 41,
-  "status": "active"
+  "status": "approved"
  },
  "horror_136x13_1": {
   "cat": "horror & creatures",
@@ -4510,7 +4510,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 39,
-  "status": "active"
+  "status": "approved"
  },
  "horror_136x13_2": {
   "cat": "horror & creatures",
@@ -4518,7 +4518,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 39,
-  "status": "active"
+  "status": "approved"
  },
  "horror_136x14_1": {
   "cat": "horror & creatures",
@@ -4526,7 +4526,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "approved"
  },
  "horror_136x14_2": {
   "cat": "horror & creatures",
@@ -4534,7 +4534,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 34,
-  "status": "active"
+  "status": "approved"
  },
  "horror_136x15_1": {
   "cat": "horror & creatures",
@@ -4542,7 +4542,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "horror_136x15_2": {
   "cat": "horror & creatures",
@@ -4590,7 +4590,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 19,
-  "status": "active"
+  "status": "approved"
  },
  "horror_139x14_2": {
   "cat": "horror & creatures",
@@ -4598,7 +4598,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "approved"
  },
  "horror_139x15_1": {
   "cat": "horror & creatures",
@@ -4606,7 +4606,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 45,
-  "status": "active"
+  "status": "approved"
  },
  "horror_139x15_2": {
   "cat": "horror & creatures",
@@ -4614,7 +4614,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 25,
-  "status": "active"
+  "status": "approved"
  },
  "horror_139x29_1": {
   "cat": "horror & creatures",
@@ -4638,7 +4638,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "approved"
  },
  "horror_139x31_2": {
   "cat": "horror & creatures",
@@ -4646,7 +4646,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "approved"
  },
  "horror_139x32_1": {
   "cat": "horror & creatures",
@@ -4654,7 +4654,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 40,
-  "status": "active"
+  "status": "approved"
  },
  "horror_139x32_2": {
   "cat": "horror & creatures",
@@ -4662,7 +4662,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 33,
-  "status": "active"
+  "status": "approved"
  },
  "horror_120x12_1": {
   "cat": "horror & creatures",
@@ -4678,7 +4678,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "approved"
  },
  "horror_120x13_1": {
   "cat": "horror & creatures",
@@ -4686,7 +4686,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 38,
-  "status": "active"
+  "status": "approved"
  },
  "horror_120x13_2": {
   "cat": "horror & creatures",
@@ -4694,7 +4694,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 32,
-  "status": "active"
+  "status": "approved"
  },
  "horror_120x14_1": {
   "cat": "horror & creatures",
@@ -4702,7 +4702,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 48,
-  "status": "active"
+  "status": "approved"
  },
  "horror_120x14_2": {
   "cat": "horror & creatures",
@@ -4742,7 +4742,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 34,
-  "status": "active"
+  "status": "approved"
  },
  "horror_81x13_1": {
   "cat": "horror & creatures",
