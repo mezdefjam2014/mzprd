@@ -3,232 +3,224 @@
   "cat": "attacks",
   "how": "clean single punch",
   "loop": true,
-  "frames": 49,
-  "seam": 0.94,
+  "frames": 43,
+  "seam": 1.01,
   "status": "active"
  },
  "snap_jab": {
   "cat": "attacks",
   "how": "fast snappy jab",
   "loop": true,
-  "frames": 36,
-  "seam": 1.15,
+  "frames": 32,
+  "seam": 0.99,
   "status": "active"
  },
  "heavy_haymaker": {
   "cat": "attacks",
   "how": "slow, heavy wind-up punch",
   "loop": true,
-  "frames": 61,
-  "seam": 1.29,
+  "frames": 54,
+  "seam": 1.04,
   "status": "active"
  },
  "lefty_punch": {
   "cat": "attacks",
   "how": "punch with the left hand",
   "loop": true,
-  "frames": 49,
-  "seam": 0.94,
+  "frames": 43,
+  "seam": 1.01,
   "status": "active"
  },
  "lunge_punch": {
   "cat": "attacks",
   "how": "stepping attack punch",
   "loop": true,
-  "frames": 73,
-  "seam": 0.72,
+  "frames": 70,
+  "seam": 1.15,
   "status": "active"
  },
  "feint_strike": {
   "cat": "attacks",
   "how": "fake then strike",
   "loop": true,
-  "frames": 18,
-  "seam": 1.03,
+  "frames": 42,
+  "seam": 2.08,
   "status": "active"
  },
  "front_kick": {
   "cat": "attacks",
   "how": "single front kick",
   "loop": true,
-  "frames": 72,
-  "seam": 0.45,
+  "frames": 63,
+  "seam": 1.07,
   "status": "active"
  },
  "snap_kick": {
   "cat": "attacks",
   "how": "fast snap kick",
   "loop": true,
-  "frames": 55,
-  "seam": 0.44,
+  "frames": 48,
+  "seam": 1.03,
   "status": "active"
  },
  "left_kick": {
   "cat": "attacks",
   "how": "kick with the left leg",
   "loop": true,
-  "frames": 72,
-  "seam": 0.45,
+  "frames": 63,
+  "seam": 1.07,
   "status": "active"
  },
  "jump_kick": {
   "cat": "attacks",
   "how": "jump kick, in place",
   "loop": true,
-  "frames": 65,
-  "seam": 0.41,
+  "frames": 66,
+  "seam": 0.75,
   "status": "active"
  },
  "jump_kick_left": {
   "cat": "attacks",
   "how": "jump kick, mirrored",
   "loop": true,
-  "frames": 65,
-  "seam": 0.41,
+  "frames": 66,
+  "seam": 0.75,
   "status": "active"
  },
  "spin_kick": {
   "cat": "attacks",
   "how": "jumping spin kick",
   "loop": true,
-  "frames": 37,
-  "seam": 0.36,
+  "frames": 39,
+  "seam": 0.55,
   "status": "active"
  },
  "sword_slash": {
   "cat": "attacks",
   "how": "single sword slash",
   "loop": true,
-  "frames": 22,
-  "seam": 0.94,
+  "frames": 58,
+  "seam": 0.62,
   "status": "active"
  },
  "sword_heavy": {
   "cat": "attacks",
   "how": "slow heavy sword swing",
   "loop": true,
-  "frames": 88,
-  "seam": 1.17,
+  "frames": 96,
+  "seam": 0.27,
   "status": "active"
  },
  "overhead_smash": {
   "cat": "attacks",
   "how": "raise and smash overhead",
   "loop": true,
-  "frames": 74,
-  "seam": 1.82,
+  "frames": 67,
+  "seam": 0.88,
   "status": "active"
  },
  "block_left": {
   "cat": "blocking",
   "how": "block on the left side",
   "loop": true,
-  "frames": 65,
-  "seam": 0.78,
+  "frames": 52,
+  "seam": 0.26,
   "status": "active"
  },
  "block_right": {
   "cat": "blocking",
   "how": "block on the right side",
   "loop": true,
-  "frames": 18,
-  "seam": 1.42,
+  "frames": 48,
+  "seam": 0.35,
   "status": "active"
  },
  "block_fast": {
   "cat": "blocking",
   "how": "quick reflex block",
   "loop": true,
-  "frames": 14,
-  "seam": 1.27,
+  "frames": 44,
+  "seam": 0.38,
   "status": "active"
  },
  "block_heavy": {
   "cat": "blocking",
   "how": "braced heavy block",
   "loop": true,
-  "frames": 22,
-  "seam": 1.55,
+  "frames": 67,
+  "seam": 0.32,
   "status": "active"
  },
  "dodge": {
   "cat": "blocking",
   "how": "dodge out of the way",
   "loop": true,
-  "frames": 64,
-  "seam": 0.88,
+  "frames": 68,
+  "seam": 0.67,
   "status": "active"
  },
  "duck": {
   "cat": "blocking",
   "how": "duck under an attack",
   "loop": true,
-  "frames": 50,
-  "seam": 1.12,
+  "frames": 89,
+  "seam": 1.97,
   "status": "active"
  },
  "wave": {
   "cat": "waves",
   "how": "friendly wave",
   "loop": true,
-  "frames": 33,
-  "seam": 1.09,
-  "status": "active"
- },
- "big_wave": {
-  "cat": "waves",
-  "how": "big, exaggerated wave",
-  "loop": true,
-  "frames": 33,
-  "seam": 1.44,
+  "frames": 69,
+  "seam": 0.64,
   "status": "active"
  },
  "excited_wave": {
   "cat": "waves",
   "how": "fast excited wave",
   "loop": true,
-  "frames": 55,
-  "seam": 1.1,
+  "frames": 48,
+  "seam": 0.85,
   "status": "active"
  },
  "tired_wave": {
   "cat": "waves",
   "how": "slow, slumped wave",
   "loop": true,
-  "frames": 44,
-  "seam": 1.1,
+  "frames": 92,
+  "seam": 0.65,
   "status": "active"
  },
  "left_hand_wave": {
   "cat": "waves",
   "how": "wave with the left hand",
   "loop": true,
-  "frames": 33,
-  "seam": 1.09,
+  "frames": 69,
+  "seam": 0.64,
   "status": "active"
  },
  "signal_wave": {
   "cat": "waves",
   "how": "directing-traffic wave",
   "loop": true,
-  "frames": 21,
-  "seam": 1.01,
+  "frames": 34,
+  "seam": 0.81,
   "status": "active"
  },
  "zombie_walk": {
   "cat": "zombies",
   "how": "zombie walk cycle",
   "loop": true,
-  "frames": 51,
-  "seam": 0.86,
+  "frames": 48,
+  "seam": 1.28,
   "status": "active"
  },
  "zombie_hunched": {
   "cat": "zombies",
   "how": "hunched zombie walk",
   "loop": true,
-  "frames": 51,
-  "seam": 1.04,
+  "frames": 48,
+  "seam": 1.24,
   "status": "active"
  },
  "zombie_heavy": {
@@ -236,15 +228,7 @@
   "how": "slow, heavy zombie walk",
   "loop": true,
   "frames": 59,
-  "seam": 1.47,
-  "status": "active"
- },
- "zombie_march": {
-  "cat": "zombies",
-  "how": "zombie march cycle",
-  "loop": true,
-  "frames": 25,
-  "seam": 1.37,
+  "seam": 1.01,
   "status": "active"
  },
  "zombie_mirrored": {
@@ -252,7 +236,7 @@
   "how": "zombie walk, mirrored",
   "loop": true,
   "frames": 41,
-  "seam": 1.26,
+  "seam": 0.97,
   "status": "active"
  },
  "zombie_lurch": {
@@ -260,31 +244,15 @@
   "how": "lurching zombie",
   "loop": true,
   "frames": 42,
-  "seam": 0.67,
-  "status": "active"
- },
- "drunk_shamble": {
-  "cat": "zombies",
-  "how": "drunken shamble cycle",
-  "loop": true,
-  "frames": 16,
-  "seam": 0.91,
+  "seam": 0.71,
   "status": "active"
  },
  "limp_walk": {
   "cat": "zombies",
   "how": "limping walk cycle",
   "loop": true,
-  "frames": 21,
-  "seam": 0.8,
-  "status": "active"
- },
- "ape_walk": {
-  "cat": "monsters",
-  "how": "ape knuckle walk",
-  "loop": true,
-  "frames": 16,
-  "seam": 1.32,
+  "frames": 39,
+  "seam": 0.78,
   "status": "active"
  },
  "ape_rage": {
@@ -292,47 +260,39 @@
   "how": "ape chest-beat / rage",
   "loop": true,
   "frames": 44,
-  "seam": 0.67,
+  "seam": 0.61,
   "status": "active"
  },
  "monster_stalk": {
   "cat": "monsters",
   "how": "slow hunched monster stalk",
   "loop": true,
-  "frames": 68,
-  "seam": 1.28,
+  "frames": 64,
+  "seam": 1.32,
   "status": "active"
  },
  "beast_charge": {
   "cat": "monsters",
   "how": "hunched charging run",
   "loop": true,
-  "frames": 22,
-  "seam": 1.3,
-  "status": "active"
- },
- "dino_walk": {
-  "cat": "monsters",
-  "how": "dinosaur stalk",
-  "loop": true,
-  "frames": 26,
-  "seam": 0.7,
+  "frames": 23,
+  "seam": 1.36,
   "status": "active"
  },
  "dino_snap": {
   "cat": "monsters",
   "how": "dinosaur lunge",
   "loop": true,
-  "frames": 39,
-  "seam": 1.38,
+  "frames": 86,
+  "seam": 1.45,
   "status": "active"
  },
  "robot_move": {
   "cat": "monsters",
   "how": "robotic motion",
   "loop": true,
-  "frames": 62,
-  "seam": 0.83,
+  "frames": 38,
+  "seam": 0.84,
   "status": "active"
  },
  "giant_stomp": {
@@ -340,23 +300,15 @@
   "how": "slow, heavy giant stomp",
   "loop": true,
   "frames": 51,
-  "seam": 1.37,
-  "status": "active"
- },
- "monster_rage": {
-  "cat": "monsters",
-  "how": "hunched rage",
-  "loop": true,
-  "frames": 40,
-  "seam": 1.06,
+  "seam": 0.84,
   "status": "active"
  },
  "boxing_combo": {
   "cat": "boxing",
   "how": "boxing combo",
   "loop": true,
-  "frames": 22,
-  "seam": 0.89,
+  "frames": 48,
+  "seam": 0.7,
   "status": "active"
  },
  "boxing_fast": {
@@ -364,15 +316,15 @@
   "how": "fast combo",
   "loop": true,
   "frames": 22,
-  "seam": 0.97,
+  "seam": 1.21,
   "status": "active"
  },
  "southpaw": {
   "cat": "boxing",
   "how": "left-handed boxing",
   "loop": true,
-  "frames": 22,
-  "seam": 0.89,
+  "frames": 48,
+  "seam": 0.7,
   "status": "active"
  },
  "heavyweight": {
@@ -380,22 +332,22 @@
   "how": "slow heavy punches",
   "loop": true,
   "frames": 78,
-  "seam": 0.71,
+  "seam": 0.5,
   "status": "active"
  },
  "boxing_bounce": {
   "cat": "boxing",
   "how": "boxer bounce and jab",
   "loop": true,
-  "frames": 70,
-  "seam": 0.59,
+  "frames": 77,
+  "seam": 0.96,
   "status": "active"
  },
  "boxing_hook": {
   "cat": "boxing",
   "how": "hooks",
   "loop": true,
-  "frames": 77,
+  "frames": 79,
   "seam": 0.3,
   "status": "active"
  },
@@ -403,88 +355,56 @@
   "cat": "social",
   "how": "explaining with gestures",
   "loop": true,
-  "frames": 80,
-  "seam": 0.81,
+  "frames": 36,
+  "seam": 0.63,
   "status": "active"
  },
  "animated_talker": {
   "cat": "social",
   "how": "big expressive gestures",
   "loop": true,
-  "frames": 80,
-  "seam": 1.15,
-  "status": "active"
- },
- "calm_talker": {
-  "cat": "social",
-  "how": "calm, small gestures",
-  "loop": true,
-  "frames": 98,
-  "seam": 1.55,
+  "frames": 36,
+  "seam": 1.05,
   "status": "active"
  },
  "arguing": {
   "cat": "social",
   "how": "angry argument",
   "loop": true,
-  "frames": 52,
-  "seam": 0.98,
+  "frames": 54,
+  "seam": 0.8,
   "status": "active"
  },
  "heated_argument": {
   "cat": "social",
   "how": "fast, heated argument",
   "loop": true,
-  "frames": 74,
-  "seam": 0.89,
-  "status": "active"
- },
- "shrug": {
-  "cat": "social",
-  "how": "shrug",
-  "loop": true,
-  "frames": 42,
-  "seam": 0.79,
-  "status": "active"
- },
- "big_shrug": {
-  "cat": "social",
-  "how": "big exaggerated shrug",
-  "loop": true,
-  "frames": 52,
-  "seam": 1.21,
+  "frames": 75,
+  "seam": 0.21,
   "status": "active"
  },
  "laugh": {
   "cat": "social",
   "how": "laughing",
   "loop": true,
-  "frames": 69,
-  "seam": 1.03,
+  "frames": 70,
+  "seam": 0.93,
   "status": "active"
  },
  "big_laugh": {
   "cat": "social",
   "how": "doubled-over laugh",
   "loop": true,
-  "frames": 89,
-  "seam": 0.95,
+  "frames": 85,
+  "seam": 1.08,
   "status": "active"
  },
  "phone_call": {
   "cat": "social",
   "how": "answering the phone",
   "loop": true,
-  "frames": 19,
-  "seam": 1.11,
-  "status": "active"
- },
- "scared": {
-  "cat": "emotions",
-  "how": "scared flinch",
-  "loop": true,
-  "frames": 43,
-  "seam": 0.78,
+  "frames": 41,
+  "seam": 0.89,
   "status": "active"
  },
  "scared_walk": {
@@ -492,47 +412,39 @@
   "how": "scared, hunched walk",
   "loop": true,
   "frames": 34,
-  "seam": 0.97,
+  "seam": 1.0,
   "status": "active"
  },
  "sad_walk": {
   "cat": "emotions",
   "how": "sad walk cycle",
   "loop": true,
-  "frames": 36,
-  "seam": 0.75,
-  "status": "active"
- },
- "proud_walk": {
-  "cat": "emotions",
-  "how": "proud walk cycle",
-  "loop": true,
-  "frames": 49,
-  "seam": 0.89,
+  "frames": 35,
+  "seam": 0.94,
   "status": "active"
  },
  "sneak": {
   "cat": "emotions",
   "how": "sneaking cycle",
   "loop": true,
-  "frames": 53,
-  "seam": 0.86,
+  "frames": 48,
+  "seam": 1.62,
   "status": "active"
  },
  "creep": {
   "cat": "emotions",
   "how": "creeping cycle",
   "loop": true,
-  "frames": 22,
-  "seam": 0.99,
+  "frames": 39,
+  "seam": 1.03,
   "status": "active"
  },
  "run_cycle": {
   "cat": "emotions",
   "how": "run cycle",
   "loop": true,
-  "frames": 22,
-  "seam": 1.08,
+  "frames": 23,
+  "seam": 1.32,
   "status": "active"
  },
  "walk_cycle": {
@@ -540,7 +452,7 @@
   "how": "walk cycle",
   "loop": true,
   "frames": 33,
-  "seam": 1.5,
+  "seam": 0.8,
   "status": "active"
  }
 }

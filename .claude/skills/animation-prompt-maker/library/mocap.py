@@ -219,7 +219,7 @@ def fix_lengths(m, ref):
         out[b] = out[a] + d / n * L[(a, b)]
     return out
 def ground(m):
-    low = np.minimum(np.minimum(m["fAn"][:, 1] + 4, m["fTo"][:, 1]), np.minimum(m["bAn"][:, 1] + 4, m["bTo"][:, 1]))
+    low = np.maximum(np.maximum(m["fAn"][:, 1] + 4, m["fTo"][:, 1]), np.maximum(m["bAn"][:, 1] + 4, m["bTo"][:, 1]))  # y points down: lowest point = largest y
     sink = np.clip(low - FLOOR, 0, None)  # push up anything below the floor
     return {k: v - np.stack([0 * sink, sink, 0 * sink], 1) for k, v in m.items()}
 def exaggerate(m, k):
