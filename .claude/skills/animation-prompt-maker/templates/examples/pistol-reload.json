@@ -1,0 +1,39 @@
+{
+ "title": "Pistol Reload Storyboard",
+ "meta": "3D third-person · side view · 24 fps · frames 1–48 · one-shot",
+ "note": "Orange is the new magazine, grey is the empty one being dropped.",
+ "fps": 24,
+ "props": {
+  "gun":   {"color": "--prop1", "layer": "top", "shapes": [[-3,-1,9,16],[-6,-10,34,8]]},
+  "slide": {"color": "--prop1", "layer": "top", "shapes": [[-6,-12,34,3]]},
+  "oldMag":{"color": "--prop3", "layer": "front", "shapes": [[-3,-7,7,15]]},
+  "newMag":{"color": "--prop2", "layer": "top", "shapes": [[-3,-7,7,15]]}
+ },
+ "keys": [
+  {"f":1,"n":"Standing ready, pistol held forward in both hands at chest height.",
+   "pose":{"lean":4,"rU":15,"rF":-5,"lU":25,"lF":-2},
+   "props":{"gun":{"at":"rH"},"slide":{"at":"rH"},"oldMag":{"at":"rH","x":2,"y":13},"newMag":{"at":"hip","x":-8,"y":6}}},
+  {"f":8,"n":"Pistol pulled close to the chest and tilted, head looking down at it.",
+   "pose":{"lean":8,"head":22,"rU":65,"rF":-55,"lU":75,"lF":-25},
+   "props":{"gun":{"at":"rH","r":-20},"slide":{"at":"rH","r":-20},"oldMag":{"at":"rH","x":5,"y":12,"r":-20},"newMag":{"at":"hip","x":-8,"y":6}}},
+  {"f":13,"n":"Thumb presses the release, the empty magazine drops out of the grip.",
+   "pose":{"lean":8,"head":25,"rU":65,"rF":-55,"lU":95,"lF":70},
+   "props":{"gun":{"at":"rH","r":-15},"slide":{"at":"rH","r":-15},"oldMag":{"at":"world","x":38,"y":20,"r":30},"newMag":{"at":"hip","x":-8,"y":6}}},
+  {"f":19,"n":"Left hand reaches down and grabs a fresh magazine from the hip pouch.",
+   "pose":{"lean":12,"head":20,"rU":65,"rF":-55,"lU":110,"lF":95},
+   "props":{"gun":{"at":"rH","r":-15},"slide":{"at":"rH","r":-15},"oldMag":{"at":"world","x":40,"y":86,"r":90},"newMag":{"at":"lH"}}},
+  {"f":25,"n":"Left hand brings the new magazine up just below the grip.",
+   "pose":{"lean":9,"head":24,"rU":65,"rF":-55,"lU":72,"lF":-8},
+   "props":{"gun":{"at":"rH","r":-15},"slide":{"at":"rH","r":-15},"oldMag":{"at":"world","x":40,"y":86,"r":90},"newMag":{"at":"lH","r":-15}}},
+  {"f":29,"snap":true,"n":"Palm slaps the magazine into the grip, pistol bumps up slightly.",
+   "pose":{"lean":7,"head":20,"rU":60,"rF":-62,"lU":66,"lF":-30},
+   "props":{"gun":{"at":"rH","r":-22},"slide":{"at":"rH","r":-22},"oldMag":{"at":"world","x":40,"y":86,"r":90},"newMag":{"at":"rH","x":6,"y":12,"r":-22}}},
+  {"f":35,"n":"Left hand pulls the slide back.",
+   "pose":{"lean":7,"head":18,"rU":60,"rF":-58,"lU":55,"lF":-75},
+   "props":{"gun":{"at":"rH","r":-12},"slide":{"at":"rH","x":-7,"r":-12},"oldMag":{"at":"world","x":40,"y":86,"r":90},"newMag":{"at":"rH","x":4,"y":12,"r":-12}}},
+  {"f":48,"snap":false,"n":"Slide released, both hands back on the pistol, extended forward and ready.",
+   "pose":{"lean":4,"rU":15,"rF":-5,"lU":25,"lF":-2},
+   "props":{"gun":{"at":"rH"},"slide":{"at":"rH"},"oldMag":{"at":"world","x":40,"y":86,"r":90},"newMag":{"at":"rH","x":2,"y":13}}}
+ ],
+ "prompt": "Create an 8-panel 3D animation storyboard of a character reloading a pistol, viewed from a third-person over-the-shoulder camera, realistic style. Lay the panels out left to right, numbered 1 to 8, same character, camera and scale in every panel. Each panel shows a different moment:\n\n1. Standing ready, pistol held forward in both hands at chest height.\n2. Pistol pulled close to the chest and tilted, head looking down at it.\n3. Thumb presses the release, the empty magazine drops out of the grip.\n4. Left hand reaches down and grabs a fresh magazine from the hip pouch.\n5. Left hand brings the new magazine up just below the grip.\n6. Palm slaps the magazine into the grip, pistol bumps up slightly.\n7. Left hand pulls the slide back.\n8. Slide released, both hands back on the pistol, extended forward and ready.\n\nKeep each step clearly different and readable, and don't let the magazine clip through the hand or gun.\nThen animate it in Blender at 24 fps, spacing these poses over 48 frames."
+}

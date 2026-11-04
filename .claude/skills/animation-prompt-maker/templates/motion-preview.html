@@ -1,0 +1,186 @@
+<title>__TITLE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono&display=swap">
+<style>
+/* Layout: animator's light-table — playback stage, numbered key panels, paste-ready prompt */
+:root{
+  --bg:#eef1f4; --panel:#ffffff; --ink:#1b2430; --muted:#5b6878; --line:#cfd6de;
+  --accent:#e0661b; --figure:#1b2430; --prop1:#3b4654; --prop2:#e0661b; --prop3:#9aa5b1; --prop4:#2f7fd6;
+  --display:"Chakra Petch",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12161c; --panel:#1b2129; --ink:#e6ebf1; --muted:#97a3b2; --line:#2e3742;
+  --accent:#ff8a3d; --figure:#e6ebf1; --prop1:#b7c2ce; --prop2:#ff8a3d; --prop3:#5f6b78; --prop4:#5ea8ff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161c; --panel:#1b2129; --ink:#e6ebf1; --muted:#97a3b2; --line:#2e3742;
+  --accent:#ff8a3d; --figure:#e6ebf1; --prop1:#b7c2ce; --prop2:#ff8a3d; --prop3:#5f6b78; --prop4:#5ea8ff; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+main{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--display);font-size:clamp(26px,5vw,38px);margin:0;text-wrap:balance}
+.meta{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-top:6px}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+#main{width:100%;aspect-ratio:16/9;max-width:100%;display:block}
+.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+button{font-family:var(--display);font-weight:700;font-size:14px;background:var(--accent);color:#fff;border:0;border-radius:6px;padding:8px 16px;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,input:focus-visible,.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=range]{flex:1;min-width:140px;accent-color:var(--accent)}
+.readout{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);min-width:170px}
+.readout b{color:var(--ink)}
+h2{font-family:var(--display);font-size:20px;margin:0}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.card.on{border-color:var(--accent)}
+.card canvas{width:100%;aspect-ratio:4/3;display:block}
+.card .n{font-family:var(--display);font-weight:700;color:var(--accent)}
+.card p{margin:0;font-size:13px;line-height:1.35}
+.card .f{font-family:var(--mono);font-size:11px;color:var(--muted)}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;white-space:pre-wrap;font-family:var(--mono);font-size:13px;line-height:1.5;margin:0;overflow-x:auto}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.note{font-size:13px;color:var(--muted);margin:0;max-width:65ch}
+section{display:flex;flex-direction:column;gap:12px}
+</style>
+
+<main>
+  <header><h1 id="title"></h1><div class="meta" id="meta"></div></header>
+  <section class="stage">
+    <canvas id="main" width="1280" height="720" aria-label="Animated preview"></canvas>
+    <div class="controls">
+      <button id="play">Pause</button>
+      <button class="ghost" id="onion">Onion skin: off</button>
+      <input type="range" id="scrub" min="1" step="0.1" value="1" aria-label="Frame">
+      <div class="readout" id="readout"></div>
+    </div>
+    <p class="note" id="note"></p>
+  </section>
+  <section><h2>Key frames</h2><div class="grid" id="grid"></div></section>
+  <section>
+    <div class="row"><h2>Prompt</h2><button class="ghost" id="copy">Copy prompt</button></div>
+    <pre id="prompt"></pre>
+  </section>
+</main>
+
+<script>
+/*DATA*/
+const DATA = __DATA__;
+/*END DATA*/
+
+// ---------- engine (do not edit per animation) ----------
+const D=Math.PI/180;
+const L={torso:58,neck:8,head:12,upper:31,fore:29,thigh:44,shin:44};
+const REST={x:0,y:0,lean:0,head:0,rU:80,rF:85,lU:95,lF:92,fT:80,fS:92,bT:100,bS:95};
+const KEYS=DATA.keys.map(k=>({...k,pose:{...REST,...(k.pose||{})}}));
+const LAST=KEYS[KEYS.length-1].f;
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const P=(x,y,a,l)=>[x+Math.cos(a*D)*l,y+Math.sin(a*D)*l];
+
+function solve(p){
+  const hip=[p.x,p.y];
+  const sh=P(hip[0],hip[1],-90+p.lean,L.torso);
+  const nk=P(sh[0],sh[1],-90+p.lean*.5,L.neck);
+  const hd=P(nk[0],nk[1],-90+p.lean+p.head*.6,L.head);
+  const rE=P(...sh,p.rU,L.upper), rH=P(...rE,p.rF,L.fore);
+  const lE=P(sh[0]-3,sh[1]+1,p.lU,L.upper), lH=P(...lE,p.lF,L.fore);
+  const fK=P(...hip,p.fT,L.thigh), fFt=P(...fK,p.fS,L.shin);
+  const bK=P(...hip,p.bT,L.thigh), bFt=P(...bK,p.bS,L.shin);
+  return {hip,sh,nk,hd,rE,rH,lE,lH,fK,fFt,bK,bFt,
+    ang:{rH:p.rF,lH:p.lF,fFoot:p.fS,bFoot:p.bS,hip:p.lean,head:p.head,world:0}};
+}
+const ANCH={rH:"rH",lH:"lH",fFoot:"fFt",bFoot:"bFt",hip:"hip",head:"hd",chest:"sh"};
+// world transform of a prop in a key: anchor point + local offset rotated by anchor angle (if follow) + own rotation
+function propXform(s,pr){
+  if(!pr)return null;
+  if(pr.at==="world")return {x:pr.x||0,y:pr.y||0,r:pr.r||0};
+  const a=s[ANCH[pr.at]], base=pr.follow?s.ang[pr.at]:0, g=base*D;
+  const x=pr.x||0,y=pr.y||0;
+  return {x:a[0]+x*Math.cos(g)-y*Math.sin(g), y:a[1]+x*Math.sin(g)+y*Math.cos(g), r:base+(pr.r||0)};
+}
+function frameState(fr){
+  fr=Math.max(KEYS[0].f,Math.min(LAST,fr));
+  let i=0;while(i<KEYS.length-2&&fr>KEYS[i+1].f)i++;
+  const a=KEYS[i],b=KEYS[i+1]||a;
+  let t=b.f===a.f?0:(fr-a.f)/(b.f-a.f);
+  t=b.snap?Math.min(1,t*1.8):ease(t);
+  const pose={};for(const k in a.pose)pose[k]=a.pose[k]+(b.pose[k]-a.pose[k])*t;
+  const sa=solve(a.pose),sb=solve(b.pose),props={};
+  for(const name in DATA.props){
+    const xa=propXform(sa,a.props?.[name]), xb=propXform(sb,b.props?.[name]);
+    if(xa&&xb)props[name]={x:xa.x+(xb.x-xa.x)*t,y:xa.y+(xb.y-xa.y)*t,r:xa.r+(xb.r-xa.r)*t};
+    else if(xa&&t<.5)props[name]=xa; else if(xb&&t>=.5)props[name]=xb;
+  }
+  return {pose,props};
+}
+function keyState(k){const s=solve(k.pose),props={};for(const n in DATA.props){const x=propXform(s,k.props?.[n]);if(x)props[n]=x}return {pose:k.pose,props};}
+
+function draw(ctx,w,h,st,opt={}){
+  const s=solve(st.pose), sc=h/230, ox=w*.45, oy=h*.45;
+  ctx.save();ctx.translate(ox,oy);ctx.scale(sc,sc);ctx.lineCap="round";ctx.lineJoin="round";
+  const fig=opt.ghost?css("--line"):css("--figure");
+  const line=(pts,c,wd)=>{ctx.strokeStyle=c;ctx.lineWidth=wd;ctx.beginPath();ctx.moveTo(...pts[0]);for(const q of pts.slice(1))ctx.lineTo(...q);ctx.stroke();};
+  if(!opt.ghost){ctx.strokeStyle=css("--line");ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-110,89);ctx.lineTo(140,89);ctx.stroke();}
+  const drawProps=layer=>{if(opt.ghost)return;for(const n in st.props){const def=DATA.props[n];if((def.layer||"front")!==layer)continue;const x=st.props[n];
+    ctx.save();ctx.translate(x.x,x.y);ctx.rotate(x.r*D);for(const sh of def.shapes){ctx.fillStyle=css(sh[4]||def.color||"--prop1");ctx.fillRect(sh[0],sh[1],sh[2],sh[3]);}ctx.restore();}};
+  drawProps("back");
+  line([s.sh,s.lE,s.lH],fig,6);                 // far arm
+  line([s.hip,s.bK,s.bFt],fig,7);               // far leg
+  line([s.hip,s.sh],fig,9);line([s.sh,s.nk],fig,6);
+  ctx.fillStyle=opt.ghost?"transparent":css("--panel");ctx.strokeStyle=fig;ctx.lineWidth=4;
+  ctx.beginPath();ctx.arc(...s.hd,L.head,0,7);ctx.fill();ctx.stroke();
+  const ed=P(...s.hd,st.pose.head*1.4,L.head*.6);ctx.fillStyle=fig;ctx.beginPath();ctx.arc(...ed,2,0,7);ctx.fill();
+  line([s.hip,s.fK,s.fFt],fig,7);               // near leg
+  drawProps("front");
+  line([s.sh,s.rE,s.rH],fig,7);                 // near arm
+  drawProps("top");
+  ctx.restore();
+}
+
+// ---------- page ----------
+document.getElementById("title").textContent=DATA.title;
+document.getElementById("meta").textContent=DATA.meta;
+document.getElementById("note").textContent=DATA.note||"";
+document.getElementById("prompt").textContent=DATA.prompt;
+const mc=document.getElementById("main"),mx=mc.getContext("2d");
+const scrub=document.getElementById("scrub"),readout=document.getElementById("readout"),playBtn=document.getElementById("play");
+scrub.min=KEYS[0].f;scrub.max=LAST;
+let frame=KEYS[0].f,playing=!matchMedia("(prefers-reduced-motion: reduce)").matches,onion=false,last=0,hold=0;
+playBtn.textContent=playing?"Pause":"Play";
+const keyIndex=fr=>{let k=0;KEYS.forEach((x,i)=>{if(fr>=x.f-.01)k=i});return k};
+function render(){
+  mx.fillStyle=css("--panel");mx.fillRect(0,0,mc.width,mc.height);
+  if(onion)KEYS.forEach(k=>draw(mx,mc.width,mc.height,keyState(k),{ghost:true}));
+  draw(mx,mc.width,mc.height,frameState(frame));
+  const k=keyIndex(frame);
+  readout.innerHTML=`Frame <b>${String(Math.floor(frame)).padStart(2,"0")}</b> / ${LAST} · key <b>${k+1}</b>`;
+  scrub.value=frame;
+  document.querySelectorAll(".card").forEach((c,i)=>c.classList.toggle("on",i===k));
+}
+function tick(t){
+  if(playing&&last){const dt=(t-last)/1000;
+    if(frame>=LAST){hold+=dt;if(hold>.8){frame=KEYS[0].f;hold=0}}else frame=Math.min(LAST,frame+dt*(DATA.fps||24));}
+  last=t;render();requestAnimationFrame(tick);
+}
+const stop=()=>{playing=false;playBtn.textContent="Play"};
+playBtn.onclick=()=>{playing=!playing;playBtn.textContent=playing?"Pause":"Play"};
+document.getElementById("onion").onclick=e=>{onion=!onion;e.target.textContent="Onion skin: "+(onion?"on":"off")};
+scrub.oninput=()=>{frame=+scrub.value;stop()};
+const grid=document.getElementById("grid");
+KEYS.forEach((k,i)=>{
+  const c=document.createElement("div");c.className="card";c.tabIndex=0;
+  c.innerHTML=`<canvas width="400" height="300"></canvas><div class="n">${i+1}</div><p></p><div class="f">frame ${k.f}</div>`;
+  c.querySelector("p").textContent=k.n;
+  const go=()=>{frame=k.f;stop()};c.onclick=go;c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}};
+  grid.appendChild(c);
+});
+function drawPanels(){document.querySelectorAll(".card canvas").forEach((cv,i)=>{const x=cv.getContext("2d");x.fillStyle=css("--panel");x.fillRect(0,0,cv.width,cv.height);draw(x,cv.width,cv.height,keyState(KEYS[i]))})}
+drawPanels();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawPanels);
+new MutationObserver(drawPanels).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+document.getElementById("copy").onclick=async e=>{
+  try{await navigator.clipboard.writeText(DATA.prompt);e.target.textContent="Copied"}
+  catch{const r=document.createRange();r.selectNodeContents(document.getElementById("prompt"));const s=getSelection();s.removeAllRanges();s.addRange(r);e.target.textContent="Selected, press Ctrl+C"}
+  setTimeout(()=>e.target.textContent="Copy prompt",1800);
+};
+requestAnimationFrame(tick);
+</script>

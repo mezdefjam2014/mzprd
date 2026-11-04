@@ -78,6 +78,24 @@ Create a [N]-panel [2D/3D] animation storyboard of [character] doing a [action],
 
 Outside the code block, add at most one short line before it (the settings used) and one line after it offering variations (faster, heavier, empty reload, mirrored, other perspective). Nothing else.
 
+## Step 4 — Build the motion graphic preview (always, fast)
+
+After the prompt, make a playable stick-figure preview. Do NOT write HTML from scratch: the engine is saved in `templates/motion-preview.html`. You only write a small JSON file.
+
+1. Copy the closest example from `templates/examples/` (`pistol-reload.json` = props/weapons, `high-kick.json` = full-body move) and edit it.
+2. Fill in: `title`, `meta` (settings line), `fps`, `note` (optional), `prompt` (the exact prompt from Step 3), `props`, `keys`.
+3. Each key: `{"f": frame, "n": panel caption (same text as the prompt line), "snap": true for hard hits, "pose": {...}, "props": {...}}`. Frame 1..N captions match the prompt's numbered lines.
+4. Run `python3 .claude/skills/animation-prompt-maker/templates/build.py data.json <out>.html` (out file in the scratchpad or the user's folder), then publish it with the Artifact tool. Skip extra screenshots unless something looks broken.
+
+Pose values (side view, figure faces right; angles in degrees, 0 = pointing right, 90 = straight down, -90 = straight up; each limb angle is absolute, not relative to its parent). Omitted values use the rest pose:
+- `x`, `y`: move the hips (y negative = up, for jumps). Floor is y = 89 at rest.
+- `lean`: torso tilt (positive = forward). `head`: look down (+) or up (-).
+- `rU`, `rF`: near (right) upper arm and forearm. `lU`, `lF`: far (left) arm. Rest: 80/85 and 95/92.
+- `fT`, `fS`: near (front) thigh and shin. `bT`, `bS`: far (back) leg. Rest: 80/92 and 100/95.
+- Examples: arm pointing forward = upper 15, forearm -5. Fists up guard = upper 60, forearm -80. Knee chambered = thigh -10, shin 95. Kick at head height = thigh -35, shin -32.
+
+Props: define `"props": {"name": {"color": "--prop1".."--prop4", "layer": "back"|"front"|"top", "shapes": [[x, y, w, h], ...]}}`, rectangles in local units (the figure is ~200 units tall). In each key, place props with `{"at": "rH"|"lH"|"fFoot"|"bFoot"|"hip"|"head"|"chest"|"world", "x", "y", "r", "follow": true to rotate with the limb}`. A prop left out of a key is hidden. Props blend smoothly between keys, so swapping hands or dropping something to the floor (`"at": "world"`) just works.
+
 ## Rules
 
 - **Always frames 1..N with no gaps**, each a different picture of a different moment. Never skip steps or repeat a pose.
