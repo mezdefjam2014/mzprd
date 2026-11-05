@@ -6969,10 +6969,10 @@
  },
  "crawler_lunge_bite": {
   "cat": "creature attacks",
-  "how": "Crawler: lunge forward and bite",
+  "how": "Crawler: lunge forward, bite, back into position",
   "loop": true,
   "oneshot": false,
-  "frames": 34,
+  "frames": 36,
   "status": "active"
  },
  "crawler_snap_bites": {
@@ -6980,7 +6980,7 @@
   "how": "Crawler: rapid snapping bites",
   "loop": true,
   "oneshot": false,
-  "frames": 34,
+  "frames": 36,
   "status": "active"
  },
  "crawler_claw_swipe": {
@@ -7020,7 +7020,7 @@
   "how": "Brute: lunge forward and bite",
   "loop": true,
   "oneshot": false,
-  "frames": 38,
+  "frames": 40,
   "status": "active"
  },
  "brute_grab_bite": {
@@ -7036,7 +7036,7 @@
   "how": "Brute: bite down and tear (head shakes)",
   "loop": true,
   "oneshot": false,
-  "frames": 42,
+  "frames": 44,
   "status": "active"
  },
  "brute_double_swipe": {

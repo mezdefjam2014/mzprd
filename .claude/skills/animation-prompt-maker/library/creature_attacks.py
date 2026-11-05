@@ -27,19 +27,23 @@ def bake(keys):
     return ikclean.no_penetration(fr.copy()), props
 
 def J(v): return {"jaw": v}
+def hands(H, dx, lift=0.0): return dict(rHand=[H[0][0] + dx, F - lift, H[0][1]], lHand=[H[1][0] + dx, F - lift, H[1][1]])
 def S(v): return {"jaw": v, "snap": True}
 
 def build():
     out = []
     # ---------- crawler ----------
-    out.append(("crawler_lunge_bite", "Crawler: lunge forward and bite", bake([
-        (0, C0, J(0)), (8, dict(C0, x=-8, hipH=38, head=-46, chest=10), J(.9)),                       # coil back, mouth opens
-        (13, dict(C0, x=18, hipH=46, head=-14, chest=-4), S(.05)),                                      # lunge, jaws snap shut
-        (20, dict(C0, x=14, hipH=45, head=-20), J(.15)), (34, C0, J(0))])))
+    out.append(("crawler_lunge_bite", "Crawler: lunge forward, bite, back into position", bake([
+        (0, C0, J(0)), (8, dict(C0, x=-8, hipH=38, head=-46, chest=10), J(.9)),                              # coil back, mouth opens
+        (11, dict(C0, x=14, hipH=46, head=-30, **hands(CH, 18, 12)), J(1)),                                    # launch: hands lift and reach out
+        (14, dict(C0, x=32, hipH=46, head=-12, chest=-4, **hands(CH, 32)), S(.05)),                            # full reach, hands land, jaws SNAP
+        (19, dict(C0, x=30, hipH=45, head=-18, **hands(CH, 32)), J(.15)),                                      # hold the bite a beat
+        (25, dict(C0, x=12, hipH=44, head=-30, **hands(CH, 14, 10)), J(.05)),                                  # push back, hands lift and step back
+        (30, dict(C0, x=0, **hands(CH, 0)), J(0)), (36, C0, J(0))])))
     out.append(("crawler_snap_bites", "Crawler: rapid snapping bites", bake([
-        (0, C0, J(0)), (5, dict(C0, x=6, head=-44), J(.8)), (8, dict(C0, x=12, head=-22), S(.05)),
-        (12, dict(C0, x=4, head=-44), J(.9)), (15, dict(C0, x=13, head=-20), S(.05)),
-        (19, dict(C0, x=4, head=-46), J(.9)), (22, dict(C0, x=14, head=-18), S(.05)), (34, C0, J(0))])))
+        (0, C0, J(0)), (5, dict(C0, x=-4, head=-44), J(.8)), (8, dict(C0, x=16, head=-20, chest=-4), S(.05)),
+        (12, dict(C0, x=-2, head=-46), J(.9)), (15, dict(C0, x=17, head=-18, chest=-4), S(.05)),
+        (19, dict(C0, x=-2, head=-46), J(.9)), (22, dict(C0, x=18, head=-16, chest=-4), S(.05)), (28, dict(C0, x=4), J(.1)), (36, C0, J(0))])))
     out.append(("crawler_claw_swipe", "Crawler: rear up on one arm and claw swipe (right)", bake([
         (0, C0, J(0)), (8, dict(C0, hipH=50, chest=-6, twist=-20, rHand=[40, 40, 34], head=-44), J(.5)),
         (13, dict(C0, hipH=48, twist=24, rHand=[80, 70, -18], head=-30), dict(jaw=.7, snap=True)),
@@ -57,8 +61,12 @@ def build():
         (22, dict(land, hipH=42, head=-10), S(.05)), (28, dict(land, hipH=40, head=-4), J(.6)), (31, dict(land, hipH=40, head=0), S(.05)), (44, dict(land, head=-30), J(0))])))
     # ---------- brute ----------
     out.append(("brute_lunge_bite", "Brute: lunge forward and bite", bake([
-        (0, B0, J(0)), (9, dict(B0, x=-6, hipH=44, head=-50, chest=20), J(1)),
-        (14, dict(B0, x=16, hipH=50, head=-16, chest=4, lean=76), S(.05)), (22, dict(B0, x=10, head=-24), J(.2)), (38, B0, J(0))])))
+        (0, B0, J(0)), (9, dict(B0, x=-8, hipH=44, head=-50, chest=20), J(1)),                                     # coil back, jaws wide
+        (12, dict(B0, x=14, hipH=52, head=-36, **hands(BH, 16, 14)), J(1)),                                          # launch, hands lift
+        (15, dict(B0, x=30, hipH=50, head=-14, chest=4, lean=76, **hands(BH, 30)), S(.05)),                          # land at full reach, SNAP
+        (21, dict(B0, x=28, head=-20, **hands(BH, 30)), J(.2)),                                                      # hold
+        (27, dict(B0, x=12, head=-28, **hands(BH, 14, 12)), J(.05)),                                                 # push back, hands step back
+        (32, dict(B0, x=0, **hands(BH, 0)), J(0)), (40, B0, J(0))])))
     out.append(("brute_grab_bite", "Brute: rear up, grab with both hands, bite and shake", bake([
         (0, B0, J(0)), (10, dict(B0, hipH=60, lean=40, chest=-8, head=-40, rHand=[44, -6, 34], lHand=[44, -6, -34]), J(.6)),
         (15, dict(B0, hipH=62, lean=34, chest=-4, head=-30, rHand=[58, 4, 12], lHand=[58, 4, -12]), dict(jaw=1, snap=True)),   # hands clamp shut on the victim
@@ -68,9 +76,11 @@ def build():
         (33, dict(B0, hipH=60, lean=48, chest=10, head=6, look=14, rHand=[48, 12, 10], lHand=[48, 12, -10], x=4), J(.05)),
         (40, dict(B0, hipH=54, lean=66), J(.3)), (54, B0, J(0))])))
     out.append(("brute_bite_tear", "Brute: bite down and tear (head shakes)", bake([
-        (0, B0, J(0)), (8, dict(B0, head=-46, chest=18, hipH=50), J(1)), (12, dict(B0, head=10, chest=26, hipH=44, x=8), S(.05)),
-        (16, dict(B0, head=14, chest=26, hipH=44, x=8, look=24), J(.05)), (20, dict(B0, head=14, chest=26, hipH=44, x=8, look=-24), J(.05)),
-        (24, dict(B0, head=12, chest=26, hipH=44, x=8, look=18), J(.05)), (30, dict(B0, head=-20, chest=18, hipH=46, x=2), J(.6)), (42, B0, J(0))])))
+        (0, B0, J(0)), (8, dict(B0, x=-6, head=-46, chest=18, hipH=50), J(1)), (10, dict(B0, x=8, head=-20, chest=22, hipH=48, **hands(BH, 10, 12)), J(1)),
+        (12, dict(B0, x=22, head=10, chest=26, hipH=44, **hands(BH, 22)), S(.05)),
+        (16, dict(B0, x=22, head=14, chest=26, hipH=44, look=24, **hands(BH, 22)), J(.05)), (20, dict(B0, x=22, head=14, chest=26, hipH=44, look=-24, **hands(BH, 22)), J(.05)),
+        (24, dict(B0, x=22, head=12, chest=26, hipH=44, look=18, **hands(BH, 22)), J(.05)),
+        (30, dict(B0, x=10, head=-20, chest=18, hipH=46, **hands(BH, 10, 12)), J(.6)), (35, dict(B0, x=0, **hands(BH, 0)), J(.2)), (44, B0, J(0))])))
     out.append(("brute_double_swipe", "Brute: left-right claw swipes", bake([
         (0, B0, J(0)), (7, dict(B0, twist=22, lHand=[20, -12, -42], hipH=52, lean=62), J(.4)),
         (11, dict(B0, twist=-26, lHand=[70, 30, 24], hipH=52, lean=62), dict(jaw=.8, snap=True)),
