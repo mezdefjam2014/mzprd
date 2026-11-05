@@ -80,7 +80,9 @@ def pose(f):
     caps.append(cap(SHR, E, 4.6, 0)); caps.append(cap(E, W2, 4.0, 0)); caps.append(cap(W2 + n(W2 - E) * -9, W2, 3.2, 0))
     Kn = [O + g * (1.0 + 2.15 * i) + F * 1.7 + Rt * 1.9 for i in range(4)]       # index, middle, ring, pinky knuckles
     palmc = (W + Kn[0] + Kn[3]) / 3 + Rt * .4
-    boxes.append(box(palmc, n(Kn[0] - Kn[3]), n(np.cross(n(Kn[0] - Kn[3]), n(palmc - W))), n(palmc - W), 7.6, 3.0, 8.2, 0))
+    ax_w = n(Kn[0] - Kn[3]); ax_l = n(palmc - W); ax_t = n(np.cross(ax_w, ax_l))
+    for k in range(3): caps.append(cap(W + ax_w * (1.6 - 1.6 * k) * .8, Kn[k + (k > 0)] - ax_l * .6, 1.55, 0))
+    boxes.append(box(palmc, ax_w, ax_t, ax_l, 5.6, 2.2, 6.0, 0))
     caps.append(cap(W, Kn[0], 1.7, 0)); caps.append(cap(W, Kn[3], 1.6, 0))
     def wrap(c, lim=(65, 150, 215)):                                          # curl around the grip axis: forward -> across -> back
         return [F * math.cos(math.radians(a * c)) - Rt * math.sin(math.radians(a * c)) for a in lim]
@@ -93,27 +95,6 @@ def pose(f):
         else: finger(Kn[i], wrap(1.0), lens[i], .95 - .07 * i, caps)
     T0 = W + F * 2.2 - Rt * 1.2 + U * .8                                     # thumb along the left side of the grip
     finger(T0, [n(F - Rt * .9 + U * .3), n(F - Rt * .2), n(F - U * .4)], (3.4, 2.8, 2.2), 1.15, caps)
-    # --- left hand: free / on the magazine / on the bolt knob / supporting the shroud
-    free = np.array([f["lx"], f["ly"], f["lz"]])
-    on_mag = magC + mag_axis * 8.5 - F * 2.5 - Rt * 1.0
-    on_bolt = knob - Rt * 3.0 - F * 3.5 + U * .5
-    on_shroud = O + F * 21 - U * 3.2 - Rt * 1.0
-    wts = [max(0, 1 - f["lOnMag"] - f["lOnBolt"] - f["lOnShroud"]), f["lOnMag"], f["lOnBolt"], f["lOnShroud"]]
-    LW = sum(w * p for w, p in zip(wts, (free, on_mag, on_bolt, on_shroud)))
-    hf = n(F * .9 + U * .25 + Rt * .35) if f["lOnBolt"] < .5 else n(F * .6 + Rt * .8)
-    pn = n(np.cross(hf, -F)) if f["lOnMag"] + f["lOnShroud"] > .3 else n(Rt + U * .3)
-    pn = n(pn - hf * np.dot(pn, hf)); side = n(np.cross(pn, hf))
-    LE, LW2 = ik(SHL, LW, np.array([-.6, -1, .5]))
-    caps.append(cap(SHL, LE, 4.6, 0)); caps.append(cap(LE, LW2, 4.0, 0)); caps.append(cap(LW2 + n(LW2 - LE) * -9, LW2, 3.2, 0))
-    lk = [LW + hf * 8 + side * (2.6 - 1.75 * i) for i in range(4)]
-    pc = (LW + lk[0] + lk[3]) / 3
-    boxes.append(box(pc, n(lk[0] - lk[3]), pn, n(pc - LW), 7.4, 3.0, 8, 0))
-    caps.append(cap(LW, lk[0], 1.7, 0)); caps.append(cap(LW, lk[3], 1.6, 0))
-    c = f["lcurl"]
-    for i in range(4):
-        dirs = [n(hf * math.cos(math.radians(a * c)) + pn * math.sin(math.radians(a * c))) for a in (55, 140, 205)]
-        finger(lk[i], dirs, lens[i], .95 - .07 * i, caps)
-    finger(LW + hf * 2.5 + side * 2.4 + pn * 1, [n(hf + side * .8 + pn * .4), n(hf + pn * .5 * c), n(hf + pn * c)], (3.4, 2.8, 2.2), 1.15, caps)
     cam = [round(f[k], 2) for k in ("cp", "cy", "cr", "cx", "cyy", "cz")]
     return dict(c=caps, b=boxes, cam=cam, m=[round(float(v), 2) for v in (*muzzle, *F)])
 # ---------------- the moves ----------------
@@ -140,34 +121,31 @@ def build():
     M.append(mv("fp_tec9_dry_fire", "TEC-9 empty click (dry fire, check the gun)", [(0, {}), (.08, dict(trig=.85)), (.16, dict(trig=.5)), (.3, dict(trig=.85)), (.38, dict(trig=.5)),
               (.7, dict(yaw=22, roll=24, pitch=8, x=20, y=-17)), (1.2, dict(yaw=22, roll=24, pitch=8, x=20, y=-17)), (1.6, dict(D))], 1.6, False))
     def reload(empty):
-        tilt = dict(yaw=24, roll=30, pitch=12, x=16, y=-11, z=-35, cp=-1.5)
-        k = [(0, {}), (.3, tilt), (.5, dict(lx=-2, ly=-30, lz=-30, lcurl=.2)), (.62, dict(lOnMag=1, lcurl=.75)),
-             (.82, dict(magY=13)), (1.0, dict(magY=13, mfx=-14, mfy=-30, mfz=10, lOnMag=1)), (1.05, dict(magOn=0, lOnMag=0, lx=-30, ly=-60, lz=-6, magY=0, mfx=0, mfy=0, mfz=0)),
-             (1.12, dict(magOn=1, lOnMag=1, magY=13, mfx=-14, mfy=-30, mfz=10)), (1.4, dict(mfx=0, mfy=0, mfz=0, magY=15)),
-             (1.58, dict(magY=0, lcurl=.45, y=-12.2, cp=-.6)), (1.66, dict(y=-11, cp=-1.5))]
-        t = 1.66
-        if empty:
-            k += [(1.82, dict(lOnMag=0, lOnBolt=1, lcurl=.8)), (1.98, dict(bolt=1, yaw=24, roll=32)), (2.06, dict(bolt=0, lOnBolt=.0, lx=-22, ly=-40, lz=-30)), (2.4, dict(lx=-34, ly=-62, lz=-14, lcurl=.35))]
-            t = 2.4
-        else:
-            k += [(1.9, dict(lOnMag=0, lx=-34, ly=-62, lz=-14, lcurl=.35))]; t = 1.9
+        tilt = dict(yaw=22, roll=-32, pitch=14, x=17, y=-12, z=-34, cp=-1.2)      # cant the gun so the mag well faces you
+        k = [(0, {}), (.28, tilt),
+             (.4, dict(magY=4)), (.55, dict(magY=15)),                                  # mag release: old mag slides out of the well
+             (.75, dict(magY=15, mfy=-45, mfx=4, mfz=6)),                               # ...and drops away
+             (.78, dict(magOn=0, magY=0, mfy=0, mfx=0, mfz=0)),
+             (.95, dict(magOn=1, magY=26, mfy=-6)), (1.2, dict(magY=6, mfy=0)),        # new mag slides up into the well
+             (1.3, dict(magY=0, pitch=20, y=-10.5, cp=-.4)), (1.42, dict(pitch=13, y=-12.3, cp=-1.4))]   # wrist flick seats it
+        t = 1.42
+        if empty:                                                                       # one-handed rack: sharp wrist snap cycles the bolt
+            k += [(1.6, dict(yaw=14, roll=-10, pitch=4, x=20, y=-15, z=-34)), (1.68, dict(yaw=10, roll=8, pitch=26, x=21, y=-9, z=-37, bolt=1, cp=.8)),
+                  (1.78, dict(bolt=0, pitch=8, y=-13, cp=-.6))]
+            t = 1.78
         k += [(t + .45, dict(D))]
-        return mv("fp_tec9_reload_empty" if empty else "fp_tec9_reload", "TEC-9 reload from empty (mag swap + rack the bolt)" if empty else "TEC-9 tactical reload (mag swap)", k, t + .5, False)
+        return mv("fp_tec9_reload_empty" if empty else "fp_tec9_reload", "TEC-9 reload from empty, one hand (mag out, mag in, wrist snap racks the bolt)" if empty
+                  else "TEC-9 reload, one hand (mag slides out, new mag slides in)", k, t + .5, False)
     M.append(reload(False)); M.append(reload(True))
     off = dict(x=30, y=-52, z=-24, yaw=30, pitch=-35, roll=50, trig=.1)
     M.append(mv("fp_tec9_draw", "TEC-9 draw (up into view)", [(0, off), (.35, dict(D, pitch=8, y=-19)), (.55, dict(D))], .6, False))
     M.append(mv("fp_tec9_holster", "TEC-9 holster (down out of view)", [(0, dict(D)), (.15, dict(D, pitch=6, y=-19.5)), (.5, off)], .55, False))
     M.append(mv("fp_tec9_inspect", "TEC-9 inspect (turn it over, check the mag)", [(0, {}), (.5, dict(x=12, y=-14, z=-36, yaw=55, roll=-35, pitch=10, cp=-2)),
-              (1.4, dict(x=12, y=-14, z=-36, yaw=70, roll=-60, pitch=14, cp=-2)), (1.9, dict(x=14, y=-15, z=-36, yaw=10, roll=70, pitch=6, cp=-1, lx=-8, ly=-30, lz=-32, lcurl=.3)),
-              (2.2, dict(lOnMag=1, lcurl=.7)), (2.5, dict(magY=3)), (2.75, dict(magY=0, lOnMag=0, lx=-34, ly=-62, lz=-14, lcurl=.35)), (3.3, dict(D))], 3.4, False))
+              (1.4, dict(x=12, y=-14, z=-36, yaw=70, roll=-60, pitch=14, cp=-2)), (1.9, dict(x=14, y=-12, z=-34, yaw=10, roll=-55, pitch=12, cp=-1)), (2.3, dict(magY=4)), (2.55, dict(magY=0, pitch=16)), (2.7, dict(pitch=12)), (3.3, dict(D))], 3.4, False))
     M.append(mv("fp_tec9_bash", "TEC-9 melee bash (pistol-whip forward)", [(0, {}), (.18, dict(x=34, y=-12, z=-30, yaw=-10, roll=-30, pitch=25, cy=2, cr=2)),
               (.32, dict(x=4, y=-20, z=-58, yaw=45, roll=60, pitch=-10, cy=-4, cr=-3, cp=1)), (.42, dict(x=2, y=-21, z=-58, yaw=48, roll=62, pitch=-12, cy=-4.5, cr=-3)), (.85, dict(D))], .9, False))
-    M.append(mv("fp_tec9_flinch", "TEC-9 jump-scare flinch (recoil back, then re-aim)", [(0, {}), (.08, dict(x=14, y=-10, z=-26, yaw=24, pitch=22, roll=-10, cp=4, cyy=2, cz=3, lx=-14, ly=-14, lz=-30, lcurl=.15)),
-              (.45, dict(x=15, y=-11, z=-27, yaw=22, pitch=18, roll=-8, cp=3, cyy=1.5, cz=2.5, lx=-15, ly=-16, lz=-30, lcurl=.2)), (.9, dict(D, x=20, y=-17, yaw=5, pitch=4)), (1.3, dict(D))], 1.35, False))
-    M.append(mv("fp_tec9_two_hand_aim", "TEC-9 two-hand steady aim (left hand on the shroud)", [(0, {}), (.35, dict(x=10, y=-16, z=-42, yaw=4, lOnShroud=1, lcurl=.7)), (1.6, dict(x=10, y=-16, z=-42, yaw=4, lOnShroud=1, lcurl=.7, pitch=3.6)),
-              (2.0, dict(D))], 2.1, False))
-    M.append(mv("fp_tec9_two_hand_fire", "TEC-9 two-hand burst (left hand on the shroud)", [(0, dict(x=10, y=-16, z=-42, yaw=4, lOnShroud=1, lcurl=.7)), (1.2, dict(x=10, y=-16, z=-42, yaw=4, lOnShroud=1, lcurl=.7))],
-              1.2, False, shots_at=[.05 + i * .075 for i in range(7)], kick=.55, climb=.6))
+    M.append(mv("fp_tec9_flinch", "TEC-9 jump-scare flinch (recoil back, then re-aim)", [(0, {}), (.08, dict(x=14, y=-8, z=-26, yaw=24, pitch=22, roll=-10, cp=4, cyy=2, cz=3)),
+              (.45, dict(x=15, y=-9, z=-27, yaw=22, pitch=18, roll=-8, cp=3, cyy=1.5, cz=2.5)), (.9, dict(D, x=20, y=-17, yaw=5, pitch=4)), (1.3, dict(D))], 1.35, False))
     return M
 if __name__ == "__main__":
     import sys; M = build(); s = json.dumps(M, separators=(",", ":"))
