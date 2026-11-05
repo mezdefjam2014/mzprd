@@ -7069,7 +7069,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 72,
-  "status": "active"
+  "status": "approved"
  },
  "talk_18x08_2": {
   "cat": "talk & conversation",
@@ -7077,7 +7077,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 61,
-  "status": "active"
+  "status": "older"
  },
  "talk_19x08_1": {
   "cat": "talk & conversation",
@@ -7085,7 +7085,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 26,
-  "status": "active"
+  "status": "older"
  },
  "talk_19x08_2": {
   "cat": "talk & conversation",
@@ -7093,7 +7093,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 70,
-  "status": "active"
+  "status": "older"
  },
  "talk_18x09_1": {
   "cat": "talk & conversation",
@@ -7101,7 +7101,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 46,
-  "status": "active"
+  "status": "older"
  },
  "talk_19x09_1": {
   "cat": "talk & conversation",
@@ -7109,7 +7109,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "talk_18x10_1": {
   "cat": "confrontation & threats",
@@ -7117,7 +7117,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 21,
-  "status": "active"
+  "status": "older"
  },
  "talk_18x10_2": {
   "cat": "confrontation & threats",
@@ -7125,7 +7125,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 51,
-  "status": "active"
+  "status": "older"
  },
  "talk_19x10_1": {
   "cat": "confrontation & threats",
@@ -7133,7 +7133,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 51,
-  "status": "active"
+  "status": "older"
  },
  "talk_19x10_2": {
   "cat": "confrontation & threats",
@@ -7141,7 +7141,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "talk_80x48_1": {
   "cat": "confrontation & threats",
@@ -7149,7 +7149,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 58,
-  "status": "active"
+  "status": "older"
  },
  "talk_80x48_2": {
   "cat": "confrontation & threats",
@@ -7157,7 +7157,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 63,
-  "status": "active"
+  "status": "older"
  },
  "talk_22x18_1": {
   "cat": "confrontation & threats",
@@ -7165,7 +7165,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 38,
-  "status": "active"
+  "status": "approved"
  },
  "talk_23x18_1": {
   "cat": "confrontation & threats",
@@ -7173,7 +7173,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 26,
-  "status": "active"
+  "status": "older"
  },
  "talk_23x18_2": {
   "cat": "confrontation & threats",
@@ -7181,7 +7181,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 52,
-  "status": "active"
+  "status": "older"
  },
  "talk_22x20_1": {
   "cat": "confrontation & threats",
@@ -7189,7 +7189,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 48,
-  "status": "active"
+  "status": "older"
  },
  "talk_23x20_1": {
   "cat": "confrontation & threats",
@@ -7197,7 +7197,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 88,
-  "status": "active"
+  "status": "older"
  },
  "talk_56x02_1": {
   "cat": "confrontation & threats",
@@ -7205,7 +7205,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 111,
-  "status": "active"
+  "status": "older"
  },
  "talk_56x02_2": {
   "cat": "confrontation & threats",
@@ -7213,7 +7213,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 75,
-  "status": "active"
+  "status": "older"
  },
  "talk_18x04_1": {
   "cat": "dialogue actions",
@@ -7221,7 +7221,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 30,
-  "status": "active"
+  "status": "older"
  },
  "talk_19x04_1": {
   "cat": "dialogue actions",
@@ -7229,7 +7229,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 90,
-  "status": "active"
+  "status": "older"
  },
  "talk_19x04_2": {
   "cat": "dialogue actions",
@@ -7237,7 +7237,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 32,
-  "status": "active"
+  "status": "older"
  },
  "talk_18x05_1": {
   "cat": "dialogue actions",
@@ -7245,7 +7245,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 43,
-  "status": "active"
+  "status": "older"
  },
  "talk_18x05_2": {
   "cat": "dialogue actions",
@@ -7253,7 +7253,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 32,
-  "status": "active"
+  "status": "older"
  },
  "talk_19x05_1": {
   "cat": "dialogue actions",
@@ -7261,7 +7261,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 98,
-  "status": "active"
+  "status": "older"
  },
  "talk_22x12_1": {
   "cat": "dialogue actions",
@@ -7269,7 +7269,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 45,
-  "status": "active"
+  "status": "approved"
  },
  "talk_22x10_1": {
   "cat": "dialogue actions",
@@ -7277,7 +7277,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 64,
-  "status": "active"
+  "status": "approved"
  },
  "talk_23x11_1": {
   "cat": "dialogue actions",
@@ -7285,7 +7285,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 129,
-  "status": "active"
+  "status": "approved"
  },
  "talk_23x11_2": {
   "cat": "dialogue actions",
@@ -7293,7 +7293,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 23,
-  "status": "active"
+  "status": "older"
  },
  "talk_23x03_1": {
   "cat": "dialogue actions",
@@ -7301,7 +7301,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 21,
-  "status": "active"
+  "status": "older"
  },
  "talk_22x04_1": {
   "cat": "dialogue actions",
@@ -7309,7 +7309,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 92,
-  "status": "active"
+  "status": "older"
  },
  "talk_22x04_2": {
   "cat": "dialogue actions",
@@ -7317,7 +7317,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 80,
-  "status": "active"
+  "status": "older"
  },
  "talk_80x45_1": {
   "cat": "dialogue actions",
@@ -7325,7 +7325,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 57,
-  "status": "active"
+  "status": "older"
  },
  "talk_80x45_2": {
   "cat": "dialogue actions",
@@ -7333,7 +7333,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 56,
-  "status": "active"
+  "status": "older"
  },
  "talk_80x46_1": {
   "cat": "dialogue actions",
@@ -7341,7 +7341,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 47,
-  "status": "active"
+  "status": "approved"
  },
  "talk_80x46_2": {
   "cat": "dialogue actions",
@@ -7349,7 +7349,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 31,
-  "status": "active"
+  "status": "older"
  },
  "talk_141x20_1": {
   "cat": "talk & conversation",
@@ -7357,7 +7357,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 32,
-  "status": "active"
+  "status": "older"
  },
  "talk_141x20_2": {
   "cat": "talk & conversation",
@@ -7365,7 +7365,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 73,
-  "status": "active"
+  "status": "older"
  },
  "talk_141x27_1": {
   "cat": "talk & conversation",
@@ -7373,7 +7373,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 26,
-  "status": "active"
+  "status": "older"
  },
  "talk_141x27_2": {
   "cat": "talk & conversation",
@@ -7381,7 +7381,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 38,
-  "status": "active"
+  "status": "older"
  },
  "talk_138x11_1": {
   "cat": "talk & conversation",
@@ -7389,7 +7389,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 39,
-  "status": "active"
+  "status": "approved"
  },
  "talk_138x13_1": {
   "cat": "talk & conversation",
@@ -7397,7 +7397,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 34,
-  "status": "active"
+  "status": "approved"
  },
  "talk_138x14_1": {
   "cat": "talk & conversation",
@@ -7405,7 +7405,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 34,
-  "status": "active"
+  "status": "older"
  },
  "talk_138x15_1": {
   "cat": "talk & conversation",
@@ -7413,7 +7413,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 28,
-  "status": "active"
+  "status": "older"
  },
  "talk_138x16_1": {
   "cat": "talk & conversation",
@@ -7421,7 +7421,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "approved"
  },
  "talk_138x17_1": {
   "cat": "talk & conversation",
@@ -7429,7 +7429,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "older"
  },
  "talk_138x18_1": {
   "cat": "talk & conversation",
@@ -7437,7 +7437,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "older"
  },
  "talk_138x19_1": {
   "cat": "talk & conversation",
@@ -7445,7 +7445,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 37,
-  "status": "active"
+  "status": "older"
  },
  "talk_138x20_1": {
   "cat": "talk & conversation",
@@ -7453,7 +7453,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 35,
-  "status": "active"
+  "status": "older"
  },
  "talk_138x21_1": {
   "cat": "talk & conversation",
@@ -7461,7 +7461,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 39,
-  "status": "active"
+  "status": "older"
  },
  "talk_138x22_1": {
   "cat": "talk & conversation",
@@ -7469,7 +7469,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 36,
-  "status": "active"
+  "status": "approved"
  },
  "talk_138x23_1": {
   "cat": "talk & conversation",
@@ -7477,6 +7477,6 @@
   "loop": true,
   "oneshot": false,
   "frames": 38,
-  "status": "active"
+  "status": "approved"
  }
 }
