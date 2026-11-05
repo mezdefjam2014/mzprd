@@ -632,9 +632,15 @@ async function renderFast(o){
  $s('#sProg').style.width='0';msg('Preparing...');
  await document.fonts.load('40px '+(FONTS[S.font]||'Impact')).catch(()=>{});await document.fonts.load("12px 'Press Start 2P'").catch(()=>{});
  if(!heroImg){heroImg=new Image();heroImg.src=new URL('hero.jpg',document.baseURI).href}try{await heroImg.decode()}catch(e){}
- const oc=new OfflineAudioContext(2,Math.ceil(dur*ac.sr),ac.sr),src=oc.createBufferSource(),og=oc.createGain();src.buffer=S.buf;src.connect(og);og.connect(oc.destination);
+ /* soundtrack mixed in plain JS (no OfflineAudioContext): Brave's privacy shield could leave the next render silent */
+ const SR=ac.sr,TN=Math.ceil(dur*SR),mL=new Float32Array(TN),mR=new Float32Array(TN);
+ const addBuf=(ab,at,gain,fade)=>{const r=ab.sampleRate/SR,a0=ab.getChannelData(0),a1=ab.numberOfChannels>1?ab.getChannelData(1):a0,s0=Math.round(at*SR);
+  for(let k=0;s0+k<TN;k++){const p=k*r,q=p|0;if(q+1>=a0.length)break;const f=p-q;let g=gain;if(fade){const t=(s0+k)/SR;if(t>dur-1.5)g*=Math.max(0,(dur-t)/1.5)}mL[s0+k]+=(a0[q]+(a0[q+1]-a0[q])*f)*g;mR[s0+k]+=(a1[q]+(a1[q+1]-a1[q])*f)*g}};
+ addBuf(S.buf,0,1,S.fmt==='9:16'&&S.buf.duration>dur+.5);
  /* anti-rip voice tag: packs + samples only, low, every 13 s */
- if(!($s('#sTag')&&!$s('#sTag').checked)&&S.kind!=='beats'){try{const tb=await oc.decodeAudioData(await (await fetch(new URL('sfx/inside/tag.mp3?v=1',document.baseURI).href)).arrayBuffer());let pk=0;for(let c=0;c<tb.numberOfChannels;c++){const d=tb.getChannelData(c);for(let i=0;i<d.length;i+=2)pk=Math.max(pk,Math.abs(d[i]))}for(let t=1.2;t<dur-1.5;t+=13){const n=oc.createBufferSource(),g=oc.createGain();n.buffer=tb;g.gain.value=.16/(pk||1);n.connect(g);g.connect(oc.destination);n.start(t)}}catch(e){console.warn('tag',e)}}if(S.fmt==='9:16'&&S.buf.duration>dur+.5){og.gain.setValueAtTime(1,Math.max(0,dur-1.5));og.gain.linearRampToValueAtTime(0,dur)}src.start(0);const rb=await oc.startRendering();
+ if(!($s('#sTag')&&!$s('#sTag').checked)&&S.kind!=='beats'){try{const tb=await decode(await (await fetch(new URL('sfx/inside/tag.mp3?v=1',document.baseURI).href)).arrayBuffer());let pk=0;for(let c=0;c<tb.numberOfChannels;c++){const d=tb.getChannelData(c);for(let i=0;i<d.length;i+=2)pk=Math.max(pk,Math.abs(d[i]))}for(let t=1.2;t<dur-1.5;t+=13)addBuf(tb,t,.16/(pk||1))}catch(e){console.warn('tag',e)}}
+ {let pk=0;for(let i=0;i<TN;i+=3)pk=Math.max(pk,Math.abs(mL[i]),Math.abs(mR[i]));if(pk>.97){const g=.97/pk;for(let i=0;i<TN;i++){mL[i]*=g;mR[i]*=g}}}
+ const rb={getChannelData:i=>i?mR:mL};
  const target=new Mp4Muxer.ArrayBufferTarget(),muxer=new Mp4Muxer.Muxer({target,video:{codec:vc.mux,width:w,height:h},audio:{codec:ac.mux,numberOfChannels:2,sampleRate:ac.sr},fastStart:'in-memory'});
  let err=null;
  const venc=new VideoEncoder({output:(c,m)=>muxer.addVideoChunk(c,m),error:e=>{err=e}});venc.configure(vc.cfg);
@@ -656,7 +662,7 @@ async function renderFast(o){
  }finally{OFF=null;try{venc.close()}catch(e){}try{aenc.close()}catch(e){}removeEventListener('beforeunload',beforeUnload);window.__mzR=Math.max(0,(window.__mzR||1)-1)}
  const blob=new Blob([target.buffer],{type:'video/mp4'});
  /* make sure the sound really made it into the file (some 9:16 renders came out silent); re-render once if it did not */
- let aud=aN>0;if(aud){try{const x=await new OfflineAudioContext(1,1,ac.sr).decodeAudioData(await blob.slice(0).arrayBuffer());const c=x.getChannelData(0),sc=rb.getChannelData(0);let m=0,ms=0;for(let i=0;i<c.length;i+=11)m=Math.max(m,Math.abs(c[i]));for(let i=0;i<sc.length;i+=11)ms=Math.max(ms,Math.abs(sc[i]));aud=x.duration>dur*.8&&(ms<.001||m>ms*.05)}catch(e){aud=false}}
+ let aud=aN>0;if(aud){try{const x=await decode(await blob.slice(0).arrayBuffer());const c=x.getChannelData(0),sc=rb.getChannelData(0);let m=0,ms=0;for(let i=0;i<c.length;i+=11)m=Math.max(m,Math.abs(c[i]));for(let i=0;i<sc.length;i+=11)ms=Math.max(ms,Math.abs(sc[i]));aud=x.duration>dur*.8&&(ms<.001||m>ms*.05)}catch(e){aud=false}}
  if(!aud&&!o.retry){console.warn('render had no audio, retrying',ac.mux);msg(tag+'Audio check failed. Rendering again...');R.busy=false;return renderFast({...o,retry:1,noAac:ac.mux!=='aac'?false:o.noAac})}
  const url=URL.createObjectURL(blob);
  dl.href=url;dl.download=((S.item&&(S.item.slug||String(S.item.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')))||'video')+'-'+(S.fmt==='16:9'?'16x9':'9x16')+'.mp4';dl.textContent='DOWNLOAD '+S.fmt+' VIDEO';dl.style.display='block';
