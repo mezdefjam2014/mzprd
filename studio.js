@@ -661,7 +661,7 @@ async function renderFast(o){
  const url=URL.createObjectURL(blob);
  dl.href=url;dl.download=((S.item&&(S.item.slug||String(S.item.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')))||'video')+'-'+(S.fmt==='16:9'?'16x9':'9x16')+'.mp4';dl.textContent='DOWNLOAD '+S.fmt+' VIDEO';dl.style.display='block';
  R.busy=false;root.classList.remove('busy');btn.disabled=false;badge();$s('#sProg').style.width='100%';
- msg(tag+'Done in '+Math.round((performance.now()-t0)/1000)+'s. '+(blob.size/1048576).toFixed(1)+' MB MP4. Click DOWNLOAD VIDEO.'+(!aud?' WARNING: the sound did not make it into this video. Try Chrome.':ac.mux!=='aac'?' NOTE: this browser made Opus audio, which some phones and apps do not play. Render in Chrome for phone-safe sound.':''));
+ msg(tag+'Done in '+Math.round((performance.now()-t0)/1000)+'s. '+(blob.size/1048576).toFixed(1)+' MB MP4. Click DOWNLOAD VIDEO. [sound: '+(aud?'OK':'MISSING')+', '+ac.mux.toUpperCase()+' '+ac.sr/1000+' kHz, '+aN+' packets'+(navigator.brave?', Brave':'')+']'+(navigator.brave&&!aud?' Brave Shields can block video sound: click the lion icon and turn Shields off for mzprd.com, then render again.':'')+(!aud?' WARNING: the sound did not make it into this video. Try Chrome.':ac.mux!=='aac'?' NOTE: this browser made Opus audio, which some phones and apps do not play. Render in Chrome for phone-safe sound.':''));
  try{toast('VIDEO READY: '+dl.download)}catch(e){}
  redraw();if(o.feed)return blob;
 }
@@ -682,7 +682,7 @@ async function renderRT(){
  rc.onstop=()=>{
   const blob=new Blob(chunks,{type:mime||'video/webm'}),url=URL.createObjectURL(blob);
   dl.href=url;dl.download=((S.item&&(S.item.slug||String(S.item.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')))||'video')+'-'+(S.fmt==='16:9'?'16x9':'9x16')+'.'+ext;dl.style.display='block';
-  btn.disabled=false;msg('Done. '+(blob.size/1048576).toFixed(1)+' MB '+ext.toUpperCase()+'. Click DOWNLOAD VIDEO.');$s('#sProg').style.width='100%';
+  btn.disabled=false;msg('Done. '+(blob.size/1048576).toFixed(1)+' MB '+ext.toUpperCase()+'. Click DOWNLOAD VIDEO. [real-time render'+(navigator.brave?', Brave':'')+']');$s('#sProg').style.width='100%';
   stopPlay();redraw();
  };
  const done=()=>{setTimeout(()=>{if(rc.state!=='inactive')rc.stop()},350)};
