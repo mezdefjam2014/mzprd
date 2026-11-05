@@ -7062,5 +7062,421 @@
   "oneshot": true,
   "frames": 44,
   "status": "older"
+ },
+ "talk_18x08_1": {
+  "cat": "talk & conversation",
+  "how": "conversation - explain with hand gestures (2 subjects - subject A)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 72,
+  "status": "active"
+ },
+ "talk_18x08_2": {
+  "cat": "talk & conversation",
+  "how": "conversation - explain with hand gestures (2 subjects - subject A)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 61,
+  "status": "active"
+ },
+ "talk_19x08_1": {
+  "cat": "talk & conversation",
+  "how": "conversation - explain with hand gestures (2 subjects - subject B)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 26,
+  "status": "active"
+ },
+ "talk_19x08_2": {
+  "cat": "talk & conversation",
+  "how": "conversation - explain with hand gestures (2 subjects - subject B)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 70,
+  "status": "active"
+ },
+ "talk_18x09_1": {
+  "cat": "talk & conversation",
+  "how": "conversation - explain with hand gestures, walk (2 subjects - subject A)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 46,
+  "status": "active"
+ },
+ "talk_19x09_1": {
+  "cat": "talk & conversation",
+  "how": "conversation - explain with hand gestures, walk (2 subjects - subject B)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 36,
+  "status": "active"
+ },
+ "talk_18x10_1": {
+  "cat": "confrontation & threats",
+  "how": "quarrel - angry hand gestures (2 subjects - subject A)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 21,
+  "status": "active"
+ },
+ "talk_18x10_2": {
+  "cat": "confrontation & threats",
+  "how": "quarrel - angry hand gestures (2 subjects - subject A)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 51,
+  "status": "active"
+ },
+ "talk_19x10_1": {
+  "cat": "confrontation & threats",
+  "how": "quarrel - angry hand gestures (2 subjects - subject B)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 51,
+  "status": "active"
+ },
+ "talk_19x10_2": {
+  "cat": "confrontation & threats",
+  "how": "quarrel - angry hand gestures (2 subjects - subject B)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 43,
+  "status": "active"
+ },
+ "talk_80x48_1": {
+  "cat": "confrontation & threats",
+  "how": "arguing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 58,
+  "status": "active"
+ },
+ "talk_80x48_2": {
+  "cat": "confrontation & threats",
+  "how": "arguing",
+  "loop": true,
+  "oneshot": false,
+  "frames": 63,
+  "status": "active"
+ },
+ "talk_22x18_1": {
+  "cat": "confrontation & threats",
+  "how": "A stares down B, leans with hands on high stool (2 subjects - subject A)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "talk_23x18_1": {
+  "cat": "confrontation & threats",
+  "how": "A stares down B, leans with hands on high stool (2 subjects - subject B)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 26,
+  "status": "active"
+ },
+ "talk_23x18_2": {
+  "cat": "confrontation & threats",
+  "how": "A stares down B, leans with hands on high stool (2 subjects - subject B)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 52,
+  "status": "active"
+ },
+ "talk_22x20_1": {
+  "cat": "confrontation & threats",
+  "how": "violence - A picks up high stool, threatens to strike B (2 subjects - subject A)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 48,
+  "status": "active"
+ },
+ "talk_23x20_1": {
+  "cat": "confrontation & threats",
+  "how": "violence - A picks up high stool, threatens to strike B (2 subjects - subject B)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 88,
+  "status": "active"
+ },
+ "talk_56x02_1": {
+  "cat": "confrontation & threats",
+  "how": "vignettes - fists up, wipe window, yawn, stretch, angrily grab, smash against wall",
+  "loop": false,
+  "oneshot": true,
+  "frames": 111,
+  "status": "active"
+ },
+ "talk_56x02_2": {
+  "cat": "confrontation & threats",
+  "how": "vignettes - fists up, wipe window, yawn, stretch, angrily grab, smash against wall",
+  "loop": false,
+  "oneshot": true,
+  "frames": 75,
+  "status": "active"
+ },
+ "talk_18x04_1": {
+  "cat": "dialogue actions",
+  "how": "A pulls B; B resists (2 subjects - subject A)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 30,
+  "status": "active"
+ },
+ "talk_19x04_1": {
+  "cat": "dialogue actions",
+  "how": "A pulls B; B resists (2 subjects - subject B)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 90,
+  "status": "active"
+ },
+ "talk_19x04_2": {
+  "cat": "dialogue actions",
+  "how": "A pulls B; B resists (2 subjects - subject B)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 32,
+  "status": "active"
+ },
+ "talk_18x05_1": {
+  "cat": "dialogue actions",
+  "how": "A pulls B by the elbow; B resists (2 subjects - subject A)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 43,
+  "status": "active"
+ },
+ "talk_18x05_2": {
+  "cat": "dialogue actions",
+  "how": "A pulls B by the elbow; B resists (2 subjects - subject A)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 32,
+  "status": "active"
+ },
+ "talk_19x05_1": {
+  "cat": "dialogue actions",
+  "how": "A pulls B by the elbow; B resists (2 subjects - subject B)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 98,
+  "status": "active"
+ },
+ "talk_22x12_1": {
+  "cat": "dialogue actions",
+  "how": "A stumbles into B (2 subjects - subject A)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 45,
+  "status": "active"
+ },
+ "talk_22x10_1": {
+  "cat": "dialogue actions",
+  "how": "A shelters B, a younger child, from harm (2 subjects - subject A)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 64,
+  "status": "active"
+ },
+ "talk_23x11_1": {
+  "cat": "dialogue actions",
+  "how": "B shelters A, a younger child, from harm (2 subjects - subject B)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 129,
+  "status": "active"
+ },
+ "talk_23x11_2": {
+  "cat": "dialogue actions",
+  "how": "B shelters A, a younger child, from harm (2 subjects - subject B)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 23,
+  "status": "active"
+ },
+ "talk_23x03_1": {
+  "cat": "dialogue actions",
+  "how": "A sits, holds face in hands; B kneels, comforts A (2 subjects - subject B)",
+  "loop": true,
+  "oneshot": false,
+  "frames": 21,
+  "status": "active"
+ },
+ "talk_22x04_1": {
+  "cat": "dialogue actions",
+  "how": "B comforts A, puts one hand on A's shoulder (2 subjects - subject A)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 92,
+  "status": "active"
+ },
+ "talk_22x04_2": {
+  "cat": "dialogue actions",
+  "how": "B comforts A, puts one hand on A's shoulder (2 subjects - subject A)",
+  "loop": false,
+  "oneshot": true,
+  "frames": 80,
+  "status": "active"
+ },
+ "talk_80x45_1": {
+  "cat": "dialogue actions",
+  "how": "crying",
+  "loop": true,
+  "oneshot": false,
+  "frames": 57,
+  "status": "active"
+ },
+ "talk_80x45_2": {
+  "cat": "dialogue actions",
+  "how": "crying",
+  "loop": true,
+  "oneshot": false,
+  "frames": 56,
+  "status": "active"
+ },
+ "talk_80x46_1": {
+  "cat": "dialogue actions",
+  "how": "crying",
+  "loop": true,
+  "oneshot": false,
+  "frames": 47,
+  "status": "active"
+ },
+ "talk_80x46_2": {
+  "cat": "dialogue actions",
+  "how": "crying",
+  "loop": true,
+  "oneshot": false,
+  "frames": 31,
+  "status": "active"
+ },
+ "talk_141x20_1": {
+  "cat": "talk & conversation",
+  "how": "Waiting",
+  "loop": true,
+  "oneshot": false,
+  "frames": 32,
+  "status": "active"
+ },
+ "talk_141x20_2": {
+  "cat": "talk & conversation",
+  "how": "Waiting",
+  "loop": true,
+  "oneshot": false,
+  "frames": 73,
+  "status": "active"
+ },
+ "talk_141x27_1": {
+  "cat": "talk & conversation",
+  "how": "Mope",
+  "loop": true,
+  "oneshot": false,
+  "frames": 26,
+  "status": "active"
+ },
+ "talk_141x27_2": {
+  "cat": "talk & conversation",
+  "how": "Mope",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
+ },
+ "talk_138x11_1": {
+  "cat": "talk & conversation",
+  "how": "Story",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "talk_138x13_1": {
+  "cat": "talk & conversation",
+  "how": "Story",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "talk_138x14_1": {
+  "cat": "talk & conversation",
+  "how": "Story",
+  "loop": true,
+  "oneshot": false,
+  "frames": 34,
+  "status": "active"
+ },
+ "talk_138x15_1": {
+  "cat": "talk & conversation",
+  "how": "Story",
+  "loop": true,
+  "oneshot": false,
+  "frames": 28,
+  "status": "active"
+ },
+ "talk_138x16_1": {
+  "cat": "talk & conversation",
+  "how": "Story",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "talk_138x17_1": {
+  "cat": "talk & conversation",
+  "how": "Story",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "talk_138x18_1": {
+  "cat": "talk & conversation",
+  "how": "Story",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "talk_138x19_1": {
+  "cat": "talk & conversation",
+  "how": "Story",
+  "loop": true,
+  "oneshot": false,
+  "frames": 37,
+  "status": "active"
+ },
+ "talk_138x20_1": {
+  "cat": "talk & conversation",
+  "how": "Story",
+  "loop": true,
+  "oneshot": false,
+  "frames": 35,
+  "status": "active"
+ },
+ "talk_138x21_1": {
+  "cat": "talk & conversation",
+  "how": "Story",
+  "loop": true,
+  "oneshot": false,
+  "frames": 39,
+  "status": "active"
+ },
+ "talk_138x22_1": {
+  "cat": "talk & conversation",
+  "how": "Story",
+  "loop": true,
+  "oneshot": false,
+  "frames": 36,
+  "status": "active"
+ },
+ "talk_138x23_1": {
+  "cat": "talk & conversation",
+  "how": "Story",
+  "loop": true,
+  "oneshot": false,
+  "frames": 38,
+  "status": "active"
  }
 }
