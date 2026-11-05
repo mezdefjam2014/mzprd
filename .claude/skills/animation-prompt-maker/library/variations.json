@@ -6973,7 +6973,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 36,
-  "status": "active"
+  "status": "older"
  },
  "crawler_snap_bites": {
   "cat": "creature attacks",
@@ -6981,7 +6981,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 36,
-  "status": "active"
+  "status": "older"
  },
  "crawler_claw_swipe": {
   "cat": "creature attacks",
@@ -6989,7 +6989,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 32,
-  "status": "active"
+  "status": "older"
  },
  "crawler_claw_swipe_left": {
   "cat": "creature attacks",
@@ -6997,7 +6997,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 32,
-  "status": "active"
+  "status": "older"
  },
  "crawler_feed": {
   "cat": "creature attacks",
@@ -7005,7 +7005,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 38,
-  "status": "active"
+  "status": "approved"
  },
  "crawler_pounce_bite": {
   "cat": "creature attacks",
@@ -7013,7 +7013,7 @@
   "loop": false,
   "oneshot": true,
   "frames": 44,
-  "status": "active"
+  "status": "older"
  },
  "brute_lunge_bite": {
   "cat": "creature attacks",
@@ -7021,7 +7021,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 40,
-  "status": "active"
+  "status": "older"
  },
  "brute_grab_bite": {
   "cat": "creature attacks",
@@ -7029,7 +7029,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 54,
-  "status": "active"
+  "status": "approved"
  },
  "brute_bite_tear": {
   "cat": "creature attacks",
@@ -7037,7 +7037,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 44,
-  "status": "active"
+  "status": "older"
  },
  "brute_double_swipe": {
   "cat": "creature attacks",
@@ -7045,7 +7045,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 42,
-  "status": "active"
+  "status": "older"
  },
  "brute_double_swipe_left": {
   "cat": "creature attacks",
@@ -7053,7 +7053,7 @@
   "loop": true,
   "oneshot": false,
   "frames": 42,
-  "status": "active"
+  "status": "older"
  },
  "brute_pounce_bite": {
   "cat": "creature attacks",
@@ -7061,6 +7061,6 @@
   "loop": false,
   "oneshot": true,
   "frames": 44,
-  "status": "active"
+  "status": "older"
  }
 }
