@@ -529,7 +529,7 @@ function audioCtx(){
  const out=ctx.createGain(),rec=ctx.createMediaStreamDestination();an.connect(out);out.connect(ctx.destination);an.connect(rec);
  A={ctx,an,out,rec,playing:false,src:null,t0:0};return A;
 }
-async function decode(arr){const a=audioCtx();return await a.ctx.decodeAudioData(arr)}
+async function decode(arr){const a=audioCtx(),ab=await a.ctx.decodeAudioData(arr);pcmOf(ab);return ab}
 /* preview links expire (signed, 6 h): on any failure get a fresh link and try once more */
 async function fetchPrev(path){const go=()=>fetch(pub(path)).then(r=>{if(!r.ok)throw new Error('audio '+r.status);return r.arrayBuffer()});try{return await go()}catch(e){if(!window.MZPrime||String(path).indexOf('r2:')!==0)throw e;await MZPrime([path],true);return await go()}}
 async function loadPreview(){if(S.item&&window.MZPrime)try{await MZPrime([S.item.preview_path])}catch(e){}
@@ -569,7 +569,7 @@ function redraw(){const cv=$s('#sCv');if(!cv)return;const[w,h]=dims();if(cv.widt
 function peaks(){
  const d=len(),key=(S.buf?S.buf.length:0)+':'+d;if(S.pk&&S.pk.key===key)return S.pk;
  const n=360,out=new Float32Array(n);
- if(S.buf){const ch=S.buf.getChannelData(0),sr=S.buf.sampleRate,tot=Math.min(ch.length,Math.floor(d*sr)),step=Math.max(1,Math.floor(tot/n)),sk=Math.max(1,(step/64)|0);
+ if(S.buf){const ch=pcmOf(S.buf)[0],sr=S.buf.sampleRate,tot=Math.min(ch.length,Math.floor(d*sr)),step=Math.max(1,Math.floor(tot/n)),sk=Math.max(1,(step/64)|0);
   let mx=1e-6;for(let i=0;i<n;i++){let m=0;const a=i*step,e=Math.min(ch.length,a+step);for(let j=a;j<e;j+=sk){const v=Math.abs(ch[j]);if(v>m)m=v}out[i]=m;if(m>mx)mx=m}
   for(let i=0;i<n;i++)out[i]=Math.max(.04,out[i]/mx)}else out.fill(.06);
  out.key=key;S.pk=out;return out;
@@ -622,6 +622,8 @@ async function render(){
  }
  return renderRT();
 }
+/* read each decoded buffer once and keep our own copy: Brave alters audio on every read, so re-reading made each render quieter */
+const PCM=new WeakMap();function pcmOf(ab){let p=PCM.get(ab);if(!p){const c0=ab.getChannelData(0).slice();p=[c0,ab.numberOfChannels>1?ab.getChannelData(1).slice():c0];PCM.set(ab,p)}return p}
 async function renderFast(o){
  o=o||{};await loadMuxer();
  const[w,h]=o.feed?[720,1280]:dims(),fps=o.feed?24:30,dur=o.feed?Math.min(20,len()):len(),N=Math.ceil(dur*fps),btn=$s('#sRender'),dl=o.dl||$s('#sDl'),root=document.getElementById('studio'),tag=o.tag||'';
@@ -634,7 +636,7 @@ async function renderFast(o){
  if(!heroImg){heroImg=new Image();heroImg.src=new URL('hero.jpg',document.baseURI).href}try{await heroImg.decode()}catch(e){}
  /* soundtrack mixed in plain JS (no OfflineAudioContext): Brave's privacy shield could leave the next render silent */
  const SR=ac.sr,TN=Math.ceil(dur*SR),mL=new Float32Array(TN),mR=new Float32Array(TN);
- const addBuf=(ab,at,gain,fade)=>{const r=ab.sampleRate/SR,a0=ab.getChannelData(0),a1=ab.numberOfChannels>1?ab.getChannelData(1):a0,s0=Math.round(at*SR);
+ const addBuf=(ab,at,gain,fade)=>{const r=ab.sampleRate/SR,[a0,a1]=pcmOf(ab),s0=Math.round(at*SR);
   for(let k=0;s0+k<TN;k++){const p=k*r,q=p|0;if(q+1>=a0.length)break;const f=p-q;let g=gain;if(fade){const t=(s0+k)/SR;if(t>dur-1.5)g*=Math.max(0,(dur-t)/1.5)}mL[s0+k]+=(a0[q]+(a0[q+1]-a0[q])*f)*g;mR[s0+k]+=(a1[q]+(a1[q+1]-a1[q])*f)*g}};
  addBuf(S.buf,0,1,S.fmt==='9:16'&&S.buf.duration>dur+.5);
  /* anti-rip voice tag: packs + samples only, low, every 13 s */
