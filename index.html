@@ -17,6 +17,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"MZPRD","description":"Beats and sample packs by MZPRD."}</script>
 <!--/SEO:HEAD-->
+<script>/* every render on the site: read each audio buffer once and reuse that array; Brave alters audio on every read, which made back-to-back renders quieter or silent */(function(){var P=window.AudioBuffer&&AudioBuffer.prototype;if(!P||P.__mzOnce)return;var o=P.getChannelData,M=new WeakMap();P.getChannelData=function(c){var m=M.get(this);if(!m){m=[];M.set(this,m)}return m[c]||(m[c]=o.call(this,c))};P.__mzOnce=1})()</script>
 <script>try{if(localStorage.getItem('mzprd_seen')==='1')document.documentElement.classList.add('seen')}catch(e){}</script>
 <style>#enter{display:none!important}</style>
 <link rel="preload" as="image" href="hero.webp" type="image/webp" fetchpriority="high">
