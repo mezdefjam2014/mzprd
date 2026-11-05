@@ -50,9 +50,15 @@ def build():
         (18, dict(C0, twist=18, rHand=[66, F, -6]), J(.3)), (32, C0, J(0))])))
     out.append(("crawler_feed", "Crawler: feeding on a downed victim (tearing bites)", bake([
         (0, dict(C0, hipH=42, head=10, chest=14), J(.2)),
-        (6, dict(C0, hipH=38, head=34, chest=20, x=4), J(.9)), (10, dict(C0, hipH=36, head=46, chest=22, x=6, look=12), S(.05)),
-        (16, dict(C0, hipH=40, head=24, chest=16, look=-16), J(.2)), (22, dict(C0, hipH=37, head=40, chest=22, x=6, look=14), J(.9)),
-        (26, dict(C0, hipH=36, head=46, chest=22, x=6, look=-10), S(.05)), (34, dict(C0, hipH=42, head=10, chest=14), J(.2))])))
+        (5, dict(C0, hipH=40, head=20, chest=16, x=-4), J(.9)),                                                           # rear back
+        (8, dict(C0, hipH=40, head=30, chest=18, x=8, **hands(CH, 10, 10)), J(1)),                                        # lunge, hands lift
+        (11, dict(C0, hipH=36, head=46, chest=22, x=18, look=12, **hands(CH, 18)), S(.05)),                              # lands, tearing bite
+        (16, dict(C0, hipH=40, head=24, chest=16, x=8, look=-16, **hands(CH, 8, 10)), J(.2)),                            # pull back
+        (19, dict(C0, hipH=40, head=22, chest=16, x=0, **hands(CH, 0)), J(.9)),
+        (22, dict(C0, hipH=40, head=32, chest=18, x=8, **hands(CH, 10, 10)), J(1)),                                      # second lunge
+        (25, dict(C0, hipH=36, head=46, chest=22, x=18, look=-10, **hands(CH, 18)), S(.05)),
+        (30, dict(C0, hipH=40, head=22, chest=16, x=8, **hands(CH, 8, 10)), J(.3)),                                      # back into position
+        (34, dict(C0, hipH=42, head=10, chest=14, **hands(CH, 0)), J(.2)), (38, dict(C0, hipH=42, head=10, chest=14), J(.2))])))
     # leap onto the target, bite on landing, stays where it lands (one-shot, root motion)
     land = dict(CRAWL, x=40, rHand=[104, F, 16], lHand=[104, F, -16], fFoot=[-6, F, 20], bFoot=[-6, F, -20])
     out.append(("crawler_pounce_bite", "Crawler: pounce and bite on landing (one-shot)", bake([
@@ -69,12 +75,12 @@ def build():
         (32, dict(B0, x=0, **hands(BH, 0)), J(0)), (40, B0, J(0))])))
     out.append(("brute_grab_bite", "Brute: rear up, grab with both hands, bite and shake", bake([
         (0, B0, J(0)), (10, dict(B0, hipH=60, lean=40, chest=-8, head=-40, rHand=[44, -6, 34], lHand=[44, -6, -34]), J(.6)),
-        (15, dict(B0, hipH=62, lean=34, chest=-4, head=-30, rHand=[58, 4, 12], lHand=[58, 4, -12]), dict(jaw=1, snap=True)),   # hands clamp shut on the victim
-        (21, dict(B0, hipH=60, lean=48, chest=10, head=4, rHand=[48, 12, 10], lHand=[48, 12, -10], x=4), S(.05)),             # pulls in and bites
-        (25, dict(B0, hipH=60, lean=48, chest=10, head=8, look=20, rHand=[48, 12, 10], lHand=[48, 12, -10], x=4), J(.05)),     # tearing shake
-        (29, dict(B0, hipH=60, lean=48, chest=10, head=8, look=-20, rHand=[48, 12, 10], lHand=[48, 12, -10], x=4), J(.05)),
-        (33, dict(B0, hipH=60, lean=48, chest=10, head=6, look=14, rHand=[48, 12, 10], lHand=[48, 12, -10], x=4), J(.05)),
-        (40, dict(B0, hipH=54, lean=66), J(.3)), (54, B0, J(0))])))
+        (15, dict(B0, hipH=62, lean=34, chest=-4, head=-30, x=20, rHand=[78, 4, 12], lHand=[78, 4, -12]), dict(jaw=1, snap=True)),   # hands clamp shut on the victim
+        (21, dict(B0, hipH=60, lean=48, chest=10, head=4, rHand=[68, 12, 10], lHand=[68, 12, -10], x=24), S(.05)),             # pulls in and bites
+        (25, dict(B0, hipH=60, lean=48, chest=10, head=8, look=20, rHand=[68, 12, 10], lHand=[68, 12, -10], x=24), J(.05)),     # tearing shake
+        (29, dict(B0, hipH=60, lean=48, chest=10, head=8, look=-20, rHand=[68, 12, 10], lHand=[68, 12, -10], x=24), J(.05)),
+        (33, dict(B0, hipH=60, lean=48, chest=10, head=6, look=14, rHand=[68, 12, 10], lHand=[68, 12, -10], x=24), J(.05)),
+        (40, dict(B0, hipH=54, lean=66, x=10), J(.3)), (46, dict(B0, x=0), J(.1)), (54, B0, J(0))])))
     out.append(("brute_bite_tear", "Brute: bite down and tear (head shakes)", bake([
         (0, B0, J(0)), (8, dict(B0, x=-6, head=-46, chest=18, hipH=50), J(1)), (10, dict(B0, x=8, head=-20, chest=22, hipH=48, **hands(BH, 10, 12)), J(1)),
         (12, dict(B0, x=22, head=10, chest=26, hipH=44, **hands(BH, 22)), S(.05)),

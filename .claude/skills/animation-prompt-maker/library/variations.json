@@ -7004,7 +7004,7 @@
   "how": "Crawler: feeding on a downed victim (tearing bites)",
   "loop": true,
   "oneshot": false,
-  "frames": 34,
+  "frames": 38,
   "status": "active"
  },
  "crawler_pounce_bite": {
